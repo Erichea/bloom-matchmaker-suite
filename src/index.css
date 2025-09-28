@@ -2,41 +2,86 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* BLOOM Premium Matchmaker Design System 
+Premium color palette with sophisticated purples, pastel pinks, and cream whites
 All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Premium Base Colors */
+    --background: 334 15% 97%;
+    --foreground: 265 15% 15%;
 
+    /* Card & Surface Colors */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 265 15% 15%;
+    --surface: 334 25% 98%;
+    --surface-elevated: 0 0% 100%;
 
+    /* Popover Colors */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 265 15% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Premium Purple Primary */
+    --primary: 271 76% 53%;
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 271 91% 65%;
+    --primary-muted: 271 40% 85%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Elegant Secondary */
+    --secondary: 334 50% 90%;
+    --secondary-foreground: 265 15% 25%;
+    --secondary-accent: 334 60% 85%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted & Subtle */
+    --muted: 334 20% 94%;
+    --muted-foreground: 265 8% 50%;
+    --muted-soft: 334 15% 96%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent Pink */
+    --accent: 331 78% 75%;
+    --accent-foreground: 0 0% 100%;
+    --accent-soft: 331 65% 85%;
+    --accent-muted: 331 40% 92%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Status Colors */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --success-soft: 142 45% 85%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --warning-soft: 38 60% 88%;
 
-    --radius: 0.5rem;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --destructive-soft: 0 45% 90%;
+
+    /* Interactive Elements */
+    --border: 334 25% 88%;
+    --border-soft: 334 15% 92%;
+    --input: 334 20% 94%;
+    --ring: 271 76% 53%;
+
+    /* Premium Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(271, 76%, 53%), hsl(271, 91%, 65%));
+    --gradient-secondary: linear-gradient(135deg, hsl(334, 50%, 90%), hsl(334, 60%, 85%));
+    --gradient-accent: linear-gradient(135deg, hsl(331, 78%, 75%), hsl(331, 65%, 85%));
+    --gradient-surface: linear-gradient(180deg, hsl(334, 25%, 98%), hsl(0, 0%, 100%));
+    --gradient-hero: linear-gradient(135deg, hsl(271, 76%, 53%) 0%, hsl(331, 78%, 75%) 50%, hsl(334, 50%, 90%) 100%);
+
+    /* Elegant Shadows */
+    --shadow-soft: 0 2px 8px -2px hsl(271, 76%, 53%, 0.08);
+    --shadow-medium: 0 4px 16px -4px hsl(271, 76%, 53%, 0.12);
+    --shadow-large: 0 8px 32px -8px hsl(271, 76%, 53%, 0.16);
+    --shadow-glow: 0 0 24px hsl(271, 76%, 53%, 0.2);
+
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +145,96 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer components {
+  /* Premium Button Variants */
+  .btn-premium {
+    @apply bg-[--gradient-primary] text-primary-foreground font-medium rounded-xl shadow-[--shadow-soft] transition-[--transition-smooth] hover:shadow-[--shadow-medium] hover:scale-105;
+  }
+
+  .btn-soft {
+    @apply bg-[--primary-muted] text-primary hover:bg-primary hover:text-primary-foreground transition-[--transition-smooth] font-medium rounded-xl;
+  }
+
+  .btn-accent {
+    @apply bg-[--gradient-accent] text-accent-foreground font-medium rounded-xl shadow-[--shadow-soft] transition-[--transition-smooth] hover:shadow-[--shadow-medium];
+  }
+
+  /* Premium Card Styles */
+  .card-premium {
+    @apply bg-card rounded-2xl shadow-[--shadow-soft] border border-[--border-soft] overflow-hidden transition-[--transition-smooth] hover:shadow-[--shadow-medium];
+  }
+
+  .card-elevated {
+    @apply bg-[--surface-elevated] rounded-2xl shadow-[--shadow-medium] border-0 overflow-hidden;
+  }
+
+  .card-gradient {
+    @apply bg-[--gradient-surface] rounded-2xl shadow-[--shadow-soft] border border-[--border-soft] overflow-hidden;
+  }
+
+  /* Status Badges */
+  .badge-success {
+    @apply bg-[--success-soft] text-success border border-success/20 rounded-full px-3 py-1 text-sm font-medium;
+  }
+
+  .badge-warning {
+    @apply bg-[--warning-soft] text-warning border border-warning/20 rounded-full px-3 py-1 text-sm font-medium;
+  }
+
+  .badge-pending {
+    @apply bg-[--primary-muted] text-primary border border-primary/20 rounded-full px-3 py-1 text-sm font-medium;
+  }
+
+  /* Interactive Elements */
+  .input-premium {
+    @apply bg-input border border-[--border-soft] rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-[--transition-fast] outline-none;
+  }
+
+  /* Animations */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glow {
+  from {
+    box-shadow: var(--shadow-soft);
+  }
+  to {
+    box-shadow: var(--shadow-glow);
   }
 }
