@@ -14,16 +14,343 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      access_codes: {
+        Row: {
+          code: string
+          created_at: string
+          event_date: string | null
+          event_name: string | null
+          expires_at: string | null
+          id: string
+          is_used: boolean | null
+          used_by: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          event_date?: string | null
+          event_name?: string | null
+          expires_at?: string | null
+          id?: string
+          is_used?: boolean | null
+          used_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          event_date?: string | null
+          event_name?: string | null
+          expires_at?: string | null
+          id?: string
+          is_used?: boolean | null
+          used_by?: string | null
+        }
+        Relationships: []
+      }
+      match_interactions: {
+        Row: {
+          created_at: string
+          id: string
+          interaction_data: Json | null
+          interaction_type: string | null
+          match_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interaction_data?: Json | null
+          interaction_type?: string | null
+          match_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interaction_data?: Json | null
+          interaction_type?: string | null
+          match_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_interactions_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matches: {
+        Row: {
+          admin_notes: string | null
+          compatibility_score: number | null
+          created_at: string
+          id: string
+          profile_1_id: string
+          profile_1_response: string | null
+          profile_2_id: string
+          profile_2_response: string | null
+          rejection_reason: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          compatibility_score?: number | null
+          created_at?: string
+          id?: string
+          profile_1_id: string
+          profile_1_response?: string | null
+          profile_2_id: string
+          profile_2_response?: string | null
+          rejection_reason?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          compatibility_score?: number | null
+          created_at?: string
+          id?: string
+          profile_1_id?: string
+          profile_1_response?: string | null
+          profile_2_id?: string
+          profile_2_response?: string | null
+          rejection_reason?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_profile_1_id_fkey"
+            columns: ["profile_1_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_profile_2_id_fkey"
+            columns: ["profile_2_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_photos: {
+        Row: {
+          created_at: string
+          id: string
+          is_primary: boolean | null
+          order_index: number | null
+          photo_url: string
+          profile_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          order_index?: number | null
+          photo_url: string
+          profile_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          order_index?: number | null
+          photo_url?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_photos_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          about_me: string | null
+          access_code_id: string | null
+          achievements: string | null
+          admin_notes: string | null
+          city: string | null
+          completion_percentage: number | null
+          country: string | null
+          created_at: string
+          date_of_birth: string | null
+          education: Database["public"]["Enums"]["education_level"] | null
+          email: string | null
+          faith: string | null
+          first_name: string | null
+          gender: Database["public"]["Enums"]["gender_type"] | null
+          height_cm: number | null
+          id: string
+          income_level: Database["public"]["Enums"]["income_level"] | null
+          interests: string[] | null
+          last_name: string | null
+          lifestyle: string[] | null
+          nationality: string | null
+          number_of_children: number | null
+          phone: string | null
+          preferred_gender: Database["public"]["Enums"]["gender_type"] | null
+          preferred_location_radius: number | null
+          preferred_max_age: number | null
+          preferred_max_height: number | null
+          preferred_min_age: number | null
+          preferred_min_height: number | null
+          profession: string | null
+          relationship_status:
+            | Database["public"]["Enums"]["relationship_status"]
+            | null
+          seeks_similar_values: boolean | null
+          status: Database["public"]["Enums"]["profile_status"] | null
+          updated_at: string
+          user_id: string | null
+          wants_more_children: boolean | null
+          weight_kg: number | null
+        }
+        Insert: {
+          about_me?: string | null
+          access_code_id?: string | null
+          achievements?: string | null
+          admin_notes?: string | null
+          city?: string | null
+          completion_percentage?: number | null
+          country?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          education?: Database["public"]["Enums"]["education_level"] | null
+          email?: string | null
+          faith?: string | null
+          first_name?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          height_cm?: number | null
+          id?: string
+          income_level?: Database["public"]["Enums"]["income_level"] | null
+          interests?: string[] | null
+          last_name?: string | null
+          lifestyle?: string[] | null
+          nationality?: string | null
+          number_of_children?: number | null
+          phone?: string | null
+          preferred_gender?: Database["public"]["Enums"]["gender_type"] | null
+          preferred_location_radius?: number | null
+          preferred_max_age?: number | null
+          preferred_max_height?: number | null
+          preferred_min_age?: number | null
+          preferred_min_height?: number | null
+          profession?: string | null
+          relationship_status?:
+            | Database["public"]["Enums"]["relationship_status"]
+            | null
+          seeks_similar_values?: boolean | null
+          status?: Database["public"]["Enums"]["profile_status"] | null
+          updated_at?: string
+          user_id?: string | null
+          wants_more_children?: boolean | null
+          weight_kg?: number | null
+        }
+        Update: {
+          about_me?: string | null
+          access_code_id?: string | null
+          achievements?: string | null
+          admin_notes?: string | null
+          city?: string | null
+          completion_percentage?: number | null
+          country?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          education?: Database["public"]["Enums"]["education_level"] | null
+          email?: string | null
+          faith?: string | null
+          first_name?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          height_cm?: number | null
+          id?: string
+          income_level?: Database["public"]["Enums"]["income_level"] | null
+          interests?: string[] | null
+          last_name?: string | null
+          lifestyle?: string[] | null
+          nationality?: string | null
+          number_of_children?: number | null
+          phone?: string | null
+          preferred_gender?: Database["public"]["Enums"]["gender_type"] | null
+          preferred_location_radius?: number | null
+          preferred_max_age?: number | null
+          preferred_max_height?: number | null
+          preferred_min_age?: number | null
+          preferred_min_height?: number | null
+          profession?: string | null
+          relationship_status?:
+            | Database["public"]["Enums"]["relationship_status"]
+            | null
+          seeks_similar_values?: boolean | null
+          status?: Database["public"]["Enums"]["profile_status"] | null
+          updated_at?: string
+          user_id?: string | null
+          wants_more_children?: boolean | null
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_access_code_id_fkey"
+            columns: ["access_code_id"]
+            isOneToOne: false
+            referencedRelation: "access_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_profile_completion: {
+        Args: { profile_id: string }
+        Returns: number
+      }
     }
     Enums: {
-      [_ in never]: never
+      education_level: "high_school" | "bachelor" | "master" | "phd" | "other"
+      gender_type: "male" | "female" | "non_binary" | "prefer_not_to_say"
+      income_level:
+        | "under_50k"
+        | "50k_75k"
+        | "75k_100k"
+        | "100k_150k"
+        | "150k_plus"
+      profile_status:
+        | "incomplete"
+        | "pending_approval"
+        | "approved"
+        | "rejected"
+      relationship_status: "single" | "divorced" | "widowed" | "separated"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +477,23 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      education_level: ["high_school", "bachelor", "master", "phd", "other"],
+      gender_type: ["male", "female", "non_binary", "prefer_not_to_say"],
+      income_level: [
+        "under_50k",
+        "50k_75k",
+        "75k_100k",
+        "100k_150k",
+        "150k_plus",
+      ],
+      profile_status: [
+        "incomplete",
+        "pending_approval",
+        "approved",
+        "rejected",
+      ],
+      relationship_status: ["single", "divorced", "widowed", "separated"],
+    },
   },
 } as const
