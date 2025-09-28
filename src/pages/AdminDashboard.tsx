@@ -1,7 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Users, UserCheck, UserX, Heart, TrendingUp, Calendar, Plus } from "lucide-react";
+import { Users, UserCheck, UserX, Heart, TrendingUp, Calendar } from "lucide-react";
 
 const AdminDashboard = () => {
   const stats = [
@@ -47,22 +46,18 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold bg-[--gradient-primary] bg-clip-text text-transparent">
-              BLOOM Dashboard
+            <h1 className="text-3xl font-bold text-foreground">
+              Welcome back!
             </h1>
             <p className="text-muted-foreground mt-2">
-              Welcome back! Here's what's happening with your matchmaking business.
+              Here's what's happening with your matchmaking business today.
             </p>
           </div>
-          <Button className="btn-premium">
-            <Plus className="mr-2 h-4 w-4" />
-            Add New Client
-          </Button>
         </div>
 
         {/* Stats Cards */}
@@ -92,9 +87,9 @@ const AdminDashboard = () => {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Activity */}
-          <Card className="card-premium lg:col-span-2">
+          <Card className="card-premium">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <TrendingUp className="mr-2 h-5 w-5 text-primary" />
@@ -135,32 +130,37 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Quick Actions */}
+          {/* Performance Overview */}
           <Card className="card-premium">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Calendar className="mr-2 h-5 w-5 text-accent" />
-                Quick Actions
+                This Month's Performance
               </CardTitle>
-              <CardDescription>Common tasks</CardDescription>
+              <CardDescription>Key metrics and trends</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full justify-start" size="sm">
-                <Users className="mr-2 h-4 w-4" />
-                Review Pending Profiles
-              </Button>
-              <Button variant="outline" className="w-full justify-start" size="sm">
-                <Heart className="mr-2 h-4 w-4" />
-                Generate Matches
-              </Button>
-              <Button variant="outline" className="w-full justify-start" size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Create Access Code
-              </Button>
-              <Button variant="outline" className="w-full justify-start" size="sm">
-                <TrendingUp className="mr-2 h-4 w-4" />
-                View Analytics
-              </Button>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center p-3 rounded-lg bg-success/10 border border-success/20">
+                <div>
+                  <p className="text-sm text-muted-foreground">Success Rate</p>
+                  <p className="text-2xl font-bold text-success">85%</p>
+                </div>
+                <TrendingUp className="h-8 w-8 text-success" />
+              </div>
+              <div className="flex justify-between items-center p-3 rounded-lg bg-primary/10 border border-primary/20">
+                <div>
+                  <p className="text-sm text-muted-foreground">New Registrations</p>
+                  <p className="text-2xl font-bold text-primary">24</p>
+                </div>
+                <Users className="h-8 w-8 text-primary" />
+              </div>
+              <div className="flex justify-between items-center p-3 rounded-lg bg-accent/10 border border-accent/20">
+                <div>
+                  <p className="text-sm text-muted-foreground">Active Matches</p>
+                  <p className="text-2xl font-bold text-accent">156</p>
+                </div>
+                <Heart className="h-8 w-8 text-accent" />
+              </div>
             </CardContent>
           </Card>
         </div>
