@@ -7,7 +7,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Heart,
   MessageCircle,
-  User,
   Settings,
   Sparkles,
   MapPin,
@@ -16,10 +15,7 @@ import {
   Clock,
   Menu,
   LogOut,
-  Edit,
-  Bell,
-  Star,
-  Users
+  Edit
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -199,284 +195,258 @@ const ClientDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50">
-      {/* Modern Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 backdrop-blur-lg bg-white/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background">
+      {/* Elegant Header */}
+      <header className="bg-surface/50 backdrop-blur-lg border-b border-border sticky top-0 z-40">
+        <div className="max-w-4xl mx-auto px-6">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
-                <Heart className="w-5 h-5 text-white fill-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                Bloom
+              <Heart className="h-5 w-5 text-accent animate-pulse-soft" />
+              <span className="text-xl font-light tracking-wide text-foreground">
+                BLOOM
               </span>
             </div>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-1">
-              <Button variant="ghost" className="text-gray-700 hover:text-pink-600">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Discover
-              </Button>
-              <Button variant="ghost" className="text-gray-700 hover:text-pink-600">
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Messages
-              </Button>
-              <Button variant="ghost" className="text-gray-700 hover:text-pink-600">
-                <Heart className="w-4 h-4 mr-2" />
-                Likes
-              </Button>
-            </nav>
-
-            {/* Right Side */}
-            <div className="flex items-center space-x-3">
-              <Button variant="ghost" size="icon" className="relative hidden md:flex">
-                <Bell className="w-5 h-5 text-gray-600" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-pink-500 rounded-full"></span>
-              </Button>
-
-              {/* Profile Avatar & Menu */}
-              <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-                <SheetTrigger asChild>
-                  <button className="flex items-center space-x-2 hover:bg-gray-100 rounded-full p-1 pr-3 transition-colors">
-                    <Avatar className="w-9 h-9 border-2 border-pink-500">
+            {/* Profile Menu */}
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              <SheetTrigger asChild>
+                <button className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+                  <Avatar className="w-9 h-9 border border-accent/30">
+                    <AvatarImage src={profile.photo_url} />
+                    <AvatarFallback className="bg-accent/10 text-accent-foreground font-light">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <Menu className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </SheetTrigger>
+              <SheetContent className="bg-surface border-border">
+                <SheetHeader>
+                  <div className="flex flex-col items-center pt-6 pb-6">
+                    <Avatar className="w-20 h-20 border-2 border-accent/30 mb-4">
                       <AvatarImage src={profile.photo_url} />
-                      <AvatarFallback className="bg-gradient-to-br from-pink-500 to-purple-600 text-white font-semibold">
+                      <AvatarFallback className="bg-accent/10 text-accent-foreground text-2xl font-light">
                         {initials}
                       </AvatarFallback>
                     </Avatar>
-                    <Menu className="w-5 h-5 text-gray-600 md:block hidden" />
-                  </button>
-                </SheetTrigger>
-                <SheetContent>
-                  <SheetHeader>
-                    <div className="flex flex-col items-center pt-4 pb-6">
-                      <Avatar className="w-20 h-20 border-4 border-pink-500 mb-3">
-                        <AvatarImage src={profile.photo_url} />
-                        <AvatarFallback className="bg-gradient-to-br from-pink-500 to-purple-600 text-white text-2xl font-semibold">
-                          {initials}
-                        </AvatarFallback>
-                      </Avatar>
-                      <SheetTitle className="text-xl">{fullName}</SheetTitle>
-                      <SheetDescription className="text-sm">{profile.email}</SheetDescription>
-                      <Badge className={`mt-3 ${getStatusBadgeClass(profile.status)} flex items-center space-x-1`}>
-                        {getStatusIcon(profile.status)}
-                        <span className="capitalize">{profile.status?.replace('_', ' ')}</span>
-                      </Badge>
-                    </div>
-                  </SheetHeader>
-
-                  <div className="space-y-2 mt-6">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        navigate('/profile-questionnaire');
-                        setMenuOpen(false);
-                      }}
-                    >
-                      <Edit className="w-4 h-4 mr-3" />
-                      Edit Profile
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        setMenuOpen(false);
-                      }}
-                    >
-                      <Settings className="w-4 h-4 mr-3" />
-                      Settings
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        setMenuOpen(false);
-                      }}
-                    >
-                      <Bell className="w-4 h-4 mr-3" />
-                      Notifications
-                    </Button>
-                    <div className="border-t my-4"></div>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => {
-                        handleSignOut();
-                        setMenuOpen(false);
-                      }}
-                    >
-                      <LogOut className="w-4 h-4 mr-3" />
-                      Sign Out
-                    </Button>
+                    <SheetTitle className="text-xl font-light text-foreground">{fullName}</SheetTitle>
+                    <SheetDescription className="text-sm text-muted-foreground">{profile.email}</SheetDescription>
+                    <Badge className={`mt-3 ${getStatusBadgeClass(profile.status)} flex items-center space-x-1 font-light`}>
+                      {getStatusIcon(profile.status)}
+                      <span className="capitalize">{profile.status?.replace('_', ' ')}</span>
+                    </Badge>
                   </div>
-                </SheetContent>
-              </Sheet>
-            </div>
+                </SheetHeader>
+
+                <div className="space-y-1 mt-6">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start font-light text-foreground hover:bg-accent/10"
+                    onClick={() => {
+                      navigate('/profile-questionnaire');
+                      setMenuOpen(false);
+                    }}
+                  >
+                    <Edit className="w-4 h-4 mr-3" />
+                    Edit Profile
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start font-light text-foreground hover:bg-accent/10"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <Settings className="w-4 h-4 mr-3" />
+                    Settings
+                  </Button>
+                  <div className="border-t border-border my-4"></div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start font-light text-muted-foreground hover:text-foreground hover:bg-accent/10"
+                    onClick={() => {
+                      handleSignOut();
+                      setMenuOpen(false);
+                    }}
+                  >
+                    <LogOut className="w-4 h-4 mr-3" />
+                    Sign Out
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-20">
+      <main className="max-w-4xl mx-auto px-6 py-12 pb-20 animate-fade-in">
         {/* Welcome Section */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">
-            Welcome back, {firstName}! 👋
-          </h1>
-          <p className="text-gray-600">Here's what's happening with your matches today</p>
+        <div className="mb-12 text-center space-y-4">
+          <div className="space-y-2">
+            <h1 className="text-3xl md:text-4xl font-light text-foreground tracking-tight">
+              Welcome back, {firstName}
+            </h1>
+            <div className="w-12 h-0.5 bg-accent mx-auto"></div>
+          </div>
+          <p className="text-lg text-muted-foreground font-light">
+            Your journey to meaningful connection continues <span className="fun-emoji">✨</span>
+          </p>
         </div>
 
         {/* Profile Status Card */}
         {profile.status !== 'approved' && (
-          <Card className="mb-6 border-0 shadow-lg bg-gradient-to-br from-white to-pink-50">
-            <CardContent className="p-6">
-              <div className="flex items-start space-x-4">
-                <div className="p-3 bg-white rounded-full shadow-md">
+          <Card className="mb-12 card-premium animate-slide-up">
+            <CardContent className="p-8">
+              <div className="text-center space-y-6">
+                <div className="illustration-icon mx-auto bg-accent/10">
                   {profile.status === 'pending_approval' ? (
-                    <Clock className="w-6 h-6 text-yellow-600" />
+                    <Clock className="w-6 h-6 text-accent animate-wiggle" />
                   ) : profile.status === 'rejected' ? (
-                    <AlertCircle className="w-6 h-6 text-red-600" />
+                    <AlertCircle className="w-6 h-6 text-muted-foreground" />
                   ) : (
-                    <AlertCircle className="w-6 h-6 text-gray-600" />
+                    <Sparkles className="w-6 h-6 text-accent animate-float" />
                   )}
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+
+                <div className="space-y-2">
+                  <h3 className="text-xl font-light text-foreground">
                     {profile.status === 'pending_approval'
                       ? 'Profile Under Review'
                       : profile.status === 'rejected'
                       ? 'Action Required'
                       : 'Complete Your Profile'}
                   </h3>
-                  <p className="text-gray-600 text-sm mb-3">
+                  <p className="text-sm text-muted-foreground font-light leading-relaxed max-w-md mx-auto">
                     {profile.status === 'pending_approval'
-                      ? 'Our team is reviewing your profile. You\'ll be notified within 24-48 hours.'
+                      ? 'Our team is carefully reviewing your profile. You\'ll be notified within 24-48 hours.'
                       : profile.status === 'rejected'
                       ? 'Please review the feedback and update your profile to continue.'
-                      : 'Complete your profile to start receiving curated matches.'}
+                      : 'Share more about yourself to start receiving curated matches.'}
                   </p>
-
-                  {profile.status === 'rejected' && profile.rejection_reason && (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-3">
-                      <p className="text-sm font-medium text-red-900 mb-1">Feedback:</p>
-                      <p className="text-sm text-red-800">{profile.rejection_reason}</p>
-                    </div>
-                  )}
-
-                  {profile.completion_percentage !== null && profile.status !== 'pending_approval' && (
-                    <div className="mb-3">
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="text-gray-600">Profile Completion</span>
-                        <span className="font-semibold text-gray-900">{profile.completion_percentage}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-gradient-to-r from-pink-500 to-purple-600 h-2 rounded-full transition-all duration-500"
-                          style={{ width: `${profile.completion_percentage}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {(profile.status === 'incomplete' || profile.status === 'rejected') && (
-                    <Button
-                      onClick={() => navigate('/profile-questionnaire')}
-                      className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white"
-                    >
-                      {profile.status === 'rejected' ? 'Update Profile' : 'Complete Profile'}
-                    </Button>
-                  )}
                 </div>
+
+                {profile.status === 'rejected' && profile.rejection_reason && (
+                  <div className="p-4 bg-accent/5 border border-accent/20 rounded-lg">
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Feedback</p>
+                    <p className="text-sm text-foreground font-light">{profile.rejection_reason}</p>
+                  </div>
+                )}
+
+                {profile.completion_percentage !== null && profile.status !== 'pending_approval' && (
+                  <div className="max-w-sm mx-auto space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground font-light">Profile Completion</span>
+                      <span className="text-foreground font-light">{profile.completion_percentage}%</span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-1.5">
+                      <div
+                        className="bg-accent h-1.5 rounded-full transition-all duration-500"
+                        style={{ width: `${profile.completion_percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {(profile.status === 'incomplete' || profile.status === 'rejected') && (
+                  <Button
+                    onClick={() => navigate('/profile-questionnaire')}
+                    className="btn-premium"
+                  >
+                    {profile.status === 'rejected' ? 'Update Profile' : 'Complete Profile'}
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-            <CardContent className="p-4 text-center">
-              <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                <Heart className="w-6 h-6 text-pink-600" />
-              </div>
-              <div className="text-2xl font-bold text-gray-900">12</div>
-              <div className="text-xs text-gray-600">Matches</div>
-            </CardContent>
-          </Card>
-          <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-            <CardContent className="p-4 text-center">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                <MessageCircle className="w-6 h-6 text-purple-600" />
-              </div>
-              <div className="text-2xl font-bold text-gray-900">5</div>
-              <div className="text-xs text-gray-600">Chats</div>
-            </CardContent>
-          </Card>
-          <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-            <CardContent className="p-4 text-center">
-              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                <Star className="w-6 h-6 text-yellow-600" />
-              </div>
-              <div className="text-2xl font-bold text-gray-900">3</div>
-              <div className="text-xs text-gray-600">New</div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Quick Stats - Only show if approved */}
+        {profile.status === 'approved' && (
+          <div className="grid grid-cols-3 gap-4 mb-12">
+            <Card className="card-premium text-center hover:scale-105 transition-transform">
+              <CardContent className="p-6">
+                <div className="illustration-icon mx-auto bg-accent/10 mb-3">
+                  <Heart className="w-5 h-5 text-accent animate-pulse-soft" />
+                </div>
+                <div className="text-2xl font-light text-foreground mb-1">12</div>
+                <div className="text-xs text-muted-foreground font-light">Matches</div>
+              </CardContent>
+            </Card>
+            <Card className="card-premium text-center hover:scale-105 transition-transform">
+              <CardContent className="p-6">
+                <div className="illustration-icon mx-auto bg-primary/10 mb-3">
+                  <MessageCircle className="w-5 h-5 text-primary" />
+                </div>
+                <div className="text-2xl font-light text-foreground mb-1">5</div>
+                <div className="text-xs text-muted-foreground font-light">Chats</div>
+              </CardContent>
+            </Card>
+            <Card className="card-premium text-center hover:scale-105 transition-transform">
+              <CardContent className="p-6">
+                <div className="illustration-icon mx-auto bg-success/10 mb-3">
+                  <Sparkles className="w-5 h-5 text-success animate-float" />
+                </div>
+                <div className="text-2xl font-light text-foreground mb-1">3</div>
+                <div className="text-xs text-muted-foreground font-light">New</div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Matches Section - Only show if approved */}
         {profile.status === 'approved' && (
           <>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                <Sparkles className="w-5 h-5 mr-2 text-pink-600" />
-                New Matches For You
-              </h2>
-              <Button variant="ghost" size="sm" className="text-pink-600">
-                See All
-              </Button>
+            <div className="text-center mb-8 space-y-4">
+              <div className="space-y-2">
+                <h2 className="text-2xl font-light text-foreground">
+                  Curated For You
+                </h2>
+                <div className="w-12 h-0.5 bg-accent mx-auto"></div>
+              </div>
+              <p className="text-sm text-muted-foreground font-light">
+                Handpicked matches based on your preferences <span className="fun-emoji">💫</span>
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-              {matchSuggestions.map((match) => (
-                <Card key={match.id} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+              {matchSuggestions.map((match, index) => (
+                <Card key={match.id} className="card-premium overflow-hidden group animate-slide-up" style={{animationDelay: `${index * 0.1}s`}}>
                   <div className="relative">
                     <img
                       src={match.photo}
                       alt={match.name}
-                      className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-96 object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute top-3 right-3">
-                      <Badge className="bg-white/90 text-pink-600 font-semibold border-0">
+                    <div className="absolute top-4 right-4">
+                      <Badge className="bg-surface/90 backdrop-blur-sm text-accent border-accent/20 font-light">
                         {match.compatibility}% Match
                       </Badge>
                     </div>
                   </div>
-                  <CardContent className="p-5">
-                    <h3 className="text-xl font-bold text-gray-900 mb-1">
-                      {match.name}, {match.age}
-                    </h3>
-                    <div className="flex items-center text-gray-600 text-sm mb-2">
-                      <MapPin className="w-4 h-4 mr-1" />
-                      {match.location}
+                  <CardContent className="p-6 space-y-4">
+                    <div>
+                      <h3 className="text-xl font-light text-foreground mb-1">
+                        {match.name}, {match.age}
+                      </h3>
+                      <div className="flex items-center text-muted-foreground text-sm font-light mb-2">
+                        <MapPin className="w-3.5 h-3.5 mr-1" />
+                        {match.location}
+                      </div>
+                      <p className="text-sm text-muted-foreground font-light">{match.profession}</p>
                     </div>
-                    <p className="text-sm text-gray-700 mb-3">{match.profession}</p>
-                    <div className="flex flex-wrap gap-2 mb-4">
+                    <div className="flex flex-wrap gap-2">
                       {match.interests.map((interest, idx) => (
-                        <Badge key={idx} variant="secondary" className="text-xs bg-pink-50 text-pink-700">
+                        <span key={idx} className="trait-tag text-xs">
                           {interest}
-                        </Badge>
+                        </span>
                       ))}
                     </div>
-                    <div className="flex space-x-2">
-                      <Button className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700">
-                        <Heart className="w-4 h-4 mr-2" />
-                        Like
+                    <div className="flex space-x-3 pt-2">
+                      <Button className="flex-1 btn-premium group">
+                        <Heart className="w-4 h-4 mr-2 group-hover:animate-pulse-soft" />
+                        Connect
                       </Button>
-                      <Button variant="outline" className="flex-1">
+                      <Button variant="outline" className="flex-1 btn-soft font-light">
                         View Profile
                       </Button>
                     </div>
@@ -489,22 +459,23 @@ const ClientDashboard = () => {
 
         {/* Empty State for non-approved users */}
         {profile.status !== 'approved' && (
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-pink-50 to-purple-50 text-center py-16">
-            <CardContent>
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
-                <Users className="w-10 h-10 text-pink-600" />
+          <Card className="card-premium text-center py-20">
+            <CardContent className="space-y-6">
+              <div className="illustration-icon mx-auto bg-accent/10">
+                <Heart className="w-8 h-8 text-accent animate-pulse-soft" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Your Matches Are Coming!</h3>
-              <p className="text-gray-600 max-w-md mx-auto mb-6">
-                {profile.status === 'pending_approval'
-                  ? 'Once your profile is approved, you\'ll start seeing curated matches tailored just for you.'
-                  : 'Complete your profile to unlock personalized matches from our expert matchmaking team.'}
-              </p>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-light text-foreground">Your Matches Await</h3>
+                <p className="text-muted-foreground font-light max-w-md mx-auto leading-relaxed">
+                  {profile.status === 'pending_approval'
+                    ? 'Once your profile is approved, you\'ll discover curated matches tailored to your preferences.'
+                    : 'Share your story with us, and we\'ll connect you with compatible individuals.'}
+                </p>
+              </div>
               {profile.status === 'incomplete' && (
                 <Button
                   onClick={() => navigate('/profile-questionnaire')}
-                  size="lg"
-                  className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white"
+                  className="btn-premium"
                 >
                   Complete Your Profile
                 </Button>
@@ -513,29 +484,6 @@ const ClientDashboard = () => {
           </Card>
         )}
       </main>
-
-      {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-3 z-40">
-        <div className="flex items-center justify-around">
-          <button className="flex flex-col items-center space-y-1 text-pink-600">
-            <Sparkles className="w-6 h-6" />
-            <span className="text-xs font-medium">Discover</span>
-          </button>
-          <button className="flex flex-col items-center space-y-1 text-gray-500 hover:text-pink-600">
-            <Heart className="w-6 h-6" />
-            <span className="text-xs font-medium">Likes</span>
-          </button>
-          <button className="flex flex-col items-center space-y-1 text-gray-500 hover:text-pink-600 relative">
-            <MessageCircle className="w-6 h-6" />
-            <span className="text-xs font-medium">Messages</span>
-            <span className="absolute top-0 right-3 w-2 h-2 bg-pink-500 rounded-full"></span>
-          </button>
-          <button className="flex flex-col items-center space-y-1 text-gray-500 hover:text-pink-600">
-            <User className="w-6 h-6" />
-            <span className="text-xs font-medium">Profile</span>
-          </button>
-        </div>
-      </nav>
     </div>
   );
 };
