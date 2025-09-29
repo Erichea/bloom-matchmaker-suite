@@ -98,9 +98,9 @@ const AuthPage = () => {
         duration: 4000,
       });
 
-      // Redirect to profile setup after a brief delay
+      // Redirect to client dashboard after a brief delay
       setTimeout(() => {
-        navigate("/profile-setup");
+        navigate("/client/dashboard");
       }, 1500);
     }
     setLoading(false);

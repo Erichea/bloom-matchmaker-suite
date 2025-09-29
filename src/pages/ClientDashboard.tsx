@@ -27,6 +27,37 @@ const ClientDashboard = () => {
     fetchProfile();
   }, [user, navigate]);
 
+  const createBasicProfile = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert({
+          user_id: user.id,
+          first_name: user.user_metadata?.first_name || null,
+          last_name: user.user_metadata?.last_name || null,
+          email: user.email || null,
+          status: 'incomplete',
+          completion_percentage: 0
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setProfile(data);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to create profile. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchProfile = async () => {
     if (!user) return;
 
@@ -42,8 +73,8 @@ const ClientDashboard = () => {
       }
 
       if (!data) {
-        // No profile found, redirect to profile setup
-        navigate("/profile-setup");
+        // No profile found, create a basic one
+        await createBasicProfile();
         return;
       }
 
