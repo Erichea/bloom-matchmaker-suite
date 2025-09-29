@@ -92,7 +92,8 @@ const ProfileSetup = () => {
           preferred_gender: profileData.preferredGender || null,
           preferred_min_age: parseInt(profileData.preferredMinAge) || null,
           preferred_max_age: parseInt(profileData.preferredMaxAge) || null,
-          status: 'incomplete'
+          status: 'incomplete',
+          completion_percentage: 0
         });
 
       if (error) {

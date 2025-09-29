@@ -78,6 +78,7 @@ const AuthPage = () => {
         title: "Welcome back! 👋",
         description: "Good to see you again.",
       });
+      // Check if user has a complete profile, otherwise redirect to dashboard
       navigate("/client/dashboard");
     }
     setLoading(false);
@@ -97,9 +98,9 @@ const AuthPage = () => {
         duration: 4000,
       });
 
-      // Redirect to client dashboard after a brief delay
+      // Redirect to profile setup after a brief delay
       setTimeout(() => {
-        navigate("/client/dashboard");
+        navigate("/profile-setup");
       }, 1500);
     }
     setLoading(false);

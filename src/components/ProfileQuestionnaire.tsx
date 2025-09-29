@@ -50,7 +50,7 @@ export function ProfileQuestionnaire({ isOpen, onClose }: ProfileQuestionnairePr
     // Calculate progress
     const totalQuestions = questions.length;
     const answeredQuestions = Object.keys(answers).length;
-    setProgress((answeredQuestions / totalQuestions) * 100);
+    setProgress(Math.round((answeredQuestions / totalQuestions) * 100));
   }, [answers]);
 
   const loadSavedAnswers = async () => {
@@ -65,7 +65,7 @@ export function ProfileQuestionnaire({ isOpen, onClose }: ProfileQuestionnairePr
       if (error) throw error;
 
       if (data) {
-        const savedAnswers = data.reduce((acc, curr) => ({
+        const savedAnswers = data.reduce((acc: Record<string, any>, curr: any) => ({
           ...acc,
           [curr.question_id]: curr.answer,
         }), {});
@@ -97,10 +97,19 @@ export function ProfileQuestionnaire({ isOpen, onClose }: ProfileQuestionnairePr
         [questionId]: answer,
       }));
 
-      // Update profile completion percentage
+      // Update profile completion percentage and status
+      const newProgress = Math.round(((Object.keys(answers).length + 1) / questions.length) * 100);
+
+      const updateData: any = { completion_percentage: newProgress };
+
+      // If all questions are answered, mark as pending review
+      if (Object.keys(answers).length + 1 >= questions.length) {
+        updateData.status = 'pending';
+      }
+
       await supabase
         .from('profiles')
-        .update({ completion_percentage: progress })
+        .update(updateData)
         .eq('user_id', user.id);
 
     } catch (error: any) {
@@ -121,6 +130,34 @@ export function ProfileQuestionnaire({ isOpen, onClose }: ProfileQuestionnairePr
   const handlePrevious = () => {
     if (currentPage > 0) {
       setCurrentPage(prev => prev - 1);
+    }
+  };
+
+  const handleFinish = async () => {
+    if (!user?.id) return;
+
+    try {
+      // Mark profile as pending review since questionnaire is complete
+      await supabase
+        .from('profiles')
+        .update({
+          status: 'pending',
+          completion_percentage: 100
+        })
+        .eq('user_id', user.id);
+
+      toast({
+        title: "Profile Complete! 🎉",
+        description: "Your profile has been submitted for review. You'll be notified once approved.",
+      });
+
+      onClose();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to complete profile. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -183,12 +220,19 @@ export function ProfileQuestionnaire({ isOpen, onClose }: ProfileQuestionnairePr
             >
               Previous
             </Button>
-            <Button
-              onClick={handleNext}
-              disabled={currentPage === questions.length - 1}
-            >
-              Next
-            </Button>
+
+            {currentPage === questions.length - 1 ? (
+              <Button
+                onClick={handleFinish}
+                className="bg-primary hover:bg-primary/90"
+              >
+                Finish Profile
+              </Button>
+            ) : (
+              <Button onClick={handleNext}>
+                Next
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>
