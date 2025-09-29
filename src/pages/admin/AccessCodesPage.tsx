@@ -15,8 +15,10 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { useAuth } from "@/hooks/useAuth";
 
 const generateCodeSchema = z.object({
+  code: z.string().min(3, "Code must be at least 3 characters").max(20, "Code must be less than 20 characters"),
   eventName: z.string().min(2, "Event name must be at least 2 characters"),
   eventDate: z.string().optional(),
   expiresAt: z.string().optional(),
@@ -31,10 +33,12 @@ const AccessCodesPage = () => {
   const [generating, setGenerating] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { user, session } = useAuth();
 
   const form = useForm<GenerateCodeForm>({
     resolver: zodResolver(generateCodeSchema),
     defaultValues: {
+      code: "",
       eventName: "",
       eventDate: "",
       expiresAt: "",
@@ -56,9 +60,10 @@ const AccessCodesPage = () => {
       if (error) throw error;
       setAccessCodes(data || []);
     } catch (error: any) {
+      console.error("Fetch access codes error:", error);
       toast({
         title: "Error",
-        description: "Failed to fetch access codes",
+        description: error.message || "Failed to fetch access codes",
         variant: "destructive",
       });
     } finally {
@@ -78,12 +83,28 @@ const AccessCodesPage = () => {
   const handleGenerateCode = async (data: GenerateCodeForm) => {
     setGenerating(true);
     try {
-      const newCode = generateRandomCode();
-      
+      console.log("User:", user);
+      console.log("Session:", session);
+
+      if (!user) {
+        throw new Error("You must be logged in to generate access codes");
+      }
+
+      // Check if code already exists
+      const { data: existingCode } = await supabase
+        .from('access_codes')
+        .select('code')
+        .eq('code', data.code.toUpperCase())
+        .single();
+
+      if (existingCode) {
+        throw new Error('This access code already exists. Please choose a different code.');
+      }
+
       const { error } = await supabase
         .from('access_codes')
         .insert({
-          code: newCode,
+          code: data.code.toUpperCase(),
           event_name: data.eventName,
           event_date: data.eventDate || null,
           expires_at: data.expiresAt || null,
@@ -92,17 +113,18 @@ const AccessCodesPage = () => {
       if (error) throw error;
 
       toast({
-        title: "Access Code Generated",
-        description: `Code ${newCode} has been created successfully.`,
+        title: "Access Code Created",
+        description: `Code ${data.code.toUpperCase()} has been created successfully.`,
       });
 
       form.reset();
       setDialogOpen(false);
       fetchAccessCodes();
     } catch (error: any) {
+      console.error("Access code generation error:", error);
       toast({
         title: "Error",
-        description: "Failed to generate access code",
+        description: error.message || "Failed to generate access code",
         variant: "destructive",
       });
     } finally {
@@ -167,7 +189,7 @@ const AccessCodesPage = () => {
           <DialogTrigger asChild>
             <Button className="btn-premium">
               <Plus className="mr-2 h-4 w-4" />
-              Generate Code
+              Create Code
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
@@ -179,6 +201,24 @@ const AccessCodesPage = () => {
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleGenerateCode)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Access Code *</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="TESTERIC"
+                          {...field}
+                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                          style={{ textTransform: 'uppercase' }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="eventName"
@@ -240,7 +280,7 @@ const AccessCodesPage = () => {
                     Cancel
                   </Button>
                   <Button type="submit" disabled={generating} className="btn-premium">
-                    {generating ? "Generating..." : "Generate Code"}
+                    {generating ? "Creating..." : "Create Code"}
                   </Button>
                 </div>
               </form>

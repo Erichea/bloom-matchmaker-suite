@@ -78,18 +78,18 @@ const ProfileSetup = () => {
         .from('profiles')
         .insert({
           user_id: user.id,
-          first_name: profileData.firstName,
-          last_name: profileData.lastName,
-          email: profileData.email,
-          date_of_birth: profileData.dateOfBirth,
-          gender: profileData.gender as any,
-          country: profileData.country,
-          city: profileData.city,
-          profession: profileData.profession,
-          education: profileData.education as any,
-          relationship_status: profileData.relationshipStatus as any,
-          about_me: profileData.aboutMe,
-          preferred_gender: profileData.preferredGender as any,
+          first_name: profileData.firstName || null,
+          last_name: profileData.lastName || null,
+          email: profileData.email || null,
+          date_of_birth: profileData.dateOfBirth || null,
+          gender: profileData.gender || null,
+          country: profileData.country || null,
+          city: profileData.city || null,
+          profession: profileData.profession || null,
+          education: profileData.education || null,
+          relationship_status: profileData.relationshipStatus || null,
+          about_me: profileData.aboutMe || null,
+          preferred_gender: profileData.preferredGender || null,
           preferred_min_age: parseInt(profileData.preferredMinAge) || null,
           preferred_max_age: parseInt(profileData.preferredMaxAge) || null,
           status: 'incomplete'
@@ -106,9 +106,10 @@ const ProfileSetup = () => {
 
       navigate("/client/dashboard");
     } catch (error: any) {
+      console.error("Profile creation error:", error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to create profile",
         variant: "destructive",
       });
     } finally {
@@ -229,8 +230,8 @@ const ProfileSetup = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="high_school">High School</SelectItem>
-                  <SelectItem value="bachelors">Bachelor's Degree</SelectItem>
-                  <SelectItem value="masters">Master's Degree</SelectItem>
+                  <SelectItem value="bachelor">Bachelor's Degree</SelectItem>
+                  <SelectItem value="master">Master's Degree</SelectItem>
                   <SelectItem value="phd">PhD</SelectItem>
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>

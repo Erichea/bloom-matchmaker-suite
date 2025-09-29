@@ -14,6 +14,7 @@ import ClientsPage from "./pages/admin/ClientsPage";
 import AccessCodesPage from "./pages/admin/AccessCodesPage";
 import { AdminLayout } from "./components/AdminLayout";
 import { AuthProvider } from "./hooks/useAuth";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -27,19 +28,25 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/admin" element={
-              <AdminLayout>
-                <AdminDashboard />
-              </AdminLayout>
+              <ProtectedRoute requireAdmin={true}>
+                <AdminLayout>
+                  <AdminDashboard />
+                </AdminLayout>
+              </ProtectedRoute>
             } />
             <Route path="/admin/clients" element={
-              <AdminLayout>
-                <ClientsPage />
-              </AdminLayout>
+              <ProtectedRoute requireAdmin={true}>
+                <AdminLayout>
+                  <ClientsPage />
+                </AdminLayout>
+              </ProtectedRoute>
             } />
             <Route path="/admin/access-codes" element={
-              <AdminLayout>
-                <AccessCodesPage />
-              </AdminLayout>
+              <ProtectedRoute requireAdmin={true}>
+                <AdminLayout>
+                  <AccessCodesPage />
+                </AdminLayout>
+              </ProtectedRoute>
             } />
             <Route path="/client" element={<ClientWelcome />} />
             <Route path="/auth" element={<AuthPage />} />

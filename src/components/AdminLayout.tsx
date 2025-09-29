@@ -11,12 +11,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full bg-background">
@@ -53,8 +63,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                       <User className="h-4 w-4 text-primary" />
                     </div>
                     <div className="hidden sm:block text-left">
-                      <p className="text-sm font-medium">Admin User</p>
-                      <p className="text-xs text-muted-foreground">admin@bloom.com</p>
+                      <p className="text-sm font-medium">{user?.user_metadata?.first_name || 'Admin'} {user?.user_metadata?.last_name || 'User'}</p>
+                      <p className="text-xs text-muted-foreground">{user?.email}</p>
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
@@ -65,7 +75,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                     <User className="mr-2 h-4 w-4" />
                     Profile Settings
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign Out
                   </DropdownMenuItem>

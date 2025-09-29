@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { createAdminUser } from "@/utils/createAdminUser";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -69,11 +70,30 @@ const AuthPage = () => {
   const handleSignUp = async (data: SignUpForm) => {
     setLoading(true);
     const { error } = await signUp(data.email, data.password, data.firstName, data.lastName);
-    
+
     if (!error) {
       toast({
         title: "Account Created",
         description: "Please check your email to verify your account before signing in.",
+      });
+    }
+    setLoading(false);
+  };
+
+  const handleCreateAdminUser = async () => {
+    setLoading(true);
+    const { error } = await createAdminUser();
+
+    if (!error) {
+      toast({
+        title: "Admin User Created",
+        description: "Admin user created with email: admin@bloom.com and password: admin123",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to create admin user. It may already exist.",
+        variant: "destructive",
       });
     }
     setLoading(false);
@@ -206,6 +226,21 @@ const AuthPage = () => {
               </Form>
             </TabsContent>
           </Tabs>
+
+          {/* Development Admin User Creation */}
+          <div className="mt-6 pt-6 border-t">
+            <p className="text-sm text-muted-foreground text-center mb-3">
+              Development Mode
+            </p>
+            <Button
+              variant="outline"
+              onClick={handleCreateAdminUser}
+              disabled={loading}
+              className="w-full"
+            >
+              Create Admin User (admin@bloom.com)
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

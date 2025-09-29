@@ -31,9 +31,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+
+        // Create user role on sign up
+        if (event === 'SIGNED_UP' && session?.user) {
+          try {
+            const { error } = await supabase
+              .from('user_roles')
+              .insert({
+                user_id: session.user.id,
+                role: 'client' // Default role is client
+              });
+
+            if (error) {
+              console.error('Error creating user role:', error);
+            }
+          } catch (error) {
+            console.error('Error in auth state change:', error);
+          }
+        }
+
         setLoading(false);
       }
     );
@@ -90,21 +109,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log("Attempting to sign in with:", email);
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
+      console.log("Sign in response:", { data, error });
+
       if (error) {
+        console.error("Sign in error:", error);
         toast({
           title: "Sign In Error",
           description: error.message,
           variant: "destructive",
         });
+      } else {
+        console.log("Sign in successful:", data);
+        toast({
+          title: "Success",
+          description: "Signed in successfully!",
+        });
       }
 
       return { error };
     } catch (error: any) {
+      console.error("Sign in exception:", error);
       toast({
         title: "Sign In Error",
         description: error.message,

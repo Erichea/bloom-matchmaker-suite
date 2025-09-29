@@ -20,6 +20,8 @@ const ClientWelcome = () => {
     setIsValidating(true);
     
     try {
+      console.log('Validating access code:', accessCode.trim());
+
       // Validate access code
       const { data: codeData, error } = await supabase
         .from('access_codes')
@@ -28,10 +30,13 @@ const ClientWelcome = () => {
         .eq('is_used', false)
         .single();
 
+      console.log('Access code validation result:', { codeData, error });
+
       if (error || !codeData) {
+        console.error('Access code validation failed:', error);
         toast({
           title: "Invalid Access Code",
-          description: "The access code you entered is invalid or has already been used.",
+          description: error?.message || "The access code you entered is invalid or has already been used.",
           variant: "destructive",
         });
         setIsValidating(false);
