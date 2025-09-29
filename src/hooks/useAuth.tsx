@@ -75,6 +75,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log('Attempting signup with:', { email, firstName, lastName });
 
+      // For development: temporarily disable email confirmation
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -98,9 +99,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
       } else {
         console.log('Signup successful!', data);
+        console.log('User details:', {
+          id: data.user?.id,
+          email: data.user?.email,
+          email_confirmed_at: data.user?.email_confirmed_at,
+          confirmation_sent_at: data.user?.confirmation_sent_at
+        });
+
         toast({
-          title: "Account Created",
-          description: data.user?.email_confirmed_at ? "Welcome! You can now sign in." : "Please check your email to verify your account.",
+          title: "Account Created Successfully! 🎉",
+          description: data.user?.email_confirmed_at
+            ? "Welcome! You can now sign in."
+            : `Verification code sent to ${data.user?.email}. Check your email (including spam folder).`,
         });
       }
 
