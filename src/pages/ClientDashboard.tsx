@@ -10,20 +10,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const ClientDashboard = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('ClientDashboard useEffect:', { user: !!user, authLoading });
+
+    // Wait for auth to finish loading
+    if (authLoading) {
+      console.log('Auth still loading, waiting...');
+      return;
+    }
+
     if (!user) {
+      console.log('No user found, redirecting to auth');
       navigate("/auth");
       return;
     }
 
+    console.log('User found, fetching profile');
     fetchProfile();
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
 
   const createBasicProfile = async () => {
     if (!user) return;
@@ -132,7 +142,7 @@ const ClientDashboard = () => {
     }
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
@@ -193,10 +203,44 @@ const ClientDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-[--gradient-hero] px-6 py-12">
+      {/* Mobile-Responsive Header */}
+      <div className="bg-[--gradient-hero] px-4 sm:px-6 py-6 sm:py-12">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between">
+          {/* Mobile Layout */}
+          <div className="block lg:hidden">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                  <User className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-white">
+                    Hi, {profile.first_name || 'Member'}!
+                  </h1>
+                  <p className="text-white/70 text-xs">
+                    {user?.email}
+                  </p>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-white hover:bg-white/20"
+                onClick={handleSignOut}
+              >
+                Sign Out
+              </Button>
+            </div>
+            <div className="flex items-center space-x-2 mb-3">
+              {getStatusIcon(profile.status)}
+              <span className="text-white/90 text-sm">
+                {getStatusText(profile.status)}
+              </span>
+            </div>
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden lg:flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
                 <User className="w-8 h-8 text-white" />
@@ -237,32 +281,40 @@ const ClientDashboard = () => {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8">
         {/* Profile Status */}
         <Card className="card-premium">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-4">
-              {getStatusIcon(profile.status)}
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold">{getStatusText(profile.status)}</h3>
-                <p className="text-muted-foreground">{getStatusDescription(profile.status)}</p>
-                {profile.completion_percentage && (
-                  <div className="mt-3">
-                    <div className="flex justify-between text-sm mb-2">
-                      <span>Profile Completion</span>
-                      <span>{profile.completion_percentage}%</span>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+              <div className="flex items-center space-x-4 flex-1">
+                <div className="flex-shrink-0">
+                  {getStatusIcon(profile.status)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold">{getStatusText(profile.status)}</h3>
+                  <p className="text-muted-foreground text-sm">{getStatusDescription(profile.status)}</p>
+                  {profile.completion_percentage && (
+                    <div className="mt-3">
+                      <div className="flex justify-between text-sm mb-2">
+                        <span>Profile Completion</span>
+                        <span className="font-medium">{profile.completion_percentage}%</span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2">
+                        <div
+                          className="bg-primary h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${profile.completion_percentage}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div 
-                        className="bg-primary h-2 rounded-full transition-all duration-300" 
-                        style={{ width: `${profile.completion_percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
               {profile.status === 'incomplete' && (
-                <Button onClick={() => navigate('/profile-questionnaire')} className="btn-premium">
+                <Button
+                  onClick={() => navigate('/profile-questionnaire')}
+                  className="btn-premium w-full sm:w-auto"
+                  size="sm"
+                >
                   Complete Profile
                 </Button>
               )}
@@ -284,28 +336,28 @@ const ClientDashboard = () => {
             </Badge>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {matchSuggestions.map((match) => (
               <Card key={match.id} className="card-premium group hover:shadow-glow transition-all duration-300">
-                <CardHeader className="text-center pb-4">
+                <CardHeader className="text-center pb-3 sm:pb-4">
                   <div className="relative">
-                    <Avatar className="w-24 h-24 mx-auto mb-4 ring-4 ring-primary-muted">
+                    <Avatar className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-3 sm:mb-4 ring-4 ring-primary-muted">
                       <AvatarImage src={match.photo} alt={match.name} />
                       <AvatarFallback>{match.name[0]}</AvatarFallback>
                     </Avatar>
-                    <Badge className="absolute top-0 right-1/4 bg-primary text-primary-foreground">
-                      {match.compatibility}% Match
+                    <Badge className="absolute top-0 right-1/4 bg-primary text-primary-foreground text-xs">
+                      {match.compatibility}%
                     </Badge>
                   </div>
-                  <CardTitle className="text-xl font-semibold">
+                  <CardTitle className="text-lg sm:text-xl font-semibold">
                     {match.name}, {match.age}
                   </CardTitle>
-                  <CardDescription className="flex items-center justify-center text-muted-foreground">
-                    <MapPin className="w-4 h-4 mr-1" />
+                  <CardDescription className="flex items-center justify-center text-muted-foreground text-sm">
+                    <MapPin className="w-3 h-3 mr-1" />
                     {match.location}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
                   <div>
                     <p className="text-sm font-medium text-foreground mb-2">{match.profession}</p>
                     <div className="flex flex-wrap gap-1">
@@ -316,12 +368,12 @@ const ClientDashboard = () => {
                       ))}
                     </div>
                   </div>
-                  <div className="flex gap-2 pt-2">
-                    <Button className="btn-premium flex-1">
+                  <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                    <Button className="btn-premium flex-1" size="sm">
                       <Heart className="mr-2 h-4 w-4" />
                       Like
                     </Button>
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" size="sm">
                       View Profile
                     </Button>
                   </div>
@@ -338,36 +390,36 @@ const ClientDashboard = () => {
             Your Active Matches
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {activeMatches.map((match, index) => (
               <Card key={index} className="card-premium">
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-4">
-                    <Avatar className="w-16 h-16">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
+                    <Avatar className="w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0">
                       <AvatarImage src={match.photo} alt={match.name} />
                       <AvatarFallback>{match.name[0]}</AvatarFallback>
                     </Avatar>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg text-foreground">{match.name}</h3>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-base sm:text-lg text-foreground truncate">{match.name}</h3>
                       <div className="flex items-center mt-1">
                         {match.status === "Date Scheduled" ? (
                           <>
-                            <Calendar className="w-4 h-4 mr-1 text-success" />
-                            <span className="text-sm text-success font-medium">{match.status}</span>
+                            <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-success flex-shrink-0" />
+                            <span className="text-xs sm:text-sm text-success font-medium">{match.status}</span>
                           </>
                         ) : (
                           <>
-                            <MessageCircle className="w-4 h-4 mr-1 text-primary" />
-                            <span className="text-sm text-primary font-medium">{match.status}</span>
+                            <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-primary flex-shrink-0" />
+                            <span className="text-xs sm:text-sm text-primary font-medium">{match.status}</span>
                           </>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-1 truncate">
                         {match.date || match.lastMessage}
                       </p>
                     </div>
-                    <Button variant="outline" size="sm">
-                      {match.status === "Date Scheduled" ? "View Details" : "Message"}
+                    <Button variant="outline" size="sm" className="text-xs sm:text-sm flex-shrink-0">
+                      {match.status === "Date Scheduled" ? "Details" : "Message"}
                     </Button>
                   </div>
                 </CardContent>
@@ -377,42 +429,45 @@ const ClientDashboard = () => {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6">
           <Card className="card-premium text-center">
-            <CardContent className="p-6">
-              <div className="text-3xl font-bold text-primary mb-2">12</div>
-              <p className="text-muted-foreground">Total Matches</p>
+            <CardContent className="p-4 sm:p-6">
+              <div className="text-2xl sm:text-3xl font-bold text-primary mb-1 sm:mb-2">12</div>
+              <p className="text-muted-foreground text-xs sm:text-sm">Total Matches</p>
             </CardContent>
           </Card>
           <Card className="card-premium text-center">
-            <CardContent className="p-6">
-              <div className="text-3xl font-bold text-accent mb-2">5</div>
-              <p className="text-muted-foreground">Dates This Month</p>
+            <CardContent className="p-4 sm:p-6">
+              <div className="text-2xl sm:text-3xl font-bold text-accent mb-1 sm:mb-2">5</div>
+              <p className="text-muted-foreground text-xs sm:text-sm">Dates This Month</p>
             </CardContent>
           </Card>
-          <Card className="card-premium text-center">
-            <CardContent className="p-6">
-              <div className="text-3xl font-bold text-success mb-2">94%</div>
-              <p className="text-muted-foreground">Profile Completion</p>
+          <Card className="card-premium text-center col-span-2 sm:col-span-1">
+            <CardContent className="p-4 sm:p-6">
+              <div className="text-2xl sm:text-3xl font-bold text-success mb-1 sm:mb-2">94%</div>
+              <p className="text-muted-foreground text-xs sm:text-sm">Profile Complete</p>
             </CardContent>
           </Card>
-            </div>
+        </div>
           </>
         )}
 
         {profile.status !== 'approved' && (
           <Card className="card-premium text-center">
-            <CardContent className="p-12">
-              <Clock className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-2xl font-semibold mb-4">Your Journey Begins Soon</h3>
-              <p className="text-muted-foreground text-lg mb-6">
-                {profile.status === 'pending' 
+            <CardContent className="p-6 sm:p-12">
+              <Clock className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-xl sm:text-2xl font-semibold mb-4">Your Journey Begins Soon</h3>
+              <p className="text-muted-foreground text-sm sm:text-lg mb-6">
+                {profile.status === 'pending'
                   ? "Our matchmaking team is reviewing your profile. You'll receive an email once approved."
                   : "Complete your profile to begin receiving curated matches from our expert team."
                 }
               </p>
               {profile.status === 'incomplete' && (
-                <Button onClick={() => navigate('/profile-questionnaire')} className="btn-premium">
+                <Button
+                  onClick={() => navigate('/profile-questionnaire')}
+                  className="btn-premium w-full sm:w-auto"
+                >
                   Complete Your Profile
                 </Button>
               )}

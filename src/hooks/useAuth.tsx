@@ -32,9 +32,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     let isMounted = true;
 
     const initializeAuth = async () => {
+      console.log('Initializing auth...');
       try {
         // Get initial session first
         const { data: { session }, error } = await supabase.auth.getSession();
+
+        console.log('Initial session check:', {
+          session: !!session,
+          user: session?.user?.id,
+          error: error?.message
+        });
 
         if (error) {
           console.error('Error getting initial session:', error);
@@ -43,10 +50,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (isMounted) {
           setSession(session);
           setUser(session?.user ?? null);
-          setLoading(false);
+          console.log('Auth state initialized:', {
+            hasSession: !!session,
+            hasUser: !!session?.user,
+            userId: session?.user?.id
+          });
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
+      } finally {
         if (isMounted) {
           setLoading(false);
         }
