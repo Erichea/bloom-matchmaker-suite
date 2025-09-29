@@ -232,20 +232,16 @@ export default function ProfileQuestionnairePage() {
       };
       setAnswers(newAnswers);
 
-      // Calculate and update completion percentage based on categories
-      const completedCategories = categories.filter(category => {
-        const categoryQuestions = questions.filter(q => q.category === category);
-        const answeredInCategory = categoryQuestions.filter(q => newAnswers[q.id] &&
-          (Array.isArray(newAnswers[q.id]) ? newAnswers[q.id].length > 0 : newAnswers[q.id].toString().trim() !== ''));
-        return answeredInCategory.length === categoryQuestions.length;
-      });
-      const completionPercentage = Math.round((completedCategories.length / categories.length) * 100);
+      // Calculate completion percentage using the database function
+      const { data: completionData } = await supabase
+        .rpc('calculate_questionnaire_completion', { p_user_id: user.id });
 
-      // Update profile completion percentage
-      await supabase
-        .from('profiles')
-        .update({ completion_percentage: completionPercentage })
-        .eq('user_id', user.id);
+      if (completionData !== null) {
+        await supabase
+          .from('profiles')
+          .update({ completion_percentage: completionData })
+          .eq('user_id', user.id);
+      }
     } catch (error: any) {
       toast({
         title: "Error",
