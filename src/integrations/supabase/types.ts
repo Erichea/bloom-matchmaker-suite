@@ -335,6 +335,10 @@ export type Database = {
         Args: { profile_id: string }
         Returns: number
       }
+      has_role: {
+        Args: { _role: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       education_level: "high_school" | "bachelor" | "master" | "phd" | "other"
