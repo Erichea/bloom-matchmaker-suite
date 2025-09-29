@@ -36,6 +36,7 @@ type SignUpForm = z.infer<typeof signUpSchema>;
 const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("signin");
+  const [showEmailConfirmationMessage, setShowEmailConfirmationMessage] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -82,9 +83,18 @@ const AuthPage = () => {
     const { error } = await signUp(data.email, data.password, data.firstName, data.lastName);
 
     if (!error) {
+      // Clear access code from session storage after successful signup
+      sessionStorage.removeItem('validAccessCode');
+
+      // Switch to sign-in tab and pre-fill email
+      setActiveTab("signin");
+      signInForm.setValue("email", data.email);
+      setShowEmailConfirmationMessage(true);
+
       toast({
-        title: "Account Created",
-        description: "Please check your email to verify your account before signing in.",
+        title: "Account Created Successfully! 🎉",
+        description: "Please check your email for a confirmation link, then sign in below.",
+        duration: 6000,
       });
     }
     setLoading(false);
@@ -137,6 +147,19 @@ const AuthPage = () => {
             </TabsList>
             
             <TabsContent value="signin" className="space-y-4">
+              {showEmailConfirmationMessage && (
+                <div className="bg-accent/30 border border-accent/20 rounded-lg p-4 mb-6 animate-fade-in">
+                  <div className="flex items-center justify-center space-x-2 mb-2">
+                    <Heart className="h-4 w-4 text-accent animate-bounce-gentle" />
+                    <p className="text-sm text-center text-foreground font-light">
+                      Welcome! Check your email for confirmation, then sign in below.
+                    </p>
+                  </div>
+                  <p className="text-xs text-center text-muted-foreground">
+                    Didn't receive an email? Check your spam folder or try signing up again.
+                  </p>
+                </div>
+              )}
               <Form {...signInForm}>
                 <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
                   <FormField
