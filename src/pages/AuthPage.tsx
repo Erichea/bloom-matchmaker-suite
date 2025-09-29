@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,9 +34,18 @@ type SignUpForm = z.infer<typeof signUpSchema>;
 
 const AuthPage = () => {
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("signin");
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Check if user came from access code validation
+  useEffect(() => {
+    const validAccessCode = sessionStorage.getItem('validAccessCode');
+    if (validAccessCode) {
+      setActiveTab("signup");
+    }
+  }, []);
 
   const signInForm = useForm<SignInForm>({
     resolver: zodResolver(signInSchema),
@@ -107,7 +116,7 @@ const AuthPage = () => {
           <CardDescription>Sign in to your account or create a new one</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -150,6 +159,23 @@ const AuthPage = () => {
             </TabsContent>
             
             <TabsContent value="signup" className="space-y-4">
+              {sessionStorage.getItem('validAccessCode') && (
+                <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-center text-foreground">
+                    Welcome! Create your account to get started.
+                  </p>
+                  <p className="text-xs text-center text-muted-foreground mt-1">
+                    Already have an account?
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("signin")}
+                      className="text-primary hover:underline ml-1"
+                    >
+                      Sign in here
+                    </button>
+                  </p>
+                </div>
+              )}
               <Form {...signUpForm}>
                 <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">

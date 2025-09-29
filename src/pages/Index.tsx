@@ -35,15 +35,15 @@ const Index = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up">
-            <Link to="/admin">
+            <Link to="/client">
               <Button className="bg-white text-primary hover:bg-white/90 font-semibold px-8 py-4 text-lg rounded-xl min-w-[200px]">
-                Admin Dashboard
+                Get Started
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link to="/client">
+            <Link to="/auth">
               <Button className="bg-white/10 text-white border-white/30 hover:bg-white/20 font-semibold px-8 py-4 text-lg rounded-xl min-w-[200px]">
-                Client Portal
+                Sign In
                 <Heart className="ml-2 h-5 w-5" />
               </Button>
             </Link>

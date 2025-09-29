@@ -20,13 +20,13 @@ const ClientWelcome = () => {
     setIsValidating(true);
     
     try {
-      console.log('Validating access code:', accessCode.trim());
+      console.log('Validating access code:', accessCode.trim().toUpperCase());
 
-      // Validate access code
+      // Validate access code (case insensitive)
       const { data: codeData, error } = await supabase
         .from('access_codes')
         .select('*')
-        .eq('code', accessCode.trim())
+        .eq('code', accessCode.trim().toUpperCase())
         .eq('is_used', false)
         .single();
 
@@ -55,7 +55,7 @@ const ClientWelcome = () => {
       }
 
       // Store access code in session storage for profile creation
-      sessionStorage.setItem('validAccessCode', accessCode.trim());
+      sessionStorage.setItem('validAccessCode', accessCode.trim().toUpperCase());
       
       toast({
         title: "Access Code Verified",
