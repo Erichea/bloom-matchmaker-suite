@@ -226,10 +226,26 @@ export default function ProfileQuestionnairePage() {
 
       if (error) throw error;
 
-      setAnswers(prev => ({
-        ...prev,
+      const newAnswers = {
+        ...answers,
         [questionId]: answer,
-      }));
+      };
+      setAnswers(newAnswers);
+
+      // Calculate and update completion percentage based on categories
+      const completedCategories = categories.filter(category => {
+        const categoryQuestions = questions.filter(q => q.category === category);
+        const answeredInCategory = categoryQuestions.filter(q => newAnswers[q.id] &&
+          (Array.isArray(newAnswers[q.id]) ? newAnswers[q.id].length > 0 : newAnswers[q.id].toString().trim() !== ''));
+        return answeredInCategory.length === categoryQuestions.length;
+      });
+      const completionPercentage = Math.round((completedCategories.length / categories.length) * 100);
+
+      // Update profile completion percentage
+      await supabase
+        .from('profiles')
+        .update({ completion_percentage: completionPercentage })
+        .eq('user_id', user.id);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -239,12 +255,22 @@ export default function ProfileQuestionnairePage() {
     }
   };
 
+  const getCompletionPercentage = () => {
+    const completedCategories = categories.filter(category => {
+      const categoryQuestions = questions.filter(q => q.category === category);
+      const answeredInCategory = categoryQuestions.filter(q => answers[q.id] &&
+        (Array.isArray(answers[q.id]) ? answers[q.id].length > 0 : answers[q.id].toString().trim() !== ''));
+      return answeredInCategory.length === categoryQuestions.length;
+    });
+    return Math.round((completedCategories.length / categories.length) * 100);
+  };
+
   const handleFinish = async () => {
     if (!user?.id) return;
 
     const requiredQuestions = questions.filter(q => q.required);
     const answeredRequired = requiredQuestions.filter(q => answers[q.id] &&
-      (Array.isArray(answers[q.id]) ? answers[q.id].length > 0 : answers[q.id].trim() !== ''));
+      (Array.isArray(answers[q.id]) ? answers[q.id].length > 0 : answers[q.id].toString().trim() !== ''));
 
     if (answeredRequired.length < requiredQuestions.length) {
       toast({
@@ -256,7 +282,7 @@ export default function ProfileQuestionnairePage() {
     }
 
     try {
-      const completionPercentage = Math.round((Object.keys(answers).length / questions.length) * 100);
+      const completionPercentage = getCompletionPercentage();
 
       await supabase
         .from('profiles')
@@ -290,8 +316,13 @@ export default function ProfileQuestionnairePage() {
   }
 
   const currentQuestion = questions[currentQuestionIndex];
-  const progress = Math.round(((currentQuestionIndex + 1) / questions.length) * 100);
-  const answeredCount = Object.keys(answers).length;
+  const completionPercentage = getCompletionPercentage();
+  const completedCategories = categories.filter(category => {
+    const categoryQuestions = questions.filter(q => q.category === category);
+    const answeredInCategory = categoryQuestions.filter(q => answers[q.id] &&
+      (Array.isArray(answers[q.id]) ? answers[q.id].length > 0 : answers[q.id].toString().trim() !== ''));
+    return answeredInCategory.length === categoryQuestions.length;
+  });
   const currentCategory = currentQuestion.category;
   const Icon = currentQuestion.icon;
 
@@ -384,10 +415,10 @@ export default function ProfileQuestionnairePage() {
           </div>
           <div className="space-y-2">
             <div className="flex justify-between text-white/80 text-sm">
-              <span>{answeredCount} answered</span>
-              <span>{progress}% complete</span>
+              <span>{completedCategories.length} of {categories.length} categories complete</span>
+              <span>{completionPercentage}% complete</span>
             </div>
-            <Progress value={progress} className="h-2" />
+            <Progress value={completionPercentage} className="h-2" />
           </div>
         </div>
       </div>
@@ -395,24 +426,42 @@ export default function ProfileQuestionnairePage() {
       <div className="max-w-4xl mx-auto px-6 py-8">
         {/* Category Navigation */}
         <div className="flex flex-wrap gap-2 mb-8">
-          {categories.map((category) => {
+          {categories.map((category, index) => {
             const categoryQuestions = questions.filter(q => q.category === category);
             const answeredInCategory = categoryQuestions.filter(q => answers[q.id]).length;
             const isCurrentCategory = category === currentCategory;
+            const isCompleted = answeredInCategory === categoryQuestions.length;
+
+            // Find a question from this category to use its icon
+            const categoryQuestion = questions.find(q => q.category === category);
+            const CategoryIcon = categoryQuestion?.icon || Star;
 
             return (
-              <div
+              <button
                 key={category}
-                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                onClick={() => {
+                  // Find the first question of this category
+                  const firstQuestionIndex = questions.findIndex(q => q.category === category);
+                  if (firstQuestionIndex !== -1) {
+                    setCurrentQuestionIndex(firstQuestionIndex);
+                  }
+                }}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-medium transition-all hover:scale-105 ${
                   isCurrentCategory
-                    ? 'bg-primary text-primary-foreground'
-                    : answeredInCategory === categoryQuestions.length
-                    ? 'bg-green-100 text-green-800 border border-green-200'
-                    : 'bg-muted text-muted-foreground'
+                    ? 'bg-primary text-primary-foreground shadow-md'
+                    : isCompleted
+                    ? 'bg-green-100 text-green-800 border border-green-200 hover:bg-green-200'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
                 }`}
               >
-                {category} ({answeredInCategory}/{categoryQuestions.length})
-              </div>
+                <CategoryIcon className="w-4 h-4" />
+                <span>{category}</span>
+                {isCompleted ? (
+                  <Check className="w-4 h-4 text-green-600" />
+                ) : (
+                  <div className="w-2 h-2 rounded-full bg-current opacity-50" />
+                )}
+              </button>
             );
           })}
         </div>

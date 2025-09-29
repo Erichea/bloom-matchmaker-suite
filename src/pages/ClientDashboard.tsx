@@ -236,6 +236,13 @@ const ClientDashboard = () => {
               <span className="text-white/90 text-sm">
                 {getStatusText(profile.status)}
               </span>
+              {profile.completion_percentage !== null && profile.completion_percentage !== undefined && (
+                <div className="bg-white/20 backdrop-blur-sm rounded-full px-2 py-1">
+                  <span className="text-white font-semibold text-xs">
+                    {profile.completion_percentage}%
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -254,6 +261,13 @@ const ClientDashboard = () => {
                   <span className="text-white/90 text-lg">
                     {getStatusText(profile.status)}
                   </span>
+                  {profile.completion_percentage !== null && profile.completion_percentage !== undefined && (
+                    <div className="bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+                      <span className="text-white font-semibold text-sm">
+                        {profile.completion_percentage}% Complete
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <p className="text-white/70 text-sm">
                   {user?.email} • Member since {new Date().toLocaleDateString()}
