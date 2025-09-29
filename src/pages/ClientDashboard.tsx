@@ -107,8 +107,10 @@ const ClientDashboard = () => {
     switch (status) {
       case 'approved':
         return <CheckCircle className="w-5 h-5 text-success" />;
-      case 'pending':
+      case 'pending_approval':
         return <Clock className="w-5 h-5 text-warning" />;
+      case 'rejected':
+        return <AlertCircle className="w-5 h-5 text-destructive" />;
       case 'incomplete':
         return <AlertCircle className="w-5 h-5 text-warning" />;
       default:
@@ -120,8 +122,10 @@ const ClientDashboard = () => {
     switch (status) {
       case 'approved':
         return 'Profile Approved';
-      case 'pending':
+      case 'pending_approval':
         return 'Pending Review';
+      case 'rejected':
+        return 'Profile Needs Revision';
       case 'incomplete':
         return 'Profile Incomplete';
       default:
@@ -133,8 +137,10 @@ const ClientDashboard = () => {
     switch (status) {
       case 'approved':
         return 'Your profile has been approved and you can now receive matches.';
-      case 'pending':
+      case 'pending_approval':
         return 'Your profile is under review by our matchmaking team.';
+      case 'rejected':
+        return 'Please review the feedback below and update your profile.';
       case 'incomplete':
         return 'Please complete your profile to start receiving matches.';
       default:
@@ -307,7 +313,15 @@ const ClientDashboard = () => {
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg font-semibold">{getStatusText(profile.status)}</h3>
                   <p className="text-muted-foreground text-sm">{getStatusDescription(profile.status)}</p>
-                  {profile.completion_percentage && (
+
+                  {profile.status === 'rejected' && profile.rejection_reason && (
+                    <div className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                      <p className="text-sm font-medium text-destructive mb-1">Feedback from our team:</p>
+                      <p className="text-sm text-foreground">{profile.rejection_reason}</p>
+                    </div>
+                  )}
+
+                  {profile.completion_percentage !== null && profile.completion_percentage !== undefined && (
                     <div className="mt-3">
                       <div className="flex justify-between text-sm mb-2">
                         <span>Profile Completion</span>
@@ -323,13 +337,13 @@ const ClientDashboard = () => {
                   )}
                 </div>
               </div>
-              {profile.status === 'incomplete' && (
+              {(profile.status === 'incomplete' || profile.status === 'rejected') && (
                 <Button
                   onClick={() => navigate('/profile-questionnaire')}
                   className="btn-premium w-full sm:w-auto"
                   size="sm"
                 >
-                  Complete Profile
+                  {profile.status === 'rejected' ? 'Update Profile' : 'Complete Profile'}
                 </Button>
               )}
             </div>
@@ -469,21 +483,42 @@ const ClientDashboard = () => {
         {profile.status !== 'approved' && (
           <Card className="card-premium text-center">
             <CardContent className="p-6 sm:p-12">
-              <Clock className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-xl sm:text-2xl font-semibold mb-4">Your Journey Begins Soon</h3>
-              <p className="text-muted-foreground text-sm sm:text-lg mb-6">
-                {profile.status === 'pending'
-                  ? "Our matchmaking team is reviewing your profile. You'll receive an email once approved."
-                  : "Complete your profile to begin receiving curated matches from our expert team."
-                }
-              </p>
-              {profile.status === 'incomplete' && (
-                <Button
-                  onClick={() => navigate('/profile-questionnaire')}
-                  className="btn-premium w-full sm:w-auto"
-                >
-                  Complete Your Profile
-                </Button>
+              {profile.status === 'pending_approval' ? (
+                <>
+                  <Clock className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-warning" />
+                  <h3 className="text-xl sm:text-2xl font-semibold mb-4">Your Profile Is Under Review</h3>
+                  <p className="text-muted-foreground text-sm sm:text-lg mb-6">
+                    Our matchmaking team is carefully reviewing your profile. You'll receive an email once approved. This usually takes 24-48 hours.
+                  </p>
+                </>
+              ) : profile.status === 'rejected' ? (
+                <>
+                  <AlertCircle className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-destructive" />
+                  <h3 className="text-xl sm:text-2xl font-semibold mb-4">Action Required</h3>
+                  <p className="text-muted-foreground text-sm sm:text-lg mb-6">
+                    Please review the feedback above and update your profile. Once updated, you can submit for review again.
+                  </p>
+                  <Button
+                    onClick={() => navigate('/profile-questionnaire')}
+                    className="btn-premium w-full sm:w-auto"
+                  >
+                    Update Your Profile
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Clock className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-xl sm:text-2xl font-semibold mb-4">Your Journey Begins Soon</h3>
+                  <p className="text-muted-foreground text-sm sm:text-lg mb-6">
+                    Complete your profile to begin receiving curated matches from our expert team.
+                  </p>
+                  <Button
+                    onClick={() => navigate('/profile-questionnaire')}
+                    className="btn-premium w-full sm:w-auto"
+                  >
+                    Complete Your Profile
+                  </Button>
+                </>
               )}
             </CardContent>
           </Card>

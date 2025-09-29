@@ -177,6 +177,7 @@ export type Database = {
           access_code_id: string | null
           achievements: string | null
           admin_notes: string | null
+          approved_at: string | null
           city: string | null
           completion_percentage: number | null
           country: string | null
@@ -203,11 +204,15 @@ export type Database = {
           preferred_min_age: number | null
           preferred_min_height: number | null
           profession: string | null
+          rejected_at: string | null
+          rejection_reason: string | null
           relationship_status:
             | Database["public"]["Enums"]["relationship_status"]
             | null
+          reviewed_by: string | null
           seeks_similar_values: boolean | null
           status: Database["public"]["Enums"]["profile_status"] | null
+          submitted_for_review_at: string | null
           updated_at: string
           user_id: string | null
           wants_more_children: boolean | null
@@ -218,6 +223,7 @@ export type Database = {
           access_code_id?: string | null
           achievements?: string | null
           admin_notes?: string | null
+          approved_at?: string | null
           city?: string | null
           completion_percentage?: number | null
           country?: string | null
@@ -244,11 +250,15 @@ export type Database = {
           preferred_min_age?: number | null
           preferred_min_height?: number | null
           profession?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
           relationship_status?:
             | Database["public"]["Enums"]["relationship_status"]
             | null
+          reviewed_by?: string | null
           seeks_similar_values?: boolean | null
           status?: Database["public"]["Enums"]["profile_status"] | null
+          submitted_for_review_at?: string | null
           updated_at?: string
           user_id?: string | null
           wants_more_children?: boolean | null
@@ -259,6 +269,7 @@ export type Database = {
           access_code_id?: string | null
           achievements?: string | null
           admin_notes?: string | null
+          approved_at?: string | null
           city?: string | null
           completion_percentage?: number | null
           country?: string | null
@@ -285,11 +296,15 @@ export type Database = {
           preferred_min_age?: number | null
           preferred_min_height?: number | null
           profession?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
           relationship_status?:
             | Database["public"]["Enums"]["relationship_status"]
             | null
+          reviewed_by?: string | null
           seeks_similar_values?: boolean | null
           status?: Database["public"]["Enums"]["profile_status"] | null
+          submitted_for_review_at?: string | null
           updated_at?: string
           user_id?: string | null
           wants_more_children?: boolean | null
@@ -331,13 +346,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_profile: {
+        Args: { p_profile_id: string; p_admin_id: string }
+        Returns: Json
+      }
       calculate_profile_completion: {
         Args: { profile_id: string }
+        Returns: number
+      }
+      calculate_questionnaire_completion: {
+        Args: { p_user_id: string }
         Returns: number
       }
       has_role: {
         Args: { _role: string; _user_id: string }
         Returns: boolean
+      }
+      reject_profile: {
+        Args: { p_profile_id: string; p_admin_id: string; p_rejection_reason: string }
+        Returns: Json
+      }
+      submit_profile_for_review: {
+        Args: { p_user_id: string }
+        Returns: Json
       }
     }
     Enums: {

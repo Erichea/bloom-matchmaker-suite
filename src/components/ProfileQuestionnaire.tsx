@@ -30,7 +30,37 @@ const questions: Question[] = [
     type: 'multiselect',
     options: ['Travel', 'Music', 'Sports', 'Art', 'Technology', 'Food', 'Nature', 'Reading'],
   },
-  // Add more questions here
+  {
+    id: 'ideal_partner',
+    text: 'Describe your ideal partner',
+    type: 'text',
+  },
+  {
+    id: 'values',
+    text: 'What values are most important to you?',
+    type: 'multiselect',
+    options: ['Family', 'Career', 'Adventure', 'Stability', 'Spirituality', 'Health', 'Creativity', 'Community'],
+  },
+  {
+    id: 'lifestyle',
+    text: 'How would you describe your lifestyle?',
+    type: 'text',
+  },
+  {
+    id: 'relationship_goals',
+    text: 'What are you looking for in a relationship?',
+    type: 'text',
+  },
+  {
+    id: 'dealbreakers',
+    text: 'What are your relationship dealbreakers?',
+    type: 'text',
+  },
+  {
+    id: 'future_plans',
+    text: 'Where do you see yourself in 5 years?',
+    type: 'text',
+  },
 ];
 
 export function ProfileQuestionnaire({ isOpen, onClose }: ProfileQuestionnaireProps) {
@@ -97,20 +127,16 @@ export function ProfileQuestionnaire({ isOpen, onClose }: ProfileQuestionnairePr
         [questionId]: answer,
       }));
 
-      // Update profile completion percentage and status
-      const newProgress = Math.round(((Object.keys(answers).length + 1) / questions.length) * 100);
+      // Update profile completion percentage using the database function
+      const { data: completionData } = await supabase
+        .rpc('calculate_questionnaire_completion', { p_user_id: user.id });
 
-      const updateData: any = { completion_percentage: newProgress };
-
-      // If all questions are answered, mark as pending review
-      if (Object.keys(answers).length + 1 >= questions.length) {
-        updateData.status = 'pending';
+      if (completionData !== null) {
+        await supabase
+          .from('profiles')
+          .update({ completion_percentage: completionData })
+          .eq('user_id', user.id);
       }
-
-      await supabase
-        .from('profiles')
-        .update(updateData)
-        .eq('user_id', user.id);
 
     } catch (error: any) {
       toast({
@@ -137,25 +163,29 @@ export function ProfileQuestionnaire({ isOpen, onClose }: ProfileQuestionnairePr
     if (!user?.id) return;
 
     try {
-      // Mark profile as pending review since questionnaire is complete
-      await supabase
-        .from('profiles')
-        .update({
-          status: 'pending',
-          completion_percentage: 100
-        })
-        .eq('user_id', user.id);
+      // Submit profile for review using the database function
+      const { data, error } = await supabase
+        .rpc('submit_profile_for_review', { p_user_id: user.id });
 
-      toast({
-        title: "Profile Complete! 🎉",
-        description: "Your profile has been submitted for review. You'll be notified once approved.",
-      });
+      if (error) throw error;
 
-      onClose();
+      if (data?.success) {
+        toast({
+          title: "Profile Submitted! 🎉",
+          description: data.message || "Your profile has been submitted for review. You'll be notified once approved.",
+        });
+        onClose();
+      } else {
+        toast({
+          title: "Unable to Submit",
+          description: data?.message || "Please complete more of your profile before submitting.",
+          variant: "destructive",
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to complete profile. Please try again.",
+        description: "Failed to submit profile. Please try again.",
         variant: "destructive",
       });
     }
@@ -226,7 +256,7 @@ export function ProfileQuestionnaire({ isOpen, onClose }: ProfileQuestionnairePr
                 onClick={handleFinish}
                 className="bg-primary hover:bg-primary/90"
               >
-                Finish Profile
+                Submit for Review
               </Button>
             ) : (
               <Button onClick={handleNext}>
