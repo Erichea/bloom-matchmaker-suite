@@ -38,7 +38,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // Create user role on sign up
         if (event === 'SIGNED_UP' && session?.user) {
           try {
-            const { error } = await supabase
+            console.log('Creating user role for:', session.user.id);
+            const { data, error } = await supabase
               .from('user_roles')
               .insert({
                 user_id: session.user.id,
@@ -47,6 +48,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             if (error) {
               console.error('Error creating user role:', error);
+              // Don't throw the error, just log it
+            } else {
+              console.log('User role created successfully:', data);
             }
           } catch (error) {
             console.error('Error in auth state change:', error);
@@ -69,13 +73,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/`;
-      
-      const { error } = await supabase.auth.signUp({
+      console.log('Attempting signup with:', { email, firstName, lastName });
+
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: redirectUrl,
           data: {
             first_name: firstName,
             last_name: lastName,
@@ -83,16 +86,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       });
 
+      console.log('Signup response:', { data, error });
+
       if (error) {
+        console.error('Signup error details:', error);
         toast({
           title: "Sign Up Error",
-          description: error.message,
+          description: error.message || "Failed to create account. Please try again.",
           variant: "destructive",
         });
       } else {
+        console.log('Signup successful!', data);
         toast({
           title: "Account Created",
-          description: "Please check your email to verify your account.",
+          description: data.user?.email_confirmed_at ? "Welcome! You can now sign in." : "Please check your email to verify your account.",
         });
       }
 
