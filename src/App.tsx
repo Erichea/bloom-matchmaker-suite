@@ -7,43 +7,50 @@ import Index from "./pages/Index";
 import AdminDashboard from "./pages/AdminDashboard";
 import ClientWelcome from "./pages/ClientWelcome";
 import ClientDashboard from "./pages/ClientDashboard";
+import AuthPage from "./pages/AuthPage";
+import ProfileSetup from "./pages/ProfileSetup";
 import NotFound from "./pages/NotFound";
 import ClientsPage from "./pages/admin/ClientsPage";
 import AccessCodesPage from "./pages/admin/AccessCodesPage";
 import { AdminLayout } from "./components/AdminLayout";
+import { AuthProvider } from "./hooks/useAuth";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/admin" element={
-            <AdminLayout>
-              <AdminDashboard />
-            </AdminLayout>
-          } />
-          <Route path="/admin/clients" element={
-            <AdminLayout>
-              <ClientsPage />
-            </AdminLayout>
-          } />
-          <Route path="/admin/access-codes" element={
-            <AdminLayout>
-              <AccessCodesPage />
-            </AdminLayout>
-          } />
-          <Route path="/client" element={<ClientWelcome />} />
-          <Route path="/client/dashboard" element={<ClientDashboard />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/admin" element={
+              <AdminLayout>
+                <AdminDashboard />
+              </AdminLayout>
+            } />
+            <Route path="/admin/clients" element={
+              <AdminLayout>
+                <ClientsPage />
+              </AdminLayout>
+            } />
+            <Route path="/admin/access-codes" element={
+              <AdminLayout>
+                <AccessCodesPage />
+              </AdminLayout>
+            } />
+            <Route path="/client" element={<ClientWelcome />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/profile-setup" element={<ProfileSetup />} />
+            <Route path="/client/dashboard" element={<ClientDashboard />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

@@ -1,25 +1,72 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Heart, Sparkles, Users, Shield } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-image.jpg";
 
 const ClientWelcome = () => {
   const [accessCode, setAccessCode] = useState("");
   const [isValidating, setIsValidating] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsValidating(true);
     
-    // Simulate validation
-    setTimeout(() => {
+    try {
+      // Validate access code
+      const { data: codeData, error } = await supabase
+        .from('access_codes')
+        .select('*')
+        .eq('code', accessCode.trim())
+        .eq('is_used', false)
+        .single();
+
+      if (error || !codeData) {
+        toast({
+          title: "Invalid Access Code",
+          description: "The access code you entered is invalid or has already been used.",
+          variant: "destructive",
+        });
+        setIsValidating(false);
+        return;
+      }
+
+      // Check if code is expired
+      if (codeData.expires_at && new Date(codeData.expires_at) < new Date()) {
+        toast({
+          title: "Expired Access Code",
+          description: "This access code has expired. Please contact your matchmaker for a new code.",
+          variant: "destructive",
+        });
+        setIsValidating(false);
+        return;
+      }
+
+      // Store access code in session storage for profile creation
+      sessionStorage.setItem('validAccessCode', accessCode.trim());
+      
+      toast({
+        title: "Access Code Verified",
+        description: "Welcome to BLOOM! Let's create your account.",
+      });
+
+      navigate("/auth");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsValidating(false);
-      // Here you would validate the access code
-      console.log("Validating code:", accessCode);
-    }, 1500);
+    }
   };
 
   const features = [

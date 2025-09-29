@@ -1,10 +1,117 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, User, Settings, Sparkles, MapPin, Calendar } from "lucide-react";
+import { Heart, MessageCircle, User, Settings, Sparkles, MapPin, Calendar, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const ClientDashboard = () => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+
+    fetchProfile();
+  }, [user, navigate]);
+
+  const fetchProfile = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      if (!data) {
+        // No profile found, redirect to profile setup
+        navigate("/profile-setup");
+        return;
+      }
+
+      setProfile(data);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to load profile information.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return <CheckCircle className="w-5 h-5 text-success" />;
+      case 'pending':
+        return <Clock className="w-5 h-5 text-warning" />;
+      case 'incomplete':
+        return <AlertCircle className="w-5 h-5 text-warning" />;
+      default:
+        return <AlertCircle className="w-5 h-5 text-muted-foreground" />;
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return 'Profile Approved';
+      case 'pending':
+        return 'Pending Review';
+      case 'incomplete':
+        return 'Profile Incomplete';
+      default:
+        return 'Unknown Status';
+    }
+  };
+
+  const getStatusDescription = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return 'Your profile has been approved and you can now receive matches.';
+      case 'pending':
+        return 'Your profile is under review by our matchmaking team.';
+      case 'incomplete':
+        return 'Please complete your profile to start receiving matches.';
+      default:
+        return '';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return null; // Will redirect to profile setup
+  }
   const matchSuggestions = [
     {
       id: 1,
@@ -61,23 +168,69 @@ const ClientDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold text-white mb-2">
-                Welcome back, James
+                Welcome back, {profile.first_name || 'Member'}
               </h1>
-              <p className="text-white/80 text-lg">
-                You have 3 new matches waiting for you
-              </p>
+              <div className="flex items-center space-x-3">
+                {getStatusIcon(profile.status)}
+                <span className="text-white/90 text-lg">
+                  {getStatusText(profile.status)}
+                </span>
+              </div>
             </div>
-            <Button variant="secondary" className="bg-white/20 text-white border-white/30 hover:bg-white/30">
-              <Settings className="mr-2 h-4 w-4" />
-              Profile Settings
-            </Button>
+            <div className="flex space-x-3">
+              <Button variant="secondary" className="bg-white/20 text-white border-white/30 hover:bg-white/30">
+                <Settings className="mr-2 h-4 w-4" />
+                Profile Settings
+              </Button>
+              <Button 
+                variant="secondary" 
+                className="bg-white/20 text-white border-white/30 hover:bg-white/30"
+                onClick={handleSignOut}
+              >
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
-        {/* New Suggestions */}
-        <div>
+        {/* Profile Status */}
+        <Card className="card-premium">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-4">
+              {getStatusIcon(profile.status)}
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold">{getStatusText(profile.status)}</h3>
+                <p className="text-muted-foreground">{getStatusDescription(profile.status)}</p>
+                {profile.completion_percentage && (
+                  <div className="mt-3">
+                    <div className="flex justify-between text-sm mb-2">
+                      <span>Profile Completion</span>
+                      <span>{profile.completion_percentage}%</span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div 
+                        className="bg-primary h-2 rounded-full transition-all duration-300" 
+                        style={{ width: `${profile.completion_percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+              {profile.status === 'incomplete' && (
+                <Button onClick={() => navigate("/profile-setup")} className="btn-premium">
+                  Complete Profile
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {profile.status === 'approved' && (
+          <>
+            {/* New Suggestions */}
+            <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-foreground flex items-center">
               <Sparkles className="mr-2 h-6 w-6 text-primary" />
@@ -200,7 +353,29 @@ const ClientDashboard = () => {
               <p className="text-muted-foreground">Profile Completion</p>
             </CardContent>
           </Card>
-        </div>
+            </div>
+          </>
+        )}
+
+        {profile.status !== 'approved' && (
+          <Card className="card-premium text-center">
+            <CardContent className="p-12">
+              <Clock className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-2xl font-semibold mb-4">Your Journey Begins Soon</h3>
+              <p className="text-muted-foreground text-lg mb-6">
+                {profile.status === 'pending' 
+                  ? "Our matchmaking team is reviewing your profile. You'll receive an email once approved."
+                  : "Complete your profile to begin receiving curated matches from our expert team."
+                }
+              </p>
+              {profile.status === 'incomplete' && (
+                <Button onClick={() => navigate("/profile-setup")} className="btn-premium">
+                  Complete Your Profile
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
