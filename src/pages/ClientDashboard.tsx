@@ -70,6 +70,19 @@ const ClientDashboard = () => {
     if (!user) return;
 
     try {
+      // First, recalculate the completion percentage
+      const { data: completionData } = await supabase
+        .rpc('calculate_questionnaire_completion', { p_user_id: user.id });
+
+      // Update the profile with the latest completion percentage
+      if (completionData !== null) {
+        await supabase
+          .from('profiles')
+          .update({ completion_percentage: completionData })
+          .eq('user_id', user.id);
+      }
+
+      // Now fetch the updated profile
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
