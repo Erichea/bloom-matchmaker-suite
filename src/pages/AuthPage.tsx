@@ -45,12 +45,13 @@ const AuthPage = () => {
   const { toast } = useToast();
 
   // Check if user came from access code validation
+  const hasValidAccessCode = sessionStorage.getItem('validAccessCode');
+
   useEffect(() => {
-    const validAccessCode = sessionStorage.getItem('validAccessCode');
-    if (validAccessCode) {
+    if (hasValidAccessCode) {
       setActiveTab("signup");
     }
-  }, []);
+  }, [hasValidAccessCode]);
 
   const signInForm = useForm<SignInForm>({
     resolver: zodResolver(signInSchema),
@@ -166,16 +167,25 @@ const AuthPage = () => {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-muted">
-              <TabsTrigger value="signin" className="font-medium flex items-center space-x-1.5">
-                <LogIn className="h-3.5 w-3.5" />
-                <span>Sign In</span>
-              </TabsTrigger>
-              <TabsTrigger value="signup" className="font-medium flex items-center space-x-1.5">
-                <UserPlus className="h-3.5 w-3.5" />
-                <span>Sign Up</span>
-              </TabsTrigger>
-            </TabsList>
+            {hasValidAccessCode ? (
+              <TabsList className="grid w-full grid-cols-2 bg-muted">
+                <TabsTrigger value="signin" className="font-medium flex items-center space-x-1.5">
+                  <LogIn className="h-3.5 w-3.5" />
+                  <span>Sign In</span>
+                </TabsTrigger>
+                <TabsTrigger value="signup" className="font-medium flex items-center space-x-1.5">
+                  <UserPlus className="h-3.5 w-3.5" />
+                  <span>Sign Up</span>
+                </TabsTrigger>
+              </TabsList>
+            ) : (
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center space-x-2 bg-muted rounded-lg px-4 py-2">
+                  <LogIn className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium text-foreground">Sign In</span>
+                </div>
+              </div>
+            )}
             
             <TabsContent value="signin" className="space-y-4">
               {showEmailConfirmationMessage && (
@@ -187,8 +197,20 @@ const AuthPage = () => {
                     </p>
                   </div>
                   <p className="text-xs text-center text-muted-foreground">
-                    Didn't receive an email? Check your spam folder or try signing up again.
+                    Didn't receive an email? Check your spam folder or contact support.
                   </p>
+                </div>
+              )}
+              {!hasValidAccessCode && !showEmailConfirmationMessage && (
+                <div className="bg-muted/50 border border-border rounded-lg p-4 mb-6">
+                  <div className="text-center space-y-2">
+                    <p className="text-sm text-foreground font-light">
+                      Welcome back! Sign in to your account.
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Need an account? You'll need an access code to get started.
+                    </p>
+                  </div>
                 </div>
               )}
               <Form {...signInForm}>
@@ -236,8 +258,8 @@ const AuthPage = () => {
               </Form>
             </TabsContent>
             
-            <TabsContent value="signup" className="space-y-4">
-              {sessionStorage.getItem('validAccessCode') && (
+            {hasValidAccessCode && (
+              <TabsContent value="signup" className="space-y-4">
                 <div className="bg-accent/30 border border-accent/20 rounded-lg p-4 mb-6 animate-fade-in">
                   <div className="flex items-center justify-center space-x-2 mb-2">
                     <Heart className="h-4 w-4 text-accent animate-bounce-gentle" />
@@ -256,8 +278,7 @@ const AuthPage = () => {
                     </button>
                   </p>
                 </div>
-              )}
-              <Form {...signUpForm}>
+                <Form {...signUpForm}>
                 <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
@@ -340,8 +361,9 @@ const AuthPage = () => {
                     )}
                   </Button>
                 </form>
-              </Form>
-            </TabsContent>
+                </Form>
+              </TabsContent>
+            )}
           </Tabs>
 
           {/* Development Admin User Creation */}
