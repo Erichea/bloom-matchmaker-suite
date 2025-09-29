@@ -79,6 +79,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         email,
         password,
         options: {
+          emailRedirectTo: undefined, // We'll use OTP instead of email links
           data: {
             first_name: firstName,
             last_name: lastName,

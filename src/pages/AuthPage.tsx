@@ -13,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Sparkles, Heart, UserPlus, LogIn } from "lucide-react";
+import { EmailVerification } from "@/components/EmailVerification";
 
 const signInSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -37,6 +38,8 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("signin");
   const [showEmailConfirmationMessage, setShowEmailConfirmationMessage] = useState(false);
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState("");
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -86,14 +89,13 @@ const AuthPage = () => {
       // Clear access code from session storage after successful signup
       sessionStorage.removeItem('validAccessCode');
 
-      // Switch to sign-in tab and pre-fill email
-      setActiveTab("signin");
-      signInForm.setValue("email", data.email);
-      setShowEmailConfirmationMessage(true);
+      // Show email verification component
+      setVerificationEmail(data.email);
+      setShowEmailVerification(true);
 
       toast({
         title: "Account Created Successfully! 🎉",
-        description: "Please check your email for a confirmation link, then sign in below.",
+        description: "Please check your email for a verification code.",
         duration: 6000,
       });
     }
@@ -118,6 +120,35 @@ const AuthPage = () => {
     }
     setLoading(false);
   };
+
+  const handleVerificationComplete = () => {
+    setShowEmailVerification(false);
+    setActiveTab("signin");
+    signInForm.setValue("email", verificationEmail);
+    setShowEmailConfirmationMessage(true);
+    toast({
+      title: "Email Verified Successfully! ✨",
+      description: "You can now sign in with your credentials.",
+    });
+  };
+
+  const handleBackToSignIn = () => {
+    setShowEmailVerification(false);
+    setActiveTab("signin");
+    signInForm.setValue("email", verificationEmail);
+  };
+
+  if (showEmailVerification) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <EmailVerification
+          email={verificationEmail}
+          onVerificationComplete={handleVerificationComplete}
+          onBackToSignIn={handleBackToSignIn}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
