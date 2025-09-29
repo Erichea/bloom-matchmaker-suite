@@ -150,17 +150,17 @@ All colors MUST be HSL.
 }
 
 @layer components {
-  /* Hinge-inspired Button Variants */
+  /* Hinge-inspired Button Variants with Fun Interactions */
   .btn-premium {
-    @apply bg-primary text-primary-foreground font-medium rounded-lg shadow-[--shadow-soft] transition-[--transition-smooth] hover:shadow-[--shadow-medium] hover:bg-primary-soft px-8 py-3;
+    @apply bg-primary text-primary-foreground font-medium rounded-lg shadow-[--shadow-soft] transition-[--transition-smooth] hover:shadow-[--shadow-medium] hover:bg-primary-soft hover:scale-105 px-8 py-3;
   }
 
   .btn-soft {
-    @apply bg-muted text-foreground hover:bg-primary hover:text-primary-foreground transition-[--transition-smooth] font-medium rounded-lg border border-border px-8 py-3;
+    @apply bg-muted text-foreground hover:bg-primary hover:text-primary-foreground transition-[--transition-smooth] font-medium rounded-lg border border-border hover:border-primary hover:scale-105 px-8 py-3;
   }
 
   .btn-accent {
-    @apply bg-accent text-accent-foreground font-medium rounded-lg shadow-[--shadow-soft] transition-[--transition-smooth] hover:shadow-[--shadow-medium] px-8 py-3;
+    @apply bg-accent text-accent-foreground font-medium rounded-lg shadow-[--shadow-soft] transition-[--transition-smooth] hover:shadow-[--shadow-medium] hover:scale-105 px-8 py-3;
   }
 
   /* Minimalist Card Styles */
@@ -206,6 +206,55 @@ All colors MUST be HSL.
   .animate-glow {
     animation: glow 2s ease-in-out infinite alternate;
   }
+
+  .animate-bounce-gentle {
+    animation: bounceGentle 2s ease-in-out infinite;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-wiggle {
+    animation: wiggle 0.8s ease-in-out;
+  }
+
+  .animate-pulse-soft {
+    animation: pulseSoft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Fun Interactive Elements */
+  .trait-tag {
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-accent/20 text-accent-foreground border border-accent/30 transition-all duration-300 hover:bg-accent/40 hover:scale-105 hover:rotate-1 cursor-pointer;
+  }
+
+  .fun-emoji {
+    @apply inline-block transition-all duration-300 hover:scale-125 hover:rotate-12 cursor-pointer;
+  }
+
+  .illustration-icon {
+    @apply w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 hover:rotate-3 cursor-pointer;
+  }
+
+  /* Easter Egg Animations */
+  .secret-animation {
+    animation: secretDance 0.6s ease-in-out;
+  }
+
+  .love-burst {
+    position: relative;
+  }
+
+  .love-burst::after {
+    content: '💕';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: heartBurst 0.8s ease-out forwards;
+    pointer-events: none;
+    opacity: 0;
+  }
 }
 
 @keyframes fadeIn {
@@ -236,5 +285,72 @@ All colors MUST be HSL.
   }
   to {
     box-shadow: var(--shadow-glow);
+  }
+}
+
+@keyframes bounceGentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes wiggle {
+  0%, 7%, 100% {
+    transform: rotate(0deg);
+  }
+  15% {
+    transform: rotate(-3deg);
+  }
+  20%, 40% {
+    transform: rotate(3deg);
+  }
+  25%, 35% {
+    transform: rotate(-3deg);
+  }
+  30% {
+    transform: rotate(3deg);
+  }
+}
+
+@keyframes pulseSoft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .7;
+  }
+}
+
+@keyframes secretDance {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-5deg) scale(1.1); }
+  50% { transform: rotate(5deg) scale(1.2); }
+  75% { transform: rotate(-3deg) scale(1.1); }
+}
+
+@keyframes heartBurst {
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) scale(0.5) translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.2) translateY(-10px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scale(1) translateY(-30px);
   }
 }

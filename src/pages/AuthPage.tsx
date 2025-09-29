@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Sparkles, Heart, UserPlus, LogIn } from "lucide-react";
 
 const signInSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -113,7 +114,11 @@ const AuthPage = () => {
       <Card className="w-full max-w-md card-premium">
         <CardHeader className="text-center space-y-4">
           <div className="space-y-2">
-            <CardTitle className="text-2xl font-light">Welcome to BLOOM</CardTitle>
+            <div className="flex items-center justify-center space-x-2">
+              <Sparkles className="h-5 w-5 text-accent animate-float" />
+              <CardTitle className="text-2xl font-light">Welcome to BLOOM</CardTitle>
+              <Heart className="h-5 w-5 text-accent animate-pulse-soft" />
+            </div>
             <div className="w-12 h-0.5 bg-accent mx-auto"></div>
           </div>
           <CardDescription className="text-muted-foreground font-light">Sign in to your account or create a new one</CardDescription>
@@ -121,8 +126,14 @@ const AuthPage = () => {
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-muted">
-              <TabsTrigger value="signin" className="font-medium">Sign In</TabsTrigger>
-              <TabsTrigger value="signup" className="font-medium">Sign Up</TabsTrigger>
+              <TabsTrigger value="signin" className="font-medium flex items-center space-x-1.5">
+                <LogIn className="h-3.5 w-3.5" />
+                <span>Sign In</span>
+              </TabsTrigger>
+              <TabsTrigger value="signup" className="font-medium flex items-center space-x-1.5">
+                <UserPlus className="h-3.5 w-3.5" />
+                <span>Sign Up</span>
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin" className="space-y-4">
@@ -154,8 +165,18 @@ const AuthPage = () => {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="btn-premium w-full" disabled={loading}>
-                    {loading ? "Signing in..." : "Sign In"}
+                  <Button type="submit" className="btn-premium w-full group" disabled={loading}>
+                    {loading ? (
+                      <div className="flex items-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                        Signing in...
+                      </div>
+                    ) : (
+                      <div className="flex items-center">
+                        <LogIn className="h-4 w-4 mr-2 group-hover:translate-x-1 transition-transform" />
+                        Sign In
+                      </div>
+                    )}
                   </Button>
                 </form>
               </Form>
@@ -163,16 +184,19 @@ const AuthPage = () => {
             
             <TabsContent value="signup" className="space-y-4">
               {sessionStorage.getItem('validAccessCode') && (
-                <div className="bg-accent/30 border border-accent/20 rounded-lg p-4 mb-6">
-                  <p className="text-sm text-center text-foreground font-light">
-                    Welcome! Create your account to get started.
-                  </p>
-                  <p className="text-xs text-center text-muted-foreground mt-2">
+                <div className="bg-accent/30 border border-accent/20 rounded-lg p-4 mb-6 animate-fade-in">
+                  <div className="flex items-center justify-center space-x-2 mb-2">
+                    <Heart className="h-4 w-4 text-accent animate-bounce-gentle" />
+                    <p className="text-sm text-center text-foreground font-light">
+                      Welcome! Create your account to get started.
+                    </p>
+                  </div>
+                  <p className="text-xs text-center text-muted-foreground">
                     Already have an account?
                     <button
                       type="button"
                       onClick={() => setActiveTab("signin")}
-                      className="text-primary hover:underline ml-1 font-medium"
+                      className="text-primary hover:underline ml-1 font-medium transition-all hover:animate-wiggle"
                     >
                       Sign in here
                     </button>
@@ -248,8 +272,18 @@ const AuthPage = () => {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="btn-premium w-full" disabled={loading}>
-                    {loading ? "Creating account..." : "Create Account"}
+                  <Button type="submit" className="btn-premium w-full group" disabled={loading}>
+                    {loading ? (
+                      <div className="flex items-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                        Creating account...
+                      </div>
+                    ) : (
+                      <div className="flex items-center">
+                        <UserPlus className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                        Create Account
+                      </div>
+                    )}
                   </Button>
                 </form>
               </Form>

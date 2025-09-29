@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Heart, Sparkles, Users, Shield } from "lucide-react";
+import { Heart, Sparkles, Users, Shield, Coffee, Smile, Star, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -105,22 +105,56 @@ const ClientWelcome = () => {
           <div className="animate-fade-in space-y-12">
             <div className="space-y-6">
               <div className="space-y-4">
-                <h1 className="text-4xl md:text-5xl font-light text-foreground tracking-tight">
-                  Welcome to BLOOM
-                </h1>
+                <div className="flex items-center justify-center space-x-3">
+                  <Sparkles className="h-6 w-6 text-accent animate-float" />
+                  <h1 className="text-4xl md:text-5xl font-light text-foreground tracking-tight">
+                    Welcome to BLOOM
+                  </h1>
+                  <Heart className="h-6 w-6 text-accent animate-pulse-soft" />
+                </div>
                 <div className="w-16 h-0.5 bg-accent mx-auto"></div>
               </div>
               <p className="text-lg text-muted-foreground font-light leading-relaxed">
-                Your journey to meaningful connections begins here.
+                Your journey to meaningful connections begins here. <span className="fun-emoji">🌟</span>
               </p>
+
+              {/* Fun welcome traits */}
+              <div className="flex flex-wrap justify-center gap-2 max-w-sm mx-auto">
+                {[
+                  { icon: Coffee, text: "Ready to mingle", emoji: "😊" },
+                  { icon: Smile, text: "Open minded", emoji: "🤗" },
+                  { icon: Star, text: "Hopeful romantic", emoji: "💕" }
+                ].map((trait, index) => {
+                  const Icon = trait.icon;
+                  return (
+                    <div
+                      key={index}
+                      className="trait-tag animate-fade-in love-burst"
+                      style={{animationDelay: `${index * 0.2}s`}}
+                      onClick={() => {
+                        const elem = document.querySelector(`[data-welcome-trait="${index}"]`);
+                        elem?.classList.add('secret-animation');
+                        setTimeout(() => elem?.classList.remove('secret-animation'), 600);
+                      }}
+                      data-welcome-trait={index}
+                    >
+                      <span className="fun-emoji mr-1">{trait.emoji}</span>
+                      {trait.text}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Access Code Form */}
-            <Card className="card-premium animate-slide-up">
+            <Card className="card-premium animate-slide-up group hover:shadow-[--shadow-medium] transition-all duration-300">
               <CardHeader className="text-center space-y-4">
-                <CardTitle className="text-xl font-medium text-foreground">
-                  Enter Your Access Code
-                </CardTitle>
+                <div className="flex items-center justify-center space-x-2">
+                  <Zap className="h-5 w-5 text-accent animate-wiggle" />
+                  <CardTitle className="text-xl font-medium text-foreground">
+                    Enter Your Access Code
+                  </CardTitle>
+                </div>
                 <CardDescription className="text-muted-foreground">
                   Please enter the exclusive code you received to begin.
                 </CardDescription>
@@ -178,10 +212,17 @@ const ClientWelcome = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {features.map((feature, index) => {
               const Icon = feature.icon;
+              const animations = ['animate-float', 'animate-bounce-gentle', 'animate-pulse-soft', 'animate-wiggle'];
+              const gradients = [
+                'from-accent/20 to-accent/10',
+                'from-primary/20 to-primary/10',
+                'from-success/20 to-success/10',
+                'from-muted to-muted-soft'
+              ];
               return (
-                <div key={index} className="text-center space-y-4">
-                  <div className="w-12 h-12 mx-auto bg-muted rounded-full flex items-center justify-center">
-                    <Icon className="h-5 w-5 text-muted-foreground" />
+                <div key={index} className="text-center space-y-4 group">
+                  <div className={`illustration-icon mx-auto bg-gradient-to-br ${gradients[index]} group-hover:scale-110`}>
+                    <Icon className={`h-6 w-6 text-muted-foreground ${animations[index]}`} />
                   </div>
                   <div className="space-y-2">
                     <h3 className="text-lg font-medium text-foreground">{feature.title}</h3>
@@ -204,7 +245,7 @@ const ClientWelcome = () => {
             <div className="w-12 h-0.5 bg-accent mx-auto"></div>
           </div>
           <p className="text-lg text-primary-foreground/80 font-light leading-relaxed">
-            Join our exclusive community and let us help you find lasting love.
+            Join our exclusive community and let us help you find lasting love. <span className="fun-emoji">💝</span>
           </p>
           <Button className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-medium px-8 py-3 rounded-lg">
             Get Your Access Code
