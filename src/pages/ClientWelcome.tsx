@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Heart, Sparkles, Users, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import heroImage from "@/assets/hero-image.jpg";
 
 const ClientWelcome = () => {
   const [accessCode, setAccessCode] = useState("");
@@ -100,102 +99,95 @@ const ClientWelcome = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background Image with Overlay */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${heroImage})` }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/80 via-accent/60 to-background/90" />
-        </div>
-        
+      <div className="relative min-h-screen flex items-center justify-center">
         {/* Content */}
-        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
-          <div className="animate-fade-in">
-            <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 tracking-tight">
-              Welcome to
-              <span className="block bg-gradient-to-r from-accent-soft to-white bg-clip-text text-transparent">
-                BLOOM
-              </span>
-            </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-2xl mx-auto leading-relaxed">
-              Where meaningful connections flourish. Your journey to finding the perfect match begins here.
-            </p>
-          </div>
+        <div className="max-w-lg mx-auto px-6 text-center">
+          <div className="animate-fade-in space-y-12">
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <h1 className="text-4xl md:text-5xl font-light text-foreground tracking-tight">
+                  Welcome to BLOOM
+                </h1>
+                <div className="w-16 h-0.5 bg-accent mx-auto"></div>
+              </div>
+              <p className="text-lg text-muted-foreground font-light leading-relaxed">
+                Your journey to meaningful connections begins here.
+              </p>
+            </div>
 
-          {/* Access Code Form */}
-          <Card className="card-premium max-w-md mx-auto animate-slide-up">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl font-semibold text-foreground">
-                Enter Your Access Code
-              </CardTitle>
-              <CardDescription>
-                Ready to start your matchmaking journey? Enter the exclusive code you received.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="accessCode" className="text-sm font-medium">
-                    Access Code
-                  </Label>
-                  <Input
-                    id="accessCode"
-                    type="text"
-                    placeholder="Enter your access code"
-                    value={accessCode}
-                    onChange={(e) => setAccessCode(e.target.value)}
-                    className="input-premium text-center text-lg tracking-wider"
-                    required
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="btn-premium w-full py-3"
-                  disabled={isValidating || !accessCode.trim()}
-                >
-                  {isValidating ? (
-                    <div className="flex items-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                      Validating...
-                    </div>
-                  ) : (
-                    "Begin Your Journey"
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+            {/* Access Code Form */}
+            <Card className="card-premium animate-slide-up">
+              <CardHeader className="text-center space-y-4">
+                <CardTitle className="text-xl font-medium text-foreground">
+                  Enter Your Access Code
+                </CardTitle>
+                <CardDescription className="text-muted-foreground">
+                  Please enter the exclusive code you received to begin.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="accessCode" className="text-sm font-medium text-muted-foreground">
+                      Access Code
+                    </Label>
+                    <Input
+                      id="accessCode"
+                      type="text"
+                      placeholder="Enter your code"
+                      value={accessCode}
+                      onChange={(e) => setAccessCode(e.target.value)}
+                      className="input-premium text-center text-base tracking-wider"
+                      required
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    className="btn-premium w-full"
+                    disabled={isValidating || !accessCode.trim()}
+                  >
+                    {isValidating ? (
+                      <div className="flex items-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                        Validating...
+                      </div>
+                    ) : (
+                      "Continue"
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
 
       {/* Features Section */}
-      <div className="py-24 px-6 bg-surface">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-foreground mb-4">
-              Why Choose BLOOM?
+      <div className="py-20 px-6 bg-surface">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-2xl md:text-3xl font-light text-foreground">
+              Why choose BLOOM?
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <div className="w-12 h-0.5 bg-accent mx-auto"></div>
+            <p className="text-lg text-muted-foreground max-w-xl mx-auto font-light leading-relaxed">
               Experience premium matchmaking with personalized service and proven results.
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <Card key={index} className="card-premium text-center group hover:shadow-glow transition-all duration-300">
-                  <CardHeader>
-                    <div className="w-16 h-16 mx-auto bg-primary-muted rounded-2xl flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                      <Icon className="h-8 w-8" />
-                    </div>
-                    <CardTitle className="text-xl font-semibold">{feature.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">{feature.description}</p>
-                  </CardContent>
-                </Card>
+                <div key={index} className="text-center space-y-4">
+                  <div className="w-12 h-12 mx-auto bg-muted rounded-full flex items-center justify-center">
+                    <Icon className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-medium text-foreground">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+                  </div>
+                </div>
               );
             })}
           </div>
@@ -203,15 +195,18 @@ const ClientWelcome = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="py-20 px-6 bg-[--gradient-hero]">
-        <div className="max-w-4xl mx-auto text-center">
-          <h3 className="text-3xl font-bold text-white mb-6">
-            Ready to Find Your Perfect Match?
-          </h3>
-          <p className="text-xl text-white/90 mb-8">
+      <div className="py-20 px-6 bg-primary">
+        <div className="max-w-2xl mx-auto text-center space-y-8">
+          <div className="space-y-4">
+            <h3 className="text-2xl font-light text-primary-foreground">
+              Ready to find your perfect match?
+            </h3>
+            <div className="w-12 h-0.5 bg-accent mx-auto"></div>
+          </div>
+          <p className="text-lg text-primary-foreground/80 font-light leading-relaxed">
             Join our exclusive community and let us help you find lasting love.
           </p>
-          <Button className="bg-white text-primary hover:bg-white/90 font-semibold px-8 py-3 rounded-xl">
+          <Button className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-medium px-8 py-3 rounded-lg">
             Get Your Access Code
           </Button>
         </div>

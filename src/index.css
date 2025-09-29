@@ -9,41 +9,41 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Premium Base Colors */
-    --background: 334 15% 97%;
-    --foreground: 265 15% 15%;
+    /* Hinge-inspired Minimalist Base Colors */
+    --background: 0 0% 99%;
+    --foreground: 0 0% 10%;
 
     /* Card & Surface Colors */
     --card: 0 0% 100%;
-    --card-foreground: 265 15% 15%;
-    --surface: 334 25% 98%;
+    --card-foreground: 0 0% 10%;
+    --surface: 0 0% 98%;
     --surface-elevated: 0 0% 100%;
 
     /* Popover Colors */
     --popover: 0 0% 100%;
-    --popover-foreground: 265 15% 15%;
+    --popover-foreground: 0 0% 10%;
 
-    /* Premium Purple Primary */
-    --primary: 271 76% 53%;
-    --primary-foreground: 0 0% 100%;
-    --primary-soft: 271 91% 65%;
-    --primary-muted: 271 40% 85%;
+    /* Elegant Primary - Deep Charcoal */
+    --primary: 0 0% 15%;
+    --primary-foreground: 0 0% 98%;
+    --primary-soft: 0 0% 25%;
+    --primary-muted: 0 0% 85%;
 
-    /* Elegant Secondary */
-    --secondary: 334 50% 90%;
-    --secondary-foreground: 265 15% 25%;
-    --secondary-accent: 334 60% 85%;
+    /* Warm Secondary */
+    --secondary: 24 100% 97%;
+    --secondary-foreground: 0 0% 20%;
+    --secondary-accent: 24 100% 95%;
 
-    /* Muted & Subtle */
-    --muted: 334 20% 94%;
-    --muted-foreground: 265 8% 50%;
-    --muted-soft: 334 15% 96%;
+    /* Sophisticated Muted */
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 45%;
+    --muted-soft: 0 0% 97%;
 
-    /* Accent Pink */
-    --accent: 331 78% 75%;
-    --accent-foreground: 0 0% 100%;
-    --accent-soft: 331 65% 85%;
-    --accent-muted: 331 40% 92%;
+    /* Warm Accent - Subtle Coral */
+    --accent: 14 100% 92%;
+    --accent-foreground: 0 0% 20%;
+    --accent-soft: 14 100% 95%;
+    --accent-muted: 14 60% 96%;
 
     /* Status Colors */
     --success: 142 76% 36%;
@@ -59,29 +59,29 @@ All colors MUST be HSL.
     --destructive-soft: 0 45% 90%;
 
     /* Interactive Elements */
-    --border: 334 25% 88%;
-    --border-soft: 334 15% 92%;
-    --input: 334 20% 94%;
-    --ring: 271 76% 53%;
+    --border: 0 0% 90%;
+    --border-soft: 0 0% 94%;
+    --input: 0 0% 97%;
+    --ring: 0 0% 15%;
 
-    /* Premium Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(271, 76%, 53%), hsl(271, 91%, 65%));
-    --gradient-secondary: linear-gradient(135deg, hsl(334, 50%, 90%), hsl(334, 60%, 85%));
-    --gradient-accent: linear-gradient(135deg, hsl(331, 78%, 75%), hsl(331, 65%, 85%));
-    --gradient-surface: linear-gradient(180deg, hsl(334, 25%, 98%), hsl(0, 0%, 100%));
-    --gradient-hero: linear-gradient(135deg, hsl(271, 76%, 53%) 0%, hsl(331, 78%, 75%) 50%, hsl(334, 50%, 90%) 100%);
+    /* Minimalist Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(0, 0%, 15%), hsl(0, 0%, 25%));
+    --gradient-secondary: linear-gradient(135deg, hsl(24, 100%, 97%), hsl(24, 100%, 95%));
+    --gradient-accent: linear-gradient(135deg, hsl(14, 100%, 92%), hsl(14, 100%, 95%));
+    --gradient-surface: linear-gradient(180deg, hsl(0, 0%, 98%), hsl(0, 0%, 100%));
+    --gradient-hero: linear-gradient(135deg, hsl(0, 0%, 15%) 0%, hsl(0, 0%, 25%) 100%);
 
-    /* Elegant Shadows */
-    --shadow-soft: 0 2px 8px -2px hsl(271, 76%, 53%, 0.08);
-    --shadow-medium: 0 4px 16px -4px hsl(271, 76%, 53%, 0.12);
-    --shadow-large: 0 8px 32px -8px hsl(271, 76%, 53%, 0.16);
-    --shadow-glow: 0 0 24px hsl(271, 76%, 53%, 0.2);
+    /* Subtle Shadows */
+    --shadow-soft: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-glow: 0 0 0 1px rgba(0, 0, 0, 0.05);
 
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -150,30 +150,30 @@ All colors MUST be HSL.
 }
 
 @layer components {
-  /* Premium Button Variants */
+  /* Hinge-inspired Button Variants */
   .btn-premium {
-    @apply bg-[--gradient-primary] text-primary-foreground font-medium rounded-xl shadow-[--shadow-soft] transition-[--transition-smooth] hover:shadow-[--shadow-medium] hover:scale-105;
+    @apply bg-primary text-primary-foreground font-medium rounded-lg shadow-[--shadow-soft] transition-[--transition-smooth] hover:shadow-[--shadow-medium] hover:bg-primary-soft px-8 py-3;
   }
 
   .btn-soft {
-    @apply bg-[--primary-muted] text-primary hover:bg-primary hover:text-primary-foreground transition-[--transition-smooth] font-medium rounded-xl;
+    @apply bg-muted text-foreground hover:bg-primary hover:text-primary-foreground transition-[--transition-smooth] font-medium rounded-lg border border-border px-8 py-3;
   }
 
   .btn-accent {
-    @apply bg-[--gradient-accent] text-accent-foreground font-medium rounded-xl shadow-[--shadow-soft] transition-[--transition-smooth] hover:shadow-[--shadow-medium];
+    @apply bg-accent text-accent-foreground font-medium rounded-lg shadow-[--shadow-soft] transition-[--transition-smooth] hover:shadow-[--shadow-medium] px-8 py-3;
   }
 
-  /* Premium Card Styles */
+  /* Minimalist Card Styles */
   .card-premium {
-    @apply bg-card rounded-2xl shadow-[--shadow-soft] border border-[--border-soft] overflow-hidden transition-[--transition-smooth] hover:shadow-[--shadow-medium];
+    @apply bg-card rounded-lg shadow-[--shadow-soft] border border-[--border-soft] overflow-hidden transition-[--transition-smooth] hover:shadow-[--shadow-medium];
   }
 
   .card-elevated {
-    @apply bg-[--surface-elevated] rounded-2xl shadow-[--shadow-medium] border-0 overflow-hidden;
+    @apply bg-[--surface-elevated] rounded-lg shadow-[--shadow-medium] border-0 overflow-hidden;
   }
 
   .card-gradient {
-    @apply bg-[--gradient-surface] rounded-2xl shadow-[--shadow-soft] border border-[--border-soft] overflow-hidden;
+    @apply bg-[--gradient-surface] rounded-lg shadow-[--shadow-soft] border border-[--border-soft] overflow-hidden;
   }
 
   /* Status Badges */
@@ -191,7 +191,7 @@ All colors MUST be HSL.
 
   /* Interactive Elements */
   .input-premium {
-    @apply bg-input border border-[--border-soft] rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-[--transition-fast] outline-none;
+    @apply bg-input border border-[--border-soft] rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary/20 transition-[--transition-fast] outline-none;
   }
 
   /* Animations */

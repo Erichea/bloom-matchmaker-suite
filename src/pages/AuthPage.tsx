@@ -110,16 +110,19 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Welcome to BLOOM</CardTitle>
-          <CardDescription>Sign in to your account or create a new one</CardDescription>
+      <Card className="w-full max-w-md card-premium">
+        <CardHeader className="text-center space-y-4">
+          <div className="space-y-2">
+            <CardTitle className="text-2xl font-light">Welcome to BLOOM</CardTitle>
+            <div className="w-12 h-0.5 bg-accent mx-auto"></div>
+          </div>
+          <CardDescription className="text-muted-foreground font-light">Sign in to your account or create a new one</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-muted">
+              <TabsTrigger value="signin" className="font-medium">Sign In</TabsTrigger>
+              <TabsTrigger value="signup" className="font-medium">Sign Up</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin" className="space-y-4">
@@ -151,7 +154,7 @@ const AuthPage = () => {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="btn-premium w-full" disabled={loading}>
                     {loading ? "Signing in..." : "Sign In"}
                   </Button>
                 </form>
@@ -160,16 +163,16 @@ const AuthPage = () => {
             
             <TabsContent value="signup" className="space-y-4">
               {sessionStorage.getItem('validAccessCode') && (
-                <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-4">
-                  <p className="text-sm text-center text-foreground">
+                <div className="bg-accent/30 border border-accent/20 rounded-lg p-4 mb-6">
+                  <p className="text-sm text-center text-foreground font-light">
                     Welcome! Create your account to get started.
                   </p>
-                  <p className="text-xs text-center text-muted-foreground mt-1">
+                  <p className="text-xs text-center text-muted-foreground mt-2">
                     Already have an account?
                     <button
                       type="button"
                       onClick={() => setActiveTab("signin")}
-                      className="text-primary hover:underline ml-1"
+                      className="text-primary hover:underline ml-1 font-medium"
                     >
                       Sign in here
                     </button>
@@ -245,7 +248,7 @@ const AuthPage = () => {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="btn-premium w-full" disabled={loading}>
                     {loading ? "Creating account..." : "Create Account"}
                   </Button>
                 </form>
@@ -254,15 +257,15 @@ const AuthPage = () => {
           </Tabs>
 
           {/* Development Admin User Creation */}
-          <div className="mt-6 pt-6 border-t">
-            <p className="text-sm text-muted-foreground text-center mb-3">
+          <div className="mt-6 pt-6 border-t border-border">
+            <p className="text-xs text-muted-foreground text-center mb-3">
               Development Mode
             </p>
             <Button
               variant="outline"
               onClick={handleCreateAdminUser}
               disabled={loading}
-              className="w-full"
+              className="w-full text-xs"
             >
               Create Admin User (admin@bloom.com)
             </Button>
