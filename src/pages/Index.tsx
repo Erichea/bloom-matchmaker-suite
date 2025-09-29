@@ -1,9 +1,33 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, Users, Shield, ArrowRight, Sparkles, Coffee, Music, BookOpen, Camera, Plane, Star, Zap, Moon, Sun, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // If user is authenticated and auth is not loading, redirect to dashboard
+    if (!loading && user) {
+      console.log('User is authenticated, redirecting to dashboard');
+      navigate('/client/dashboard');
+    }
+  }, [user, loading, navigate]);
+
+  // Show loading spinner while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Only show the landing page if user is not authenticated
   return (
     <div className="min-h-screen bg-background">
       {/* Welcome Section */}
