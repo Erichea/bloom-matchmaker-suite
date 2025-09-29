@@ -72,8 +72,12 @@ const AuthPage = () => {
   const handleSignIn = async (data: SignInForm) => {
     setLoading(true);
     const { error } = await signIn(data.email, data.password);
-    
+
     if (!error) {
+      toast({
+        title: "Welcome back! 👋",
+        description: "Good to see you again.",
+      });
       navigate("/client/dashboard");
     }
     setLoading(false);

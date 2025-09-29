@@ -8,6 +8,7 @@ import { Heart, MessageCircle, User, Settings, Sparkles, MapPin, Calendar, Alert
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { ProfileQuestionnaire } from "@/components/ProfileQuestionnaire";
 
 const ClientDashboard = () => {
   const { user, signOut } = useAuth();
@@ -15,6 +16,7 @@ const ClientDashboard = () => {
   const { toast } = useToast();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showQuestionnaire, setShowQuestionnaire] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -219,7 +221,7 @@ const ClientDashboard = () => {
                 )}
               </div>
               {profile.status === 'incomplete' && (
-                <Button onClick={() => navigate("/profile-setup")} className="btn-premium">
+                <Button onClick={() => setShowQuestionnaire(true)} className="btn-premium">
                   Complete Profile
                 </Button>
               )}
@@ -369,13 +371,22 @@ const ClientDashboard = () => {
                 }
               </p>
               {profile.status === 'incomplete' && (
-                <Button onClick={() => navigate("/profile-setup")} className="btn-premium">
+                <Button onClick={() => setShowQuestionnaire(true)} className="btn-premium">
                   Complete Your Profile
                 </Button>
               )}
             </CardContent>
           </Card>
         )}
+
+        {/* Profile Questionnaire Modal */}
+        <ProfileQuestionnaire
+          isOpen={showQuestionnaire}
+          onClose={() => {
+            setShowQuestionnaire(false);
+            fetchProfile(); // Refresh profile data after questionnaire is closed
+          }}
+        />
       </div>
     </div>
   );
