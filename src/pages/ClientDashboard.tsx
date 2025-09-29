@@ -8,7 +8,6 @@ import { Heart, MessageCircle, User, Settings, Sparkles, MapPin, Calendar, Alert
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ProfileQuestionnaire } from "@/components/ProfileQuestionnaire";
 
 const ClientDashboard = () => {
   const { user, signOut } = useAuth();
@@ -16,7 +15,6 @@ const ClientDashboard = () => {
   const { toast } = useToast();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showQuestionnaire, setShowQuestionnaire] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -199,25 +197,37 @@ const ClientDashboard = () => {
       <div className="bg-[--gradient-hero] px-6 py-12">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold text-white mb-2">
-                Welcome back, {profile.first_name || 'Member'}
-              </h1>
-              <div className="flex items-center space-x-3">
-                {getStatusIcon(profile.status)}
-                <span className="text-white/90 text-lg">
-                  {getStatusText(profile.status)}
-                </span>
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                <User className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-white mb-1">
+                  Welcome back, {profile.first_name || 'Member'}!
+                </h1>
+                <div className="flex items-center space-x-3 mb-2">
+                  {getStatusIcon(profile.status)}
+                  <span className="text-white/90 text-lg">
+                    {getStatusText(profile.status)}
+                  </span>
+                </div>
+                <p className="text-white/70 text-sm">
+                  {user?.email} • Member since {new Date().toLocaleDateString()}
+                </p>
               </div>
             </div>
-            <div className="flex space-x-3">
+            <div className="flex items-center space-x-3">
+              <div className="text-right text-white/80 mr-4">
+                <p className="text-sm">Signed in as</p>
+                <p className="font-semibold">{profile.first_name} {profile.last_name}</p>
+              </div>
               <Button variant="secondary" className="bg-white/20 text-white border-white/30 hover:bg-white/30">
                 <Settings className="mr-2 h-4 w-4" />
-                Profile Settings
+                Settings
               </Button>
-              <Button 
-                variant="secondary" 
-                className="bg-white/20 text-white border-white/30 hover:bg-white/30"
+              <Button
+                variant="destructive"
+                className="bg-red-500/80 text-white border-red-400/50 hover:bg-red-600/80"
                 onClick={handleSignOut}
               >
                 Sign Out
@@ -252,7 +262,7 @@ const ClientDashboard = () => {
                 )}
               </div>
               {profile.status === 'incomplete' && (
-                <Button onClick={() => setShowQuestionnaire(true)} className="btn-premium">
+                <Button onClick={() => navigate('/profile-questionnaire')} className="btn-premium">
                   Complete Profile
                 </Button>
               )}
@@ -402,7 +412,7 @@ const ClientDashboard = () => {
                 }
               </p>
               {profile.status === 'incomplete' && (
-                <Button onClick={() => setShowQuestionnaire(true)} className="btn-premium">
+                <Button onClick={() => navigate('/profile-questionnaire')} className="btn-premium">
                   Complete Your Profile
                 </Button>
               )}
@@ -410,14 +420,6 @@ const ClientDashboard = () => {
           </Card>
         )}
 
-        {/* Profile Questionnaire Modal */}
-        <ProfileQuestionnaire
-          isOpen={showQuestionnaire}
-          onClose={() => {
-            setShowQuestionnaire(false);
-            fetchProfile(); // Refresh profile data after questionnaire is closed
-          }}
-        />
       </div>
     </div>
   );

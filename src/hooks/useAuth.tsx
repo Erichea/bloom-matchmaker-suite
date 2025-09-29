@@ -29,46 +29,69 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { toast } = useToast();
 
   useEffect(() => {
+    let isMounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        // Get initial session first
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error('Error getting initial session:', error);
+        }
+
+        if (isMounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+        console.log('Auth state changed:', event, !!session);
 
-        // Create user role on sign up
-        if (event === 'SIGNED_UP' && session?.user) {
-          try {
-            console.log('Creating user role for:', session.user.id);
-            const { data, error } = await supabase
-              .from('user_roles')
-              .insert({
-                user_id: session.user.id,
-                role: 'client' // Default role is client
-              });
+        if (isMounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
 
-            if (error) {
-              console.error('Error creating user role:', error);
-              // Don't throw the error, just log it
-            } else {
-              console.log('User role created successfully:', data);
+          // Create user role on sign up
+          if (event === 'SIGNED_UP' && session?.user) {
+            try {
+              console.log('Creating user role for:', session.user.id);
+              const { data, error } = await supabase
+                .from('user_roles')
+                .insert({
+                  user_id: session.user.id,
+                  role: 'client' // Default role is client
+                });
+
+              if (error) {
+                console.error('Error creating user role:', error);
+              } else {
+                console.log('User role created successfully:', data);
+              }
+            } catch (error) {
+              console.error('Error in auth state change:', error);
             }
-          } catch (error) {
-            console.error('Error in auth state change:', error);
           }
         }
-
-        setLoading(false);
       }
     );
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    initializeAuth();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, firstName: string, lastName: string) => {

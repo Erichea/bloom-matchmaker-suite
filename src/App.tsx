@@ -9,6 +9,7 @@ import ClientWelcome from "./pages/ClientWelcome";
 import ClientDashboard from "./pages/ClientDashboard";
 import AuthPage from "./pages/AuthPage";
 import ProfileSetup from "./pages/ProfileSetup";
+import ProfileQuestionnairePage from "./pages/ProfileQuestionairePage";
 import NotFound from "./pages/NotFound";
 import ClientsPage from "./pages/admin/ClientsPage";
 import AccessCodesPage from "./pages/admin/AccessCodesPage";
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/client" element={<ClientWelcome />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
+            <Route path="/profile-questionnaire" element={<ProfileQuestionnairePage />} />
             <Route path="/client/dashboard" element={<ClientDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
