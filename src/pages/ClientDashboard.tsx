@@ -15,12 +15,10 @@ import {
   CheckCircle,
   Clock,
   Menu,
-  X,
   LogOut,
   Edit,
   Bell,
   Star,
-  TrendingUp,
   Users
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
