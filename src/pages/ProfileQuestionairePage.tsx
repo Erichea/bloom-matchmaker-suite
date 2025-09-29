@@ -278,26 +278,30 @@ export default function ProfileQuestionnairePage() {
     }
 
     try {
-      const completionPercentage = getCompletionPercentage();
+      // Use the database function to submit for review
+      const { data, error } = await supabase
+        .rpc('submit_profile_for_review', { p_user_id: user.id });
 
-      await supabase
-        .from('profiles')
-        .update({
-          status: 'pending',
-          completion_percentage: completionPercentage
-        })
-        .eq('user_id', user.id);
+      if (error) throw error;
 
-      toast({
-        title: "Profile Complete! 🎉",
-        description: "Your profile has been submitted for review. You'll be notified once approved.",
-      });
-
-      navigate('/client/dashboard');
+      if (data?.success) {
+        toast({
+          title: "Profile Submitted! 🎉",
+          description: data.message || "Your profile has been submitted for review. You'll be notified once approved.",
+        });
+        navigate('/client/dashboard');
+      } else {
+        toast({
+          title: "Unable to Submit",
+          description: data?.message || "Please complete more of your profile before submitting.",
+          variant: "destructive",
+        });
+      }
     } catch (error: any) {
+      console.error('Submit error:', error);
       toast({
         title: "Error",
-        description: "Failed to complete profile. Please try again.",
+        description: "Failed to submit profile. Please try again.",
         variant: "destructive",
       });
     }
