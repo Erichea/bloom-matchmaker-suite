@@ -55,18 +55,13 @@ const adminMenuItems = [
     icon: Heart,
     children: [
       {
-        title: "Match Suggestions",
-        url: "/admin/matches/suggestions",
+        title: "Suggest Matches",
+        url: "/admin/matches/suggest",
         icon: Heart,
       },
       {
-        title: "Active Matches",
-        url: "/admin/matches/active",
-        icon: Heart,
-      },
-      {
-        title: "Match History",
-        url: "/admin/matches/history",
+        title: "Manage Matches",
+        url: "/admin/matches",
         icon: Heart,
       },
     ],

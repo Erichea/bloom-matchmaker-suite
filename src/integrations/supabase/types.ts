@@ -85,39 +85,60 @@ export type Database = {
           compatibility_score: number | null
           created_at: string
           id: string
+          match_status: Database["public"]["Enums"]["match_status"] | null
+          profile_1_feedback: string | null
           profile_1_id: string
           profile_1_response: string | null
+          profile_2_feedback: string | null
           profile_2_id: string
           profile_2_response: string | null
           rejection_reason: string | null
           status: string | null
+          suggested_at: string | null
+          suggested_by: string | null
           updated_at: string
+          viewed_by_profile_1: boolean | null
+          viewed_by_profile_2: boolean | null
         }
         Insert: {
           admin_notes?: string | null
           compatibility_score?: number | null
           created_at?: string
           id?: string
+          match_status?: Database["public"]["Enums"]["match_status"] | null
+          profile_1_feedback?: string | null
           profile_1_id: string
           profile_1_response?: string | null
+          profile_2_feedback?: string | null
           profile_2_id: string
           profile_2_response?: string | null
           rejection_reason?: string | null
           status?: string | null
+          suggested_at?: string | null
+          suggested_by?: string | null
           updated_at?: string
+          viewed_by_profile_1?: boolean | null
+          viewed_by_profile_2?: boolean | null
         }
         Update: {
           admin_notes?: string | null
           compatibility_score?: number | null
           created_at?: string
           id?: string
+          match_status?: Database["public"]["Enums"]["match_status"] | null
+          profile_1_feedback?: string | null
           profile_1_id?: string
           profile_1_response?: string | null
+          profile_2_feedback?: string | null
           profile_2_id?: string
           profile_2_response?: string | null
           rejection_reason?: string | null
           status?: string | null
+          suggested_at?: string | null
+          suggested_by?: string | null
           updated_at?: string
+          viewed_by_profile_1?: boolean | null
+          viewed_by_profile_2?: boolean | null
         }
         Relationships: [
           {
@@ -135,6 +156,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profile_answers: {
+        Row: {
+          answer: Json
+          created_at: string
+          id: string
+          question_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          answer: Json
+          created_at?: string
+          id?: string
+          question_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          answer?: Json
+          created_at?: string
+          id?: string
+          question_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       profile_photos: {
         Row: {
@@ -347,11 +395,15 @@ export type Database = {
     }
     Functions: {
       approve_profile: {
-        Args: { p_profile_id: string; p_admin_id: string }
+        Args: { p_admin_id: string; p_profile_id: string }
         Returns: Json
       }
+      calculate_compatibility_score: {
+        Args: { p_profile_1_id: string; p_profile_2_id: string }
+        Returns: number
+      }
       calculate_profile_completion: {
-        Args: { profile_id: string }
+        Args: { input_profile_id: string }
         Returns: number
       }
       calculate_questionnaire_completion: {
@@ -363,7 +415,20 @@ export type Database = {
         Returns: boolean
       }
       reject_profile: {
-        Args: { p_profile_id: string; p_admin_id: string; p_rejection_reason: string }
+        Args: {
+          p_admin_id: string
+          p_profile_id: string
+          p_rejection_reason: string
+        }
+        Returns: Json
+      }
+      respond_to_match: {
+        Args: {
+          p_feedback?: string
+          p_match_id: string
+          p_response: string
+          p_user_id: string
+        }
         Returns: Json
       }
       submit_profile_for_review: {
@@ -380,6 +445,14 @@ export type Database = {
         | "75k_100k"
         | "100k_150k"
         | "150k_plus"
+      match_status:
+        | "pending"
+        | "profile_1_accepted"
+        | "profile_1_rejected"
+        | "profile_2_accepted"
+        | "profile_2_rejected"
+        | "both_accepted"
+        | "rejected"
       profile_status:
         | "incomplete"
         | "pending_approval"
@@ -521,6 +594,15 @@ export const Constants = {
         "75k_100k",
         "100k_150k",
         "150k_plus",
+      ],
+      match_status: [
+        "pending",
+        "profile_1_accepted",
+        "profile_1_rejected",
+        "profile_2_accepted",
+        "profile_2_rejected",
+        "both_accepted",
+        "rejected",
       ],
       profile_status: [
         "incomplete",

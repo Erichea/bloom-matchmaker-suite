@@ -15,11 +15,15 @@ import {
   Clock,
   Menu,
   LogOut,
-  Edit
+  Edit,
+  Star,
+  Briefcase,
+  Eye
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import MatchDetailModal from "@/components/MatchDetailModal";
 import {
   Sheet,
   SheetContent,
@@ -29,13 +33,37 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+interface Match {
+  id: string;
+  profile_1_id: string;
+  profile_2_id: string;
+  profile_1_response: string | null;
+  profile_2_response: string | null;
+  match_status: string;
+  compatibility_score: number;
+  suggested_at: string;
+  viewed_by_profile_1: boolean;
+  viewed_by_profile_2: boolean;
+  profile_1: any;
+  profile_2: any;
+}
+
 const ClientDashboard = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [profile, setProfile] = useState<any>(null);
+  const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [stats, setStats] = useState({
+    totalMatches: 0,
+    pendingMatches: 0,
+    mutualMatches: 0,
+    newMatches: 0
+  });
 
   useEffect(() => {
     if (authLoading) return;
@@ -44,6 +72,7 @@ const ClientDashboard = () => {
       return;
     }
     fetchProfile();
+    fetchMatches();
   }, [user, authLoading, navigate]);
 
   const createBasicProfile = async () => {
@@ -115,6 +144,79 @@ const ClientDashboard = () => {
     }
   };
 
+  const fetchMatches = async () => {
+    if (!user) return;
+
+    try {
+      // First, get the user's profile ID
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!userProfile) return;
+
+      // Fetch matches where the user is either profile_1 or profile_2
+      const { data, error } = await supabase
+        .from('matches')
+        .select(`
+          *,
+          profile_1:profiles!matches_profile_1_id_fkey(*),
+          profile_2:profiles!matches_profile_2_id_fkey(*)
+        `)
+        .or(`profile_1_id.eq.${userProfile.id},profile_2_id.eq.${userProfile.id}`)
+        .order('suggested_at', { ascending: false });
+
+      if (error) throw error;
+
+      setMatches(data || []);
+      calculateStats(data || [], userProfile.id);
+
+      // Mark matches as viewed
+      const unviewedMatches = (data || []).filter((match: Match) => {
+        const isProfile1 = match.profile_1_id === userProfile.id;
+        return isProfile1 ? !match.viewed_by_profile_1 : !match.viewed_by_profile_2;
+      });
+
+      if (unviewedMatches.length > 0) {
+        for (const match of unviewedMatches) {
+          const isProfile1 = match.profile_1_id === userProfile.id;
+          await supabase
+            .from('matches')
+            .update({
+              [isProfile1 ? 'viewed_by_profile_1' : 'viewed_by_profile_2']: true
+            })
+            .eq('id', match.id);
+        }
+      }
+    } catch (error: any) {
+      console.error('Error fetching matches:', error);
+    }
+  };
+
+  const calculateStats = (matchesData: Match[], userProfileId: string) => {
+    const pending = matchesData.filter(m => 
+      m.match_status === 'pending' || 
+      (m.match_status === 'profile_1_accepted' && m.profile_1_id !== userProfileId) ||
+      (m.match_status === 'profile_2_accepted' && m.profile_2_id !== userProfileId)
+    );
+    
+    const mutual = matchesData.filter(m => m.match_status === 'both_accepted');
+    
+    const newMatches = matchesData.filter(m => {
+      const isProfile1 = m.profile_1_id === userProfileId;
+      return isProfile1 ? !m.viewed_by_profile_1 : !m.viewed_by_profile_2;
+    });
+
+    setStats({
+      totalMatches: matchesData.length,
+      pendingMatches: pending.length,
+      mutualMatches: mutual.length,
+      newMatches: newMatches.length
+    });
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
@@ -146,6 +248,56 @@ const ClientDashboard = () => {
     }
   };
 
+  const calculateAge = (dateOfBirth: string) => {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const getMatchStatus = (match: Match) => {
+    const userProfileId = profile?.id;
+    const isProfile1 = match.profile_1_id === userProfileId;
+    const userResponse = isProfile1 ? match.profile_1_response : match.profile_2_response;
+    const otherResponse = isProfile1 ? match.profile_2_response : match.profile_1_response;
+
+    if (match.match_status === 'both_accepted') {
+      return { text: 'Mutual Match! 🎉', color: 'badge-success' };
+    }
+    
+    if (userResponse === 'accepted') {
+      return otherResponse === null 
+        ? { text: 'Waiting for response...', color: 'badge-warning' }
+        : { text: 'They passed', color: 'badge-error' };
+    }
+    
+    if (userResponse === 'rejected') {
+      return { text: 'You passed', color: 'badge-pending' };
+    }
+    
+    if (otherResponse === 'accepted') {
+      return { text: 'They\'re interested!', color: 'badge-warning' };
+    }
+    
+    return { text: 'New Match', color: 'badge-success' };
+  };
+
+  const openMatchModal = (match: Match) => {
+    setSelectedMatch(match);
+    setModalOpen(true);
+  };
+
+  const hasUserResponded = (match: Match) => {
+    const userProfileId = profile?.id;
+    const isProfile1 = match.profile_1_id === userProfileId;
+    const userResponse = isProfile1 ? match.profile_1_response : match.profile_2_response;
+    return userResponse !== null;
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 flex items-center justify-center">
@@ -161,38 +313,12 @@ const ClientDashboard = () => {
   const initials = `${firstName[0]}${lastName[0] || ''}`.toUpperCase();
   const fullName = `${firstName} ${lastName}`.trim();
 
-  const matchSuggestions = [
-    {
-      id: 1,
-      name: "Alexandra",
-      age: 28,
-      location: "New York, NY",
-      compatibility: 94,
-      profession: "Marketing Director",
-      interests: ["Photography", "Travel", "Yoga"],
-      photo: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face"
-    },
-    {
-      id: 2,
-      name: "Sofia",
-      age: 26,
-      location: "San Francisco, CA",
-      compatibility: 91,
-      profession: "UX Designer",
-      interests: ["Art", "Hiking", "Coffee"],
-      photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face"
-    },
-    {
-      id: 3,
-      name: "Emma",
-      age: 30,
-      location: "Los Angeles, CA",
-      compatibility: 88,
-      profession: "Architect",
-      interests: ["Design", "Music", "Cooking"],
-      photo: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=face"
-    }
-  ];
+  // Filter matches for display - show pending and mutual matches
+  const displayMatches = matches.filter(m => 
+    m.match_status !== 'rejected' && 
+    m.match_status !== 'profile_1_rejected' && 
+    m.match_status !== 'profile_2_rejected'
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -219,6 +345,11 @@ const ClientDashboard = () => {
                     </AvatarFallback>
                   </Avatar>
                   <Menu className="w-4 h-4 text-muted-foreground" />
+                  {stats.newMatches > 0 && (
+                    <Badge className="bg-primary text-white text-xs">
+                      {stats.newMatches}
+                    </Badge>
+                  )}
                 </button>
               </SheetTrigger>
               <SheetContent className="bg-surface border-border">
@@ -368,8 +499,8 @@ const ClientDashboard = () => {
                 <div className="illustration-icon mx-auto bg-accent/10 mb-3">
                   <Heart className="w-5 h-5 text-accent animate-pulse-soft" />
                 </div>
-                <div className="text-2xl font-light text-foreground mb-1">12</div>
-                <div className="text-xs text-muted-foreground font-light">Matches</div>
+                <div className="text-2xl font-light text-foreground mb-1">{stats.totalMatches}</div>
+                <div className="text-xs text-muted-foreground font-light">Total Matches</div>
               </CardContent>
             </Card>
             <Card className="card-premium text-center hover:scale-105 transition-transform">
@@ -377,8 +508,8 @@ const ClientDashboard = () => {
                 <div className="illustration-icon mx-auto bg-primary/10 mb-3">
                   <MessageCircle className="w-5 h-5 text-primary" />
                 </div>
-                <div className="text-2xl font-light text-foreground mb-1">5</div>
-                <div className="text-xs text-muted-foreground font-light">Chats</div>
+                <div className="text-2xl font-light text-foreground mb-1">{stats.mutualMatches}</div>
+                <div className="text-xs text-muted-foreground font-light">Mutual</div>
               </CardContent>
             </Card>
             <Card className="card-premium text-center hover:scale-105 transition-transform">
@@ -386,8 +517,8 @@ const ClientDashboard = () => {
                 <div className="illustration-icon mx-auto bg-success/10 mb-3">
                   <Sparkles className="w-5 h-5 text-success animate-float" />
                 </div>
-                <div className="text-2xl font-light text-foreground mb-1">3</div>
-                <div className="text-xs text-muted-foreground font-light">New</div>
+                <div className="text-2xl font-light text-foreground mb-1">{stats.pendingMatches}</div>
+                <div className="text-xs text-muted-foreground font-light">Pending</div>
               </CardContent>
             </Card>
           </div>
@@ -409,80 +540,92 @@ const ClientDashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-              {matchSuggestions.map((match, index) => (
-                <Card key={match.id} className="card-premium overflow-hidden group animate-slide-up" style={{animationDelay: `${index * 0.1}s`}}>
-                  <div className="relative">
-                    <img
-                      src={match.photo}
-                      alt={match.name}
-                      className="w-full h-96 object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute top-4 right-4">
-                      <Badge className="bg-surface/90 backdrop-blur-sm text-accent border-accent/20 font-light">
-                        {match.compatibility}% Match
-                      </Badge>
-                    </div>
-                  </div>
-                  <CardContent className="p-6 space-y-4">
-                    <div>
-                      <h3 className="text-xl font-light text-foreground mb-1">
-                        {match.name}, {match.age}
-                      </h3>
-                      <div className="flex items-center text-muted-foreground text-sm font-light mb-2">
-                        <MapPin className="w-3.5 h-3.5 mr-1" />
-                        {match.location}
+              {displayMatches.map((match, index) => {
+                const userProfileId = profile?.id;
+                const otherProfile = match.profile_1_id === userProfileId ? match.profile_2 : match.profile_1;
+                const name = `${otherProfile?.first_name || ''} ${otherProfile?.last_name || ''}`.trim();
+                const age = otherProfile?.date_of_birth ? calculateAge(otherProfile.date_of_birth) : null;
+                const location = [otherProfile?.city, otherProfile?.country].filter(Boolean).join(', ');
+                const initials = name.split(' ').map((n: string) => n[0]).join('').toUpperCase();
+                const status = getMatchStatus(match);
+                const hasResponded = hasUserResponded(match);
+
+                return (
+                  <Card key={match.id} className="card-premium overflow-hidden group animate-slide-up" style={{animationDelay: `${index * 0.1}s`}}>
+                    <div className="relative">
+                      <div className="w-full h-96 bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+                        <Avatar className="w-32 h-32 border-4 border-white shadow-lg">
+                          <AvatarFallback className="text-4xl bg-primary-muted text-primary">
+                            {initials}
+                          </AvatarFallback>
+                        </Avatar>
                       </div>
-                      <p className="text-sm text-muted-foreground font-light">{match.profession}</p>
+                      <div className="absolute top-4 right-4">
+                        <Badge className="bg-surface/90 backdrop-blur-sm text-accent border-accent/20 font-light">
+                          <Star className="w-3 h-3 mr-1" />
+                          {match.compatibility_score}% Match
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {match.interests.map((interest, idx) => (
-                        <span key={idx} className="trait-tag text-xs">
-                          {interest}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex space-x-3 pt-2">
-                      <Button className="flex-1 btn-premium group">
-                        <Heart className="w-4 h-4 mr-2 group-hover:animate-pulse-soft" />
-                        Connect
-                      </Button>
-                      <Button variant="outline" className="flex-1 btn-soft font-light">
-                        View Profile
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    <CardContent className="p-6 space-y-4">
+                      <div>
+                        <h3 className="text-xl font-light text-foreground mb-1">
+                          {name}{age && `, ${age}`}
+                        </h3>
+                        {location && (
+                          <div className="flex items-center text-muted-foreground text-sm font-light mb-2">
+                            <MapPin className="w-3.5 h-3.5 mr-1" />
+                            {location}
+                          </div>
+                        )}
+                        {otherProfile?.profession && (
+                          <div className="flex items-center text-muted-foreground text-sm font-light">
+                            <Briefcase className="w-3.5 h-3.5 mr-1" />
+                            {otherProfile.profession}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-center">
+                        <Badge className={status.color}>
+                          {status.text}
+                        </Badge>
+                      </div>
+
+                      <div className="flex space-x-3 pt-2">
+                        <Button 
+                          className="flex-1 btn-premium group"
+                          onClick={() => openMatchModal(match)}
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          View Profile
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
+
+            {displayMatches.length === 0 && (
+              <div className="text-center py-12">
+                <Heart className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">No matches yet. Check back soon!</p>
+              </div>
+            )}
           </>
         )}
 
-        {/* Empty State for non-approved users */}
-        {profile.status !== 'approved' && (
-          <Card className="card-premium text-center py-20">
-            <CardContent className="space-y-6">
-              <div className="illustration-icon mx-auto bg-accent/10">
-                <Heart className="w-8 h-8 text-accent animate-pulse-soft" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-2xl font-light text-foreground">Your Matches Await</h3>
-                <p className="text-muted-foreground font-light max-w-md mx-auto leading-relaxed">
-                  {profile.status === 'pending_approval'
-                    ? 'Once your profile is approved, you\'ll discover curated matches tailored to your preferences.'
-                    : 'Share your story with us, and we\'ll connect you with compatible individuals.'}
-                </p>
-              </div>
-              {profile.status === 'incomplete' && (
-                <Button
-                  onClick={() => navigate('/profile-questionnaire')}
-                  className="btn-premium"
-                >
-                  Complete Your Profile
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        )}
+        {/* Match Detail Modal */}
+        <MatchDetailModal
+          match={selectedMatch}
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+          onMatchResponse={() => {
+            fetchMatches();
+            setSelectedMatch(null);
+          }}
+        />
       </main>
     </div>
   );

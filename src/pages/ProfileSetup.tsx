@@ -76,25 +76,25 @@ const ProfileSetup = () => {
     try {
       const { error } = await supabase
         .from('profiles')
-        .insert({
+        .insert([{
           user_id: user.id,
           first_name: profileData.firstName || null,
           last_name: profileData.lastName || null,
           email: profileData.email || null,
           date_of_birth: profileData.dateOfBirth || null,
-          gender: profileData.gender || null,
+          gender: (profileData.gender as any) || null,
           country: profileData.country || null,
           city: profileData.city || null,
           profession: profileData.profession || null,
-          education: profileData.education || null,
-          relationship_status: profileData.relationshipStatus || null,
+          education: (profileData.education as any) || null,
+          relationship_status: (profileData.relationshipStatus as any) || null,
           about_me: profileData.aboutMe || null,
-          preferred_gender: profileData.preferredGender || null,
+          preferred_gender: (profileData.preferredGender as any) || null,
           preferred_min_age: parseInt(profileData.preferredMinAge) || null,
           preferred_max_age: parseInt(profileData.preferredMaxAge) || null,
           status: 'incomplete',
           completion_percentage: 0
-        });
+        }]);
 
       if (error) {
         throw error;

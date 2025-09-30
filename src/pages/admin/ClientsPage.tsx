@@ -102,7 +102,7 @@ const ClientsPage = () => {
 
       if (error) throw error;
 
-      if (data?.success) {
+      if ((data as any)?.success) {
         toast({
           title: "Profile Approved",
           description: "The profile has been approved successfully."
@@ -111,7 +111,7 @@ const ClientsPage = () => {
       } else {
         toast({
           title: "Error",
-          description: data?.message || "Failed to approve profile",
+          description: (data as any)?.message || "Failed to approve profile",
           variant: "destructive"
         });
       }
@@ -137,7 +137,7 @@ const ClientsPage = () => {
 
       if (error) throw error;
 
-      if (data?.success) {
+      if ((data as any)?.success) {
         toast({
           title: "Profile Rejected",
           description: "The profile has been rejected and the user will be notified."
@@ -146,7 +146,7 @@ const ClientsPage = () => {
       } else {
         toast({
           title: "Error",
-          description: data?.message || "Failed to reject profile",
+          description: (data as any)?.message || "Failed to reject profile",
           variant: "destructive"
         });
       }

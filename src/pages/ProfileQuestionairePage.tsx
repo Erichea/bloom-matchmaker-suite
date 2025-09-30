@@ -284,16 +284,16 @@ export default function ProfileQuestionnairePage() {
 
       if (error) throw error;
 
-      if (data?.success) {
+      if ((data as any)?.success) {
         toast({
           title: "Profile Submitted! 🎉",
-          description: data.message || "Your profile has been submitted for review. You'll be notified once approved.",
+          description: (data as any).message || "Your profile has been submitted for review. You'll be notified once approved.",
         });
         navigate('/client/dashboard');
       } else {
         toast({
           title: "Unable to Submit",
-          description: data?.message || "Please complete more of your profile before submitting.",
+          description: (data as any)?.message || "Please complete more of your profile before submitting.",
           variant: "destructive",
         });
       }

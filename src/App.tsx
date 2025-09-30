@@ -13,6 +13,8 @@ import ProfileQuestionnairePage from "./pages/ProfileQuestionairePage";
 import NotFound from "./pages/NotFound";
 import ClientsPage from "./pages/admin/ClientsPage";
 import AccessCodesPage from "./pages/admin/AccessCodesPage";
+import MatchSuggestionPage from "./pages/admin/MatchSuggestionPage";
+import MatchManagementPage from "./pages/admin/MatchManagementPage";
 import { AdminLayout } from "./components/AdminLayout";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -46,6 +48,20 @@ const App = () => (
               <ProtectedRoute requireAdmin={true}>
                 <AdminLayout>
                   <AccessCodesPage />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/matches/suggest" element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminLayout>
+                  <MatchSuggestionPage />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/matches" element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminLayout>
+                  <MatchManagementPage />
                 </AdminLayout>
               </ProtectedRoute>
             } />

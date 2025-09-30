@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(session?.user ?? null);
 
           // Create user role on sign up
-          if (event === 'SIGNED_UP' && session?.user) {
+          if (event === 'SIGNED_IN' && session?.user) {
             try {
               console.log('Creating user role for:', session.user.id);
               const { data, error } = await supabase
