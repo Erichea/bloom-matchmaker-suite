@@ -75,6 +75,10 @@ export const ProfileLibraryModal = ({ open, onOpenChange, sourceProfileId, onSug
 
     try {
       setSubmitting(true);
+      console.log("Calling create_bulk_matches with:");
+      console.log("p_profile_1_id:", sourceProfileId);
+      console.log("p_profile_2_ids:", Array.from(selectedProfiles));
+      console.log("p_suggested_by:", user.id);
       const { error } = await supabase.rpc('create_bulk_matches', {
         p_profile_1_id: sourceProfileId,
         p_profile_2_ids: Array.from(selectedProfiles),
