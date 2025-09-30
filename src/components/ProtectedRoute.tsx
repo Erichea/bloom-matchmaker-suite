@@ -23,47 +23,44 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
         return;
       }
 
-      // Only start role loading if we have a user and haven't loaded the role yet
-      if (user && userRole === null) {
-        setRoleLoading(true);
-        console.log('Checking role for user:', user.id, user.email);
+      setRoleLoading(true);
+      console.log('Checking role for user:', user.id, user.email);
 
-        try {
-          const { data, error } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', user.id)
-            .single();
+      try {
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
 
-          console.log('Role query result:', { data, error });
+        console.log('Role query result:', { data, error });
 
-          if (error) {
-            console.error('Error fetching user role:', error);
-            setUserRole(null);
-          } else {
-            setUserRole(data?.role || null);
-            console.log('User role set to:', data?.role);
-          }
-        } catch (error) {
-          console.error('Error checking user role:', error);
+        if (error) {
+          console.error('Error fetching user role:', error);
           setUserRole(null);
-        } finally {
-          console.log('Setting roleLoading to false');
-          setRoleLoading(false);
+        } else {
+          setUserRole(data?.role || null);
+          console.log('User role set to:', data?.role);
         }
+      } catch (error) {
+        console.error('Error checking user role:', error);
+        setUserRole(null);
+      } finally {
+        console.log('Setting roleLoading to false');
+        setRoleLoading(false);
       }
     };
 
     checkUserRole();
-  }, [user, userRole]);
+  }, [user]);
 
   // Redirect to auth page if not logged in
   if (!user && !loading) {
     return <Navigate to="/auth" replace />;
   }
 
-  // Show loading spinner while checking authentication OR role OR if we have a user but no role yet
-  if (loading || roleLoading || (user && userRole === null)) {
+  // Show loading spinner while checking authentication OR role
+  if (loading || roleLoading) {
     console.log('Loading states - auth loading:', loading, 'role loading:', roleLoading, 'user:', !!user, 'userRole:', userRole);
     return (
       <div className="flex items-center justify-center min-h-screen">
