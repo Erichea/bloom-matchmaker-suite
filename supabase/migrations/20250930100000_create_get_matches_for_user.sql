@@ -25,8 +25,7 @@ begin
         'date_of_birth', p1.date_of_birth,
         'city', p1.city,
         'country', p1.country,
-        'profession', p1.profession,
-        'photo_url', p1.photo_url
+        'profession', p1.profession
       ),
       'profile_2', json_build_object(
         'id', p2.id,
@@ -35,8 +34,7 @@ begin
         'date_of_birth', p2.date_of_birth,
         'city', p2.city,
         'country', p2.country,
-        'profession', p2.profession,
-        'photo_url', p2.photo_url
+        'profession', p2.profession
       )
     )
   from

@@ -337,7 +337,6 @@ const ClientDashboard = () => {
               <SheetTrigger asChild>
                 <button className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
                   <Avatar className="w-9 h-9 border border-accent/30">
-                    <AvatarImage src={profile.photo_url} />
                     <AvatarFallback className="bg-accent/10 text-accent-foreground font-light">
                       {initials}
                     </AvatarFallback>
@@ -354,7 +353,6 @@ const ClientDashboard = () => {
                 <SheetHeader>
                   <div className="flex flex-col items-center pt-6 pb-6">
                     <Avatar className="w-20 h-20 border-2 border-accent/30 mb-4">
-                      <AvatarImage src={profile.photo_url} />
                       <AvatarFallback className="bg-accent/10 text-accent-foreground text-2xl font-light">
                         {initials}
                       </AvatarFallback>
