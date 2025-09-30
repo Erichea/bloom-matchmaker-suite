@@ -55,15 +55,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             hasUser: !!session?.user,
             userId: session?.user?.id
           });
+          // Set loading to false immediately after setting the initial state
+          console.log('Setting auth loading to false');
+          setLoading(false);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
-      } finally {
         if (isMounted) {
           setLoading(false);
         }
       }
     };
+
+    // Initialize auth first
+    initializeAuth();
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -97,8 +102,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
     );
-
-    initializeAuth();
 
     return () => {
       isMounted = false;
