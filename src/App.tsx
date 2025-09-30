@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminLoginPage from "./pages/AdminLoginPage";
 import ClientWelcome from "./pages/ClientWelcome";
 import ClientDashboard from "./pages/ClientDashboard";
 import AuthPage from "./pages/AuthPage";
@@ -30,6 +31,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/admin/login" element={<AdminLoginPage />} />
             <Route path="/admin" element={
               <ProtectedRoute requireAdmin={true}>
                 <AdminLayout>
