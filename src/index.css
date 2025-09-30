@@ -19,6 +19,12 @@ All colors MUST be HSL.
     --surface: 0 0% 98%;
     --surface-elevated: 0 0% 100%;
 
+    /* Brand Palette */
+    --brand-primary: 330 58% 48%;
+    --brand-primary-foreground: 0 0% 100%;
+    --brand-secondary: 0 0% 12%;
+    --brand-secondary-foreground: 0 0% 98%;
+
     /* Popover Colors */
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 9%;
@@ -110,6 +116,11 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 15%;
     --sidebar-ring: 330 50% 50%;
+
+    --brand-primary: 330 60% 52%;
+    --brand-primary-foreground: 0 0% 100%;
+    --brand-secondary: 0 0% 90%;
+    --brand-secondary-foreground: 0 0% 9%;
   }
 }
 

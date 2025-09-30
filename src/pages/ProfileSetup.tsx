@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, ArrowRight, User, Heart, MapPin, Briefcase } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 
 const ProfileSetup = () => {
   const { user } = useAuth();
@@ -125,10 +124,12 @@ const ProfileSetup = () => {
       case 1:
         return (
           <div className="space-y-6">
-            <div className="text-center mb-6">
-              <User className="w-12 h-12 mx-auto mb-4 text-primary" />
-              <h3 className="text-xl font-semibold">Basic Information</h3>
-              <p className="text-muted-foreground">Let's start with your basic details</p>
+            <div className="space-y-2">
+              <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Step 1</span>
+              <h3 className="text-lg font-semibold text-[hsl(var(--brand-secondary))]">Basic information</h3>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Tell us who you are so your matchmaker can introduce you with intention.
+              </p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -189,10 +190,12 @@ const ProfileSetup = () => {
       case 2:
         return (
           <div className="space-y-6">
-            <div className="text-center mb-6">
-              <MapPin className="w-12 h-12 mx-auto mb-4 text-primary" />
-              <h3 className="text-xl font-semibold">Location & Background</h3>
-              <p className="text-muted-foreground">Tell us about your location and background</p>
+            <div className="space-y-2">
+              <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Step 2</span>
+              <h3 className="text-lg font-semibold text-[hsl(var(--brand-secondary))]">Location & background</h3>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Your story is anchored in a place—help us paint that atmosphere for future matches.
+              </p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -258,10 +261,12 @@ const ProfileSetup = () => {
       case 3:
         return (
           <div className="space-y-6">
-            <div className="text-center mb-6">
-              <Briefcase className="w-12 h-12 mx-auto mb-4 text-primary" />
-              <h3 className="text-xl font-semibold">About You</h3>
-              <p className="text-muted-foreground">Share more about yourself</p>
+            <div className="space-y-2">
+              <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Step 3</span>
+              <h3 className="text-lg font-semibold text-[hsl(var(--brand-secondary))]">Your essence</h3>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Share a glimpse of your world—interests, rhythms, and what lights you up.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="aboutMe">About Me</Label>
@@ -279,10 +284,12 @@ const ProfileSetup = () => {
       case 4:
         return (
           <div className="space-y-6">
-            <div className="text-center mb-6">
-              <Heart className="w-12 h-12 mx-auto mb-4 text-primary" />
-              <h3 className="text-xl font-semibold">Partner Preferences</h3>
-              <p className="text-muted-foreground">Tell us about your ideal match</p>
+            <div className="space-y-2">
+              <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Step 4</span>
+              <h3 className="text-lg font-semibold text-[hsl(var(--brand-secondary))]">Preferences</h3>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Outline what feels aligned so we can introduce people who fit naturally into your life.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="preferredGender">Preferred Gender</Label>
@@ -333,51 +340,80 @@ const ProfileSetup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-2xl mx-auto">
-        <Card className="card-premium">
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold">Complete Your Profile</CardTitle>
-            <CardDescription className="text-lg">
-              Help us find your perfect match by completing your profile
-            </CardDescription>
-            <div className="mt-6">
-              <Progress value={progress} className="w-full" />
-              <p className="text-sm text-muted-foreground mt-2">
-                Step {currentStep} of 4 ({Math.round(progress)}% complete)
-              </p>
+    <div className="relative min-h-screen bg-[hsl(var(--background))]">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(190,76,139,0.16),_transparent_60%)]" />
+
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 py-16 lg:flex-row lg:items-start lg:px-12">
+        <aside className="flex-1 space-y-10">
+          <ProfileCard
+            name={`${profileData.firstName || "Your"} ${profileData.lastName || "Profile"}`.trim()}
+            location={[profileData.city, profileData.country].filter(Boolean).join(", ") || undefined}
+            headline={profileData.profession || "Share your story"}
+            bio={
+              profileData.aboutMe ||
+              "Introduce yourself with warmth and clarity. Highlight the passions and rituals that make your days meaningful."
+            }
+            interests={profileData.preferredGender ? ["Intentional", "Sincere", "Aligned"] : undefined}
+            highlight
+          />
+
+          <div className="rounded-3xl border border-[hsl(var(--brand-secondary))]/15 bg-[hsl(var(--surface))] p-8">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+              Guidance
+            </h2>
+            <ul className="mt-6 space-y-4 text-sm leading-6 text-muted-foreground">
+              <li>• Use vivid language—your matchmaker will use this to craft introductions.</li>
+              <li>• Note what energises you outside of work. Shared cadence builds chemistry.</li>
+              <li>• Preferences are flexible; adjust them anytime to keep matches in sync.</li>
+            </ul>
+          </div>
+        </aside>
+
+        <section className="flex-1 space-y-8 rounded-3xl border border-[hsl(var(--brand-secondary))]/20 bg-[hsl(var(--background))] p-10 shadow-[0_32px_120px_-64px_rgba(18,18,18,0.5)] backdrop-blur">
+          <div className="space-y-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Profile setup</span>
+                <h1 className="text-2xl font-semibold tracking-tight text-[hsl(var(--brand-secondary))]">
+                  Craft your introduction
+                </h1>
+              </div>
+              <div className="text-right">
+                <Progress value={progress} className="h-2 w-40 rounded-full bg-[hsl(var(--surface))]" />
+                <p className="mt-2 text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                  Step {currentStep} of 4
+                </p>
+              </div>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {renderStep()}
-            
-            <div className="flex justify-between pt-6">
-              <Button
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={currentStep === 1}
-              >
-                Previous
-              </Button>
-              
-              {currentStep < 4 ? (
-                <Button onClick={handleNext} className="btn-premium">
-                  Next
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              ) : (
-                <Button onClick={handleSubmit} disabled={loading} className="btn-premium">
-                  {loading ? "Creating Profile..." : (
-                    <>
-                      Complete Profile
-                      <CheckCircle className="ml-2 h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+            <p className="text-sm leading-6 text-muted-foreground">
+              These details remain private to your matchmaker and are used solely to curate aligned introductions.
+            </p>
+          </div>
+
+          <div className="space-y-8">{renderStep()}</div>
+
+          <div className="flex flex-col gap-4 pt-4 sm:flex-row sm:justify-between">
+            <Button
+              variant="outline"
+              className="rounded-full border-[hsl(var(--brand-secondary))]/20 px-6 text-sm"
+              onClick={handlePrevious}
+              disabled={currentStep === 1}
+            >
+              Previous
+            </Button>
+
+            {currentStep < 4 ? (
+              <PremiumButton onClick={handleNext} className="justify-center">
+                Continue
+              </PremiumButton>
+            ) : (
+              <PremiumButton onClick={handleSubmit} disabled={loading} className="justify-center">
+                {loading ? "Saving" : "Complete profile"}
+                <CheckCircle className="ml-2 h-4 w-4" />
+              </PremiumButton>
+            )}
+          </div>
+        </section>
       </div>
     </div>
   );

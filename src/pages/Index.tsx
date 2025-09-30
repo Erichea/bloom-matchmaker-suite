@@ -1,10 +1,12 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Users, Shield, ArrowRight, Sparkles, Coffee, Music, BookOpen, Camera, Plane, Star, Zap, Moon, Sun, UserPlus } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { ArrowRight, Shield, Sparkles, Star, Users } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { PremiumButton } from "@/components/experience/PremiumButton";
+import { SwipeDeck } from "@/components/experience/SwipeDeck";
+import { MatchList } from "@/components/experience/MatchList";
+import { ProfileCard } from "@/components/experience/ProfileCard";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -21,132 +23,210 @@ const Index = () => {
   // Show loading spinner while checking auth
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      <div className="flex min-h-screen items-center justify-center bg-[hsl(var(--background))]">
+        <motion.div
+          className="h-24 w-24 rounded-full border-[3px] border-[hsl(var(--brand-secondary))]/20 border-t-[hsl(var(--brand-primary))]"
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
+        />
       </div>
     );
   }
 
-  // Only show the landing page if user is not authenticated
   return (
-    <div className="min-h-screen bg-background">
-      {/* Welcome Section */}
-      <div className="relative min-h-screen flex items-center justify-center">
-        {/* Content */}
-        <div className="max-w-2xl mx-auto px-6 text-center">
-          <div className="animate-fade-in space-y-12">
+    <div className="min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--brand-secondary))]">
+      <section className="relative flex min-h-screen flex-col justify-between overflow-hidden">
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(190,76,139,0.16),_transparent_55%)]" />
+        <div className="absolute inset-y-0 right-0 -z-10 hidden w-1/2 bg-[hsl(var(--surface))] sm:block" />
+
+        <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 pb-16 pt-32 lg:flex-row lg:items-center lg:gap-20 lg:px-12">
+          <div className="flex-1 space-y-8">
             <div className="space-y-6">
-              <div className="space-y-4">
-                <h1 className="text-5xl md:text-6xl font-light text-foreground tracking-tight">
-                  Welcome to BLOOM
-                </h1>
-                <div className="w-16 h-0.5 bg-accent mx-auto"></div>
+              <motion.span
+                className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--brand-secondary))] px-4 py-1 text-xs uppercase tracking-[0.3em] text-[hsl(var(--brand-secondary-foreground))]"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+              >
+                <Sparkles className="h-3 w-3" /> Exclusive matchmaking
+              </motion.span>
+              <motion.h1
+                className="font-display text-4xl leading-tight tracking-tight text-[hsl(var(--brand-secondary))] sm:text-5xl lg:text-6xl"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.15 }}
+              >
+                Curated introductions for remarkable people.
+              </motion.h1>
+              <motion.p
+                className="max-w-xl text-base leading-7 text-muted-foreground sm:text-lg"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                BLOOM is a private community for intentional dating. We blend human intuition with data to
+                orchestrate introductions that feel effortless, warm, and distinctly personal.
+              </motion.p>
+            </div>
+
+            <motion.div
+              className="flex flex-col gap-4 sm:flex-row"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.25 }}
+            >
+              <Link to="/client" className="w-full sm:w-auto">
+                <PremiumButton className="w-full sm:w-auto">
+                  Begin your application
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </PremiumButton>
+              </Link>
+              <Link to="/auth" className="w-full sm:w-auto">
+                <button className="w-full rounded-full border border-[hsl(var(--brand-secondary))]/20 bg-[hsl(var(--surface))] px-6 py-2 text-sm font-medium text-[hsl(var(--brand-secondary))] transition hover:border-[hsl(var(--brand-secondary))]/40">
+                  I already have an account
+                </button>
+              </Link>
+            </motion.div>
+
+            <motion.div
+              className="flex items-center gap-6 text-xs uppercase tracking-[0.3em] text-muted-foreground"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4" /> Verified members
               </div>
-              <p className="text-xl md:text-2xl text-muted-foreground font-light leading-relaxed">
-                Your journey to meaningful connections starts here <span className="fun-emoji">🌸</span>
-              </p>
-            </div>
-
-            {/* Personal Touch */}
-            <div className="bg-accent/20 rounded-lg p-6 space-y-4">
-              <p className="text-lg text-foreground font-light">
-                Ready to find your perfect match?
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Join our exclusive community and let me help you discover lasting love through personalized matchmaking.
-              </p>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Link to="/client" className="w-full sm:w-auto">
-                  <Button className="btn-premium w-full sm:min-w-[200px] group">
-                    Get Started
-                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-                <Link to="/auth" className="w-full sm:w-auto">
-                  <Button className="btn-soft w-full sm:min-w-[200px] group">
-                    I Have an Account
-                    <Heart className="ml-2 h-4 w-4 group-hover:animate-pulse-soft transition-all" />
-                  </Button>
-                </Link>
+              <div className="hidden h-3 w-px bg-muted sm:block" />
+              <div className="hidden items-center gap-2 sm:flex">
+                <Users className="h-4 w-4" /> Personalized matchmaking
               </div>
-
-              <p className="text-xs text-muted-foreground">
-                New here? Start with "Get Started" to begin your journey
-              </p>
-            </div>
+            </motion.div>
           </div>
-        </div>
-      </div>
 
-      {/* What to Expect Section */}
-      <div className="py-20 px-6 bg-surface">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-12 space-y-4">
-            <h2 className="text-2xl md:text-3xl font-light text-foreground">
-              What to expect
+          <motion.div
+            className="relative mt-16 flex-1 lg:mt-0"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+          >
+            <SwipeDeck
+              profiles={[
+                {
+                  id: "1",
+                  name: "Amelia, 32",
+                  location: "New York",
+                  headline: "Creative director & jazz devotee",
+                  bio: "Balancing gallery nights with sunrise yoga. Looking for someone curious about the world.",
+                  interests: ["Art", "Jazz", "City escapes"],
+                },
+                {
+                  id: "2",
+                  name: "Harper, 29",
+                  location: "Austin",
+                  headline: "Investor exploring conscious hospitality",
+                  bio: "Weekends between farmer's markets and bootstrapping boutique stays.",
+                  interests: ["Design", "Slow travel", "Wine"],
+                },
+                {
+                  id: "3",
+                  name: "Miles, 35",
+                  location: "San Francisco",
+                  headline: "Founder | R&D at the intersection of health and tech",
+                  bio: "Think long hikes, vinyl, and untangling elegant systems.",
+                  interests: ["Wellness", "Architecture", "Analog moments"],
+                },
+              ]}
+            />
+          </motion.div>
+        </div>
+      </section>
+
+      <section className="border-t border-border bg-[hsl(var(--surface))] py-24">
+        <div className="mx-auto flex max-w-6xl flex-col gap-16 px-6 lg:flex-row lg:items-start lg:px-12">
+          <div className="flex-1 space-y-6">
+            <h2 className="text-3xl font-semibold tracking-tight text-[hsl(var(--brand-secondary))] md:text-4xl">
+              A considered journey from introduction to connection.
             </h2>
-            <div className="w-12 h-0.5 bg-accent mx-auto"></div>
-          </div>
-
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center space-y-4">
-                <div className="illustration-icon mx-auto bg-gradient-to-br from-primary/20 to-primary/10">
-                  <UserPlus className="h-6 w-6 text-primary" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium text-foreground">1. Create Profile</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Tell us about yourself and what you're looking for
+            <p className="max-w-xl text-base leading-7 text-muted-foreground">
+              We only introduce people who feel aligned—professionally, personally, and energetically. Expect
+              thoughtful curation and a guided experience at every step.
+            </p>
+            <div className="grid gap-6 sm:grid-cols-2">
+              {[
+                {
+                  title: "Curated profiles",
+                  description: "Hand-selected members sourced through referrals and in-depth interviews.",
+                },
+                {
+                  title: "Match previews",
+                  description: "Receive elegant dossiers highlighting chemistry, values, and conversation sparks.",
+                },
+                {
+                  title: "Concierge support",
+                  description: "A dedicated matchmaker stays with you throughout each introduction.",
+                },
+                {
+                  title: "Refined pacing",
+                  description: "Thoughtfully spaced introductions—quality over quantity, always.",
+                },
+              ].map((feature) => (
+                <div
+                  key={feature.title}
+                  className="rounded-3xl border border-[hsl(var(--brand-secondary))]/10 bg-[hsl(var(--background))] p-6 shadow-[0_18px_60px_-36px_rgba(15,15,15,0.4)]"
+                >
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                    {feature.title}
+                  </h3>
+                  <p className="mt-4 text-sm leading-6 text-[hsl(var(--brand-secondary))]">
+                    {feature.description}
                   </p>
                 </div>
-              </div>
-
-              <div className="text-center space-y-4">
-                <div className="illustration-icon mx-auto bg-gradient-to-br from-accent/30 to-accent/20">
-                  <Heart className="h-6 w-6 text-accent-foreground animate-pulse-soft" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium text-foreground">2. Get Matched</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Receive carefully curated matches based on compatibility
-                  </p>
-                </div>
-              </div>
-
-              <div className="text-center space-y-4">
-                <div className="illustration-icon mx-auto bg-gradient-to-br from-success/20 to-success/10">
-                  <Sparkles className="h-6 w-6 text-success animate-float" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium text-foreground">3. Connect</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Start meaningful conversations with your matches
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Simple CTA */}
-      <div className="py-16 px-6">
-        <div className="max-w-2xl mx-auto text-center space-y-6">
-          <p className="text-lg text-muted-foreground font-light">
-            Ready to find love? <span className="fun-emoji">💕</span>
-          </p>
+          <div className="flex-1 space-y-8">
+            <ProfileCard
+              name="Meet your matchmaker"
+              headline="Thoughtful guidance from discovery to the first date"
+              bio="Every BLOOM member is paired with a dedicated matchmaker who learns their rhythm, their goals, and the nuances that matter."
+              interests={["Connection", "Privacy", "Intuition"]}
+              highlight
+            />
+            <MatchList
+              title="Recent intros"
+              highlightNew
+              matches={[
+                { id: "101", name: "Rowan", status: "new", compatibility: 92, subtitle: "Introduced this week" },
+                { id: "102", name: "Cleo", status: "mutual", compatibility: 88, subtitle: "Planning second date" },
+                { id: "103", name: "Luca", status: "pending", compatibility: 85, subtitle: "Awaiting response" },
+              ]}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-border bg-[hsl(var(--background))] py-20">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 px-6 text-center lg:px-12">
+          <div className="space-y-4">
+            <span className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--brand-secondary))]/10 px-4 py-1 text-xs uppercase tracking-[0.3em] text-muted-foreground">
+              <Star className="h-3 w-3" /> Private membership
+            </span>
+            <h2 className="text-3xl font-semibold tracking-tight text-[hsl(var(--brand-secondary))] sm:text-4xl">
+              Discover a matchmaking experience designed for people who value discretion.
+            </h2>
+            <p className="max-w-2xl text-base leading-7 text-muted-foreground">
+              Interviews, curated introductions, and thoughtful follow-through. We limit membership to keep the
+              experience elevated and personal.
+            </p>
+          </div>
+
           <Link to="/client">
-            <Button className="btn-premium px-8 py-3">
-              Start Your Journey
-            </Button>
+            <PremiumButton className="px-10 py-3 text-base">Apply for membership</PremiumButton>
           </Link>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

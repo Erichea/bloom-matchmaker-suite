@@ -19,6 +19,12 @@ export default {
         display: ['Cal Sans', 'Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
+        brand: {
+          primary: "hsl(var(--brand-primary))",
+          "primary-foreground": "hsl(var(--brand-primary-foreground))",
+          secondary: "hsl(var(--brand-secondary))",
+          "secondary-foreground": "hsl(var(--brand-secondary-foreground))",
+        },
         border: "hsl(var(--border))",
         "border-soft": "hsl(var(--border-soft))",
         "border-hover": "hsl(var(--border-hover))",

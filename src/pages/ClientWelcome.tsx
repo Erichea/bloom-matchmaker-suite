@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Heart, Sparkles, Users, Shield, Coffee, Smile, Star, Zap } from "lucide-react";
+import { PremiumButton } from "@/components/experience/PremiumButton";
+import { ProfileCard } from "@/components/experience/ProfileCard";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Shield, Sparkles, Users } from "lucide-react";
 
 const ClientWelcome = () => {
   const [accessCode, setAccessCode] = useState("");
@@ -14,68 +15,55 @@ const ClientWelcome = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setIsValidating(true);
-    
+
     try {
-      console.log('Validating access code:', accessCode.trim().toUpperCase());
-
       const normalizedCode = accessCode.trim().toUpperCase();
-
-      const { data: validationResult, error } = await supabase.rpc('validate_access_code', {
+      const { data: validationResult, error } = await supabase.rpc("validate_access_code", {
         p_code: normalizedCode,
       });
-
-      console.log('Access code validation result:', { validationResult, error });
 
       const codeData = Array.isArray(validationResult) ? validationResult[0] : null;
 
       if (error || !codeData) {
-        console.error('Access code validation failed:', error);
         toast({
-          title: "Invalid Access Code",
-          description: error?.message || "The access code you entered is invalid or has already been used.",
+          title: "Invalid access code",
+          description: error?.message || "Please verify the invitation you received.",
           variant: "destructive",
         });
-        setIsValidating(false);
         return;
       }
 
       if (codeData.is_used) {
         toast({
-          title: "Access Code Already Used",
-          description: "This access code has already been redeemed.",
+          title: "Code already used",
+          description: "This invitation has already been redeemed.",
           variant: "destructive",
         });
-        setIsValidating(false);
         return;
       }
 
-      // Check if code is expired
       if (codeData.expires_at && new Date(codeData.expires_at) < new Date()) {
         toast({
-          title: "Expired Access Code",
-          description: "This access code has expired. Please contact your matchmaker for a new code.",
+          title: "Code expired",
+          description: "Please contact your matchmaker for a fresh invitation.",
           variant: "destructive",
         });
-        setIsValidating(false);
         return;
       }
 
-      // Store access code in session storage for profile creation
-      sessionStorage.setItem('validAccessCode', normalizedCode);
-      
+      sessionStorage.setItem("validAccessCode", normalizedCode);
       toast({
-        title: "Access Code Verified",
-        description: "Welcome to BLOOM! Let's create your account.",
+        title: "Welcome to BLOOM",
+        description: "Let’s create your membership profile.",
       });
-
       navigate("/auth");
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
+        title: "Something went wrong",
+        description: "Please try again in a moment.",
         variant: "destructive",
       });
     } finally {
@@ -83,184 +71,102 @@ const ClientWelcome = () => {
     }
   };
 
-  const features = [
-    {
-      icon: Heart,
-      title: "Curated Matches",
-      description: "Handpicked matches based on deep compatibility analysis"
-    },
-    {
-      icon: Users,
-      title: "Premium Members",
-      description: "Exclusive community of verified, serious-minded singles"
-    },
-    {
-      icon: Sparkles,
-      title: "Personalized Service",
-      description: "Dedicated matchmaker guidance throughout your journey"
-    },
-    {
-      icon: Shield,
-      title: "Privacy & Security",
-      description: "Your information is protected with the highest standards"
-    }
-  ];
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="relative min-h-screen flex items-center justify-center">
-        {/* Content */}
-        <div className="max-w-lg mx-auto px-6 text-center">
-          <div className="animate-fade-in space-y-12">
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-center space-x-3">
-                  <Sparkles className="h-6 w-6 text-accent animate-float" />
-                  <h1 className="text-4xl md:text-5xl font-light text-foreground tracking-tight">
-                    Welcome to BLOOM
-                  </h1>
-                  <Heart className="h-6 w-6 text-accent animate-pulse-soft" />
-                </div>
-                <div className="w-16 h-0.5 bg-accent mx-auto"></div>
-              </div>
-              <p className="text-lg text-muted-foreground font-light leading-relaxed">
-                Your journey to meaningful connections begins here. <span className="fun-emoji">🌟</span>
-              </p>
+    <div className="relative min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--brand-secondary))]">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(190,76,139,0.18),transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 -z-10 hidden w-1/2 bg-[hsl(var(--surface))] md:block" />
 
-              {/* Fun welcome traits */}
-              <div className="flex flex-wrap justify-center gap-2 max-w-sm mx-auto">
-                {[
-                  { icon: Coffee, text: "Ready to mingle", emoji: "😊" },
-                  { icon: Smile, text: "Open minded", emoji: "🤗" },
-                  { icon: Star, text: "Hopeful romantic", emoji: "💕" }
-                ].map((trait, index) => {
-                  const Icon = trait.icon;
-                  return (
-                    <div
-                      key={index}
-                      className="trait-tag animate-fade-in love-burst"
-                      style={{animationDelay: `${index * 0.2}s`}}
-                      onClick={() => {
-                        const elem = document.querySelector(`[data-welcome-trait="${index}"]`);
-                        elem?.classList.add('secret-animation');
-                        setTimeout(() => elem?.classList.remove('secret-animation'), 600);
-                      }}
-                      data-welcome-trait={index}
-                    >
-                      <span className="fun-emoji mr-1">{trait.emoji}</span>
-                      {trait.text}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Access Code Form */}
-            <Card className="card-premium animate-slide-up group hover:shadow-[--shadow-medium] transition-all duration-300">
-              <CardHeader className="text-center space-y-4">
-                <div className="flex items-center justify-center space-x-2">
-                  <Zap className="h-5 w-5 text-accent animate-wiggle" />
-                  <CardTitle className="text-xl font-medium text-foreground">
-                    Enter Your Access Code
-                  </CardTitle>
-                </div>
-                <CardDescription className="text-muted-foreground">
-                  Please enter the exclusive code you received to begin.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="accessCode" className="text-sm font-medium text-muted-foreground">
-                      Access Code
-                    </Label>
-                    <Input
-                      id="accessCode"
-                      type="text"
-                      placeholder="Enter your code"
-                      value={accessCode}
-                      onChange={(e) => setAccessCode(e.target.value)}
-                      className="input-premium text-center text-base tracking-wider"
-                      required
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    className="btn-premium w-full"
-                    disabled={isValidating || !accessCode.trim()}
-                  >
-                    {isValidating ? (
-                      <div className="flex items-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                        Validating...
-                      </div>
-                    ) : (
-                      "Continue"
-                    )}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-
-      {/* Features Section */}
-      <div className="py-20 px-6 bg-surface">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16 space-y-4">
-            <h2 className="text-2xl md:text-3xl font-light text-foreground">
-              Why choose BLOOM?
-            </h2>
-            <div className="w-12 h-0.5 bg-accent mx-auto"></div>
-            <p className="text-lg text-muted-foreground max-w-xl mx-auto font-light leading-relaxed">
-              Experience premium matchmaking with personalized service and proven results.
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-16 px-6 py-20 md:py-24 lg:flex-row lg:items-center lg:gap-24 lg:px-12">
+        <motion.div
+          className="flex-1 space-y-10"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <div className="space-y-4">
+            <span className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--brand-secondary))] px-4 py-1 text-xs uppercase tracking-[0.3em] text-[hsl(var(--brand-secondary-foreground))]">
+              <Sparkles className="h-3 w-3" /> Invitation only
+            </span>
+            <h1 className="font-display text-4xl leading-tight tracking-tight sm:text-5xl">
+              The first step to an intentionally curated love life.
+            </h1>
+            <p className="max-w-xl text-base leading-7 text-muted-foreground">
+              Enter the invitation code shared by your matchmaker to unlock your personalized onboarding experience.
+              BLOOM welcomes a limited number of members to ensure the experience remains intimate and considered.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            {features.map((feature, index) => {
-              const Icon = feature.icon;
-              const animations = ['animate-float', 'animate-bounce-gentle', 'animate-pulse-soft', 'animate-wiggle'];
-              const gradients = [
-                'from-accent/20 to-accent/10',
-                'from-primary/20 to-primary/10',
-                'from-success/20 to-success/10',
-                'from-muted to-muted-soft'
-              ];
-              return (
-                <div key={index} className="text-center space-y-4 group">
-                  <div className={`illustration-icon mx-auto bg-gradient-to-br ${gradients[index]} group-hover:scale-110`}>
-                    <Icon className={`h-6 w-6 text-muted-foreground ${animations[index]}`} />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-medium text-foreground">{feature.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+          <motion.form
+            onSubmit={handleSubmit}
+            className="space-y-6 rounded-3xl border border-[hsl(var(--brand-secondary))]/15 bg-[hsl(var(--background))] p-8 shadow-[0_28px_96px_-48px_rgba(18,18,18,0.45)] backdrop-blur"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+          >
+            <div className="space-y-2">
+              <Label htmlFor="accessCode" className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                Invitation code
+              </Label>
+              <Input
+                id="accessCode"
+                value={accessCode}
+                onChange={(event) => setAccessCode(event.target.value.toUpperCase())}
+                placeholder="BLOOM-2024"
+                className="h-12 rounded-full border-[hsl(var(--brand-secondary))]/20 bg-[hsl(var(--surface))] text-center text-base tracking-[0.5em] uppercase"
+                required
+              />
+            </div>
+            <PremiumButton type="submit" disabled={isValidating || !accessCode.trim()} className="w-full justify-center">
+              {isValidating ? "Verifying" : "Continue"}
+            </PremiumButton>
+            <div className="grid grid-cols-1 gap-3 text-xs uppercase tracking-[0.3em] text-muted-foreground sm:grid-cols-3">
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4" /> Verified privacy
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4" /> Curated members
+              </div>
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4" /> Guided intros
+              </div>
+            </div>
+          </motion.form>
+        </motion.div>
 
-      {/* CTA Section */}
-      <div className="py-20 px-6 bg-primary">
-        <div className="max-w-2xl mx-auto text-center space-y-8">
-          <div className="space-y-4">
-            <h3 className="text-2xl font-light text-primary-foreground">
-              Ready to find your perfect match?
-            </h3>
-            <div className="w-12 h-0.5 bg-accent mx-auto"></div>
+        <motion.div
+          className="flex-1 space-y-10"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+        >
+          <ProfileCard
+            name="Elise, Matchmaker"
+            headline="20+ years orchestrating extraordinary first meetings"
+            bio="We interview every member personally. Expect warmth, discretion, and a matchmaking ecosystem crafted for quality over quantity."
+            interests={["Intentional dating", "Quiet luxury", "Intuitive pairing"]}
+            highlight
+          />
+
+          <div className="space-y-6 rounded-3xl border border-[hsl(var(--brand-secondary))]/15 bg-[hsl(var(--surface))] p-10">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+              Membership cadence
+            </h2>
+            <div className="space-y-5 text-sm leading-7 text-muted-foreground">
+              <p>
+                <span className="font-semibold text-[hsl(var(--brand-secondary))]">Discovery.</span> Begin with a calm,
+                private conversation so we understand your rhythm and relationship vision.
+              </p>
+              <p>
+                <span className="font-semibold text-[hsl(var(--brand-secondary))]">Curation.</span> Receive
+                hand-crafted dossiers that highlight chemistry, shared values, and conversation sparks.
+              </p>
+              <p>
+                <span className="font-semibold text-[hsl(var(--brand-secondary))]">Guidance.</span> Your matchmaker
+                coordinates every introduction—from first hello to thoughtfully paced follow-ups.
+              </p>
+            </div>
           </div>
-          <p className="text-lg text-primary-foreground/80 font-light leading-relaxed">
-            Join our exclusive community and let us help you find lasting love. <span className="fun-emoji">💝</span>
-          </p>
-          <Button className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-medium px-8 py-3 rounded-lg">
-            Get Your Access Code
-          </Button>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
