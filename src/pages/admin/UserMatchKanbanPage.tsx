@@ -527,7 +527,6 @@ const UserMatchKanbanPage = () => {
             )}
           </div>
         </div>
-      </div>
     </>
   );
 };
