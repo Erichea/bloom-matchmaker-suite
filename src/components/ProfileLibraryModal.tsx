@@ -84,13 +84,17 @@ export const ProfileLibraryModal = ({ open, onOpenChange, sourceProfileId, onSug
         p_profile_2_ids: Array.from(selectedProfiles),
         p_suggested_by: user.id
       });
-      if (error) throw error;
+      if (error) {
+        console.error("create_bulk_matches error:", error);
+        throw error;
+      }
 
       toast({ title: "Success!", description: `Suggested ${selectedProfiles.size} new match(es).` });
       onSuggestSuccess();
       onOpenChange(false);
     } catch (error) {
-      toast({ title: "Error", description: "Failed to create new matches.", variant: "destructive" });
+      console.error("Failed to create matches:", error);
+      toast({ title: "Error", description: error instanceof Error ? error.message : "Failed to create new matches.", variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
