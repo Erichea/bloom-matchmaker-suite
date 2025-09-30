@@ -313,7 +313,7 @@ const ClientsPage = () => {
                   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
                   const location = [client.city, client.country].filter(Boolean).join(', ') || 'Location not set';
 
-                  return (
+                  (
                     <div key={client.id} className="card-interactive p-4">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center space-x-4 flex-1 min-w-0">
@@ -382,8 +382,7 @@ const ClientsPage = () => {
                         </DropdownMenu>
                       </div>
                     </div>
-                  );
-                })
+                  )
               )}
             </div>
           </CardContent>
