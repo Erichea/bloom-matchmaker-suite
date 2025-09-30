@@ -187,69 +187,69 @@ const ClientsPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="loading-spinner-lg text-accent"></div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background">
+      <div className="container-app py-6 md:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Client Management</h1>
+            <h1>Client Management</h1>
             <p className="text-muted-foreground mt-2">
               Manage all client profiles and their approval status
             </p>
           </div>
-          <Button className="btn-premium">
+          <Button className="btn-accent w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             Add New Client
           </Button>
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="card-premium">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <Card className="card">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Total Clients</p>
-                  <p className="text-2xl font-bold text-foreground">{stats.total}</p>
+                  <p className="text-2xl font-semibold">{stats.total}</p>
                 </div>
-                <Users className="h-8 w-8 text-primary" />
+                <Users className="h-8 w-8 text-accent" />
               </div>
             </CardContent>
           </Card>
-          <Card className="card-premium">
+          <Card className="card">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Pending Review</p>
-                  <p className="text-2xl font-bold text-warning">{stats.pending}</p>
+                  <p className="text-2xl font-semibold text-warning">{stats.pending}</p>
                 </div>
                 <Clock className="h-8 w-8 text-warning" />
               </div>
             </CardContent>
           </Card>
-          <Card className="card-premium">
+          <Card className="card">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Approved</p>
-                  <p className="text-2xl font-bold text-success">{stats.approved}</p>
+                  <p className="text-2xl font-semibold text-success">{stats.approved}</p>
                 </div>
                 <UserCheck className="h-8 w-8 text-success" />
               </div>
             </CardContent>
           </Card>
-          <Card className="card-premium">
+          <Card className="card">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">This Month</p>
-                  <p className="text-2xl font-bold text-accent">+{stats.thisMonth}</p>
+                  <p className="text-2xl font-semibold text-accent">+{stats.thisMonth}</p>
                 </div>
                 <Plus className="h-8 w-8 text-accent" />
               </div>
@@ -258,48 +258,50 @@ const ClientsPage = () => {
         </div>
 
         {/* Filters and Search */}
-        <Card className="card-premium">
+        <Card className="card">
           <CardHeader>
             <CardTitle>Client List</CardTitle>
             <CardDescription>Search and filter through your client database</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="flex flex-col gap-4 mb-6">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by name or email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 input"
                 />
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="pending_approval">Pending Review</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                  <SelectItem value="incomplete">Incomplete</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={genderFilter} onValueChange={setGenderFilter}>
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder="Filter by gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Genders</SelectItem>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full sm:w-48">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="pending_approval">Pending Review</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="incomplete">Incomplete</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={genderFilter} onValueChange={setGenderFilter}>
+                  <SelectTrigger className="w-full sm:w-48">
+                    <SelectValue placeholder="Filter by gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Genders</SelectItem>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* Client List */}
-            <div className="space-y-4">
+            <div className="space-y-3 mt-6">
               {filteredClients.length === 0 ? (
                 <div className="text-center py-12">
                   <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -312,32 +314,33 @@ const ClientsPage = () => {
                   const location = [client.city, client.country].filter(Boolean).join(', ') || 'Location not set';
 
                   return (
-                    <div key={client.id} className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border-soft hover:bg-muted/50 transition-colors">
-                      <div className="flex items-center space-x-4 flex-1 min-w-0">
-                        <div className="w-12 h-12 rounded-full bg-primary-muted flex items-center justify-center flex-shrink-0">
-                          <span className="text-lg font-medium text-primary">
-                            {initials}
-                          </span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-foreground truncate">{name}</h3>
-                          <p className="text-sm text-muted-foreground truncate">{client.email || 'No email'}</p>
-                          <p className="text-sm text-muted-foreground truncate">{location}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-4 flex-shrink-0">
-                        <div className="text-right">
-                          <div className="flex items-center space-x-2 mb-1">
-                            {getStatusBadge(client.status)}
-                            {client.completion_percentage !== null && (
-                              <span className="text-sm text-muted-foreground">{client.completion_percentage}% complete</span>
-                            )}
+                    <div key={client.id} className="card-interactive p-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center space-x-4 flex-1 min-w-0">
+                          <div className="w-12 h-12 rounded-full bg-accent-soft flex items-center justify-center flex-shrink-0">
+                            <span className="text-lg font-semibold text-accent">
+                              {initials}
+                            </span>
                           </div>
-                          <p className="text-xs text-muted-foreground">
-                            Joined {new Date(client.created_at).toLocaleDateString()}
-                          </p>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold truncate">{name}</h3>
+                            <p className="text-sm text-muted-foreground truncate">{client.email || 'No email'}</p>
+                            <p className="text-sm text-muted-foreground truncate">{location}</p>
+                          </div>
                         </div>
+
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-shrink-0">
+                          <div className="text-left sm:text-right">
+                            <div className="flex items-center space-x-2 mb-1">
+                              {getStatusBadge(client.status)}
+                              {client.completion_percentage !== null && (
+                                <span className="text-sm text-muted-foreground hidden sm:inline">{client.completion_percentage}% complete</span>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              Joined {new Date(client.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
 
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>

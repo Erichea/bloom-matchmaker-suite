@@ -102,18 +102,18 @@ export const ProfileLibraryModal = ({ open, onOpenChange, sourceProfileId, onSug
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Suggest More Matches</DialogTitle>
           <DialogDescription>Select profiles to suggest as a new match.</DialogDescription>
         </DialogHeader>
-        
+
         {loading ? (
-          <div className="h-96 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-900"></div>
+          <div className="h-64 md:h-96 flex items-center justify-center">
+            <div className="loading-spinner-lg text-accent"></div>
           </div>
         ) : (
-          <ScrollArea className="h-96 pr-4">
+          <ScrollArea className="flex-1 pr-4 max-h-[50vh]">
             <div className="space-y-2">
               {profiles.map(profile => {
                 const name = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
@@ -121,19 +121,24 @@ export const ProfileLibraryModal = ({ open, onOpenChange, sourceProfileId, onSug
                 return (
                   <div
                     key={profile.id}
-                    className={`flex items-center space-x-4 p-3 rounded-md ${profile.is_already_suggested ? 'opacity-50' : 'cursor-pointer hover:bg-gray-100'}`}
+                    className={`flex items-center space-x-3 p-3 rounded-lg border transition-all ${
+                      profile.is_already_suggested
+                        ? 'opacity-50 bg-muted cursor-not-allowed'
+                        : 'cursor-pointer hover:bg-accent-soft hover:border-accent/30 active:scale-[0.99]'
+                    }`}
                     onClick={() => !profile.is_already_suggested && handleSelectProfile(profile.id)}
                   >
                     <Checkbox
                       checked={selectedProfiles.has(profile.id)}
                       disabled={profile.is_already_suggested}
+                      className="flex-shrink-0"
                     />
-                    <Avatar className="w-10 h-10">
-                      <AvatarFallback>{initials}</AvatarFallback>
+                    <Avatar className="w-10 h-10 flex-shrink-0">
+                      <AvatarFallback className="bg-accent text-accent-foreground text-sm font-semibold">{initials}</AvatarFallback>
                     </Avatar>
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-800">{name}</p>
-                      <p className="text-sm text-gray-500">{profile.email}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm truncate">{name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{profile.email}</p>
                     </div>
                   </div>
                 );
@@ -142,10 +147,12 @@ export const ProfileLibraryModal = ({ open, onOpenChange, sourceProfileId, onSug
           </ScrollArea>
         )}
 
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={submitting}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={submitting || loading}>
-            {submitting ? "Suggesting..." : `Suggest ${selectedProfiles.size} Match(es)`}
+        <DialogFooter className="flex-shrink-0 gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="btn-secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} disabled={submitting || loading || selectedProfiles.size === 0} className="btn-accent">
+            {submitting ? "Suggesting..." : `Suggest ${selectedProfiles.size} Match${selectedProfiles.size !== 1 ? 'es' : ''}`}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -170,28 +170,29 @@ const AccessCodesPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="loading-spinner-lg text-accent"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Access Codes</h1>
-          <p className="text-muted-foreground">
-            Generate and manage access codes for client registration
-          </p>
-        </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="btn-premium">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Code
-            </Button>
-          </DialogTrigger>
+    <div className="min-h-screen bg-background">
+      <div className="container-app py-6 md:py-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div>
+            <h1>Access Codes</h1>
+            <p className="text-muted-foreground">
+              Generate and manage access codes for client registration
+            </p>
+          </div>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="btn-accent w-full sm:w-auto">
+                <Plus className="mr-2 h-4 w-4" />
+                Create Code
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Generate New Access Code</DialogTitle>
@@ -279,7 +280,7 @@ const AccessCodesPage = () => {
                   <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={generating} className="btn-premium">
+                  <Button type="submit" disabled={generating} className="btn-accent">
                     {generating ? "Creating..." : "Create Code"}
                   </Button>
                 </div>
@@ -289,36 +290,36 @@ const AccessCodesPage = () => {
         </Dialog>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="text-center">
-          <CardContent className="p-6">
-            <div className="text-3xl font-bold text-primary mb-2">{stats.total}</div>
-            <p className="text-muted-foreground">Total Codes</p>
-          </CardContent>
-        </Card>
-        <Card className="text-center">
-          <CardContent className="p-6">
-            <div className="text-3xl font-bold text-success mb-2">{stats.active}</div>
-            <p className="text-muted-foreground">Active Codes</p>
-          </CardContent>
-        </Card>
-        <Card className="text-center">
-          <CardContent className="p-6">
-            <div className="text-3xl font-bold text-accent mb-2">{stats.used}</div>
-            <p className="text-muted-foreground">Used Codes</p>
-          </CardContent>
-        </Card>
-        <Card className="text-center">
-          <CardContent className="p-6">
-            <div className="text-3xl font-bold text-destructive mb-2">{stats.expired}</div>
-            <p className="text-muted-foreground">Expired Codes</p>
-          </CardContent>
-        </Card>
-      </div>
+        {/* Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <Card className="card text-center">
+            <CardContent className="p-4 md:p-6">
+              <div className="text-2xl md:text-3xl font-semibold mb-2">{stats.total}</div>
+              <p className="text-sm text-muted-foreground">Total Codes</p>
+            </CardContent>
+          </Card>
+          <Card className="card text-center">
+            <CardContent className="p-4 md:p-6">
+              <div className="text-2xl md:text-3xl font-semibold text-success mb-2">{stats.active}</div>
+              <p className="text-sm text-muted-foreground">Active</p>
+            </CardContent>
+          </Card>
+          <Card className="card text-center">
+            <CardContent className="p-4 md:p-6">
+              <div className="text-2xl md:text-3xl font-semibold text-accent mb-2">{stats.used}</div>
+              <p className="text-sm text-muted-foreground">Used</p>
+            </CardContent>
+          </Card>
+          <Card className="card text-center">
+            <CardContent className="p-4 md:p-6">
+              <div className="text-2xl md:text-3xl font-semibold text-destructive mb-2">{stats.expired}</div>
+              <p className="text-sm text-muted-foreground">Expired</p>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Access Codes Table */}
-      <Card>
+        {/* Access Codes Table */}
+        <Card className="card">
         <CardHeader>
           <CardTitle>All Access Codes</CardTitle>
           <CardDescription>
@@ -394,17 +395,18 @@ const AccessCodesPage = () => {
             </TableBody>
           </Table>
           
-          {accessCodes.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground text-lg mb-4">No access codes generated yet</p>
-              <Button onClick={() => setDialogOpen(true)} className="btn-premium">
-                <Plus className="mr-2 h-4 w-4" />
-                Generate Your First Code
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            {accessCodes.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground text-lg mb-4">No access codes generated yet</p>
+                <Button onClick={() => setDialogOpen(true)} className="btn-accent">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Generate Your First Code
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

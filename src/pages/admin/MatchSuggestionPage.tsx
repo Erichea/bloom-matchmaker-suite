@@ -58,20 +58,20 @@ const MatchSuggestionPage = () => {
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="hover:bg-gray-100 px-2 -ml-2 transition-all duration-200"
+            className="hover:bg-muted px-2 -ml-2"
           >
-            <Users className="inline-block w-4 h-4 mr-2 text-indigo-600" />
-            <span className="font-bold text-gray-900">Client</span>
-            <ArrowUpDown className="ml-2 h-3.5 w-3.5 text-gray-400" />
+            <Users className="inline-block w-4 h-4 mr-2 text-accent" />
+            <span className="font-semibold">Client</span>
+            <ArrowUpDown className="ml-2 h-3.5 w-3.5" />
           </Button>
         );
       },
       cell: ({ row }) => (
         <div className="py-1">
-          <div className="font-semibold text-gray-900 text-sm">
+          <div className="font-semibold text-sm">
             {row.original.first_name} {row.original.last_name}
           </div>
-          <div className="text-xs text-gray-500 mt-0.5">{row.original.email}</div>
+          <div className="text-xs text-muted-foreground mt-0.5">{row.original.email}</div>
         </div>
       ),
     },
@@ -82,17 +82,17 @@ const MatchSuggestionPage = () => {
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="hover:bg-gray-100 px-2 w-full justify-center transition-all duration-200"
+            className="hover:bg-muted px-2 w-full justify-center"
           >
-            <TrendingUp className="inline-block w-4 h-4 mr-2 text-blue-600" />
-            <span className="font-bold text-gray-900">Total</span>
-            <ArrowUpDown className="ml-2 h-3.5 w-3.5 text-gray-400" />
+            <TrendingUp className="inline-block w-4 h-4 mr-2 text-accent" />
+            <span className="font-semibold">Total</span>
+            <ArrowUpDown className="ml-2 h-3.5 w-3.5" />
           </Button>
         );
       },
       cell: ({ row }) => (
         <div className="text-center">
-          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700 font-bold text-sm">
+          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-accent-soft text-accent font-semibold text-sm">
             {row.original.total_matches}
           </span>
         </div>
@@ -105,17 +105,17 @@ const MatchSuggestionPage = () => {
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="hover:bg-gray-100 px-2 w-full justify-center transition-all duration-200"
+            className="hover:bg-muted px-2 w-full justify-center"
           >
-            <Clock className="inline-block w-4 h-4 mr-2 text-blue-600" />
-            <span className="font-bold text-gray-900">In Progress</span>
-            <ArrowUpDown className="ml-2 h-3.5 w-3.5 text-gray-400" />
+            <Clock className="inline-block w-4 h-4 mr-2 text-accent" />
+            <span className="font-semibold">In Progress</span>
+            <ArrowUpDown className="ml-2 h-3.5 w-3.5" />
           </Button>
         );
       },
       cell: ({ row }) => (
         <div className="text-center">
-          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700 font-bold text-sm">
+          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-accent-soft text-accent font-semibold text-sm">
             {row.original.in_progress_matches}
           </span>
         </div>
@@ -128,17 +128,17 @@ const MatchSuggestionPage = () => {
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="hover:bg-gray-100 px-2 w-full justify-center transition-all duration-200"
+            className="hover:bg-muted px-2 w-full justify-center"
           >
-            <CheckCircle className="inline-block w-4 h-4 mr-2 text-amber-600" />
-            <span className="font-bold text-gray-900">Pending</span>
-            <ArrowUpDown className="ml-2 h-3.5 w-3.5 text-gray-400" />
+            <CheckCircle className="inline-block w-4 h-4 mr-2" />
+            <span className="font-semibold">Pending</span>
+            <ArrowUpDown className="ml-2 h-3.5 w-3.5" />
           </Button>
         );
       },
       cell: ({ row }) => (
         <div className="text-center">
-          <Badge className="bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-700 border-amber-200 font-bold shadow-sm hover:shadow-md transition-all">
+          <Badge className="badge-warning">
             {row.original.pending_matches}
           </Badge>
         </div>
@@ -151,17 +151,17 @@ const MatchSuggestionPage = () => {
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="hover:bg-gray-100 px-2 w-full justify-center transition-all duration-200"
+            className="hover:bg-muted px-2 w-full justify-center"
           >
-            <Heart className="inline-block w-4 h-4 mr-2 text-emerald-600" />
-            <span className="font-bold text-gray-900">Mutual</span>
-            <ArrowUpDown className="ml-2 h-3.5 w-3.5 text-gray-400" />
+            <Heart className="inline-block w-4 h-4 mr-2" />
+            <span className="font-semibold">Mutual</span>
+            <ArrowUpDown className="ml-2 h-3.5 w-3.5" />
           </Button>
         );
       },
       cell: ({ row }) => (
         <div className="text-center">
-          <Badge className="bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-700 border-emerald-200 font-bold shadow-sm hover:shadow-md transition-all">
+          <Badge className="badge-success">
             {row.original.mutual_matches}
           </Badge>
         </div>
@@ -174,17 +174,17 @@ const MatchSuggestionPage = () => {
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="hover:bg-gray-100 px-2 w-full justify-center transition-all duration-200"
+            className="hover:bg-muted px-2 w-full justify-center"
           >
-            <XCircle className="inline-block w-4 h-4 mr-2 text-rose-600" />
-            <span className="font-bold text-gray-900">Rejected</span>
-            <ArrowUpDown className="ml-2 h-3.5 w-3.5 text-gray-400" />
+            <XCircle className="inline-block w-4 h-4 mr-2" />
+            <span className="font-semibold">Rejected</span>
+            <ArrowUpDown className="ml-2 h-3.5 w-3.5" />
           </Button>
         );
       },
       cell: ({ row }) => (
         <div className="text-center">
-          <Badge className="bg-gradient-to-r from-rose-100 to-red-100 text-rose-700 border-rose-200 font-bold shadow-sm hover:shadow-md transition-all">
+          <Badge className="badge-error">
             {row.original.rejected_matches}
           </Badge>
         </div>
@@ -245,148 +245,202 @@ const MatchSuggestionPage = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen gap-4 bg-gradient-to-br from-slate-50 via-white to-slate-50">
-        <div className="relative">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200"></div>
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-indigo-600 border-t-transparent absolute top-0 left-0"></div>
-        </div>
-        <p className="text-sm text-gray-500 font-medium animate-pulse">Loading dashboard...</p>
+      <div className="flex flex-col items-center justify-center h-screen gap-4 bg-background">
+        <div className="loading-spinner-lg text-accent"></div>
+        <p className="text-sm text-muted-foreground font-medium animate-pulse">Loading dashboard...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-      <div className="px-4 py-6 md:px-8 md:py-8 lg:px-12 lg:py-10">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
-                Match Dashboard
-              </h1>
+    <div className="min-h-screen bg-background">
+      <div className="container-app py-6 md:py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
+            <div className="flex items-center gap-3">
+              <h1>Match Dashboard</h1>
               {stats.length > 0 && (
-                <Badge className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0 px-3 py-1 text-sm font-bold shadow-sm">
+                <Badge className="badge-neutral">
                   {stats.length} {stats.length === 1 ? 'client' : 'clients'}
                 </Badge>
               )}
             </div>
-            <p className="text-sm text-gray-600">
-              Click on any client to view and manage their match suggestions
-            </p>
           </div>
+          <p className="text-sm text-muted-foreground">
+            Click on any client to view and manage their match suggestions
+          </p>
+        </div>
 
           {stats.length === 0 ? (
-            <Card className="border-2 border-dashed border-gray-300 bg-gray-50/50">
+            <Card className="border-2 border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-16">
-                <div className="rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 p-6 mb-4">
-                  <Sparkles className="w-12 h-12 text-indigo-600" />
+                <div className="rounded-full bg-accent-soft p-6 mb-4">
+                  <Sparkles className="w-12 h-12 text-accent" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">No clients yet</h3>
-                <p className="text-gray-600 text-center max-w-md">
+                <h3 className="text-xl font-semibold mb-2">No clients yet</h3>
+                <p className="text-muted-foreground text-center max-w-md">
                   Clients will appear here once they start creating profiles and receiving matches.
                 </p>
               </CardContent>
             </Card>
           ) : (
-            <Card className="border-0 shadow-xl overflow-hidden bg-white/80 backdrop-blur-sm">
-              <CardContent className="p-0">
-                {/* Search Bar */}
-                <div className="p-6 border-b border-gray-200/60 bg-gradient-to-r from-gray-50 to-white">
-                  <div className="relative max-w-md">
-                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <Input
-                      placeholder="Search by name or email..."
-                      value={globalFilter ?? ""}
-                      onChange={(e) => setGlobalFilter(e.target.value)}
-                      className="pl-12 h-11 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 bg-white shadow-sm"
-                    />
-                  </div>
+            <>
+              {/* Search Bar */}
+              <div className="mb-6">
+                <div className="relative max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Input
+                    placeholder="Search by name or email..."
+                    value={globalFilter ?? ""}
+                    onChange={(e) => setGlobalFilter(e.target.value)}
+                    className="pl-10 input"
+                  />
                 </div>
+              </div>
 
-                {/* Table */}
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id} className="bg-gradient-to-r from-gray-50 to-white hover:from-gray-100 hover:to-gray-50 border-b border-gray-200">
-                          {headerGroup.headers.map((header) => (
-                            <TableHead key={header.id} className="font-bold text-gray-900">
-                              {header.isPlaceholder
-                                ? null
-                                : flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
-                                  )}
-                            </TableHead>
-                          ))}
-                        </TableRow>
-                      ))}
-                    </TableHeader>
-                    <TableBody>
-                      {table.getRowModel().rows?.length ? (
-                        table.getRowModel().rows.map((row) => (
-                          <TableRow
-                            key={row.id}
-                            onClick={() => handleRowClick(row.original.profile_id)}
-                            className="cursor-pointer hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all duration-200 border-b border-gray-100 group"
-                          >
-                            {row.getVisibleCells().map((cell) => (
-                              <TableCell key={cell.id} className="py-4">
-                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                              </TableCell>
+              {/* Desktop Table View */}
+              <Card className="card hidden md:block">
+                <CardContent className="p-0">
+
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        {table.getHeaderGroups().map((headerGroup) => (
+                          <TableRow key={headerGroup.id} className="border-b">
+                            {headerGroup.headers.map((header) => (
+                              <TableHead key={header.id} className="font-semibold">
+                                {header.isPlaceholder
+                                  ? null
+                                  : flexRender(
+                                      header.column.columnDef.header,
+                                      header.getContext()
+                                    )}
+                              </TableHead>
                             ))}
                           </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={columns.length} className="h-32 text-center">
-                            <div className="flex flex-col items-center gap-2 text-gray-500">
-                              <Search className="w-8 h-8 text-gray-300" />
-                              <p className="font-medium">No results found</p>
-                              <p className="text-sm">Try adjusting your search</p>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
+                        ))}
+                      </TableHeader>
+                      <TableBody>
+                        {table.getRowModel().rows?.length ? (
+                          table.getRowModel().rows.map((row) => (
+                            <TableRow
+                              key={row.id}
+                              onClick={() => handleRowClick(row.original.profile_id)}
+                              className="cursor-pointer hover:bg-muted transition-colors"
+                            >
+                              {row.getVisibleCells().map((cell) => (
+                                <TableCell key={cell.id} className="py-4">
+                                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                </TableCell>
+                              ))}
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={columns.length} className="h-32 text-center">
+                              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                                <Search className="w-8 h-8" />
+                                <p className="font-medium">No results found</p>
+                                <p className="text-sm">Try adjusting your search</p>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
 
-                {/* Pagination */}
-                <div className="px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-gray-50 to-white border-t border-gray-200/60">
-                  <div className="text-sm text-gray-600 font-medium">
-                    Showing <span className="text-gray-900 font-bold">{table.getRowModel().rows.length}</span> of{" "}
-                    <span className="text-gray-900 font-bold">{table.getFilteredRowModel().rows.length}</span> {table.getFilteredRowModel().rows.length === 1 ? 'result' : 'results'}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => table.previousPage()}
-                      disabled={!table.getCanPreviousPage()}
-                      className="hover:bg-gray-100 disabled:opacity-50 transition-all duration-200 border-gray-300"
-                    >
-                      <ChevronLeft className="w-4 h-4 mr-1" />
-                      Previous
-                    </Button>
-                    <div className="px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-md text-sm font-bold shadow-sm">
-                      Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                  {/* Pagination */}
+                  <div className="px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t">
+                    <div className="text-sm text-muted-foreground">
+                      Showing <span className="font-semibold text-foreground">{table.getRowModel().rows.length}</span> of{" "}
+                      <span className="font-semibold text-foreground">{table.getFilteredRowModel().rows.length}</span> {table.getFilteredRowModel().rows.length === 1 ? 'result' : 'results'}
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => table.nextPage()}
-                      disabled={!table.getCanNextPage()}
-                      className="hover:bg-gray-100 disabled:opacity-50 transition-all duration-200 border-gray-300"
-                    >
-                      Next
-                      <ChevronRight className="w-4 h-4 ml-1" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => table.previousPage()}
+                        disabled={!table.getCanPreviousPage()}
+                        className="btn-secondary"
+                      >
+                        <ChevronLeft className="w-4 h-4 mr-1" />
+                        Previous
+                      </Button>
+                      <div className="px-3 py-1.5 bg-accent text-accent-foreground rounded-md text-sm font-semibold">
+                        Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => table.nextPage()}
+                        disabled={!table.getCanNextPage()}
+                        className="btn-secondary"
+                      >
+                        Next
+                        <ChevronRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-4">
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <Card
+                      key={row.id}
+                      onClick={() => handleRowClick(row.original.profile_id)}
+                      className="card-interactive"
+                    >
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
+                          <div>
+                            <div className="font-semibold text-foreground">
+                              {row.original.first_name} {row.original.last_name}
+                            </div>
+                            <div className="text-sm text-muted-foreground">{row.original.email}</div>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            <div className="flex items-center gap-1.5 text-sm">
+                              <TrendingUp className="w-4 h-4 text-accent" />
+                              <span className="font-semibold">{row.original.total_matches}</span>
+                              <span className="text-muted-foreground">total</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-sm">
+                              <Clock className="w-4 h-4 text-accent" />
+                              <span className="font-semibold">{row.original.in_progress_matches}</span>
+                              <span className="text-muted-foreground">in progress</span>
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge className="badge-warning">
+                              {row.original.pending_matches} pending
+                            </Badge>
+                            <Badge className="badge-success">
+                              {row.original.mutual_matches} mutual
+                            </Badge>
+                            <Badge className="badge-error">
+                              {row.original.rejected_matches} rejected
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <Card>
+                    <CardContent className="flex flex-col items-center justify-center py-12">
+                      <Search className="w-12 h-12 text-muted-foreground mb-2" />
+                      <p className="font-medium text-muted-foreground">No results found</p>
+                      <p className="text-sm text-muted-foreground">Try adjusting your search</p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </>
           )}
         </div>
       </div>

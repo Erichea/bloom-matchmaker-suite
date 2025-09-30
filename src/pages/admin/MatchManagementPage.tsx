@@ -163,7 +163,7 @@ const MatchManagementPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="loading-spinner-lg text-accent"></div>
       </div>
     );
   }
@@ -179,59 +179,57 @@ const MatchManagementPage = () => {
   );
 
   return (
-    <div className="p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background">
+      <div className="container-app py-6 md:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Match Management</h1>
-            <p className="text-muted-foreground mt-2">
-              Monitor and manage all match suggestions and outcomes
-            </p>
-          </div>
+        <div className="mb-6">
+          <h1>Match Management</h1>
+          <p className="text-muted-foreground mt-2">
+            Monitor and manage all match suggestions and outcomes
+          </p>
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="card-premium">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <Card className="card">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Matches</p>
-                  <p className="text-2xl font-bold text-foreground">{stats.totalMatches}</p>
+                  <p className="text-sm text-muted-foreground">Total</p>
+                  <p className="text-2xl font-semibold">{stats.totalMatches}</p>
                 </div>
-                <Heart className="h-8 w-8 text-primary" />
+                <Heart className="h-8 w-8 text-accent" />
               </div>
             </CardContent>
           </Card>
-          <Card className="card-premium">
+          <Card className="card">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Pending</p>
-                  <p className="text-2xl font-bold text-warning">{stats.pendingMatches}</p>
+                  <p className="text-2xl font-semibold text-warning">{stats.pendingMatches}</p>
                 </div>
                 <Clock className="h-8 w-8 text-warning" />
               </div>
             </CardContent>
           </Card>
-          <Card className="card-premium">
+          <Card className="card">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Mutual Matches</p>
-                  <p className="text-2xl font-bold text-success">{stats.mutualMatches}</p>
+                  <p className="text-sm text-muted-foreground">Mutual</p>
+                  <p className="text-2xl font-semibold text-success">{stats.mutualMatches}</p>
                 </div>
                 <CheckCircle className="h-8 w-8 text-success" />
               </div>
             </CardContent>
           </Card>
-          <Card className="card-premium">
+          <Card className="card">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Acceptance Rate</p>
-                  <p className="text-2xl font-bold text-accent">{stats.acceptanceRate}%</p>
+                  <p className="text-sm text-muted-foreground">Rate</p>
+                  <p className="text-2xl font-semibold text-accent">{stats.acceptanceRate}%</p>
                 </div>
                 <TrendingUp className="h-8 w-8 text-accent" />
               </div>
@@ -249,7 +247,7 @@ const MatchManagementPage = () => {
           </TabsList>
 
           <TabsContent value="suggested">
-            <Card className="card-premium">
+            <Card className="card">
               <CardHeader>
                 <CardTitle>Suggested Matches</CardTitle>
                 <CardDescription>
@@ -257,9 +255,9 @@ const MatchManagementPage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {suggestedMatches.map((match) => (
-                    <div key={match.id} className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border-soft">
+                    <div key={match.id} className="card-interactive p-4">
                       <div className="flex items-center space-x-4 flex-1">
                         <div className="flex items-center space-x-2">
                           <Avatar className="w-10 h-10">

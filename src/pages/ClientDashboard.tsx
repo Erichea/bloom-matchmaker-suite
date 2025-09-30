@@ -298,8 +298,8 @@ const ClientDashboard = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-4 border-pink-500 border-t-transparent"></div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="loading-spinner-lg text-accent"></div>
       </div>
     );
   }
@@ -320,14 +320,14 @@ const ClientDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Elegant Header */}
-      <header className="bg-surface/50 backdrop-blur-lg border-b border-border sticky top-0 z-40">
-        <div className="max-w-4xl mx-auto px-6">
+      {/* Header */}
+      <header className="bg-card border-b border-border sticky top-0 z-40">
+        <div className="container-narrow">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center space-x-3">
-              <Heart className="h-5 w-5 text-accent animate-pulse-soft" />
-              <span className="text-xl font-light tracking-wide text-foreground">
+              <Heart className="h-5 w-5 text-accent" />
+              <span className="text-xl font-medium tracking-wide">
                 BLOOM
               </span>
             </div>
@@ -406,44 +406,39 @@ const ClientDashboard = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 py-12 pb-20 animate-fade-in">
+      <main className="container-narrow py-8 md:py-12 animate-fade-in">
         {/* Welcome Section */}
-        <div className="mb-12 text-center space-y-4">
-          <div className="space-y-2">
-            <h1 className="text-3xl md:text-4xl font-light text-foreground tracking-tight">
-              Welcome back, {firstName}
-            </h1>
-            <div className="w-12 h-0.5 bg-accent mx-auto"></div>
-          </div>
-          <p className="text-lg text-muted-foreground font-light">
-            Your journey to meaningful connection continues <span className="fun-emoji">✨</span>
+        <div className="mb-8 text-center space-y-3">
+          <h1 className="text-2xl md:text-3xl">Welcome back, {firstName}</h1>
+          <p className="text-muted-foreground">
+            Your journey to meaningful connection continues
           </p>
         </div>
 
         {/* Profile Status Card */}
         {profile.status !== 'approved' && (
-          <Card className="mb-12 card-premium animate-slide-up">
-            <CardContent className="p-8">
-              <div className="text-center space-y-6">
-                <div className="illustration-icon mx-auto bg-accent/10">
+          <Card className="mb-8 card animate-slide-up">
+            <CardContent className="p-6 md:p-8">
+              <div className="text-center space-y-4">
+                <div className="w-12 h-12 rounded-full bg-accent-soft mx-auto flex items-center justify-center">
                   {profile.status === 'pending_approval' ? (
-                    <Clock className="w-6 h-6 text-accent animate-wiggle" />
+                    <Clock className="w-6 h-6 text-accent" />
                   ) : profile.status === 'rejected' ? (
-                    <AlertCircle className="w-6 h-6 text-muted-foreground" />
+                    <AlertCircle className="w-6 h-6 text-destructive" />
                   ) : (
-                    <Sparkles className="w-6 h-6 text-accent animate-float" />
+                    <Sparkles className="w-6 h-6 text-accent" />
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="text-xl font-light text-foreground">
+                  <h3 className="text-lg font-semibold">
                     {profile.status === 'pending_approval'
                       ? 'Profile Under Review'
                       : profile.status === 'rejected'
                       ? 'Action Required'
                       : 'Complete Your Profile'}
                   </h3>
-                  <p className="text-sm text-muted-foreground font-light leading-relaxed max-w-md mx-auto">
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
                     {profile.status === 'pending_approval'
                       ? 'Our team is carefully reviewing your profile. You\'ll be notified within 24-48 hours.'
                       : profile.status === 'rejected'
@@ -453,21 +448,21 @@ const ClientDashboard = () => {
                 </div>
 
                 {profile.status === 'rejected' && profile.rejection_reason && (
-                  <div className="p-4 bg-accent/5 border border-accent/20 rounded-lg">
-                    <p className="text-xs font-medium text-muted-foreground mb-1">Feedback</p>
-                    <p className="text-sm text-foreground font-light">{profile.rejection_reason}</p>
+                  <div className="p-4 bg-destructive-soft border border-destructive/20 rounded-lg">
+                    <p className="text-xs font-semibold text-muted-foreground mb-1">Feedback</p>
+                    <p className="text-sm">{profile.rejection_reason}</p>
                   </div>
                 )}
 
                 {profile.completion_percentage !== null && profile.status !== 'pending_approval' && (
                   <div className="max-w-sm mx-auto space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground font-light">Profile Completion</span>
-                      <span className="text-foreground font-light">{profile.completion_percentage}%</span>
+                      <span className="text-muted-foreground">Profile Completion</span>
+                      <span className="font-semibold">{profile.completion_percentage}%</span>
                     </div>
-                    <div className="w-full bg-muted rounded-full h-1.5">
+                    <div className="w-full bg-muted rounded-full h-2">
                       <div
-                        className="bg-accent h-1.5 rounded-full transition-all duration-500"
+                        className="bg-accent h-2 rounded-full transition-all duration-500"
                         style={{ width: `${profile.completion_percentage}%` }}
                       />
                     </div>
@@ -477,7 +472,7 @@ const ClientDashboard = () => {
                 {(profile.status === 'incomplete' || profile.status === 'rejected') && (
                   <Button
                     onClick={() => navigate('/profile-questionnaire')}
-                    className="btn-premium"
+                    className="btn-accent"
                   >
                     {profile.status === 'rejected' ? 'Update Profile' : 'Complete Profile'}
                   </Button>
@@ -489,32 +484,32 @@ const ClientDashboard = () => {
 
         {/* Quick Stats - Only show if approved */}
         {profile.status === 'approved' && (
-          <div className="grid grid-cols-3 gap-4 mb-12">
-            <Card className="card-premium text-center hover:scale-105 transition-transform">
-              <CardContent className="p-6">
-                <div className="illustration-icon mx-auto bg-accent/10 mb-3">
-                  <Heart className="w-5 h-5 text-accent animate-pulse-soft" />
+          <div className="grid grid-cols-3 gap-3 md:gap-4 mb-8">
+            <Card className="card text-center">
+              <CardContent className="p-4 md:p-6">
+                <div className="w-10 h-10 rounded-full bg-accent-soft mx-auto flex items-center justify-center mb-2">
+                  <Heart className="w-5 h-5 text-accent" />
                 </div>
-                <div className="text-2xl font-light text-foreground mb-1">{stats.totalMatches}</div>
-                <div className="text-xs text-muted-foreground font-light">Total Matches</div>
+                <div className="text-xl md:text-2xl font-semibold mb-1">{stats.totalMatches}</div>
+                <div className="text-xs text-muted-foreground">Total</div>
               </CardContent>
             </Card>
-            <Card className="card-premium text-center hover:scale-105 transition-transform">
-              <CardContent className="p-6">
-                <div className="illustration-icon mx-auto bg-primary/10 mb-3">
-                  <MessageCircle className="w-5 h-5 text-primary" />
+            <Card className="card text-center">
+              <CardContent className="p-4 md:p-6">
+                <div className="w-10 h-10 rounded-full bg-success-soft mx-auto flex items-center justify-center mb-2">
+                  <MessageCircle className="w-5 h-5 text-success" />
                 </div>
-                <div className="text-2xl font-light text-foreground mb-1">{stats.mutualMatches}</div>
-                <div className="text-xs text-muted-foreground font-light">Mutual</div>
+                <div className="text-xl md:text-2xl font-semibold mb-1">{stats.mutualMatches}</div>
+                <div className="text-xs text-muted-foreground">Mutual</div>
               </CardContent>
             </Card>
-            <Card className="card-premium text-center hover:scale-105 transition-transform">
-              <CardContent className="p-6">
-                <div className="illustration-icon mx-auto bg-success/10 mb-3">
-                  <Sparkles className="w-5 h-5 text-success animate-float" />
+            <Card className="card text-center">
+              <CardContent className="p-4 md:p-6">
+                <div className="w-10 h-10 rounded-full bg-warning-soft mx-auto flex items-center justify-center mb-2">
+                  <Sparkles className="w-5 h-5 text-warning" />
                 </div>
-                <div className="text-2xl font-light text-foreground mb-1">{stats.pendingMatches}</div>
-                <div className="text-xs text-muted-foreground font-light">Pending</div>
+                <div className="text-xl md:text-2xl font-semibold mb-1">{stats.pendingMatches}</div>
+                <div className="text-xs text-muted-foreground">Pending</div>
               </CardContent>
             </Card>
           </div>
@@ -523,19 +518,16 @@ const ClientDashboard = () => {
         {/* Matches Section - Only show if approved */}
         {profile.status === 'approved' && (
           <>
-            <div className="text-center mb-8 space-y-4">
-              <div className="space-y-2">
-                <h2 className="text-2xl font-light text-foreground">
-                  Curated For You
-                </h2>
-                <div className="w-12 h-0.5 bg-accent mx-auto"></div>
-              </div>
-              <p className="text-sm text-muted-foreground font-light">
-                Handpicked matches based on your preferences <span className="fun-emoji">💫</span>
+            <div className="text-center mb-6 space-y-2">
+              <h2 className="text-xl md:text-2xl font-semibold">
+                Curated For You
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Handpicked matches based on your preferences
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8">
               {displayMatches.map((match, index) => {
                 const userProfileId = profile?.id;
                 const otherProfile = match.profile_1_id === userProfileId ? match.profile_2 : match.profile_1;
@@ -547,35 +539,35 @@ const ClientDashboard = () => {
                 const hasResponded = hasUserResponded(match);
 
                 return (
-                  <Card key={match.id} className="card-premium overflow-hidden group animate-slide-up" style={{animationDelay: `${index * 0.1}s`}}>
+                  <Card key={match.id} className="card-interactive overflow-hidden animate-slide-up" style={{animationDelay: `${index * 0.1}s`}}>
                     <div className="relative">
-                      <div className="w-full h-96 bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
-                        <Avatar className="w-32 h-32 border-4 border-white shadow-lg">
-                          <AvatarFallback className="text-4xl bg-primary-muted text-primary">
+                      <div className="w-full h-64 md:h-80 bg-accent-soft flex items-center justify-center">
+                        <Avatar className="w-24 h-24 md:w-32 md:h-32 border-4 border-card shadow-md">
+                          <AvatarFallback className="text-3xl md:text-4xl bg-accent text-accent-foreground">
                             {initials}
                           </AvatarFallback>
                         </Avatar>
                       </div>
                       <div className="absolute top-4 right-4">
-                        <Badge className="bg-surface/90 backdrop-blur-sm text-accent border-accent/20 font-light">
+                        <Badge className="bg-card/90 backdrop-blur-sm border">
                           <Star className="w-3 h-3 mr-1" />
-                          {match.compatibility_score}% Match
+                          {match.compatibility_score}%
                         </Badge>
                       </div>
                     </div>
-                    <CardContent className="p-6 space-y-4">
+                    <CardContent className="p-4 md:p-6 space-y-3">
                       <div>
-                        <h3 className="text-xl font-light text-foreground mb-1">
+                        <h3 className="text-lg font-semibold mb-1">
                           {name}{age && `, ${age}`}
                         </h3>
                         {location && (
-                          <div className="flex items-center text-muted-foreground text-sm font-light mb-2">
+                          <div className="flex items-center text-muted-foreground text-sm mb-1">
                             <MapPin className="w-3.5 h-3.5 mr-1" />
                             {location}
                           </div>
                         )}
                         {otherProfile?.profession && (
-                          <div className="flex items-center text-muted-foreground text-sm font-light">
+                          <div className="flex items-center text-muted-foreground text-sm">
                             <Briefcase className="w-3.5 h-3.5 mr-1" />
                             {otherProfile.profession}
                           </div>
@@ -588,15 +580,13 @@ const ClientDashboard = () => {
                         </Badge>
                       </div>
 
-                      <div className="flex space-x-3 pt-2">
-                        <Button 
-                          className="flex-1 btn-premium group"
-                          onClick={() => openMatchModal(match)}
-                        >
-                          <Eye className="w-4 h-4 mr-2" />
-                          View Profile
-                        </Button>
-                      </div>
+                      <Button
+                        className="w-full btn-accent"
+                        onClick={() => openMatchModal(match)}
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        View Profile
+                      </Button>
                     </CardContent>
                   </Card>
                 );
