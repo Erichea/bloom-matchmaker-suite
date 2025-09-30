@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -65,20 +65,29 @@ const ClientDashboard = () => {
     newMatches: 0
   });
 
-  useEffect(() => {
-    if (authLoading) return;
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
-    const loadData = async () => {
-      await fetchProfile();
-      await fetchMatches();
-    };
-    loadData();
-  }, [user, authLoading, navigate]);
+  const calculateStats = useCallback((matchesData: Match[], userProfileId: string) => {
+    const pending = matchesData.filter(m =>
+      m.match_status === 'pending' ||
+      (m.match_status === 'profile_1_accepted' && m.profile_1_id !== userProfileId) ||
+      (m.match_status === 'profile_2_accepted' && m.profile_2_id !== userProfileId)
+    );
 
-  const createBasicProfile = async () => {
+    const mutual = matchesData.filter(m => m.match_status === 'both_accepted');
+
+    const newMatches = matchesData.filter(m => {
+      const isProfile1 = m.profile_1_id === userProfileId;
+      return isProfile1 ? !m.viewed_by_profile_1 : !m.viewed_by_profile_2;
+    });
+
+    setStats({
+      totalMatches: matchesData.length,
+      pendingMatches: pending.length,
+      mutualMatches: mutual.length,
+      newMatches: newMatches.length
+    });
+  }, []);
+
+  const createBasicProfile = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -107,9 +116,9 @@ const ClientDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast, user]);
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -147,9 +156,9 @@ const ClientDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast, createBasicProfile]);
 
-  const fetchMatches = async () => {
+  const fetchMatches = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -191,29 +200,20 @@ const ClientDashboard = () => {
     } catch (error: any) {
       console.error('Error fetching matches:', error);
     }
-  };
+  }, [user, calculateStats]);
 
-  const calculateStats = (matchesData: Match[], userProfileId: string) => {
-    const pending = matchesData.filter(m => 
-      m.match_status === 'pending' || 
-      (m.match_status === 'profile_1_accepted' && m.profile_1_id !== userProfileId) ||
-      (m.match_status === 'profile_2_accepted' && m.profile_2_id !== userProfileId)
-    );
-    
-    const mutual = matchesData.filter(m => m.match_status === 'both_accepted');
-    
-    const newMatches = matchesData.filter(m => {
-      const isProfile1 = m.profile_1_id === userProfileId;
-      return isProfile1 ? !m.viewed_by_profile_1 : !m.viewed_by_profile_2;
-    });
-
-    setStats({
-      totalMatches: matchesData.length,
-      pendingMatches: pending.length,
-      mutualMatches: mutual.length,
-      newMatches: newMatches.length
-    });
-  };
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    const loadData = async () => {
+      await fetchProfile();
+      await fetchMatches();
+    };
+    loadData();
+  }, [user, authLoading, navigate, fetchProfile, fetchMatches]);
 
   const handleSignOut = async () => {
     await signOut();

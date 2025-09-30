@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -32,13 +32,7 @@ export const ProfileLibraryModal = ({ open, onOpenChange, sourceProfileId, onSug
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (open && sourceProfileId) {
-      fetchProfiles();
-    }
-  }, [open, sourceProfileId]);
-
-  const fetchProfiles = async () => {
+  const fetchProfiles = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase.rpc('get_profiles_for_suggestion', { p_profile_id: sourceProfileId });
@@ -49,7 +43,13 @@ export const ProfileLibraryModal = ({ open, onOpenChange, sourceProfileId, onSug
     } finally {
       setLoading(false);
     }
-  };
+  }, [sourceProfileId, toast]);
+
+  useEffect(() => {
+    if (open && sourceProfileId) {
+      fetchProfiles();
+    }
+  }, [open, sourceProfileId, fetchProfiles]);
 
   const handleSelectProfile = (profileId: string) => {
     setSelectedProfiles(prev => {

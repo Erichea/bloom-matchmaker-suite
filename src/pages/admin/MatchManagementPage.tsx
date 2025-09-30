@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,11 +50,39 @@ const MatchManagementPage = () => {
     acceptanceRate: 0
   });
 
-  useEffect(() => {
-    fetchMatches();
+  const calculateStats = useCallback((matchesData: Match[]) => {
+    const total = matchesData.length;
+    const pending = matchesData.filter(m =>
+      m.match_status === 'pending' ||
+      m.match_status === 'profile_1_accepted' ||
+      m.match_status === 'profile_2_accepted'
+    ).length;
+    const mutual = matchesData.filter(m => m.match_status === 'both_accepted').length;
+    const rejected = matchesData.filter(m =>
+      m.match_status === 'profile_1_rejected' ||
+      m.match_status === 'profile_2_rejected' ||
+      m.match_status === 'rejected'
+    ).length;
+
+    const responded = matchesData.filter(m =>
+      m.profile_1_response || m.profile_2_response
+    ).length;
+    const accepted = matchesData.filter(m =>
+      m.profile_1_response === 'accepted' || m.profile_2_response === 'accepted'
+    ).length;
+
+    const acceptanceRate = responded > 0 ? Math.round((accepted / responded) * 100) : 0;
+
+    setStats({
+      totalMatches: total,
+      pendingMatches: pending,
+      mutualMatches: mutual,
+      rejectedMatches: rejected,
+      acceptanceRate
+    });
   }, []);
 
-  const fetchMatches = async () => {
+  const fetchMatches = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -79,39 +107,11 @@ const MatchManagementPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [calculateStats, toast]);
 
-  const calculateStats = (matchesData: Match[]) => {
-    const total = matchesData.length;
-    const pending = matchesData.filter(m => 
-      m.match_status === 'pending' || 
-      m.match_status === 'profile_1_accepted' || 
-      m.match_status === 'profile_2_accepted'
-    ).length;
-    const mutual = matchesData.filter(m => m.match_status === 'both_accepted').length;
-    const rejected = matchesData.filter(m => 
-      m.match_status === 'profile_1_rejected' || 
-      m.match_status === 'profile_2_rejected' || 
-      m.match_status === 'rejected'
-    ).length;
-    
-    const responded = matchesData.filter(m => 
-      m.profile_1_response || m.profile_2_response
-    ).length;
-    const accepted = matchesData.filter(m => 
-      m.profile_1_response === 'accepted' || m.profile_2_response === 'accepted'
-    ).length;
-    
-    const acceptanceRate = responded > 0 ? Math.round((accepted / responded) * 100) : 0;
-
-    setStats({
-      totalMatches: total,
-      pendingMatches: pending,
-      mutualMatches: mutual,
-      rejectedMatches: rejected,
-      acceptanceRate
-    });
-  };
+  useEffect(() => {
+    fetchMatches();
+  }, [fetchMatches]);
 
   const getStatusBadge = (match: Match) => {
     switch (match.match_status) {

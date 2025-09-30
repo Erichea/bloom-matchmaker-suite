@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -177,15 +177,7 @@ export default function ProfileQuestionnairePage() {
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-    loadSavedAnswers();
-  }, [user, navigate]);
-
-  const loadSavedAnswers = async () => {
+  const loadSavedAnswers = useCallback(async () => {
     if (!user?.id) return;
 
     try {
@@ -208,7 +200,15 @@ export default function ProfileQuestionnairePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    loadSavedAnswers();
+  }, [user, navigate, loadSavedAnswers]);
 
   const saveAnswer = async (questionId: string, answer: any) => {
     if (!user?.id) return;

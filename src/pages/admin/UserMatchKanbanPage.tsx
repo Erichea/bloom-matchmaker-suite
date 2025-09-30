@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -269,13 +269,7 @@ const UserMatchKanbanPage = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  useEffect(() => {
-    if (profileId) {
-      fetchKanbanMatches(profileId);
-    }
-  }, [profileId]);
-
-  const fetchKanbanMatches = async (p_profile_id: string) => {
+  const fetchKanbanMatches = useCallback(async (p_profile_id: string) => {
     try {
       setLoading(true);
       const { data, error } = await supabase.rpc('get_matches_for_kanban', { p_profile_id });
@@ -297,7 +291,13 @@ const UserMatchKanbanPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    if (profileId) {
+      fetchKanbanMatches(profileId);
+    }
+  }, [profileId, fetchKanbanMatches]);
 
   const groupedMatches = matches.reduce((acc, match) => {
     const column = KANBAN_COLUMNS[match.match_status as keyof typeof KANBAN_COLUMNS];

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -46,11 +46,7 @@ const AccessCodesPage = () => {
     },
   });
 
-  useEffect(() => {
-    fetchAccessCodes();
-  }, []);
-
-  const fetchAccessCodes = async () => {
+  const fetchAccessCodes = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('access_codes')
@@ -69,7 +65,11 @@ const AccessCodesPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchAccessCodes();
+  }, [fetchAccessCodes]);
 
   const generateRandomCode = () => {
     const characters = 'ABCDEFGHIJKLMNPQRSTUVWXYZ123456789'; // Exclude O and 0 for clarity

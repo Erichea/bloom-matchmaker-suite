@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,11 +49,7 @@ const ClientsPage = () => {
     thisMonth: 0
   });
 
-  useEffect(() => {
-    fetchClients();
-  }, []);
-
-  const fetchClients = async () => {
+  const fetchClients = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -88,7 +84,11 @@ const ClientsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchClients();
+  }, [fetchClients]);
 
   const handleApprove = async (profileId: string) => {
     if (!user?.id) return;
@@ -310,17 +310,21 @@ const ClientsPage = () => {
               ) : (
                 filteredClients.map((client) => {
                   const name = `${client.first_name || ''} ${client.last_name || ''}`.trim() || 'Unnamed';
-                  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
-                  const location = [client.city, client.country].filter(Boolean).join(', ') || 'Location not set';
+                  const initials = name
+                    .split(' ')
+                    .map((part) => part[0])
+                    .join('')
+                    .toUpperCase();
+                  const location = [client.city, client.country]
+                    .filter(Boolean)
+                    .join(', ') || 'Location not set';
 
-                  (
+                  return (
                     <div key={client.id} className="card-interactive p-4">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center space-x-4 flex-1 min-w-0">
                           <div className="w-12 h-12 rounded-full bg-accent-soft flex items-center justify-center flex-shrink-0">
-                            <span className="text-lg font-semibold text-accent">
-                              {initials}
-                            </span>
+                            <span className="text-lg font-semibold text-accent">{initials}</span>
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold truncate">{name}</h3>
@@ -334,7 +338,9 @@ const ClientsPage = () => {
                             <div className="flex items-center space-x-2 mb-1">
                               {getStatusBadge(client.status)}
                               {client.completion_percentage !== null && (
-                                <span className="text-sm text-muted-foreground hidden sm:inline">{client.completion_percentage}% complete</span>
+                                <span className="text-sm text-muted-foreground hidden sm:inline">
+                                  {client.completion_percentage}% complete
+                                </span>
                               )}
                             </div>
                             <p className="text-xs text-muted-foreground">
@@ -342,47 +348,49 @@ const ClientsPage = () => {
                             </p>
                           </div>
 
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View Profile
-                            </DropdownMenuItem>
-                            {client.status === 'pending_approval' && (
-                              <>
-                                <DropdownMenuItem
-                                  className="text-success"
-                                  onClick={() => handleApprove(client.id)}
-                                >
-                                  <UserCheck className="mr-2 h-4 w-4" />
-                                  Approve Profile
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="text-destructive"
-                                  onClick={() => {
-                                    const reason = prompt('Please provide a reason for rejection:');
-                                    if (reason) {
-                                      handleReject(client.id, reason);
-                                    }
-                                  }}
-                                >
-                                  <UserX className="mr-2 h-4 w-4" />
-                                  Reject Profile
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Profile
+                              </DropdownMenuItem>
+                              {client.status === 'pending_approval' && (
+                                <>
+                                  <DropdownMenuItem
+                                    className="text-success"
+                                    onClick={() => handleApprove(client.id)}
+                                  >
+                                    <UserCheck className="mr-2 h-4 w-4" />
+                                    Approve Profile
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-destructive"
+                                    onClick={() => {
+                                      const reason = prompt('Please provide a reason for rejection:');
+                                      if (reason) {
+                                        handleReject(client.id, reason);
+                                      }
+                                    }}
+                                  >
+                                    <UserX className="mr-2 h-4 w-4" />
+                                    Reject Profile
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
                     </div>
-                  )
+                  );
+                })
               )}
             </div>
           </CardContent>
