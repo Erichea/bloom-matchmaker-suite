@@ -7,167 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { ChevronLeft, ChevronRight, Check, User, Heart, MapPin, Briefcase, Star, Coffee, Camera, Book } from 'lucide-react';
-
-interface Question {
-  id: string;
-  title: string;
-  description: string;
-  type: 'text' | 'select' | 'multiselect' | 'textarea' | 'range';
-  category: string;
-  icon: React.ComponentType<any>;
-  options?: string[];
-  min?: number;
-  max?: number;
-  required?: boolean;
-}
-
-const questions: Question[] = [
-  // Personal Information
-  {
-    id: 'about_me',
-    title: 'Tell us about yourself',
-    description: 'Share what makes you unique and what you\'re passionate about',
-    type: 'textarea',
-    category: 'About You',
-    icon: User,
-    required: true
-  },
-  {
-    id: 'profession_details',
-    title: 'What do you do for work?',
-    description: 'Tell us about your career and professional interests',
-    type: 'textarea',
-    category: 'About You',
-    icon: Briefcase,
-    required: true
-  },
-
-  // Interests & Hobbies
-  {
-    id: 'interests',
-    title: 'What are your interests and hobbies?',
-    description: 'Select all that apply to you',
-    type: 'multiselect',
-    category: 'Interests',
-    icon: Star,
-    options: [
-      'Travel & Adventure', 'Photography', 'Music & Concerts', 'Art & Museums',
-      'Sports & Fitness', 'Cooking & Dining', 'Reading & Writing', 'Technology',
-      'Nature & Hiking', 'Dancing', 'Movies & Theater', 'Fashion & Style',
-      'Entrepreneurship', 'Volunteering', 'Learning Languages', 'Board Games'
-    ],
-    required: true
-  },
-  {
-    id: 'favorite_activities',
-    title: 'What\'s your ideal weekend activity?',
-    description: 'Choose your preferred way to spend free time',
-    type: 'select',
-    category: 'Lifestyle',
-    icon: Coffee,
-    options: [
-      'Exploring new restaurants or cafes',
-      'Outdoor adventures and sports',
-      'Cozy nights in with movies or books',
-      'Social events and parties',
-      'Cultural events like museums or concerts',
-      'Working on personal projects or hobbies',
-      'Traveling to new places'
-    ],
-    required: true
-  },
-
-  // Values & Personality
-  {
-    id: 'values',
-    title: 'What values are most important to you?',
-    description: 'Select your top values',
-    type: 'multiselect',
-    category: 'Values',
-    icon: Heart,
-    options: [
-      'Family', 'Career Success', 'Adventure', 'Stability',
-      'Creativity', 'Health & Wellness', 'Financial Security', 'Spirituality',
-      'Social Impact', 'Personal Growth', 'Freedom', 'Authenticity'
-    ],
-    required: true
-  },
-  {
-    id: 'personality_traits',
-    title: 'How would your friends describe you?',
-    description: 'Choose traits that best represent you',
-    type: 'multiselect',
-    category: 'Personality',
-    icon: User,
-    options: [
-      'Outgoing & Social', 'Thoughtful & Introspective', 'Adventurous', 'Reliable',
-      'Creative & Artistic', 'Analytical', 'Empathetic', 'Ambitious',
-      'Funny & Witty', 'Calm & Patient', 'Spontaneous', 'Organized'
-    ],
-    required: true
-  },
-
-  // Lifestyle
-  {
-    id: 'lifestyle_preferences',
-    title: 'Describe your lifestyle',
-    description: 'Select what applies to you',
-    type: 'multiselect',
-    category: 'Lifestyle',
-    icon: MapPin,
-    options: [
-      'Love to travel', 'Prefer staying local', 'Active and sporty', 'Enjoy quiet evenings',
-      'Social butterfly', 'Small circle of close friends', 'Night owl', 'Early bird',
-      'City life enthusiast', 'Nature lover', 'Foodie', 'Health conscious'
-    ],
-    required: true
-  },
-
-  // Relationship Goals
-  {
-    id: 'relationship_goals',
-    title: 'What are you looking for?',
-    description: 'Select your relationship goals',
-    type: 'select',
-    category: 'Relationship',
-    icon: Heart,
-    options: [
-      'Long-term committed relationship',
-      'Marriage and family',
-      'Companionship and connection',
-      'Taking it slow and seeing where it goes',
-      'Someone to share adventures with'
-    ],
-    required: true
-  },
-  {
-    id: 'deal_breakers',
-    title: 'What are your deal breakers?',
-    description: 'Select any that would be incompatible',
-    type: 'multiselect',
-    category: 'Preferences',
-    icon: Heart,
-    options: [
-      'Smoking', 'Heavy drinking', 'No desire for commitment', 'Different life goals',
-      'Poor communication', 'Lack of ambition', 'Dishonesty', 'Different values about family',
-      'Incompatible lifestyle', 'No shared interests'
-    ]
-  },
-
-  // Future & Goals
-  {
-    id: 'future_goals',
-    title: 'What are your goals for the next few years?',
-    description: 'Share your aspirations and plans',
-    type: 'textarea',
-    category: 'Future',
-    icon: Star,
-    required: true
-  }
-];
-
-const categories = Array.from(new Set(questions.map(q => q.category)));
+import { ChevronLeft, ChevronRight, Check, Star } from 'lucide-react';
+import { profileQuestionCategories, profileQuestions } from '@/constants/profileQuestions';
 
 export default function ProfileQuestionnairePage() {
   const { user } = useAuth();
@@ -252,20 +93,20 @@ export default function ProfileQuestionnairePage() {
   };
 
   const getCompletionPercentage = () => {
-    const completedCategories = categories.filter(category => {
-      const categoryQuestions = questions.filter(q => q.category === category);
-      const answeredInCategory = categoryQuestions.filter(q => answers[q.id] &&
+    const completedCategories = profileQuestionCategories.filter((category) => {
+      const categoryQuestions = profileQuestions.filter((q) => q.category === category);
+      const answeredInCategory = categoryQuestions.filter((q) => answers[q.id] &&
         (Array.isArray(answers[q.id]) ? answers[q.id].length > 0 : answers[q.id].toString().trim() !== ''));
       return answeredInCategory.length === categoryQuestions.length;
     });
-    return Math.round((completedCategories.length / categories.length) * 100);
+    return Math.round((completedCategories.length / profileQuestionCategories.length) * 100);
   };
 
   const handleFinish = async () => {
     if (!user?.id) return;
 
-    const requiredQuestions = questions.filter(q => q.required);
-    const answeredRequired = requiredQuestions.filter(q => answers[q.id] &&
+    const requiredQuestions = profileQuestions.filter((q) => q.required);
+    const answeredRequired = requiredQuestions.filter((q) => answers[q.id] &&
       (Array.isArray(answers[q.id]) ? answers[q.id].length > 0 : answers[q.id].toString().trim() !== ''));
 
     if (answeredRequired.length < requiredQuestions.length) {
@@ -315,10 +156,10 @@ export default function ProfileQuestionnairePage() {
     );
   }
 
-  const currentQuestion = questions[currentQuestionIndex];
+  const currentQuestion = profileQuestions[currentQuestionIndex];
   const completionPercentage = getCompletionPercentage();
-  const completedCategories = categories.filter(category => {
-    const categoryQuestions = questions.filter(q => q.category === category);
+  const completedCategories = profileQuestionCategories.filter((category) => {
+    const categoryQuestions = profileQuestions.filter((q) => q.category === category);
     const answeredInCategory = categoryQuestions.filter(q => answers[q.id] &&
       (Array.isArray(answers[q.id]) ? answers[q.id].length > 0 : answers[q.id].toString().trim() !== ''));
     return answeredInCategory.length === categoryQuestions.length;
@@ -410,12 +251,12 @@ export default function ProfileQuestionnairePage() {
               <p className="text-white/80">Help us find your perfect match</p>
             </div>
             <Badge variant="secondary" className="bg-white/20 text-white">
-              Question {currentQuestionIndex + 1} of {questions.length}
+            Question {currentQuestionIndex + 1} of {profileQuestions.length}
             </Badge>
           </div>
           <div className="space-y-2">
             <div className="flex justify-between text-white/80 text-sm">
-              <span>{completedCategories.length} of {categories.length} categories complete</span>
+              <span>{completedCategories.length} of {profileQuestionCategories.length} categories complete</span>
               <span>{completionPercentage}% complete</span>
             </div>
             <Progress value={completionPercentage} className="h-2" />
@@ -426,14 +267,14 @@ export default function ProfileQuestionnairePage() {
       <div className="max-w-4xl mx-auto px-6 py-8">
         {/* Category Navigation */}
         <div className="flex flex-wrap gap-2 mb-8">
-          {categories.map((category, index) => {
-            const categoryQuestions = questions.filter(q => q.category === category);
+          {profileQuestionCategories.map((category, index) => {
+            const categoryQuestions = profileQuestions.filter((q) => q.category === category);
             const answeredInCategory = categoryQuestions.filter(q => answers[q.id]).length;
             const isCurrentCategory = category === currentCategory;
             const isCompleted = answeredInCategory === categoryQuestions.length;
 
             // Find a question from this category to use its icon
-            const categoryQuestion = questions.find(q => q.category === category);
+            const categoryQuestion = profileQuestions.find((q) => q.category === category);
             const CategoryIcon = categoryQuestion?.icon || Star;
 
             return (
@@ -441,7 +282,7 @@ export default function ProfileQuestionnairePage() {
                 key={category}
                 onClick={() => {
                   // Find the first question of this category
-                  const firstQuestionIndex = questions.findIndex(q => q.category === category);
+                  const firstQuestionIndex = profileQuestions.findIndex((q) => q.category === category);
                   if (firstQuestionIndex !== -1) {
                     setCurrentQuestionIndex(firstQuestionIndex);
                   }
@@ -510,14 +351,14 @@ export default function ProfileQuestionnairePage() {
               Save & Exit
             </Button>
 
-            {currentQuestionIndex === questions.length - 1 ? (
+            {currentQuestionIndex === profileQuestions.length - 1 ? (
               <Button onClick={handleFinish} className="btn-premium flex items-center space-x-2">
                 <Check className="w-4 h-4" />
                 <span>Complete Profile</span>
               </Button>
             ) : (
               <Button
-                onClick={() => setCurrentQuestionIndex(Math.min(questions.length - 1, currentQuestionIndex + 1))}
+                onClick={() => setCurrentQuestionIndex(Math.min(profileQuestions.length - 1, currentQuestionIndex + 1))}
                 className="btn-premium flex items-center space-x-2"
               >
                 <span>Next</span>
