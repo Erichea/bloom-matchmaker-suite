@@ -1,4 +1,6 @@
 -- Add match_id to get_matches_for_kanban function
+drop function if exists get_matches_for_kanban(uuid);
+
 create or replace function get_matches_for_kanban(p_profile_id uuid)
 returns table (match_id uuid, match_status text, compatibility_score integer, other_profile json)
 language sql
