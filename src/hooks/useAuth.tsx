@@ -79,26 +79,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setSession(session);
           setUser(session?.user ?? null);
 
-          // Create user role on sign up
-          if (event === 'SIGNED_IN' && session?.user) {
-            try {
-              console.log('Creating user role for:', session.user.id);
-              const { data, error } = await supabase
-                .from('user_roles')
-                .insert({
-                  user_id: session.user.id,
-                  role: 'client' // Default role is client
-                });
 
-              if (error) {
-                console.error('Error creating user role:', error);
-              } else {
-                console.log('User role created successfully:', data);
-              }
-            } catch (error) {
-              console.error('Error in auth state change:', error);
-            }
-          }
         }
       }
     );
@@ -143,6 +124,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           email_confirmed_at: data.user?.email_confirmed_at,
           confirmation_sent_at: data.user?.confirmation_sent_at
         });
+
+        if (data.user) {
+          console.log('Creating user role for:', data.user.id);
+          const { error: roleError } = await supabase
+            .from('user_roles')
+            .insert({
+              user_id: data.user.id,
+              role: 'client' // Default role is client
+            });
+
+          if (roleError) {
+            console.error('Error creating user role:', roleError);
+            // Optionally, handle this error more gracefully
+          } else {
+            console.log('User role created successfully.');
+          }
+        }
 
         toast({
           title: "Account Created Successfully! 🎉",
