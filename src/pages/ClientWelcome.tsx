@@ -21,21 +21,31 @@ const ClientWelcome = () => {
     try {
       console.log('Validating access code:', accessCode.trim().toUpperCase());
 
-      // Validate access code (case insensitive)
-      const { data: codeData, error } = await supabase
-        .from('access_codes')
-        .select('*')
-        .eq('code', accessCode.trim().toUpperCase())
-        .eq('is_used', false)
-        .single();
+      const normalizedCode = accessCode.trim().toUpperCase();
 
-      console.log('Access code validation result:', { codeData, error });
+      const { data: validationResult, error } = await supabase.rpc('validate_access_code', {
+        p_code: normalizedCode,
+      });
+
+      console.log('Access code validation result:', { validationResult, error });
+
+      const codeData = Array.isArray(validationResult) ? validationResult[0] : null;
 
       if (error || !codeData) {
         console.error('Access code validation failed:', error);
         toast({
           title: "Invalid Access Code",
           description: error?.message || "The access code you entered is invalid or has already been used.",
+          variant: "destructive",
+        });
+        setIsValidating(false);
+        return;
+      }
+
+      if (codeData.is_used) {
+        toast({
+          title: "Access Code Already Used",
+          description: "This access code has already been redeemed.",
           variant: "destructive",
         });
         setIsValidating(false);
@@ -54,7 +64,7 @@ const ClientWelcome = () => {
       }
 
       // Store access code in session storage for profile creation
-      sessionStorage.setItem('validAccessCode', accessCode.trim().toUpperCase());
+      sessionStorage.setItem('validAccessCode', normalizedCode);
       
       toast({
         title: "Access Code Verified",
