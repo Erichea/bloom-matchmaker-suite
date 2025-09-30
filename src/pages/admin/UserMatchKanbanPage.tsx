@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowLeft, Plus, Heart, Clock, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Plus, Heart, Clock, CheckCircle, XCircle, GripVertical } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProfileLibraryModal } from "@/components/ProfileLibraryModal";
 import {
@@ -45,21 +45,22 @@ interface GroupedMatches {
 }
 
 const KANBAN_COLUMNS = {
-  pending: { title: "In Progress", icon: Clock, key: "pending" },
-  profile_1_accepted: { title: "Pending", icon: CheckCircle, key: "profile_1_accepted" },
-  profile_2_accepted: { title: "Pending", icon: CheckCircle, key: "profile_2_accepted" },
-  both_accepted: { title: "Mutual", icon: Heart, key: "both_accepted" },
-  profile_1_rejected: { title: "Rejected", icon: XCircle, key: "profile_1_rejected" },
-  profile_2_rejected: { title: "Rejected", icon: XCircle, key: "profile_2_rejected" },
-  rejected: { title: "Rejected", icon: XCircle, key: "rejected" },
+  pending: { title: "In Progress", icon: Clock, key: "pending", color: "bg-blue-50 border-blue-200" },
+  profile_1_accepted: { title: "Pending", icon: CheckCircle, key: "profile_1_accepted", color: "bg-yellow-50 border-yellow-200" },
+  profile_2_accepted: { title: "Pending", icon: CheckCircle, key: "profile_2_accepted", color: "bg-yellow-50 border-yellow-200" },
+  both_accepted: { title: "Mutual", icon: Heart, key: "both_accepted", color: "bg-green-50 border-green-200" },
+  profile_1_rejected: { title: "Rejected", icon: XCircle, key: "profile_1_rejected", color: "bg-red-50 border-red-200" },
+  profile_2_rejected: { title: "Rejected", icon: XCircle, key: "profile_2_rejected", color: "bg-red-50 border-red-200" },
+  rejected: { title: "Rejected", icon: XCircle, key: "rejected", color: "bg-red-50 border-red-200" },
 };
 
 interface MatchCardProps {
   match: KanbanMatch;
   isDragging?: boolean;
+  isCompact?: boolean;
 }
 
-const MatchCard = ({ match, isDragging }: MatchCardProps) => {
+const MatchCard = ({ match, isDragging, isCompact = false }: MatchCardProps) => {
   const profile = match.other_profile;
   const name = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -80,21 +81,27 @@ const MatchCard = ({ match, isDragging }: MatchCardProps) => {
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <Card className="bg-white shadow-sm hover:shadow-md transition-shadow border-none cursor-move">
-        <CardContent className="p-3">
-          <div className="flex items-start space-x-3">
-            <Avatar className="w-10 h-10">
-              <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <p className="font-semibold text-gray-800">{name}</p>
-              <p className="text-sm text-gray-500">{age} years old</p>
-              <p className="text-sm text-gray-500">{profile.city}, {profile.country}</p>
+    <div ref={setNodeRef} style={style} {...attributes}>
+      <Card className="bg-white shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 group">
+        <CardContent className={isCompact ? "p-2" : "p-3"}>
+          <div className="flex items-center gap-2">
+            <div {...listeners} className="cursor-grab active:cursor-grabbing">
+              <GripVertical className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
             </div>
-          </div>
-          <div className="mt-3 pt-3 border-t border-gray-100">
-            <Badge variant="secondary">{match.compatibility_score}% Match</Badge>
+            <Avatar className={isCompact ? "w-8 h-8" : "w-10 h-10"}>
+              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className={`font-semibold text-gray-800 truncate ${isCompact ? "text-sm" : "text-base"}`}>
+                {name}
+              </p>
+              <p className={`text-gray-500 truncate ${isCompact ? "text-xs" : "text-sm"}`}>
+                {age} • {profile.city}
+              </p>
+            </div>
+            <Badge variant="secondary" className={isCompact ? "text-xs px-1.5 py-0" : "text-xs"}>
+              {match.compatibility_score}%
+            </Badge>
           </div>
         </CardContent>
       </Card>
@@ -114,6 +121,51 @@ const calculateAge = (dateOfBirth: string) => {
   return age;
 };
 
+// Mobile list view component
+const MobileListView = ({ matches, profileId }: { matches: KanbanMatch[]; profileId: string }) => {
+  const { toast } = useToast();
+  const groupedMatches = matches.reduce((acc, match) => {
+    const column = KANBAN_COLUMNS[match.match_status as keyof typeof KANBAN_COLUMNS];
+    if (column) {
+      const title = column.title;
+      if (!acc[title]) {
+        acc[title] = [];
+      }
+      acc[title].push(match);
+    }
+    return acc;
+  }, {} as GroupedMatches);
+
+  return (
+    <div className="space-y-4">
+      {Object.entries(KANBAN_COLUMNS)
+        .map(([key, { title, icon: Icon, color }]) => ({ key, title, icon: Icon, color }))
+        .filter((v, i, a) => a.findIndex(t => t.title === v.title) === i)
+        .map(({ key, title, icon: Icon, color }) => {
+          const columnMatches = groupedMatches[title] || [];
+          if (columnMatches.length === 0) return null;
+
+          return (
+            <div key={title} className={`rounded-lg border-2 ${color} p-3`}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Icon className="w-5 h-5 text-gray-600" />
+                  <h3 className="font-semibold text-gray-800">{title}</h3>
+                </div>
+                <Badge variant="outline" className="text-xs">{columnMatches.length}</Badge>
+              </div>
+              <div className="space-y-2">
+                {columnMatches.map((match) => (
+                  <MatchCard key={match.match_id} match={match} isCompact />
+                ))}
+              </div>
+            </div>
+          );
+        })}
+    </div>
+  );
+};
+
 const UserMatchKanbanPage = () => {
   const { profileId } = useParams<{ profileId: string }>();
   const navigate = useNavigate();
@@ -122,6 +174,7 @@ const UserMatchKanbanPage = () => {
   const [loading, setLoading] = useState(true);
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -130,6 +183,16 @@ const UserMatchKanbanPage = () => {
       },
     })
   );
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (profileId) {
@@ -143,7 +206,6 @@ const UserMatchKanbanPage = () => {
       const { data, error } = await supabase.rpc('get_matches_for_kanban', { p_profile_id });
       if (error) throw error;
 
-      // Add match_id to each match if it doesn't exist
       const matchesWithIds = (data || []).map((match: any, index: number) => ({
         ...match,
         match_id: match.match_id || `match-${index}`,
@@ -183,13 +245,11 @@ const UserMatchKanbanPage = () => {
     const activeMatch = matches.find(m => m.match_id === active.id);
     const overId = over.id as string;
 
-    // Check if dropped over a column
     const targetColumnKey = Object.entries(KANBAN_COLUMNS).find(
       ([key, val]) => val.title === overId
     )?.[0];
 
     if (activeMatch && targetColumnKey && activeMatch.match_status !== targetColumnKey) {
-      // Update the match status
       updateMatchStatus(activeMatch.match_id, targetColumnKey);
     }
   };
@@ -203,7 +263,6 @@ const UserMatchKanbanPage = () => {
 
       if (error) throw error;
 
-      // Update local state
       setMatches(matches.map(m =>
         m.match_id === matchId ? { ...m, match_status: newStatus } : m
       ));
@@ -225,69 +284,87 @@ const UserMatchKanbanPage = () => {
         sourceProfileId={profileId!}
         onSuggestSuccess={() => fetchKanbanMatches(profileId!)}
       />
-      <div className="p-8 bg-gray-50 min-h-screen">
-        <div className="max-w-full mx-auto">
-          <div className="mb-8 flex justify-between items-center">
-            <div>
-              <Button variant="ghost" onClick={() => navigate(-1)} className="mb-2 text-gray-600 hover:text-gray-900">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Dashboard
-              </Button>
-              <h1 className="text-3xl font-bold text-gray-800">Match Kanban</h1>
-              <p className="text-gray-500 mt-1">Drag and drop matches to update their status</p>
-            </div>
-            <Button size="lg" onClick={() => setIsLibraryOpen(true)}>
-              <Plus className="w-5 h-5 mr-2" />
-              Suggest More
-            </Button>
-          </div>
-
-          {loading ? (
-            <div className="flex items-center justify-center h-96">
-              <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-gray-900"></div>
-            </div>
-          ) : (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCorners}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-            >
-              <div className="flex gap-6 overflow-x-auto pb-4">
-                {Object.entries(KANBAN_COLUMNS)
-                  .map(([key, { title, icon: Icon }]) => ({ key, title, icon: Icon }))
-                  .filter((v, i, a) => a.findIndex(t => t.title === v.title) === i)
-                  .map(({ key, title, icon: Icon }) => {
-                    const columnMatches = groupedMatches[title] || [];
-                    return (
-                      <div key={title} className="w-80 flex-shrink-0 bg-gray-100 rounded-lg">
-                        <div className="p-3 flex items-center justify-between border-b border-gray-200">
-                          <div className="flex items-center">
-                            <Icon className="w-5 h-5 mr-3 text-gray-500" />
-                            <h2 className="font-semibold text-gray-700">{title}</h2>
-                          </div>
-                          <span className="text-sm font-medium text-gray-500">{columnMatches.length}</span>
-                        </div>
-                        <SortableContext
-                          items={columnMatches.map(m => m.match_id)}
-                          strategy={verticalListSortingStrategy}
-                          id={title}
-                        >
-                          <div className="p-2 space-y-3 overflow-y-auto h-[calc(100vh-20rem)]">
-                            {columnMatches.map((match) => (
-                              <MatchCard key={match.match_id} match={match} />
-                            ))}
-                          </div>
-                        </SortableContext>
-                      </div>
-                    );
-                  })}
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="p-4 md:p-6 lg:p-8">
+          <div className="max-w-[1600px] mx-auto">
+            <div className="mb-4 md:mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+              <div>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate(-1)}
+                  className="mb-2 text-gray-600 hover:text-gray-900 -ml-2"
+                  size="sm"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back
+                </Button>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Match Board</h1>
+                <p className="text-sm text-gray-500 mt-1">
+                  {isMobile ? "Tap to view • Swipe to manage" : "Drag and drop to update status"}
+                </p>
               </div>
-              <DragOverlay>
-                {activeMatch ? <MatchCard match={activeMatch} isDragging /> : null}
-              </DragOverlay>
-            </DndContext>
-          )}
+              <Button size="lg" onClick={() => setIsLibraryOpen(true)} className="w-full sm:w-auto">
+                <Plus className="w-5 h-5 mr-2" />
+                Suggest More
+              </Button>
+            </div>
+
+            {loading ? (
+              <div className="flex items-center justify-center h-96">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-900"></div>
+              </div>
+            ) : isMobile ? (
+              <MobileListView matches={matches} profileId={profileId!} />
+            ) : (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCorners}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                  {Object.entries(KANBAN_COLUMNS)
+                    .map(([key, { title, icon: Icon, color }]) => ({ key, title, icon: Icon, color }))
+                    .filter((v, i, a) => a.findIndex(t => t.title === v.title) === i)
+                    .map(({ key, title, icon: Icon, color }) => {
+                      const columnMatches = groupedMatches[title] || [];
+                      return (
+                        <div key={title} className={`rounded-lg border-2 ${color} bg-white/50 backdrop-blur-sm flex flex-col`}>
+                          <div className="p-3 flex items-center justify-between border-b border-gray-200 bg-white/80">
+                            <div className="flex items-center gap-2">
+                              <Icon className="w-4 h-4 text-gray-600" />
+                              <h2 className="font-semibold text-gray-800 text-sm">{title}</h2>
+                            </div>
+                            <Badge variant="outline" className="text-xs font-semibold">
+                              {columnMatches.length}
+                            </Badge>
+                          </div>
+                          <SortableContext
+                            items={columnMatches.map(m => m.match_id)}
+                            strategy={verticalListSortingStrategy}
+                            id={title}
+                          >
+                            <div className="p-2 space-y-2 overflow-y-auto flex-1 min-h-[200px] max-h-[calc(100vh-280px)]">
+                              {columnMatches.map((match) => (
+                                <MatchCard key={match.match_id} match={match} isCompact />
+                              ))}
+                              {columnMatches.length === 0 && (
+                                <div className="text-center text-gray-400 text-sm py-8">
+                                  No matches
+                                </div>
+                              )}
+                            </div>
+                          </SortableContext>
+                        </div>
+                      );
+                    })}
+                </div>
+                <DragOverlay>
+                  {activeMatch ? <MatchCard match={activeMatch} isDragging isCompact /> : null}
+                </DragOverlay>
+              </DndContext>
+            )}
+          </div>
         </div>
       </div>
     </>
