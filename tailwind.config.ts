@@ -20,6 +20,7 @@ export default {
       colors: {
         border: "hsl(var(--border))",
         "border-soft": "hsl(var(--border-soft))",
+        "border-hover": "hsl(var(--border-hover))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
