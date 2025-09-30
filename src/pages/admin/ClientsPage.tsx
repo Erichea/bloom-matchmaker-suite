@@ -26,6 +26,8 @@ import {
   Loader2,
   CheckCircle,
   Clock,
+  Check,
+  X,
 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -48,6 +50,13 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -102,6 +111,16 @@ type ViewMode = "active" | "deleted";
 
 type QuestionnaireAnswers = Record<string, any>;
 
+type StatusFilter = "all" | "pending_approval" | "approved" | "rejected" | "incomplete";
+
+const STATUS_FILTER_OPTIONS: Array<{ value: StatusFilter; label: string }> = [
+  { value: "all", label: "All statuses" },
+  { value: "pending_approval", label: "Pending review" },
+  { value: "approved", label: "Approved" },
+  { value: "rejected", label: "Rejected" },
+  { value: "incomplete", label: "Incomplete" },
+];
+
 const formatDate = (value: string | null | undefined, includeTime = false) => {
   if (!value) return "—";
   try {
@@ -134,6 +153,7 @@ const getPrimaryPhoto = (photos?: ProfilePhoto[] | null) => {
 const ClientsPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const userId = user?.id ?? null;
 
   const [view, setView] = useState<ViewMode>("active");
   const [clients, setClients] = useState<ClientRow[]>([]);
@@ -141,6 +161,7 @@ const ClientsPage = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
   const [cockpitOpen, setCockpitOpen] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
@@ -153,6 +174,16 @@ const ClientsPage = () => {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
+
+  const updateStatusFilter = useCallback((value: StatusFilter) => {
+    setStatusFilter(value);
+    setColumnFilters((previous) => {
+      const withoutStatus = previous.filter((filter) => filter.id !== "status");
+      return value === "all"
+        ? withoutStatus
+        : [...withoutStatus, { id: "status", value }];
+    });
+  }, [setColumnFilters]);
 
   const fetchClients = useCallback(
     async (currentView: ViewMode) => {
@@ -273,6 +304,11 @@ const ClientsPage = () => {
   }, [fetchClients, view]);
 
   useEffect(() => {
+    updateStatusFilter("all");
+    setGlobalFilter("");
+  }, [view, updateStatusFilter]);
+
+  useEffect(() => {
     if (cockpitOpen && selectedClientId) {
       loadClientDetails(selectedClientId);
     }
@@ -283,41 +319,49 @@ const ClientsPage = () => {
     setCockpitOpen(true);
   };
 
-  const refreshData = async () => {
-    await fetchClients(view);
-    if (selectedClientId) {
-      await loadClientDetails(selectedClientId);
-    }
-  };
-
-  const handleApprove = async () => {
-    if (!user?.id || !selectedClientId) return;
-
-    try {
-      const { data, error } = await supabase.rpc("approve_profile", {
-        p_profile_id: selectedClientId,
-        p_admin_id: user.id,
-      });
-
-      if (error) throw error;
-
-      if (data?.success) {
-        toast({ title: "Profile approved" });
-        await refreshData();
-      } else {
-        throw new Error(data?.message || "Failed to approve profile");
+  const refreshData = useCallback(
+    async (targetProfileId?: string | null) => {
+      await fetchClients(view);
+      const profileId = targetProfileId ?? selectedClientId;
+      if (profileId) {
+        await loadClientDetails(profileId);
       }
-    } catch (error: any) {
-      toast({
-        title: "Approval failed",
-        description: error.message || "Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
+    },
+    [fetchClients, view, selectedClientId, loadClientDetails],
+  );
 
-  const handleReject = async () => {
-    if (!user?.id || !selectedClientId) return;
+  const handleApprove = useCallback(
+    async (profileId?: string) => {
+      const targetProfileId = profileId ?? selectedClientId;
+      if (!userId || !targetProfileId) return;
+
+      try {
+        const { data, error } = await supabase.rpc("approve_profile", {
+          p_profile_id: targetProfileId,
+          p_admin_id: userId,
+        });
+
+        if (error) throw error;
+
+        if (data?.success) {
+          toast({ title: "Profile approved" });
+          await refreshData();
+        } else {
+          throw new Error(data?.message || "Failed to approve profile");
+        }
+      } catch (error: any) {
+        toast({
+          title: "Approval failed",
+          description: error.message || "Please try again.",
+          variant: "destructive",
+        });
+      }
+    },
+    [selectedClientId, toast, refreshData, userId],
+  );
+
+  const handleReject = useCallback(async () => {
+    if (!userId || !selectedClientId) return;
     if (!rejectionReason.trim()) {
       toast({
         title: "Reason required",
@@ -330,7 +374,7 @@ const ClientsPage = () => {
     try {
       const { data, error } = await supabase.rpc("reject_profile", {
         p_profile_id: selectedClientId,
-        p_admin_id: user.id,
+        p_admin_id: userId,
         p_rejection_reason: rejectionReason.trim(),
       });
 
@@ -351,15 +395,15 @@ const ClientsPage = () => {
         variant: "destructive",
       });
     }
-  };
+  }, [userId, selectedClientId, rejectionReason, toast, refreshData]);
 
   const handleDelete = async () => {
-    if (!user?.id || !selectedClientId) return;
+    if (!userId || !selectedClientId) return;
 
     try {
       const { data, error } = await supabase.rpc("soft_delete_profile", {
         p_profile_id: selectedClientId,
-        p_admin_id: user.id,
+        p_admin_id: userId,
       });
 
       if (error) throw error;
@@ -383,12 +427,12 @@ const ClientsPage = () => {
   };
 
   const handleRestore = async () => {
-    if (!user?.id || !selectedClientId) return;
+    if (!userId || !selectedClientId) return;
 
     try {
       const { data, error } = await supabase.rpc("restore_profile", {
         p_profile_id: selectedClientId,
-        p_admin_id: user.id,
+        p_admin_id: userId,
       });
 
       if (error) throw error;
@@ -412,7 +456,13 @@ const ClientsPage = () => {
   };
 
   const stats = useMemo(() => {
-  const cards = [] as Array<{ label: string; value: number; icon: ComponentType<any>; tone: string }>;
+    const cards: Array<{
+      label: string;
+      value: number;
+      icon: ComponentType<any>;
+      tone: string;
+      statusValue?: StatusFilter;
+    }> = [];
 
     if (view === "active") {
       const total = clients.length;
@@ -423,9 +473,9 @@ const ClientsPage = () => {
       ).length;
 
       cards.push(
-        { label: "Total clients", value: total, icon: Users, tone: "text-primary" },
-        { label: "Pending review", value: pending, icon: Clock, tone: "text-warning" },
-        { label: "Approved", value: approved, icon: ShieldCheck, tone: "text-success" },
+        { label: "Total clients", value: total, icon: Users, tone: "text-primary", statusValue: "all" },
+        { label: "Pending review", value: pending, icon: Clock, tone: "text-warning", statusValue: "pending_approval" },
+        { label: "Approved", value: approved, icon: ShieldCheck, tone: "text-success", statusValue: "approved" },
         { label: "Joined this month", value: thisMonth, icon: Calendar, tone: "text-muted-foreground" },
       );
     } else {
@@ -521,8 +571,49 @@ const ClientsPage = () => {
           </span>
         ),
       },
+      {
+        id: "actions",
+        header: "",
+        enableSorting: false,
+        cell: ({ row }) => {
+          const client = row.original;
+
+          if (view === "deleted" || client.deleted_at || client.status !== "pending_approval") {
+            return <div className="h-8" />;
+          }
+
+          return (
+            <div className="flex justify-end gap-2">
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 border border-border text-success hover:text-success"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleApprove(client.id);
+                }}
+              >
+                <Check className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 border border-border text-destructive hover:text-destructive"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setSelectedClientId(client.id);
+                  setRejectionReason("");
+                  setRejectDialogOpen(true);
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          );
+        },
+      },
     ],
-    [view],
+    [view, handleApprove],
   );
 
   const table = useReactTable({
@@ -573,19 +664,42 @@ const ClientsPage = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {stats.map(({ label, value, icon: Icon, tone }) => (
-              <Card key={label} className="card">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">{label}</p>
-                      <p className="text-2xl font-semibold">{value}</p>
+            {stats.map(({ label, value, icon: Icon, tone, statusValue }) => {
+              const isClickable = view === "active" && statusValue !== undefined;
+              const isActiveCard = isClickable && statusFilter === statusValue;
+
+              const handleCardInteraction = () => {
+                if (!isClickable || !statusValue) return;
+                updateStatusFilter(statusValue);
+              };
+
+              return (
+                <Card
+                  key={label}
+                  role={isClickable ? "button" : undefined}
+                  tabIndex={isClickable ? 0 : undefined}
+                  onClick={handleCardInteraction}
+                  onKeyDown={(event) => {
+                    if (!isClickable) return;
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      handleCardInteraction();
+                    }
+                  }}
+                  className={`card ${isClickable ? "cursor-pointer transition-colors hover:border-primary/40" : ""} ${isActiveCard ? "border-primary shadow-sm" : ""}`}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">{label}</p>
+                        <p className="text-2xl font-semibold">{value}</p>
+                      </div>
+                      <Icon className={`h-8 w-8 ${tone}`} />
                     </div>
-                    <Icon className={`h-8 w-8 ${tone}`} />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
 
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -598,9 +712,23 @@ const ClientsPage = () => {
                 className="pl-9"
               />
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Filter className="h-4 w-4" />
-              <span>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-3 md:justify-end w-full md:w-auto">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Filter className="h-4 w-4" />
+                <Select value={statusFilter} onValueChange={(value) => updateStatusFilter(value as StatusFilter)}>
+                  <SelectTrigger className="w-48" disabled={view === "deleted"}>
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STATUS_FILTER_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <span className="text-sm text-muted-foreground">
                 Showing {table.getRowModel().rows.length} of {table.getFilteredRowModel().rows.length} profiles
               </span>
             </div>
@@ -636,7 +764,10 @@ const ClientsPage = () => {
                           onClick={() => handleRowClick(row.original)}
                         >
                           {row.getVisibleCells().map((cell) => (
-                            <TableCell key={cell.id} className="py-4 text-sm">
+                            <TableCell
+                              key={cell.id}
+                              className={`py-4 text-sm ${cell.column.id === "actions" ? "text-right" : ""}`}
+                            >
                               {flexRender(cell.column.columnDef.cell, cell.getContext())}
                             </TableCell>
                           ))}

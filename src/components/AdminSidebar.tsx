@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { 
-  Home, 
-  Users, 
-  UserCheck, 
-  Heart, 
-  Code, 
-  Settings, 
+import {
+  Home,
+  Users,
+  Heart,
+  Code,
+  Settings,
   HelpCircle,
-  ChevronDown
+  ChevronDown,
 } from "lucide-react";
 import {
   Sidebar,
@@ -37,16 +36,6 @@ const adminMenuItems = [
         title: "All Clients",
         url: "/admin/clients",
         icon: Users,
-      },
-      {
-        title: "Pending Approval",
-        url: "/admin/clients/pending",
-        icon: UserCheck,
-      },
-      {
-        title: "Profile Reviews",
-        url: "/admin/clients/reviews",
-        icon: UserCheck,
       },
     ],
   },
