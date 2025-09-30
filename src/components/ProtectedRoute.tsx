@@ -14,6 +14,7 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
   const { user, loading, signOut } = useAuth();
   const [userRole, setUserRole] = useState<string | undefined>(undefined);
   const [roleLoading, setRoleLoading] = useState(false);
+  const [checkedUserId, setCheckedUserId] = useState<string | null>(null);
   const location = useLocation();
 
   useEffect(() => {
@@ -24,7 +25,14 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
         if (isMounted) {
           setUserRole(undefined);
           setRoleLoading(false);
+          setCheckedUserId(null);
         }
+        return;
+      }
+
+      // Only fetch role if we haven't checked this user yet or user changed
+      if (checkedUserId === user.id) {
+        console.log('Role already checked for user:', user.id);
         return;
       }
 
@@ -51,11 +59,13 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
             setUserRole(data?.role || 'client');
             console.log('User role set to:', data?.role || 'client');
           }
+          setCheckedUserId(user.id);
         }
       } catch (error) {
         console.error('Error checking user role:', error);
         if (isMounted) {
           setUserRole('client');
+          setCheckedUserId(user.id);
         }
       } finally {
         if (isMounted) {
@@ -70,7 +80,7 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
     return () => {
       isMounted = false;
     };
-  }, [user]);
+  }, [user, checkedUserId]);
 
   // Redirect to admin login if not logged in and trying to access admin
   if (!user && !loading && requireAdmin) {
