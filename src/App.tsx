@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import ClientsPage from "./pages/admin/ClientsPage";
 import AccessCodesPage from "./pages/admin/AccessCodesPage";
 import MatchSuggestionPage from "./pages/admin/MatchSuggestionPage";
+import UserMatchKanbanPage from "./pages/admin/UserMatchKanbanPage";
 import MatchManagementPage from "./pages/admin/MatchManagementPage";
 import { AdminLayout } from "./components/AdminLayout";
 import { AuthProvider } from "./hooks/useAuth";
@@ -57,6 +58,13 @@ const App = () => (
               <ProtectedRoute requireAdmin={true}>
                 <AdminLayout>
                   <MatchSuggestionPage />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/matches/suggest/:profileId" element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminLayout>
+                  <UserMatchKanbanPage />
                 </AdminLayout>
               </ProtectedRoute>
             } />
