@@ -71,8 +71,11 @@ const ClientDashboard = () => {
       navigate("/auth");
       return;
     }
-    fetchProfile();
-    fetchMatches();
+    const loadData = async () => {
+      await fetchProfile();
+      await fetchMatches();
+    };
+    loadData();
   }, [user, authLoading, navigate]);
 
   const createBasicProfile = async () => {
@@ -94,6 +97,7 @@ const ClientDashboard = () => {
 
       if (error) throw error;
       setProfile(data);
+      return data; // Return the newly created profile
     } catch (error: any) {
       toast({
         title: "Error",
@@ -125,14 +129,15 @@ const ClientDashboard = () => {
         .eq('user_id', user.id)
         .single();
 
+      let profileData = data;
       if (error && error.code !== 'PGRST116') throw error;
 
-      if (!data) {
-        await createBasicProfile();
-        return;
+      if (!profileData) {
+        profileData = await createBasicProfile();
+        if (!profileData) return; // Still exit if creation failed
       }
 
-      setProfile(data);
+      setProfile(profileData);
     } catch (error: any) {
       toast({
         title: "Error",
