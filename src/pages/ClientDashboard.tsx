@@ -148,7 +148,13 @@ const ClientDashboard = () => {
     if (!user) return;
 
     try {
-      // First, get the user's profile ID
+      const { data: rpcData, error } = await supabase
+        .rpc('get_matches_for_user', { p_user_id: user.id });
+
+      if (error) throw error;
+
+      const data = rpcData ? rpcData.map((row: any) => row.match_data) : [];
+
       const { data: userProfile } = await supabase
         .from('profiles')
         .select('id')
@@ -156,19 +162,6 @@ const ClientDashboard = () => {
         .single();
 
       if (!userProfile) return;
-
-      // Fetch matches where the user is either profile_1 or profile_2
-      const { data, error } = await supabase
-        .from('matches')
-        .select(`
-          *,
-          profile_1:profiles!matches_profile_1_id_fkey(*),
-          profile_2:profiles!matches_profile_2_id_fkey(*)
-        `)
-        .or(`profile_1_id.eq.${userProfile.id},profile_2_id.eq.${userProfile.id}`)
-        .order('suggested_at', { ascending: false });
-
-      if (error) throw error;
 
       setMatches(data || []);
       calculateStats(data || [], userProfile.id);
