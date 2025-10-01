@@ -163,30 +163,51 @@ const ClientDashboard = () => {
 
   const currentProfileId = profile?.id ?? null;
 
-  const matchSummaries = useMemo(() => {
-    if (!matches.length) return [];
-    return matches.map((match) => {
-      const other = match.profile_1_id === currentProfileId ? match.profile_2 : match.profile_1;
-      const name = other ? `${other.first_name ?? ""} ${other.last_name ?? ""}`.trim() || "Untitled" : "Match";
-      const isNew = currentProfileId
-        ? match.profile_1_id === currentProfileId
-          ? !match.viewed_by_profile_1
-          : !match.viewed_by_profile_2
-        : false;
-
-      let status: "pending" | "mutual" | "new" | "inactive" = "inactive";
-      if (match.match_status === "both_accepted") status = "mutual";
-      else if (isNew) status = "new";
-      else if (match.match_status === "pending" || match.match_status?.includes("accepted")) status = "pending";
-
+  const categorizedMatches = useMemo(() => {
+    if (!matches.length || !currentProfileId) {
       return {
+        yourTurn: [],
+        theirTurn: [],
+        rejected: [],
+        mutualMatch: [],
+      };
+    }
+
+    const categories = {
+      yourTurn: [] as any[],
+      theirTurn: [] as any[],
+      rejected: [] as any[],
+      mutualMatch: [] as any[],
+    };
+
+    matches.forEach((match) => {
+      const isProfile1 = match.profile_1_id === currentProfileId;
+      const currentUserResponse = isProfile1 ? match.profile_1_response : match.profile_2_response;
+      const otherUserResponse = isProfile1 ? match.profile_2_response : match.profile_1_response;
+      const other = isProfile1 ? match.profile_2 : match.profile_1;
+      const name = other ? `${other.first_name ?? ""} ${other.last_name ?? ""}`.trim() || "Untitled" : "Match";
+
+      const matchSummary = {
         id: match.id,
         name,
-        status,
         compatibility: match.compatibility_score,
         subtitle: match.suggested_at ? new Date(match.suggested_at).toLocaleDateString() : undefined,
+        match: match,
       };
+
+      // Categorize based on responses
+      if (match.match_status === "both_accepted") {
+        categories.mutualMatch.push({ ...matchSummary, status: "mutual" });
+      } else if (currentUserResponse === "rejected" || otherUserResponse === "rejected") {
+        categories.rejected.push({ ...matchSummary, status: "inactive" });
+      } else if (currentUserResponse === "accepted") {
+        categories.theirTurn.push({ ...matchSummary, status: "pending" });
+      } else if (!currentUserResponse) {
+        categories.yourTurn.push({ ...matchSummary, status: "new" });
+      }
     });
+
+    return categories;
   }, [matches, currentProfileId]);
 
   if (authLoading || loading) {
@@ -385,26 +406,68 @@ const ClientDashboard = () => {
             )}
 
             {profileStatus === "approved" && (
-              <div className="space-y-6 rounded-[26px] border border-white/12 bg-white/90 p-6 text-left text-[hsl(var(--brand-secondary))] shadow-[0_32px_120px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:p-8">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
-                  <div>
-                    <span className="text-[0.65rem] uppercase tracking-[0.3em] text-[hsl(var(--brand-secondary))]/60">Active matches</span>
-                    <h2 className="text-2xl font-semibold text-[hsl(var(--brand-secondary))]">
-                      {matchSummaries.length ? "Your introductions" : "Quiet for now"}
-                    </h2>
+              <div className="space-y-6">
+                {/* Your Turn */}
+                {categorizedMatches.yourTurn.length > 0 && (
+                  <div className="rounded-[26px] border border-white/12 bg-white/90 p-6 text-left text-[hsl(var(--brand-secondary))] shadow-[0_32px_120px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:p-8">
+                    <div className="mb-4">
+                      <span className="text-[0.65rem] uppercase tracking-[0.3em] text-[hsl(var(--brand-secondary))]/60">Your turn</span>
+                      <h2 className="text-2xl font-semibold text-[hsl(var(--brand-secondary))]">
+                        {categorizedMatches.yourTurn.length} {categorizedMatches.yourTurn.length === 1 ? "match" : "matches"} waiting
+                      </h2>
+                    </div>
+                    <MatchList matches={categorizedMatches.yourTurn} highlightNew onSelect={handleOpenMatch} className="space-y-4" />
                   </div>
-                  {matchSummaries.length ? (
-                    <span className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--brand-secondary))]/60">
-                      Updated moments ago
-                    </span>
-                  ) : null}
-                </div>
+                )}
 
-                {matchSummaries.length > 0 ? (
-                  <MatchList matches={matchSummaries} highlightNew onSelect={handleOpenMatch} className="space-y-4" />
-                ) : (
-                  <div className="rounded-2xl border border-dashed border-[hsl(var(--brand-secondary))]/20 bg-white/70 p-10 text-center text-sm text-[hsl(var(--brand-secondary))]/70">
-                    Your matchmaker is curating the perfect introduction. We&apos;ll let you know the moment a dossier is ready.
+                {/* Mutual Matches */}
+                {categorizedMatches.mutualMatch.length > 0 && (
+                  <div className="rounded-[26px] border border-white/12 bg-white/90 p-6 text-left text-[hsl(var(--brand-secondary))] shadow-[0_32px_120px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:p-8">
+                    <div className="mb-4">
+                      <span className="text-[0.65rem] uppercase tracking-[0.3em] text-[hsl(var(--brand-secondary))]/60">Mutual match</span>
+                      <h2 className="text-2xl font-semibold text-[hsl(var(--brand-secondary))]">
+                        {categorizedMatches.mutualMatch.length} {categorizedMatches.mutualMatch.length === 1 ? "connection" : "connections"}
+                      </h2>
+                    </div>
+                    <MatchList matches={categorizedMatches.mutualMatch} onSelect={handleOpenMatch} className="space-y-4" />
+                  </div>
+                )}
+
+                {/* Their Turn */}
+                {categorizedMatches.theirTurn.length > 0 && (
+                  <div className="rounded-[26px] border border-white/12 bg-white/90 p-6 text-left text-[hsl(var(--brand-secondary))] shadow-[0_32px_120px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:p-8">
+                    <div className="mb-4">
+                      <span className="text-[0.65rem] uppercase tracking-[0.3em] text-[hsl(var(--brand-secondary))]/60">Their turn</span>
+                      <h2 className="text-2xl font-semibold text-[hsl(var(--brand-secondary))]">
+                        Waiting for {categorizedMatches.theirTurn.length} {categorizedMatches.theirTurn.length === 1 ? "response" : "responses"}
+                      </h2>
+                    </div>
+                    <MatchList matches={categorizedMatches.theirTurn} onSelect={handleOpenMatch} className="space-y-4" />
+                  </div>
+                )}
+
+                {/* Rejected */}
+                {categorizedMatches.rejected.length > 0 && (
+                  <div className="rounded-[26px] border border-white/12 bg-white/90 p-6 text-left text-[hsl(var(--brand-secondary))] shadow-[0_32px_120px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:p-8">
+                    <div className="mb-4">
+                      <span className="text-[0.65rem] uppercase tracking-[0.3em] text-[hsl(var(--brand-secondary))]/60">Rejected</span>
+                      <h2 className="text-2xl font-semibold text-[hsl(var(--brand-secondary))]">
+                        {categorizedMatches.rejected.length} {categorizedMatches.rejected.length === 1 ? "match" : "matches"}
+                      </h2>
+                    </div>
+                    <MatchList matches={categorizedMatches.rejected} onSelect={handleOpenMatch} className="space-y-4" />
+                  </div>
+                )}
+
+                {/* Empty state */}
+                {categorizedMatches.yourTurn.length === 0 &&
+                 categorizedMatches.theirTurn.length === 0 &&
+                 categorizedMatches.rejected.length === 0 &&
+                 categorizedMatches.mutualMatch.length === 0 && (
+                  <div className="rounded-[26px] border border-white/12 bg-white/90 p-6 text-left text-[hsl(var(--brand-secondary))] shadow-[0_32px_120px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:p-8">
+                    <div className="rounded-2xl border border-dashed border-[hsl(var(--brand-secondary))]/20 bg-white/70 p-10 text-center text-sm text-[hsl(var(--brand-secondary))]/70">
+                      Your matchmaker is curating the perfect introduction. We&apos;ll let you know the moment a dossier is ready.
+                    </div>
                   </div>
                 )}
               </div>

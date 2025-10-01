@@ -106,15 +106,24 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
   };
 
   // Get the other person's profile (not the current user)
-  const currentUserProfile = match.profile_1?.user_id === user?.id ? match.profile_1 : match.profile_2;
-  const otherProfile = match.profile_1?.user_id === user?.id ? match.profile_2 : match.profile_1;
-  
+  const isProfile1 = match.profile_1?.user_id === user?.id;
+  const currentUserProfile = isProfile1 ? match.profile_1 : match.profile_2;
+  const otherProfile = isProfile1 ? match.profile_2 : match.profile_1;
+  const currentUserResponse = isProfile1 ? match.profile_1_response : match.profile_2_response;
+  const otherUserResponse = isProfile1 ? match.profile_2_response : match.profile_1_response;
+
   if (!otherProfile) return null;
 
   const name = `${otherProfile.first_name || ''} ${otherProfile.last_name || ''}`.trim();
   const initials = name.split(' ').map((n: string) => n[0]).join('').toUpperCase();
   const age = otherProfile.date_of_birth ? calculateAge(otherProfile.date_of_birth) : null;
   const location = [otherProfile.city, otherProfile.country].filter(Boolean).join(', ');
+
+  // Determine match state
+  const isMutualMatch = match.match_status === "both_accepted";
+  const hasResponded = currentUserResponse !== null;
+  const userAccepted = currentUserResponse === "accepted";
+  const userRejected = currentUserResponse === "rejected";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -213,7 +222,48 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
           </Card>
 
           {/* Response Section */}
-          {!showFeedbackForm ? (
+          {isMutualMatch ? (
+            <Card className="bg-primary/5 border-primary/20">
+              <CardContent className="p-6 text-center space-y-2">
+                <div className="text-4xl">🎉</div>
+                <h3 className="font-semibold text-lg">It's a Match!</h3>
+                <p className="text-sm text-muted-foreground">
+                  Both of you are interested! You can now exchange contact information.
+                </p>
+              </CardContent>
+            </Card>
+          ) : userAccepted ? (
+            <div className="space-y-4">
+              <Card className="bg-muted/30">
+                <CardContent className="p-6 text-center space-y-3">
+                  <div className="text-3xl">💌</div>
+                  <h3 className="font-semibold">Waiting for their response</h3>
+                  <p className="text-sm text-muted-foreground">
+                    You've shown interest. We'll notify you if they feel the same!
+                  </p>
+                </CardContent>
+              </Card>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleReject}
+                disabled={responding}
+              >
+                <X className="w-4 h-4 mr-2" />
+                Change mind and reject
+              </Button>
+            </div>
+          ) : userRejected ? (
+            <Card className="bg-muted/30">
+              <CardContent className="p-6 text-center space-y-2">
+                <div className="text-3xl">✕</div>
+                <h3 className="font-semibold">You rejected this match</h3>
+                <p className="text-sm text-muted-foreground">
+                  This match has been declined. We'll keep finding better connections for you.
+                </p>
+              </CardContent>
+            </Card>
+          ) : !showFeedbackForm ? (
             <div className="space-y-4">
               <h3 className="font-semibold text-center">What do you think?</h3>
               <div className="flex space-x-3">
