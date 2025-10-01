@@ -132,7 +132,12 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
   const initials = name.split(' ').map((n: string) => n[0]).join('').toUpperCase();
   const age = otherProfile.date_of_birth ? calculateAge(otherProfile.date_of_birth) : null;
   const location = [otherProfile.city, otherProfile.country].filter(Boolean).join(', ');
-  const otherProfilePhoto = getProfilePhoto(otherProfile);
+  const otherProfilePhotos = Array.isArray(otherProfile?.photos)
+    ? otherProfile.photos.filter((photo: any) => photo && photo.photo_url)
+    : [];
+  const otherProfilePhoto = otherProfilePhotos.length > 0
+    ? otherProfilePhotos[0].photo_url
+    : getProfilePhoto(otherProfile);
 
   // Determine match state
   const isMutualMatch = match.match_status === "both_accepted";
@@ -178,6 +183,31 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
                 </div>
               )}
             </div>
+
+            {otherProfilePhotos.length > 0 && (
+              <div className="space-y-2 text-left">
+                <h3 className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">Gallery</h3>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {otherProfilePhotos.map((photo: any, index: number) => (
+                    <div
+                      key={photo.id ?? photo.photo_url ?? index}
+                      className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted/40"
+                    >
+                      <img
+                        src={photo.photo_url}
+                        alt={`${name || "Match"} photo ${index + 1}`}
+                        className="h-full w-full object-cover"
+                      />
+                      {index === 0 && (
+                        <span className="absolute left-2 top-2 rounded-full bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground">
+                          Primary
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <Badge className="bg-primary/10 text-primary border-primary/20">
               <Star className="w-3 h-3 mr-1" />
