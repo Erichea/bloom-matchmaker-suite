@@ -205,6 +205,10 @@ const ClientDashboard = () => {
     return null;
   }
 
+  // Determine the profile status
+  const profileStatus = profile?.status || "incomplete";
+  const completionPercentage = profile?.completion_percentage || 0;
+
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-[hsl(var(--brand-secondary))] text-white">
       <MatchDetailModal match={selectedMatch} open={modalOpen} onOpenChange={setModalOpen} onMatchResponse={handleMatchResponse} />
@@ -244,13 +248,15 @@ const ClientDashboard = () => {
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/profile-questionnaire")}
-            className="hidden rounded-full border border-white/15 px-6 py-2 text-[0.65rem] uppercase tracking-[0.28em] text-white/80 transition hover:border-white/35 hover:text-white md:inline-flex"
-          >
-            Update profile
-          </Button>
+          {profileStatus === "approved" && (
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/profile-questionnaire")}
+              className="hidden rounded-full border border-white/15 px-6 py-2 text-[0.65rem] uppercase tracking-[0.28em] text-white/80 transition hover:border-white/35 hover:text-white md:inline-flex"
+            >
+              Update profile
+            </Button>
+          )}
           <Button
             variant="ghost"
             onClick={handleSignOut}
@@ -268,25 +274,69 @@ const ClientDashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
-          <div className="flex flex-col gap-4">
-            <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-white/60 md:self-start">
-              Curated introductions
-            </span>
-            <h1 className="font-display text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl">
-              {profile?.first_name ? `Good to see you, ${profile.first_name}.` : "Your curated matches await."}
-            </h1>
-            <p className="text-sm leading-7 text-white/75 md:max-w-xl md:text-base">
-              Explore new introductions as they arrive. Each dossier is prepared intentionally so you can focus on the
-              connections that matter.
-            </p>
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/profile-questionnaire")}
-              className="inline-flex w-full items-center justify-center gap-2 self-center rounded-full border border-white/15 px-6 py-3 text-[0.65rem] uppercase tracking-[0.28em] text-white/80 transition hover:border-white/35 hover:text-white md:w-auto md:self-start"
-            >
-              <User className="h-3.5 w-3.5" /> Update profile preferences
-            </Button>
-          </div>
+          {profileStatus === "incomplete" && (
+            <div className="flex flex-col gap-4">
+              <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-white/60 md:self-start">
+                Complete your profile
+              </span>
+              <h1 className="font-display text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl">
+                {profile?.first_name ? `Welcome, ${profile.first_name}.` : "Let's get started."}
+              </h1>
+              <p className="text-sm leading-7 text-white/75 md:max-w-xl md:text-base">
+                Complete your questionnaire so we can start curating perfect introductions for you.
+              </p>
+            </div>
+          )}
+
+          {profileStatus === "rejected" && (
+            <div className="flex flex-col gap-4">
+              <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-white/60 md:self-start">
+                Profile needs revision
+              </span>
+              <h1 className="font-display text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl">
+                {profile?.first_name ? `${profile.first_name}, let's refine your profile.` : "Update required"}
+              </h1>
+              <p className="text-sm leading-7 text-white/75 md:max-w-xl md:text-base">
+                Your matchmaker has requested some changes to your profile. Please review and resubmit.
+              </p>
+            </div>
+          )}
+
+          {profileStatus === "pending_approval" && (
+            <div className="flex flex-col gap-4">
+              <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-white/60 md:self-start">
+                Under review
+              </span>
+              <h1 className="font-display text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl">
+                {profile?.first_name ? `Thank you, ${profile.first_name}.` : "Profile submitted"}
+              </h1>
+              <p className="text-sm leading-7 text-white/75 md:max-w-xl md:text-base">
+                Your profile is being reviewed by your matchmaker. You'll be notified once approved and we start curating introductions.
+              </p>
+            </div>
+          )}
+
+          {profileStatus === "approved" && (
+            <div className="flex flex-col gap-4">
+              <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-white/60 md:self-start">
+                Curated introductions
+              </span>
+              <h1 className="font-display text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl">
+                {profile?.first_name ? `Good to see you, ${profile.first_name}.` : "Your curated matches await."}
+              </h1>
+              <p className="text-sm leading-7 text-white/75 md:max-w-xl md:text-base">
+                Explore new introductions as they arrive. Each dossier is prepared intentionally so you can focus on the
+                connections that matter.
+              </p>
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/profile-questionnaire")}
+                className="inline-flex w-full items-center justify-center gap-2 self-center rounded-full border border-white/15 px-6 py-3 text-[0.65rem] uppercase tracking-[0.28em] text-white/80 transition hover:border-white/35 hover:text-white md:w-auto md:self-start"
+              >
+                <User className="h-3.5 w-3.5" /> Update profile preferences
+              </Button>
+            </div>
+          )}
 
           <motion.div
             className="w-full"
@@ -294,29 +344,71 @@ const ClientDashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
           >
-            <div className="space-y-6 rounded-[26px] border border-white/12 bg-white/90 p-6 text-left text-[hsl(var(--brand-secondary))] shadow-[0_32px_120px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:p-8">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
-                <div>
-                  <span className="text-[0.65rem] uppercase tracking-[0.3em] text-[hsl(var(--brand-secondary))]/60">Active matches</span>
-                  <h2 className="text-2xl font-semibold text-[hsl(var(--brand-secondary))]">
-                    {matchSummaries.length ? "Your introductions" : "Quiet for now"}
-                  </h2>
+            {(profileStatus === "incomplete" || profileStatus === "rejected") && (
+              <div className="space-y-6 rounded-[26px] border border-white/12 bg-white/90 p-6 text-left text-[hsl(var(--brand-secondary))] shadow-[0_32px_120px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:p-8">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[0.65rem] uppercase tracking-[0.3em] text-[hsl(var(--brand-secondary))]/60">Questionnaire progress</span>
+                    <span className="text-2xl font-semibold text-[hsl(var(--brand-secondary))]">{completionPercentage}%</span>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-[hsl(var(--brand-secondary))]/10">
+                    <div
+                      className="h-full bg-[hsl(var(--brand-primary))] transition-all duration-500"
+                      style={{ width: `${completionPercentage}%` }}
+                    />
+                  </div>
                 </div>
-                {matchSummaries.length ? (
-                  <span className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--brand-secondary))]/60">
-                    Updated moments ago
-                  </span>
-                ) : null}
+                <p className="text-sm text-[hsl(var(--brand-secondary))]/70">
+                  {profileStatus === "rejected"
+                    ? "Please update your profile and resubmit for review."
+                    : "Complete your profile questionnaire to submit for matchmaker review."}
+                </p>
+                <Button
+                  onClick={() => navigate("/profile-questionnaire")}
+                  className="w-full rounded-full bg-[hsl(var(--brand-primary))] px-8 py-3 text-sm font-medium uppercase tracking-[0.3em] text-white transition hover:opacity-90"
+                >
+                  {profileStatus === "rejected" ? "Update questionnaire" : "Continue questionnaire"}
+                </Button>
               </div>
+            )}
 
-              {matchSummaries.length > 0 ? (
-                <MatchList matches={matchSummaries} highlightNew onSelect={handleOpenMatch} className="space-y-4" />
-              ) : (
-                <div className="rounded-2xl border border-dashed border-[hsl(var(--brand-secondary))]/20 bg-white/70 p-10 text-center text-sm text-[hsl(var(--brand-secondary))]/70">
-                  Your matchmaker is curating the perfect introduction. We&apos;ll let you know the moment a dossier is ready.
+            {profileStatus === "pending_approval" && (
+              <div className="space-y-6 rounded-[26px] border border-white/12 bg-white/90 p-6 text-left text-[hsl(var(--brand-secondary))] shadow-[0_32px_120px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:p-8">
+                <div>
+                  <span className="text-[0.65rem] uppercase tracking-[0.3em] text-[hsl(var(--brand-secondary))]/60">Profile status</span>
+                  <h2 className="text-2xl font-semibold text-[hsl(var(--brand-secondary))]">Under review</h2>
                 </div>
-              )}
-            </div>
+                <div className="rounded-2xl border border-dashed border-[hsl(var(--brand-secondary))]/20 bg-white/70 p-10 text-center text-sm text-[hsl(var(--brand-secondary))]/70">
+                  Your matchmaker is carefully reviewing your profile. You'll receive a notification once approved and we can start creating your perfect introductions.
+                </div>
+              </div>
+            )}
+
+            {profileStatus === "approved" && (
+              <div className="space-y-6 rounded-[26px] border border-white/12 bg-white/90 p-6 text-left text-[hsl(var(--brand-secondary))] shadow-[0_32px_120px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:p-8">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
+                  <div>
+                    <span className="text-[0.65rem] uppercase tracking-[0.3em] text-[hsl(var(--brand-secondary))]/60">Active matches</span>
+                    <h2 className="text-2xl font-semibold text-[hsl(var(--brand-secondary))]">
+                      {matchSummaries.length ? "Your introductions" : "Quiet for now"}
+                    </h2>
+                  </div>
+                  {matchSummaries.length ? (
+                    <span className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--brand-secondary))]/60">
+                      Updated moments ago
+                    </span>
+                  ) : null}
+                </div>
+
+                {matchSummaries.length > 0 ? (
+                  <MatchList matches={matchSummaries} highlightNew onSelect={handleOpenMatch} className="space-y-4" />
+                ) : (
+                  <div className="rounded-2xl border border-dashed border-[hsl(var(--brand-secondary))]/20 bg-white/70 p-10 text-center text-sm text-[hsl(var(--brand-secondary))]/70">
+                    Your matchmaker is curating the perfect introduction. We&apos;ll let you know the moment a dossier is ready.
+                  </div>
+                )}
+              </div>
+            )}
           </motion.div>
         </motion.div>
       </main>
