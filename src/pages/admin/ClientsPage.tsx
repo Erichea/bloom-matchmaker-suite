@@ -189,7 +189,7 @@ const ClientsPage = () => {
     async (currentView: ViewMode) => {
       try {
         setLoading(true);
-        const query = supabase
+        let query = supabase
           .from("profiles")
           .select(
             `
@@ -206,10 +206,21 @@ const ClientsPage = () => {
               submitted_for_review_at,
               approved_at,
               rejected_at,
+              deleted_at,
+              deleted_by,
+              status_before_deletion,
               profile_photos ( photo_url, is_primary, order_index )
             `,
-          )
-          .order("created_at", { ascending: false });
+          );
+
+        // Filter based on view
+        if (currentView === "active") {
+          query = query.is("deleted_at", null);
+        } else {
+          query = query.not("deleted_at", "is", null);
+        }
+
+        query = query.order("created_at", { ascending: false });
 
         const { data, error } = await query;
 
