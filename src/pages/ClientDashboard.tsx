@@ -262,7 +262,10 @@ const ClientDashboard = () => {
         name,
         compatibility: match.compatibility_score,
         subtitle: match.suggested_at ? new Date(match.suggested_at).toLocaleDateString() : undefined,
-        match: match,
+        match: {
+          ...match,
+          current_profile_id: currentProfileId,
+        },
         avatarUrl,
       };
 

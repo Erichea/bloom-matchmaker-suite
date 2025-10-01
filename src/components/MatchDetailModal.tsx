@@ -120,7 +120,7 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
   };
 
   // Get the other person's profile (not the current user)
-  const isProfile1 = match.profile_1?.user_id === user?.id;
+  const isProfile1 = match.profile_1_id === match?.current_profile_id;
   const currentUserProfile = isProfile1 ? match.profile_1 : match.profile_2;
   const otherProfile = isProfile1 ? match.profile_2 : match.profile_1;
   const currentUserResponse = isProfile1 ? match.profile_1_response : match.profile_2_response;
