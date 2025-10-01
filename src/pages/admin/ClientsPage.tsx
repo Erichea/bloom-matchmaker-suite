@@ -275,14 +275,11 @@ const ClientsPage = () => {
             throw answersError;
           }
 
-          console.log("Fetched answers data:", answersData);
-
           const answersMap = (answersData || []).reduce<QuestionnaireAnswers>((acc, curr) => {
             acc[curr.question_id] = curr.answer;
             return acc;
           }, {});
 
-          console.log("Answers map:", answersMap);
           setQuestionnaireAnswers(answersMap);
         }
 
@@ -959,6 +956,15 @@ const ClientsPage = () => {
 
                 <section>
                   <h3 className="text-sm font-semibold text-muted-foreground mb-3">Questionnaire answers</h3>
+                  {Object.keys(questionnaireAnswers).length === 0 && (
+                    <Card className="border-warning/50 bg-warning/5 mb-4">
+                      <CardContent className="p-4">
+                        <p className="text-sm text-warning">
+                          No questionnaire answers found. The user may not have started the questionnaire yet, or the completion percentage may be incorrect.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
                   <div className="space-y-4">
                     {profileQuestionCategories.map((category) => {
                       const categoryQuestions = profileQuestions.filter((question) => question.category === category);
@@ -980,7 +986,6 @@ const ClientsPage = () => {
                               {categoryQuestions.map((question) => {
                                 const AnswerIcon = question.icon;
                                 const answer = questionnaireAnswers[question.id];
-                                console.log(`Question ${question.id}:`, answer);
                                 return (
                                   <div key={question.id} className="border border-border rounded-md p-3">
                                     <div className="flex items-center gap-2 text-sm font-medium mb-2">
