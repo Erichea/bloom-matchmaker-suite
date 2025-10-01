@@ -231,6 +231,8 @@ export type Database = {
           country: string | null
           created_at: string
           date_of_birth: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           education: Database["public"]["Enums"]["education_level"] | null
           email: string | null
           faith: string | null
@@ -260,6 +262,9 @@ export type Database = {
           reviewed_by: string | null
           seeks_similar_values: boolean | null
           status: Database["public"]["Enums"]["profile_status"] | null
+          status_before_deletion:
+            | Database["public"]["Enums"]["profile_status"]
+            | null
           submitted_for_review_at: string | null
           updated_at: string
           user_id: string | null
@@ -277,6 +282,8 @@ export type Database = {
           country?: string | null
           created_at?: string
           date_of_birth?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           education?: Database["public"]["Enums"]["education_level"] | null
           email?: string | null
           faith?: string | null
@@ -306,6 +313,9 @@ export type Database = {
           reviewed_by?: string | null
           seeks_similar_values?: boolean | null
           status?: Database["public"]["Enums"]["profile_status"] | null
+          status_before_deletion?:
+            | Database["public"]["Enums"]["profile_status"]
+            | null
           submitted_for_review_at?: string | null
           updated_at?: string
           user_id?: string | null
@@ -323,6 +333,8 @@ export type Database = {
           country?: string | null
           created_at?: string
           date_of_birth?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           education?: Database["public"]["Enums"]["education_level"] | null
           email?: string | null
           faith?: string | null
@@ -352,6 +364,9 @@ export type Database = {
           reviewed_by?: string | null
           seeks_similar_values?: boolean | null
           status?: Database["public"]["Enums"]["profile_status"] | null
+          status_before_deletion?:
+            | Database["public"]["Enums"]["profile_status"]
+            | null
           submitted_for_review_at?: string | null
           updated_at?: string
           user_id?: string | null
@@ -410,6 +425,58 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: number
       }
+      create_bulk_matches: {
+        Args: {
+          p_profile_1_id: string
+          p_profile_2_ids: string[]
+          p_suggested_by: string
+        }
+        Returns: undefined
+      }
+      get_matches_for_kanban: {
+        Args: { p_profile_id: string }
+        Returns: {
+          compatibility_score: number
+          match_id: string
+          match_status: string
+          other_profile: Json
+        }[]
+      }
+      get_matches_for_user: {
+        Args: { p_user_id: string }
+        Returns: {
+          match_data: Json
+        }[]
+      }
+      get_profiles_for_suggestion: {
+        Args: { p_profile_id: string }
+        Returns: {
+          city: string
+          country: string
+          date_of_birth: string
+          email: string
+          first_name: string
+          id: string
+          is_already_suggested: boolean
+          last_name: string
+          profession: string
+        }[]
+      }
+      get_user_match_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          email: string
+          first_name: string
+          in_progress_matches: number
+          last_name: string
+          mutual_matches: number
+          pending_matches: number
+          profile_id: string
+          rejected_matches: number
+          total_matches: number
+          user_id: string
+        }[]
+      }
       has_role: {
         Args: { _role: string; _user_id: string }
         Returns: boolean
@@ -431,9 +498,25 @@ export type Database = {
         }
         Returns: Json
       }
+      restore_profile: {
+        Args: { p_admin_id: string; p_profile_id: string }
+        Returns: Json
+      }
+      soft_delete_profile: {
+        Args: { p_admin_id: string; p_profile_id: string }
+        Returns: Json
+      }
       submit_profile_for_review: {
         Args: { p_user_id: string }
         Returns: Json
+      }
+      validate_access_code: {
+        Args: { p_code: string }
+        Returns: {
+          expires_at: string
+          id: string
+          is_used: boolean
+        }[]
       }
     }
     Enums: {
@@ -458,6 +541,7 @@ export type Database = {
         | "pending_approval"
         | "approved"
         | "rejected"
+        | "deleted"
       relationship_status: "single" | "divorced" | "widowed" | "separated"
     }
     CompositeTypes: {
@@ -609,6 +693,7 @@ export const Constants = {
         "pending_approval",
         "approved",
         "rejected",
+        "deleted",
       ],
       relationship_status: ["single", "divorced", "widowed", "separated"],
     },

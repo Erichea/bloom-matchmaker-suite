@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { ChevronLeft, ChevronRight, Check, Star } from 'lucide-react';
 import { profileQuestionCategories, profileQuestions } from '@/constants/profileQuestions';
+import { PhotoUploadGrid } from '@/components/PhotoUploadGrid';
 
 export default function ProfileQuestionnairePage() {
   const { user } = useAuth();
@@ -17,6 +18,42 @@ export default function ProfileQuestionnairePage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<any>(null);
+  const [photos, setPhotos] = useState<any[]>([]);
+
+  const loadProfile = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) throw error;
+      setProfile(data);
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    }
+  }, [user?.id]);
+
+  const loadPhotos = useCallback(async () => {
+    if (!profile?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('profile_photos')
+        .select('*')
+        .eq('profile_id', profile.id)
+        .order('order_index');
+
+      if (error) throw error;
+      setPhotos(data || []);
+    } catch (error) {
+      console.error('Error loading photos:', error);
+    }
+  }, [profile?.id]);
 
   const loadSavedAnswers = useCallback(async () => {
     if (!user?.id) return;
@@ -48,8 +85,15 @@ export default function ProfileQuestionnairePage() {
       navigate('/auth');
       return;
     }
+    loadProfile();
     loadSavedAnswers();
-  }, [user, navigate, loadSavedAnswers]);
+  }, [user, navigate, loadProfile, loadSavedAnswers]);
+
+  useEffect(() => {
+    if (profile) {
+      loadPhotos();
+    }
+  }, [profile, loadPhotos]);
 
   const saveAnswer = async (questionId: string, answer: any) => {
     if (!user?.id) return;
@@ -265,6 +309,24 @@ export default function ProfileQuestionnairePage() {
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-8">
+        {/* Photos Section - Show first if no photos */}
+        {photos.length === 0 && profile && (
+          <Card className="card-premium mb-8">
+            <CardHeader>
+              <CardTitle>Profile Photos</CardTitle>
+              <p className="text-muted-foreground text-sm">Add at least 6 photos to complete your profile</p>
+            </CardHeader>
+            <CardContent>
+              <PhotoUploadGrid
+                userId={user!.id}
+                profileId={profile.id}
+                photos={photos}
+                onPhotosUpdate={loadPhotos}
+              />
+            </CardContent>
+          </Card>
+        )}
+
         {/* Category Navigation */}
         <div className="flex flex-wrap gap-2 mb-8">
           {profileQuestionCategories.map((category, index) => {
