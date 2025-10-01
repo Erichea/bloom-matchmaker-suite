@@ -170,91 +170,88 @@ const AuthPage = () => {
       </header>
 
       <main className="relative z-10 flex flex-1 items-center px-6 pb-16 md:px-10">
-        <div className="mx-auto grid w-full max-w-5xl items-start gap-12 lg:grid-cols-[1.05fr_1fr]">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="flex flex-col gap-6"
-          >
-            <span className="text-[0.65rem] uppercase tracking-[0.5em] text-white/60">
+        <motion.div
+          className="mx-auto flex w-full max-w-3xl flex-col items-center gap-10 text-center md:items-start md:text-left"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+        >
+          <div className="flex flex-col gap-5">
+            <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-white/60 md:self-start">
               Private members
             </span>
-            <h1 className="font-display text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl">
-              Welcome back to Bloom.
+            <h1 className="font-display text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl">
+              Sign in or finish your invitation.
             </h1>
-            <p className="max-w-xl text-sm leading-7 text-white/75 md:text-base">
-              Sign in to continue your curated introductions. If you’ve just received your invitation, you can create your
-              membership using the same space.
+            <p className="text-sm leading-7 text-white/75 md:text-base">
+              Continue your curated introductions or finalize your invitation after entering your private access code.
             </p>
-            <div className="space-y-3 text-[0.7rem] uppercase tracking-[0.35em] text-white/70">
+            <div className="flex flex-col gap-2 text-[0.65rem] uppercase tracking-[0.25em] text-white/70">
               {hasValidAccessCode ? (
-                <div className="inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-6 py-3 text-white">
-                  <span className="h-px w-6 bg-white/50" /> Invitation verified — finish setting up below.
+                <div className="inline-flex items-center justify-center gap-3 self-center rounded-full border border-white/20 bg-white/10 px-6 py-2 text-white md:self-start">
+                  <span className="h-px w-6 bg-white/50" /> Invitation verified — finish below
                 </div>
               ) : (
-                <div className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-6 py-3">
-                  <span className="h-px w-6 bg-white/40" /> Need an invitation? Use the private code shared by your matchmaker.
-                </div>
+                <Link
+                  to="/client"
+                  className="inline-flex items-center justify-center gap-3 self-center rounded-full border border-white/20 bg-white/5 px-6 py-2 transition hover:border-white/40 hover:text-white md:self-start"
+                >
+                  <span className="h-px w-6 bg-white/40" /> Validate access code first
+                </Link>
               )}
-              <Link to="/client" className="inline-flex items-center gap-3 text-white/80 transition hover:text-white">
-                <span className="h-px w-6 bg-white/40" /> Enter access code
-              </Link>
             </div>
-          </motion.div>
+          </div>
 
           <motion.div
+            className="w-full"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
-            className="w-full"
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
           >
-            <div className="rounded-[2rem] border border-white/15 bg-white/[0.08] p-8 shadow-[0_32px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl">
-              <div className="mb-6 space-y-2 text-center">
-                <span className="text-[0.65rem] uppercase tracking-[0.45em] text-white/60">Bloom members</span>
+            <div className="rounded-[28px] border border-white/15 bg-white/[0.08] p-6 shadow-[0_32px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:p-8">
+              <div className="mb-6 space-y-1 text-center md:text-left">
+                <span className="text-[0.65rem] uppercase tracking-[0.3em] text-white/60">Bloom members</span>
                 <h2 className="text-2xl font-semibold text-white">{activeTab === "signup" ? "Create your account" : "Sign in"}</h2>
-                <p className="text-xs uppercase tracking-[0.3em] text-white/60">
+                <p className="text-xs uppercase tracking-[0.2em] text-white/60">
                   {hasValidAccessCode ? "Invitation required" : "Members only"}
                 </p>
               </div>
 
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
                 {hasValidAccessCode ? (
-                  <TabsList className="grid w-full grid-cols-2 rounded-full bg-white/10 p-1 text-[0.65rem] uppercase tracking-[0.3em] text-white/70">
+                  <TabsList className="flex w-full flex-col gap-2 rounded-2xl bg-white/10 p-2 text-[0.65rem] uppercase tracking-[0.25em] text-white/70 sm:flex-row">
                     <TabsTrigger
                       value="signin"
-                      className="rounded-full px-4 py-2 transition data-[state=active]:bg-white data-[state=active]:text-[hsl(var(--brand-secondary))] data-[state=active]:shadow-sm"
+                      className="flex-1 rounded-xl px-4 py-2 transition data-[state=active]:bg-white data-[state=active]:text-[hsl(var(--brand-secondary))] data-[state=active]:shadow-sm"
                     >
                       Sign In
                     </TabsTrigger>
                     <TabsTrigger
                       value="signup"
-                      className="rounded-full px-4 py-2 transition data-[state=active]:bg-white data-[state=active]:text-[hsl(var(--brand-secondary))] data-[state=active]:shadow-sm"
+                      className="flex-1 rounded-xl px-4 py-2 transition data-[state=active]:bg-white data-[state=active]:text-[hsl(var(--brand-secondary))] data-[state=active]:shadow-sm"
                     >
                       Sign Up
                     </TabsTrigger>
                   </TabsList>
                 ) : (
-                  <div className="flex items-center justify-center rounded-full border border-white/15 bg-white/10 px-5 py-3 text-[0.65rem] uppercase tracking-[0.3em] text-white/70">
+                  <div className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-center text-[0.65rem] uppercase tracking-[0.25em] text-white/70">
                     Sign In
                   </div>
                 )}
 
-                <TabsContent value="signin" className="space-y-5">
+                <TabsContent value="signin" className="space-y-4">
                   {showEmailConfirmationMessage && (
-                    <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
+                    <div className="rounded-2xl border border-white/20 bg-white/10 p-4 text-center text-xs text-white/80">
                       <div className="flex items-center justify-center gap-2 text-sm text-white">
                         <Heart className="h-4 w-4 text-white" />
-                        Welcome! Check your email for confirmation, then sign in below.
+                        Check your email for confirmation, then sign in below.
                       </div>
-                      <p className="mt-2 text-center text-xs text-white/70">
-                        Didn&apos;t receive an email? Check your spam folder or contact support.
-                      </p>
+                      <p className="mt-2 text-white/70">Didn&apos;t receive an email? Peek at spam or contact support.</p>
                     </div>
                   )}
                   {!hasValidAccessCode && !showEmailConfirmationMessage && (
-                    <div className="rounded-2xl border border-white/15 bg-white/10 p-4 text-center text-xs uppercase tracking-[0.3em] text-white/70">
-                      Welcome back — members sign in below.
+                    <div className="rounded-2xl border border-white/15 bg-white/10 p-4 text-center text-xs text-white/70">
+                      Members sign in to continue your introductions.
                     </div>
                   )}
                   <Form {...signInForm}>
@@ -305,15 +302,15 @@ const AuthPage = () => {
                       </Button>
                     </form>
                   </Form>
-                  <div className="text-center text-xs uppercase tracking-[0.3em] text-white/60">
-                    Have an invitation but no account yet? Use the sign-up tab once your code is validated.
+                  <div className="text-center text-xs text-white/70">
+                    Have an invitation but no account yet? Switch to sign up once your code is verified.
                   </div>
                 </TabsContent>
 
                 {hasValidAccessCode && (
-                  <TabsContent value="signup" className="space-y-5">
-                    <div className="rounded-2xl border border-white/20 bg-white/10 p-4 text-center text-xs uppercase tracking-[0.3em] text-white">
-                      Your invitation is confirmed. Complete these details to join Bloom.
+                  <TabsContent value="signup" className="space-y-4">
+                    <div className="rounded-2xl border border-white/20 bg-white/10 p-4 text-center text-xs text-white/80">
+                      Invitation confirmed — complete your membership details.
                     </div>
                     <Form {...signUpForm}>
                       <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-4 text-left">
@@ -414,19 +411,19 @@ const AuthPage = () => {
               </Tabs>
 
               <div className="mt-8 border-t border-white/10 pt-6 text-center">
-                <p className="mb-3 text-[0.65rem] uppercase tracking-[0.3em] text-white/50">Development mode</p>
+                <p className="mb-3 text-[0.65rem] uppercase tracking-[0.25em] text-white/50">Development mode</p>
                 <Button
                   variant="outline"
                   onClick={handleCreateAdminUser}
                   disabled={loading}
-                  className="w-full border-white/25 text-xs uppercase tracking-[0.3em] text-white hover:border-white/40"
+                  className="w-full border-white/25 text-xs uppercase tracking-[0.25em] text-white hover:border-white/40"
                 >
                   Create Admin User (admin@bloom.com)
                 </Button>
               </div>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       </main>
     </div>
   );

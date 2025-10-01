@@ -137,18 +137,18 @@ const ClientWelcome = () => {
 
       <main className="relative z-10 flex flex-1 items-center px-6 pb-16 md:px-10">
         <motion.div
-          className="mx-auto flex w-full max-w-xl flex-col items-center gap-10 text-center"
+          className="mx-auto flex w-full max-w-2xl flex-col items-center gap-10 text-center md:items-start md:text-left"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-[0.65rem] uppercase tracking-[0.35em] text-white/80">
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-[0.65rem] uppercase tracking-[0.28em] text-white/80">
             <Sparkles className="h-4 w-4" /> Invitation only
           </span>
           <h1 className="font-display text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl">
             Enter your Bloom invitation code.
           </h1>
-          <p className="text-sm leading-7 text-white/75 md:text-base">
+          <p className="max-w-xl text-sm leading-7 text-white/75 md:text-base">
             The code keeps Bloom intentionally intimate. Paste or type the invitation your matchmaker sent to unlock the
             private onboarding experience.
           </p>
@@ -160,9 +160,9 @@ const ClientWelcome = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
           >
-            <div className="space-y-6 rounded-[2rem] border border-white/15 bg-white/[0.08] p-8 shadow-[0_32px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+            <div className="space-y-6 rounded-[26px] border border-white/15 bg-white/[0.08] p-6 shadow-[0_32px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:p-8">
               <div className="space-y-2 text-left">
-                <span className="text-[0.65rem] uppercase tracking-[0.35em] text-white/60">Invitation code</span>
+                <span className="text-[0.65rem] uppercase tracking-[0.25em] text-white/65">Invitation code</span>
                 <Input
                   id="accessCode"
                   value={accessCode}
@@ -194,11 +194,12 @@ const ClientWelcome = () => {
             </div>
           </motion.form>
 
-          <div className="space-y-3 text-[0.65rem] uppercase tracking-[0.35em] text-white/70">
-            <span className="inline-flex items-center gap-3">
-              <span className="h-px w-6 bg-white/40" /> Already a member? <Link to="/auth" className="text-white transition hover:opacity-80">Sign in</Link>
+          <div className="flex flex-col gap-2 text-[0.65rem] uppercase tracking-[0.25em] text-white/70">
+            <span className="inline-flex items-center gap-3 self-center md:self-start">
+              <span className="h-px w-6 bg-white/40" /> Already a member?
+              <Link to="/auth" className="text-white transition hover:opacity-80">Sign in</Link>
             </span>
-            <span className="inline-flex items-center gap-3">
+            <span className="inline-flex items-center gap-3 self-center md:self-start">
               <span className="h-px w-6 bg-white/40" /> Need help? Contact your matchmaker concierge.
             </span>
           </div>
