@@ -227,16 +227,16 @@ const AuthPage = () => {
 
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
                 {hasValidAccessCode && !isSignInOnly ? (
-                  <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-white/10 p-2 text-[0.65rem] uppercase tracking-[0.25em] text-white/70">
+                  <TabsList className="flex h-auto w-full items-stretch rounded-2xl bg-white/10 p-2 text-[0.65rem] uppercase tracking-[0.25em] text-white/70">
                     <TabsTrigger
                       value="signin"
-                      className="rounded-xl px-4 py-2 transition data-[state=active]:bg-white data-[state=active]:text-[hsl(var(--brand-secondary))] data-[state=active]:shadow-sm"
+                      className="flex-1 justify-center rounded-xl px-4 py-2 transition data-[state=active]:bg-white data-[state=active]:text-[hsl(var(--brand-secondary))] data-[state=active]:shadow-sm"
                     >
                       Sign In
                     </TabsTrigger>
                     <TabsTrigger
                       value="signup"
-                      className="rounded-xl px-4 py-2 transition data-[state=active]:bg-white data-[state=active]:text-[hsl(var(--brand-secondary))] data-[state=active]:shadow-sm"
+                      className="flex-1 justify-center rounded-xl px-4 py-2 transition data-[state=active]:bg-white data-[state=active]:text-[hsl(var(--brand-secondary))] data-[state=active]:shadow-sm"
                     >
                       Sign Up
                     </TabsTrigger>
@@ -257,7 +257,7 @@ const AuthPage = () => {
                       <p className="mt-2 text-white/70">Didn&apos;t receive an email? Peek at spam or contact support.</p>
                     </div>
                   )}
-                  {!hasValidAccessCode && !showEmailConfirmationMessage && (
+                  {!hasValidAccessCode && !showEmailConfirmationMessage && !isSignInOnly && (
                     <div className="rounded-2xl border border-white/15 bg-white/10 p-4 text-center text-xs text-white/70">
                       Members sign in to continue your introductions.
                     </div>
@@ -420,17 +420,6 @@ const AuthPage = () => {
                 )}
               </Tabs>
 
-              <div className="mt-8 border-t border-white/10 pt-6 text-center">
-                <p className="mb-3 text-[0.65rem] uppercase tracking-[0.25em] text-white/50">Development mode</p>
-                <Button
-                  variant="outline"
-                  onClick={handleCreateAdminUser}
-                  disabled={loading}
-                  className="w-full border-white/25 text-xs uppercase tracking-[0.25em] text-white hover:border-white/40"
-                >
-                  Create Admin User (admin@bloom.com)
-                </Button>
-              </div>
             </div>
           </motion.div>
         </motion.div>
