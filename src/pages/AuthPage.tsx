@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -12,7 +11,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Sparkles, Heart, UserPlus, LogIn } from "lucide-react";
+import { Heart, UserPlus, LogIn } from "lucide-react";
 
 const signInSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -127,236 +126,308 @@ const AuthPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6">
-      <Card className="w-full max-w-md card-premium">
-        <CardHeader className="text-center space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-center space-x-2">
-              <Sparkles className="h-5 w-5 text-accent animate-float" />
-              <CardTitle className="text-2xl font-light">Bloom</CardTitle>
-              <Heart className="h-5 w-5 text-accent animate-pulse-soft" />
-            </div>
-            <div className="w-12 h-0.5 bg-accent mx-auto"></div>
-          </div>
-          <CardDescription className="text-muted-foreground font-light">Private introductions. Human-first.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            {hasValidAccessCode ? (
-              <TabsList className="grid w-full grid-cols-2 bg-muted">
-                <TabsTrigger value="signin" className="font-medium flex items-center space-x-1.5">
-                  <LogIn className="h-3.5 w-3.5" />
-                  <span>Sign In</span>
-                </TabsTrigger>
-                <TabsTrigger value="signup" className="font-medium flex items-center space-x-1.5">
-                  <UserPlus className="h-3.5 w-3.5" />
-                  <span>Sign Up</span>
-                </TabsTrigger>
-              </TabsList>
-            ) : (
-              <div className="text-center mb-6">
-                <div className="inline-flex items-center space-x-2 bg-muted rounded-lg px-4 py-2">
-                  <LogIn className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium text-foreground">Sign In</span>
-                </div>
-              </div>
-            )}
-            
-            <TabsContent value="signin" className="space-y-4">
-              {showEmailConfirmationMessage && (
-                <div className="bg-accent/30 border border-accent/20 rounded-lg p-4 mb-6 animate-fade-in">
-                  <div className="flex items-center justify-center space-x-2 mb-2">
-                    <Heart className="h-4 w-4 text-accent animate-bounce-gentle" />
-                    <p className="text-sm text-center text-foreground font-light">
-                      Welcome! Check your email for confirmation, then sign in below.
-                    </p>
-                  </div>
-                  <p className="text-xs text-center text-muted-foreground">
-                    Didn't receive an email? Check your spam folder or contact support.
-                  </p>
-                </div>
-              )}
-              {!hasValidAccessCode && !showEmailConfirmationMessage && (
-                <div className="bg-muted/50 border border-border rounded-lg p-4 mb-6">
-                  <div className="text-center space-y-2">
-                    <p className="text-sm text-foreground font-light">
-                      Welcome back! Sign in to your account.
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Need an account? You'll need an access code to get started.
-                    </p>
-                  </div>
-                </div>
-              )}
-              <Form {...signInForm}>
-                <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
-                  <FormField
-                    control={signInForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter your email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={signInForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" placeholder="Enter your password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="btn-premium w-full group" disabled={loading}>
-                    {loading ? (
-                      <div className="flex items-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                        Signing in...
-                      </div>
-                    ) : (
-                      <div className="flex items-center">
-                        <LogIn className="h-4 w-4 mr-2 group-hover:translate-x-1 transition-transform" />
-                        Sign In
-                      </div>
-                    )}
-                  </Button>
-                </form>
-              </Form>
-            </TabsContent>
-            
-            {hasValidAccessCode && (
-              <TabsContent value="signup" className="space-y-4">
-                <div className="bg-accent/30 border border-accent/20 rounded-lg p-4 mb-6 animate-fade-in">
-                  <div className="flex items-center justify-center space-x-2 mb-2">
-                    <Heart className="h-4 w-4 text-accent animate-bounce-gentle" />
-                    <p className="text-sm text-center text-foreground font-light">
-                      Welcome! Create your account to get started.
-                    </p>
-                  </div>
-                  <p className="text-xs text-center text-muted-foreground">
-                    Already have an account?
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab("signin")}
-                      className="text-primary hover:underline ml-1 font-medium transition-all hover:animate-wiggle"
-                    >
-                      Sign in here
-                    </button>
-                  </p>
-                </div>
-                <Form {...signUpForm}>
-                <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={signUpForm.control}
-                      name="firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>First Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="First name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={signUpForm.control}
-                      name="lastName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Last Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Last name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <FormField
-                    control={signUpForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter your email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={signUpForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" placeholder="Enter your password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={signUpForm.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" placeholder="Confirm your password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="btn-premium w-full group" disabled={loading}>
-                    {loading ? (
-                      <div className="flex items-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                        Creating account...
-                      </div>
-                    ) : (
-                      <div className="flex items-center">
-                        <UserPlus className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
-                        Create Account
-                      </div>
-                    )}
-                  </Button>
-                </form>
-                </Form>
-              </TabsContent>
-            )}
-          </Tabs>
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[hsl(var(--brand-secondary))] text-white">
+      <video
+        className="absolute inset-0 h-full w-full object-cover"
+        autoPlay
+        muted
+        loop
+        playsInline
+        poster="/placeholder.svg"
+      >
+        <source src="https://storage.googleapis.com/coverr-main/mp4/Mt_Baker.mp4" type="video/mp4" />
+      </video>
 
-          {/* Development Admin User Creation */}
-          <div className="mt-6 pt-6 border-t border-border">
-            <p className="text-xs text-muted-foreground text-center mb-3">
-              Development Mode
-            </p>
-            <Button
-              variant="outline"
-              onClick={handleCreateAdminUser}
-              disabled={loading}
-              className="w-full text-xs"
-            >
-              Create Admin User (admin@bloom.com)
-            </Button>
+      <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(29,32,31,0.92)_0%,rgba(29,32,31,0.78)_40%,rgba(29,32,31,0.65)_100%)]" />
+      <div className="absolute inset-0 backdrop-blur-sm" />
+
+      <motion.div
+        className="pointer-events-none absolute -left-24 top-1/3 h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(223,146,142,0.35)_0%,rgba(223,146,142,0)_70%)]"
+        animate={{ y: [-20, 10, -20], x: [0, 15, 0] }}
+        transition={{ duration: 14, repeat: Infinity, repeatType: "mirror" }}
+      />
+      <motion.div
+        className="pointer-events-none absolute -bottom-16 right-[-6rem] h-[32rem] w-[32rem] rounded-full bg-[radial-gradient(circle,rgba(223,146,142,0.25)_0%,rgba(223,146,142,0)_70%)]"
+        animate={{ y: [10, -15, 10], x: [0, -20, 0] }}
+        transition={{ duration: 18, repeat: Infinity, repeatType: "mirror" }}
+      />
+
+      <header className="relative z-10 flex items-center justify-between px-6 pb-6 pt-8 md:px-10">
+        <Link to="/" className="flex items-center gap-3 text-white transition hover:opacity-80">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 text-sm font-semibold uppercase tracking-[0.3em]">
+            B
           </div>
-        </CardContent>
-      </Card>
+          <span className="text-xs font-semibold uppercase tracking-[0.45em]">
+            Bloom
+          </span>
+        </Link>
+        <Link
+          to="/client"
+          className="hidden rounded-full border border-white/20 px-5 py-2 text-[0.65rem] uppercase tracking-[0.35em] text-white/70 transition hover:border-white/35 hover:text-white md:block"
+        >
+          Invitation access
+        </Link>
+      </header>
+
+      <main className="relative z-10 flex flex-1 items-center px-6 pb-16 md:px-10">
+        <div className="mx-auto grid w-full max-w-5xl items-start gap-12 lg:grid-cols-[1.05fr_1fr]">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="flex flex-col gap-6"
+          >
+            <span className="text-[0.65rem] uppercase tracking-[0.5em] text-white/60">
+              Private members
+            </span>
+            <h1 className="font-display text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl">
+              Welcome back to Bloom.
+            </h1>
+            <p className="max-w-xl text-sm leading-7 text-white/75 md:text-base">
+              Sign in to continue your curated introductions. If you’ve just received your invitation, you can create your
+              membership using the same space.
+            </p>
+            <div className="space-y-3 text-[0.7rem] uppercase tracking-[0.35em] text-white/70">
+              {hasValidAccessCode ? (
+                <div className="inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-6 py-3 text-white">
+                  <span className="h-px w-6 bg-white/50" /> Invitation verified — finish setting up below.
+                </div>
+              ) : (
+                <div className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-6 py-3">
+                  <span className="h-px w-6 bg-white/40" /> Need an invitation? Use the private code shared by your matchmaker.
+                </div>
+              )}
+              <Link to="/client" className="inline-flex items-center gap-3 text-white/80 transition hover:text-white">
+                <span className="h-px w-6 bg-white/40" /> Enter access code
+              </Link>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
+            className="w-full"
+          >
+            <div className="rounded-[2rem] border border-white/15 bg-white/[0.08] p-8 shadow-[0_32px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+              <div className="mb-6 space-y-2 text-center">
+                <span className="text-[0.65rem] uppercase tracking-[0.45em] text-white/60">Bloom members</span>
+                <h2 className="text-2xl font-semibold text-white">{activeTab === "signup" ? "Create your account" : "Sign in"}</h2>
+                <p className="text-xs uppercase tracking-[0.3em] text-white/60">
+                  {hasValidAccessCode ? "Invitation required" : "Members only"}
+                </p>
+              </div>
+
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                {hasValidAccessCode ? (
+                  <TabsList className="grid w-full grid-cols-2 rounded-full bg-white/10 p-1 text-[0.65rem] uppercase tracking-[0.3em] text-white/70">
+                    <TabsTrigger
+                      value="signin"
+                      className="rounded-full px-4 py-2 transition data-[state=active]:bg-white data-[state=active]:text-[hsl(var(--brand-secondary))] data-[state=active]:shadow-sm"
+                    >
+                      Sign In
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="signup"
+                      className="rounded-full px-4 py-2 transition data-[state=active]:bg-white data-[state=active]:text-[hsl(var(--brand-secondary))] data-[state=active]:shadow-sm"
+                    >
+                      Sign Up
+                    </TabsTrigger>
+                  </TabsList>
+                ) : (
+                  <div className="flex items-center justify-center rounded-full border border-white/15 bg-white/10 px-5 py-3 text-[0.65rem] uppercase tracking-[0.3em] text-white/70">
+                    Sign In
+                  </div>
+                )}
+
+                <TabsContent value="signin" className="space-y-5">
+                  {showEmailConfirmationMessage && (
+                    <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
+                      <div className="flex items-center justify-center gap-2 text-sm text-white">
+                        <Heart className="h-4 w-4 text-white" />
+                        Welcome! Check your email for confirmation, then sign in below.
+                      </div>
+                      <p className="mt-2 text-center text-xs text-white/70">
+                        Didn&apos;t receive an email? Check your spam folder or contact support.
+                      </p>
+                    </div>
+                  )}
+                  {!hasValidAccessCode && !showEmailConfirmationMessage && (
+                    <div className="rounded-2xl border border-white/15 bg-white/10 p-4 text-center text-xs uppercase tracking-[0.3em] text-white/70">
+                      Welcome back — members sign in below.
+                    </div>
+                  )}
+                  <Form {...signInForm}>
+                    <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4 text-left">
+                      <FormField
+                        control={signInForm.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white/80">Email</FormLabel>
+                            <FormControl>
+                              <Input placeholder="your@email.com" className="bg-white/95 text-[hsl(var(--brand-secondary))]" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={signInForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white/80">Password</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="password"
+                                placeholder="••••••••"
+                                className="bg-white/95 text-[hsl(var(--brand-secondary))]"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button type="submit" className="btn-premium w-full group" disabled={loading}>
+                        {loading ? (
+                          <div className="flex items-center">
+                            <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white" />
+                            Signing in...
+                          </div>
+                        ) : (
+                          <div className="flex items-center">
+                            <LogIn className="mr-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            Sign In
+                          </div>
+                        )}
+                      </Button>
+                    </form>
+                  </Form>
+                  <div className="text-center text-xs uppercase tracking-[0.3em] text-white/60">
+                    Have an invitation but no account yet? Use the sign-up tab once your code is validated.
+                  </div>
+                </TabsContent>
+
+                {hasValidAccessCode && (
+                  <TabsContent value="signup" className="space-y-5">
+                    <div className="rounded-2xl border border-white/20 bg-white/10 p-4 text-center text-xs uppercase tracking-[0.3em] text-white">
+                      Your invitation is confirmed. Complete these details to join Bloom.
+                    </div>
+                    <Form {...signUpForm}>
+                      <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-4 text-left">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <FormField
+                            control={signUpForm.control}
+                            name="firstName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white/80">First Name</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="First name" className="bg-white/95 text-[hsl(var(--brand-secondary))]" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={signUpForm.control}
+                            name="lastName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white/80">Last Name</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="Last name" className="bg-white/95 text-[hsl(var(--brand-secondary))]" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <FormField
+                          control={signUpForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-white/80">Email</FormLabel>
+                              <FormControl>
+                                <Input placeholder="your@email.com" className="bg-white/95 text-[hsl(var(--brand-secondary))]" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={signUpForm.control}
+                          name="password"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-white/80">Password</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="password"
+                                  placeholder="Create a password"
+                                  className="bg-white/95 text-[hsl(var(--brand-secondary))]"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={signUpForm.control}
+                          name="confirmPassword"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-white/80">Confirm Password</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="password"
+                                  placeholder="Repeat password"
+                                  className="bg-white/95 text-[hsl(var(--brand-secondary))]"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <Button type="submit" className="btn-premium w-full group" disabled={loading}>
+                          {loading ? (
+                            <div className="flex items-center">
+                              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white" />
+                              Creating account...
+                            </div>
+                          ) : (
+                            <div className="flex items-center">
+                              <UserPlus className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
+                              Create Account
+                            </div>
+                          )}
+                        </Button>
+                      </form>
+                    </Form>
+                  </TabsContent>
+                )}
+              </Tabs>
+
+              <div className="mt-8 border-t border-white/10 pt-6 text-center">
+                <p className="mb-3 text-[0.65rem] uppercase tracking-[0.3em] text-white/50">Development mode</p>
+                <Button
+                  variant="outline"
+                  onClick={handleCreateAdminUser}
+                  disabled={loading}
+                  className="w-full border-white/25 text-xs uppercase tracking-[0.3em] text-white hover:border-white/40"
+                >
+                  Create Admin User (admin@bloom.com)
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </main>
     </div>
   );
 };
