@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Cropper, { Area, Point } from "react-easy-crop";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -61,6 +61,16 @@ export const ImageCropDialog = ({ open, imageUrl, onCropComplete, onCancel }: Im
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [processing, setProcessing] = useState(false);
 
+  useEffect(() => {
+    if (open) {
+      console.log("ImageCropDialog opened with imageUrl:", imageUrl);
+    }
+  }, [open, imageUrl]);
+
+  useEffect(() => {
+    console.log("croppedAreaPixels updated:", croppedAreaPixels);
+  }, [croppedAreaPixels]);
+
   const onCropChange = (crop: Point) => {
     setCrop(crop);
   };
@@ -70,18 +80,25 @@ export const ImageCropDialog = ({ open, imageUrl, onCropComplete, onCancel }: Im
   };
 
   const onCropCompleteCallback = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
+    console.log("Crop complete callback fired:", croppedAreaPixels);
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
 
   const handleSave = async () => {
-    if (!croppedAreaPixels) return;
+    if (!croppedAreaPixels) {
+      console.error("No crop area available");
+      return;
+    }
 
     try {
       setProcessing(true);
+      console.log("Cropping image with area:", croppedAreaPixels);
       const croppedBlob = await getCroppedImg(imageUrl, croppedAreaPixels);
+      console.log("Cropped blob created:", croppedBlob.size, "bytes");
       onCropComplete(croppedBlob);
     } catch (error) {
       console.error("Error cropping image:", error);
+      alert("Failed to crop image: " + (error instanceof Error ? error.message : String(error)));
     } finally {
       setProcessing(false);
     }
@@ -95,7 +112,7 @@ export const ImageCropDialog = ({ open, imageUrl, onCropComplete, onCancel }: Im
         </DialogHeader>
 
         <div className="space-y-6">
-          <div className="relative h-[400px] w-full overflow-hidden rounded-lg bg-muted">
+          <div className="relative h-[400px] w-full overflow-hidden rounded-lg bg-muted" style={{ minHeight: '400px' }}>
             <Cropper
               image={imageUrl}
               crop={crop}
@@ -105,6 +122,13 @@ export const ImageCropDialog = ({ open, imageUrl, onCropComplete, onCancel }: Im
               onZoomChange={onZoomChange}
               onCropComplete={onCropCompleteCallback}
               objectFit="contain"
+              style={{
+                containerStyle: {
+                  width: '100%',
+                  height: '100%',
+                  position: 'relative'
+                }
+              }}
             />
           </div>
 
@@ -135,7 +159,7 @@ export const ImageCropDialog = ({ open, imageUrl, onCropComplete, onCancel }: Im
           <Button variant="outline" onClick={onCancel} disabled={processing}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={processing}>
+          <Button onClick={handleSave} disabled={processing || !croppedAreaPixels}>
             {processing ? "Processing..." : "Save Photo"}
           </Button>
         </DialogFooter>
