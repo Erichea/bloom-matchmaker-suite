@@ -34,7 +34,7 @@ interface ProfilePhoto {
 }
 
 const ClientDashboard = () => {
-  const { user, signOut, loading: authLoading } = useAuth();
+  const { user, session, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -183,19 +183,27 @@ const ClientDashboard = () => {
   }, [user]);
 
   useEffect(() => {
-    if (authLoading) return;
-    if (!user) {
+    // Wait for auth to finish loading
+    if (authLoading) {
+      console.log("ClientDashboard: Auth still loading, waiting...");
+      return;
+    }
+
+    // Only redirect if auth is done loading AND there's no session/user
+    if (!session && !user) {
+      console.log("ClientDashboard: No session or user, redirecting to /auth");
       navigate("/auth");
       return;
     }
 
+    console.log("ClientDashboard: Auth complete, loading profile data");
     const loadData = async () => {
       await fetchProfile();
       await fetchMatches();
     };
 
     loadData();
-  }, [user, authLoading, navigate, fetchProfile, fetchMatches]);
+  }, [user, session, authLoading, navigate, fetchProfile, fetchMatches]);
 
   const handleSignOut = async () => {
     await signOut();
