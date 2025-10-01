@@ -266,31 +266,21 @@ const ClientsPage = () => {
         const detailedProfile = profile as DetailedProfile;
 
         if (detailedProfile?.user_id) {
-          console.log("Querying answers for user_id:", detailedProfile.user_id);
-          console.log("Profile email:", detailedProfile.email);
-
           const { data: answersData, error: answersError } = await supabase
             .from("profile_answers")
             .select("question_id, answer")
             .eq("user_id", detailedProfile.user_id);
 
           if (answersError) {
-            console.error("Error fetching answers:", answersError);
             throw answersError;
           }
-
-          console.log("Fetched answers count:", answersData?.length || 0);
-          console.log("Answers data:", answersData);
 
           const answersMap = (answersData || []).reduce<QuestionnaireAnswers>((acc, curr) => {
             acc[curr.question_id] = curr.answer;
             return acc;
           }, {});
 
-          console.log("Mapped answers:", answersMap);
           setQuestionnaireAnswers(answersMap);
-        } else {
-          console.warn("No user_id found in profile:", detailedProfile);
         }
 
         setSelectedProfile(detailedProfile);
