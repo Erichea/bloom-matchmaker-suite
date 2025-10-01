@@ -2,16 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { PremiumButton } from "@/components/experience/PremiumButton";
-import { ProfileCard } from "@/components/experience/ProfileCard";
 import { MatchList } from "@/components/experience/MatchList";
-import { ChatBubble } from "@/components/experience/ChatBubble";
 import MatchDetailModal from "@/components/MatchDetailModal";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Heart, MessageCircle, Sparkles } from "lucide-react";
+import { Home, User, LogOut } from "lucide-react";
 
 interface Match {
   id: string;
@@ -38,30 +34,6 @@ const ClientDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [stats, setStats] = useState({ totalMatches: 0, pendingMatches: 0, mutualMatches: 0, newMatches: 0 });
-
-  const calculateStats = useCallback((matchesData: Match[], userProfileId: string) => {
-    const pending = matchesData.filter(
-      (match) =>
-        match.match_status === "pending" ||
-        (match.match_status === "profile_1_accepted" && match.profile_1_id !== userProfileId) ||
-        (match.match_status === "profile_2_accepted" && match.profile_2_id !== userProfileId),
-    );
-
-    const mutual = matchesData.filter((match) => match.match_status === "both_accepted");
-    const newMatches = matchesData.filter((match) => {
-      const isProfile1 = match.profile_1_id === userProfileId;
-      return isProfile1 ? !match.viewed_by_profile_1 : !match.viewed_by_profile_2;
-    });
-
-    setStats({
-      totalMatches: matchesData.length,
-      pendingMatches: pending.length,
-      mutualMatches: mutual.length,
-      newMatches: newMatches.length,
-    });
-  }, []);
-
   const createBasicProfile = useCallback(async () => {
     if (!user) return;
 
@@ -138,8 +110,6 @@ const ClientDashboard = () => {
       if (!userProfile) return;
 
       setMatches(data || []);
-      calculateStats(data || [], userProfile.id);
-
       const unviewedMatches = (data || []).filter((match: Match) => {
         const isProfile1 = match.profile_1_id === userProfile.id;
         return isProfile1 ? !match.viewed_by_profile_1 : !match.viewed_by_profile_2;
@@ -157,7 +127,7 @@ const ClientDashboard = () => {
     } catch (error: any) {
       console.error("Error fetching matches:", error);
     }
-  }, [user, calculateStats]);
+  }, [user]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -235,136 +205,59 @@ const ClientDashboard = () => {
     return null;
   }
 
-  const highlightMatch = matches[0];
-  const highlightName = highlightMatch
-    ? `${highlightMatch.profile_1_id === currentProfileId ? highlightMatch.profile_2?.first_name : highlightMatch.profile_1?.first_name ?? ""}`
-    : null;
-
   return (
-    <div className="min-h-screen bg-[hsl(var(--background))]">
+    <div className="flex min-h-screen flex-col bg-[hsl(var(--background))]">
       <MatchDetailModal match={selectedMatch} open={modalOpen} onOpenChange={setModalOpen} onMatchResponse={handleMatchResponse} />
 
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 py-16 lg:px-12">
-        <header className="flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
-          <div className="space-y-3">
-            <span className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--brand-secondary))]/90 px-4 py-1 text-xs uppercase tracking-[0.3em] text-[hsl(var(--brand-secondary-foreground))]">
-              <Sparkles className="h-3 w-3" /> Welcome back
-            </span>
-            <h1 className="font-display text-3xl tracking-tight text-[hsl(var(--brand-secondary))] sm:text-4xl">
-              Hello {profile?.first_name || "there"}, your curated matches await.
+      <header className="border-b border-border bg-[hsl(var(--surface))]/60 px-6 py-4 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-5xl items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Welcome back</p>
+            <h1 className="text-xl font-semibold text-[hsl(var(--brand-secondary))]">
+              {profile?.first_name ? `Hi ${profile.first_name}` : "Your matches"}
             </h1>
-            <p className="max-w-xl text-sm leading-7 text-muted-foreground">
-              We refresh introductions thoughtfully—take a moment to review new profiles, share your impressions, and
-              we’ll guide the rest.
-            </p>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button
-              variant="outline"
-              className="rounded-full border-[hsl(var(--brand-secondary))]/20 px-6 text-sm"
-              onClick={() => navigate("/profile-questionnaire")}
-            >
-              Update preferences
-            </Button>
-            <PremiumButton onClick={handleSignOut} className="justify-center">
-              Sign out
-            </PremiumButton>
+          <Button variant="ghost" size="sm" onClick={handleSignOut} className="gap-2 text-muted-foreground">
+            <LogOut className="h-4 w-4" />
+            Sign out
+          </Button>
+        </div>
+      </header>
+
+      <main className="flex-1 overflow-y-auto">
+        <div className="mx-auto w-full max-w-5xl px-6 py-10">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-[hsl(var(--brand-secondary))]">Your matches</h2>
+            <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Updated in real time</span>
           </div>
-        </header>
-
-        <main className="grid gap-12 lg:grid-cols-[1.7fr_1fr]">
-          <section className="space-y-10">
-            <ProfileCard
-              name={`${profile.first_name ?? "Member"} ${profile.last_name ?? ""}`.trim() || "Member"}
-              age={profile.date_of_birth ? new Date().getFullYear() - new Date(profile.date_of_birth).getFullYear() : undefined}
-              location={[profile.city, profile.country].filter(Boolean).join(", ") || undefined}
-              headline={profile.profession || "Thoughtful connections"}
-              bio={profile.about_me || "Add a short introduction so your matchmaker can highlight you effortlessly."}
-              interests={Array.isArray(profile.interests) ? profile.interests.slice(0, 3) : undefined}
-              highlight
-            />
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              {[{
-                label: "Total introductions",
-                value: stats.totalMatches,
-              },
-              {
-                label: "Awaiting replies",
-                value: stats.pendingMatches,
-              },
-              {
-                label: "Mutual matches",
-                value: stats.mutualMatches,
-              },
-              {
-                label: "New this week",
-                value: stats.newMatches,
-              }].map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-3xl border border-[hsl(var(--brand-secondary))]/10 bg-[hsl(var(--surface))] p-6 shadow-[0_18px_80px_-48px_rgba(15,15,15,0.4)]"
-                >
-                  <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{item.label}</p>
-                  <p className="mt-3 text-2xl font-semibold text-[hsl(var(--brand-secondary))]">{item.value}</p>
-                </div>
-              ))}
+          {matchSummaries.length > 0 ? (
+            <MatchList matches={matchSummaries} highlightNew onSelect={handleOpenMatch} />
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border bg-[hsl(var(--surface))]/60 px-6 py-12 text-center">
+              <p className="text-sm text-muted-foreground">
+                Your matchmaker is curating introductions. You'll see new matches here first.
+              </p>
             </div>
+          )}
+        </div>
+      </main>
 
-            <MatchList
-              title="Your introductions"
-              matches={matchSummaries}
-              highlightNew
-              onSelect={handleOpenMatch}
-            />
-          </section>
-
-          <section className="space-y-8">
-            <div className="rounded-3xl border border-[hsl(var(--brand-secondary))]/10 bg-[hsl(var(--surface))] p-8">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                <Heart className="h-3 w-3" /> Conversation preview
-              </div>
-              {highlightMatch && highlightName ? (
-                <div className="mt-6 space-y-4">
-                  <Badge className="rounded-full bg-[hsl(var(--brand-primary))]/10 text-[hsl(var(--brand-primary))]">
-                    {highlightMatch.match_status === "both_accepted" ? "Mutual" : "Awaiting reply"}
-                  </Badge>
-                  <div className="space-y-3 text-sm leading-6 text-muted-foreground">
-                    <ChatBubble
-                      author="match"
-                      message={`Hi ${profile.first_name || "there"}, ${highlightName.trim()} loved your profile. Shall we plan a wine tasting this week?`}
-                    />
-                    <ChatBubble
-                      author="self"
-                      message={`That sounds perfect. I'm free Thursday evening—let’s meet at The Avery.`}
-                      timestamp="just now"
-                    />
-                  </div>
-                  <PremiumButton className="mt-4 w-full justify-center" onClick={() => handleOpenMatch(highlightMatch.id)}>
-                    Review introduction
-                    <MessageCircle className="ml-2 h-4 w-4" />
-                  </PremiumButton>
-                </div>
-              ) : (
-                <p className="mt-6 text-sm leading-6 text-muted-foreground">
-                  We’re currently curating your next introduction. Keep an eye out for new dossiers from your matchmaker.
-                </p>
-              )}
-            </div>
-
-            <div className="rounded-3xl border border-[hsl(var(--brand-secondary))]/10 bg-[hsl(var(--surface))] p-8">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                <Sparkles className="h-3 w-3" /> Next steps
-              </div>
-              <ul className="mt-6 space-y-4 text-sm leading-6 text-muted-foreground">
-                <li>• Share feedback after each date so your matchmaker can refine future introductions.</li>
-                <li>• Update your profile with recent highlights—travel plans, passions, or the latest project you’re proud of.</li>
-                <li>• Keep your availability current to receive perfectly timed matches.</li>
-              </ul>
-            </div>
-          </section>
-        </main>
-      </div>
+      <nav className="sticky bottom-0 border-t border-border bg-[hsl(var(--surface))]/80 px-6 py-3 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-5xl items-center gap-3">
+          <Button variant="ghost" className="flex-1 justify-center gap-2 text-[hsl(var(--brand-secondary))]" disabled>
+            <Home className="h-4 w-4" />
+            Matches
+          </Button>
+          <Button
+            variant="ghost"
+            className="flex-1 justify-center gap-2 text-muted-foreground"
+            onClick={() => navigate("/profile-questionnaire")}
+          >
+            <User className="h-4 w-4" />
+            Update profile
+          </Button>
+        </div>
+      </nav>
     </div>
   );
 };
