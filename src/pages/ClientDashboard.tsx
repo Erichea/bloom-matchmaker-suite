@@ -23,6 +23,7 @@ interface Match {
   viewed_by_profile_2: boolean;
   profile_1: any;
   profile_2: any;
+  current_profile_id?: string;
 }
 
 interface ProfilePhoto {
@@ -204,7 +205,10 @@ const ClientDashboard = () => {
   const handleOpenMatch = (matchId: string) => {
     const match = matches.find((item) => item.id === matchId);
     if (match) {
-      setSelectedMatch(match);
+      setSelectedMatch({
+        ...match,
+        current_profile_id: currentProfileId,
+      });
       setModalOpen(true);
     }
   };
