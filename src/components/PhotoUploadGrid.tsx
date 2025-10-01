@@ -290,7 +290,8 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
     setImageToCrop(imageUrl);
     setOriginalFileName(file.name);
     setCropDialogOpen(true);
-    closeSheet();
+    // Don't close sheet yet - we need sheetContext for the upload
+    setSheetOpen(false);
   };
 
   const handleCropComplete = async (croppedBlob: Blob) => {
@@ -394,6 +395,8 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
         URL.revokeObjectURL(imageToCrop);
         setImageToCrop(null);
       }
+      // Clear sheet context after upload completes
+      setSheetContext(null);
     }
   };
 
@@ -406,6 +409,8 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+    // Clear sheet context on cancel
+    setSheetContext(null);
   };
 
   const handleDragEnd = useCallback(
