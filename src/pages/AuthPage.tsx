@@ -58,18 +58,18 @@ const AuthPage = () => {
 
       // Verify the code is still valid server-side
       try {
-        const { data: validationResult, error } = await supabase.rpc("validate_access_code", {
+        const { data: validationResult, error } = await supabase.rpc("validate_access_code" as any, {
           p_code: storedCode,
         });
 
-        const codeData = Array.isArray(validationResult) ? validationResult[0] : null;
+        const codeData = Array.isArray(validationResult) ? validationResult[0] : (validationResult as any);
 
         // Check if code is valid, not used, and not expired
         const isValid =
           !error &&
           codeData &&
-          !codeData.is_used &&
-          (!codeData.expires_at || new Date(codeData.expires_at) >= new Date());
+          !(codeData as any).is_used &&
+          (!(codeData as any).expires_at || new Date((codeData as any).expires_at) >= new Date());
 
         if (!isValid) {
           // Clear invalid code from session storage

@@ -216,13 +216,13 @@ const MatchSuggestionPage = () => {
     const fetchUserMatchStats = async () => {
       try {
         setLoading(true);
-        const { data, error } = await supabase.rpc("get_user_match_stats");
+        const { data, error } = await supabase.rpc("get_user_match_stats" as any);
 
         if (error) {
           throw error;
         }
 
-        setStats(data || []);
+        setStats((data || []) as any[]);
       } catch (error: unknown) {
         console.error("Error fetching user match stats:", error);
         toast({

@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Plus } from "lucide-react";
 
 interface ProfileForSuggestion {
   id: string;
@@ -35,9 +34,9 @@ export const ProfileLibraryModal = ({ open, onOpenChange, sourceProfileId, onSug
   const fetchProfiles = useCallback(async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.rpc('get_profiles_for_suggestion', { p_profile_id: sourceProfileId });
+      const { data, error } = await supabase.rpc('get_profiles_for_suggestion' as any, { p_profile_id: sourceProfileId });
       if (error) throw error;
-      setProfiles(data || []);
+      setProfiles((data || []) as ProfileForSuggestion[]);
     } catch (error) {
       toast({ title: "Error", description: "Could not load profiles for suggestion.", variant: "destructive" });
     } finally {
@@ -75,11 +74,7 @@ export const ProfileLibraryModal = ({ open, onOpenChange, sourceProfileId, onSug
 
     try {
       setSubmitting(true);
-      console.log("Calling create_bulk_matches with:");
-      console.log("p_profile_1_id:", sourceProfileId);
-      console.log("p_profile_2_ids:", Array.from(selectedProfiles));
-      console.log("p_suggested_by:", user.id);
-      const { error } = await supabase.rpc('create_bulk_matches', {
+      const { error } = await supabase.rpc('create_bulk_matches' as any, {
         p_profile_1_id: sourceProfileId,
         p_profile_2_ids: Array.from(selectedProfiles),
         p_suggested_by: user.id

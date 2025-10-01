@@ -101,10 +101,10 @@ const ClientDashboard = () => {
     if (!user) return;
 
     try {
-      const { data: rpcData, error } = await supabase.rpc("get_matches_for_user", { p_user_id: user.id });
+      const { data: rpcData, error } = await supabase.rpc("get_matches_for_user" as any, { p_user_id: user.id });
       if (error) throw error;
 
-      const data = rpcData ? rpcData.map((row: any) => row.match_data) : [];
+      const data = rpcData ? (rpcData as any[]).map((row: any) => row.match_data) : [];
 
       const { data: userProfile } = await supabase.from("profiles").select("id").eq("user_id", user.id).single();
       if (!userProfile) return;

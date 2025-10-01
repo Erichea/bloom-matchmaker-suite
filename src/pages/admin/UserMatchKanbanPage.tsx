@@ -272,10 +272,10 @@ const UserMatchKanbanPage = () => {
   const fetchKanbanMatches = useCallback(async (p_profile_id: string) => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.rpc('get_matches_for_kanban', { p_profile_id });
+      const { data, error } = await supabase.rpc('get_matches_for_kanban' as any, { p_profile_id });
       if (error) throw error;
 
-      const matchesWithIds = (data || []).map((match: any, index: number) => ({
+      const matchesWithIds = ((data || []) as any[]).map((match: any, index: number) => ({
         ...match,
         match_id: match.match_id || `match-${index}`,
       }));
@@ -337,7 +337,7 @@ const UserMatchKanbanPage = () => {
     try {
       const { error } = await supabase
         .from('matches')
-        .update({ match_status: newStatus })
+        .update({ match_status: newStatus as any })
         .eq('id', matchId);
 
       if (error) throw error;

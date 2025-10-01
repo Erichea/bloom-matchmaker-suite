@@ -206,19 +206,10 @@ const ClientsPage = () => {
               submitted_for_review_at,
               approved_at,
               rejected_at,
-              deleted_at,
-              deleted_by,
-              status_before_deletion,
               profile_photos ( photo_url, is_primary, order_index )
             `,
           )
           .order("created_at", { ascending: false });
-
-        if (currentView === "active") {
-          query.is("deleted_at", null);
-        } else {
-          query.not("deleted_at", "is", null);
-        }
 
         const { data, error } = await query;
 
@@ -226,7 +217,7 @@ const ClientsPage = () => {
           throw error;
         }
 
-        setClients((data as ClientRow[]) || []);
+        setClients((data as any[]) || []);
       } catch (error: any) {
         console.error("Failed to fetch clients", error);
         toast({
@@ -263,7 +254,7 @@ const ClientsPage = () => {
           throw error;
         }
 
-        const detailedProfile = profile as DetailedProfile;
+        const detailedProfile = profile as any;
 
         if (detailedProfile?.user_id) {
           const { data: answersData, error: answersError } = await supabase
@@ -343,11 +334,11 @@ const ClientsPage = () => {
 
         if (error) throw error;
 
-        if (data?.success) {
+        if ((data as any)?.success) {
           toast({ title: "Profile approved" });
           await refreshData();
         } else {
-          throw new Error(data?.message || "Failed to approve profile");
+          throw new Error((data as any)?.message || "Failed to approve profile");
         }
       } catch (error: any) {
         toast({
@@ -380,13 +371,13 @@ const ClientsPage = () => {
 
       if (error) throw error;
 
-      if (data?.success) {
+      if ((data as any)?.success) {
         toast({ title: "Profile rejected" });
         setRejectDialogOpen(false);
         setRejectionReason("");
         await refreshData();
       } else {
-        throw new Error(data?.message || "Failed to reject profile");
+        throw new Error((data as any)?.message || "Failed to reject profile");
       }
     } catch (error: any) {
       toast({
@@ -401,21 +392,21 @@ const ClientsPage = () => {
     if (!userId || !selectedClientId) return;
 
     try {
-      const { data, error } = await supabase.rpc("soft_delete_profile", {
+      const { data, error } = await supabase.rpc("soft_delete_profile" as any, {
         p_profile_id: selectedClientId,
         p_admin_id: userId,
       });
 
       if (error) throw error;
 
-      if (data?.success) {
+      if ((data as any)?.success) {
         toast({ title: "Profile deleted" });
         setDeleteDialogOpen(false);
         setCockpitOpen(false);
         setSelectedClientId(null);
         await fetchClients(view);
       } else {
-        throw new Error(data?.message || "Failed to delete profile");
+        throw new Error((data as any)?.message || "Failed to delete profile");
       }
     } catch (error: any) {
       toast({
@@ -430,21 +421,21 @@ const ClientsPage = () => {
     if (!userId || !selectedClientId) return;
 
     try {
-      const { data, error } = await supabase.rpc("restore_profile", {
+      const { data, error } = await supabase.rpc("restore_profile" as any, {
         p_profile_id: selectedClientId,
         p_admin_id: userId,
       });
 
       if (error) throw error;
 
-      if (data?.success) {
+      if ((data as any)?.success) {
         toast({ title: "Profile restored" });
         setRestoreDialogOpen(false);
         setCockpitOpen(false);
         setSelectedClientId(null);
         await fetchClients(view);
       } else {
-        throw new Error(data?.message || "Failed to restore profile");
+        throw new Error((data as any)?.message || "Failed to restore profile");
       }
     } catch (error: any) {
       toast({
@@ -1015,9 +1006,9 @@ const ClientsPage = () => {
 
           <div className="border-t px-6 py-4 flex flex-wrap items-center gap-2 justify-between">
             <div className="flex flex-wrap gap-2">
-              {selectedProfile?.status === "pending_approval" && !selectedProfile.deleted_at && (
+              {selectedProfile?.status === "pending_approval" && (
                 <>
-                  <Button size="sm" onClick={handleApprove} className="btn-accent">
+                  <Button size="sm" onClick={() => handleApprove()} className="btn-accent">
                     Approve
                   </Button>
                   <Button

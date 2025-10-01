@@ -126,7 +126,7 @@ const ProfileSetup = () => {
           <div className="space-y-6">
             <div className="space-y-2">
               <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Step 1</span>
-              <h3 className="text-lg font-semibold text-[hsl(var(--brand-secondary))]">Basic information</h3>
+              <h3 className="text-lg font-semibold text-foreground">Basic information</h3>
               <p className="text-sm leading-6 text-muted-foreground">
                 Tell us who you are so your matchmaker can introduce you with intention.
               </p>
@@ -192,7 +192,7 @@ const ProfileSetup = () => {
           <div className="space-y-6">
             <div className="space-y-2">
               <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Step 2</span>
-              <h3 className="text-lg font-semibold text-[hsl(var(--brand-secondary))]">Location & background</h3>
+              <h3 className="text-lg font-semibold text-foreground">Location & background</h3>
               <p className="text-sm leading-6 text-muted-foreground">
                 Your story is anchored in a place—help us paint that atmosphere for future matches.
               </p>
@@ -263,7 +263,7 @@ const ProfileSetup = () => {
           <div className="space-y-6">
             <div className="space-y-2">
               <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Step 3</span>
-              <h3 className="text-lg font-semibold text-[hsl(var(--brand-secondary))]">Your essence</h3>
+              <h3 className="text-lg font-semibold text-foreground">Your essence</h3>
               <p className="text-sm leading-6 text-muted-foreground">
                 Share a glimpse of your world—interests, rhythms, and what lights you up.
               </p>
@@ -286,7 +286,7 @@ const ProfileSetup = () => {
           <div className="space-y-6">
             <div className="space-y-2">
               <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Step 4</span>
-              <h3 className="text-lg font-semibold text-[hsl(var(--brand-secondary))]">Preferences</h3>
+              <h3 className="text-lg font-semibold text-foreground">Preferences</h3>
               <p className="text-sm leading-6 text-muted-foreground">
                 Outline what feels aligned so we can introduce people who fit naturally into your life.
               </p>
@@ -340,24 +340,12 @@ const ProfileSetup = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[hsl(var(--background))]">
+    <div className="relative min-h-screen bg-background">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(190,76,139,0.16),_transparent_60%)]" />
 
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 py-16 lg:flex-row lg:items-start lg:px-12">
         <aside className="flex-1 space-y-10">
-          <ProfileCard
-            name={`${profileData.firstName || "Your"} ${profileData.lastName || "Profile"}`.trim()}
-            location={[profileData.city, profileData.country].filter(Boolean).join(", ") || undefined}
-            headline={profileData.profession || "Share your story"}
-            bio={
-              profileData.aboutMe ||
-              "Introduce yourself with warmth and clarity. Highlight the passions and rituals that make your days meaningful."
-            }
-            interests={profileData.preferredGender ? ["Intentional", "Sincere", "Aligned"] : undefined}
-            highlight
-          />
-
-          <div className="rounded-3xl border border-[hsl(var(--brand-secondary))]/15 bg-[hsl(var(--surface))] p-8">
+          <div className="rounded-3xl border border-border bg-card p-8">
             <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-muted-foreground">
               Guidance
             </h2>
@@ -369,17 +357,17 @@ const ProfileSetup = () => {
           </div>
         </aside>
 
-        <section className="flex-1 space-y-8 rounded-3xl border border-[hsl(var(--brand-secondary))]/20 bg-[hsl(var(--background))] p-10 shadow-[0_32px_120px_-64px_rgba(18,18,18,0.5)] backdrop-blur">
+        <section className="flex-1 space-y-8 rounded-3xl border border-border bg-card p-10 shadow-lg">
           <div className="space-y-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Profile setup</span>
-                <h1 className="text-2xl font-semibold tracking-tight text-[hsl(var(--brand-secondary))]">
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                   Craft your introduction
                 </h1>
               </div>
               <div className="text-right">
-                <Progress value={progress} className="h-2 w-40 rounded-full bg-[hsl(var(--surface))]" />
+                <Progress value={progress} className="h-2 w-40 rounded-full" />
                 <p className="mt-2 text-xs uppercase tracking-[0.3em] text-muted-foreground">
                   Step {currentStep} of 4
                 </p>
@@ -395,7 +383,6 @@ const ProfileSetup = () => {
           <div className="flex flex-col gap-4 pt-4 sm:flex-row sm:justify-between">
             <Button
               variant="outline"
-              className="rounded-full border-[hsl(var(--brand-secondary))]/20 px-6 text-sm"
               onClick={handlePrevious}
               disabled={currentStep === 1}
             >
@@ -403,14 +390,14 @@ const ProfileSetup = () => {
             </Button>
 
             {currentStep < 4 ? (
-              <PremiumButton onClick={handleNext} className="justify-center">
+              <Button onClick={handleNext}>
                 Continue
-              </PremiumButton>
+              </Button>
             ) : (
-              <PremiumButton onClick={handleSubmit} disabled={loading} className="justify-center">
+              <Button onClick={handleSubmit} disabled={loading}>
                 {loading ? "Saving" : "Complete profile"}
                 <CheckCircle className="ml-2 h-4 w-4" />
-              </PremiumButton>
+              </Button>
             )}
           </div>
         </section>

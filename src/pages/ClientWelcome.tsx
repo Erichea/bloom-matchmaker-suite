@@ -41,11 +41,11 @@ const ClientWelcome = () => {
 
     try {
       const normalizedCode = accessCode.trim().toUpperCase();
-      const { data: validationResult, error } = await supabase.rpc("validate_access_code", {
+      const { data: validationResult, error } = await supabase.rpc("validate_access_code" as any, {
         p_code: normalizedCode,
       });
 
-      const codeData = Array.isArray(validationResult) ? validationResult[0] : null;
+      const codeData = Array.isArray(validationResult) ? validationResult[0] : (validationResult as any);
 
       if (error || !codeData) {
         toast({
@@ -56,7 +56,7 @@ const ClientWelcome = () => {
         return;
       }
 
-      if (codeData.is_used) {
+      if ((codeData as any).is_used) {
         toast({
           title: "Code already used",
           description: "This invitation has already been redeemed.",
@@ -65,7 +65,7 @@ const ClientWelcome = () => {
         return;
       }
 
-      if (codeData.expires_at && new Date(codeData.expires_at) < new Date()) {
+      if ((codeData as any).expires_at && new Date((codeData as any).expires_at) < new Date()) {
         toast({
           title: "Code expired",
           description: "Please contact your matchmaker for a fresh invitation.",
