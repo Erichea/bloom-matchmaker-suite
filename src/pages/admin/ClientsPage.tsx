@@ -275,11 +275,14 @@ const ClientsPage = () => {
             throw answersError;
           }
 
+          console.log("Fetched answers data:", answersData);
+
           const answersMap = (answersData || []).reduce<QuestionnaireAnswers>((acc, curr) => {
             acc[curr.question_id] = curr.answer;
             return acc;
           }, {});
 
+          console.log("Answers map:", answersMap);
           setQuestionnaireAnswers(answersMap);
         }
 
@@ -846,7 +849,7 @@ const ClientsPage = () => {
                           ? "badge-error"
                           : ""
                   }>
-                    {selectedProfile.status.replace("_", " ")}
+                    {selectedProfile.status === "pending_approval" ? "Pending review" : selectedProfile.status.replace("_", " ")}
                   </Badge>
                 )
               )}
@@ -972,13 +975,12 @@ const ClientsPage = () => {
                                   {answeredCount} of {categoryQuestions.length} answered
                                 </p>
                               </div>
-                              <Badge variant="secondary" className={isComplete ? "text-success" : "text-muted-foreground"}>
-                                {isComplete ? "Complete" : "In progress"}
-                              </Badge>
                             </div>
                             <div className="space-y-3">
                               {categoryQuestions.map((question) => {
                                 const AnswerIcon = question.icon;
+                                const answer = questionnaireAnswers[question.id];
+                                console.log(`Question ${question.id}:`, answer);
                                 return (
                                   <div key={question.id} className="border border-border rounded-md p-3">
                                     <div className="flex items-center gap-2 text-sm font-medium mb-2">
@@ -986,7 +988,7 @@ const ClientsPage = () => {
                                       <span>{question.title}</span>
                                     </div>
                                     <p className="text-sm text-muted-foreground whitespace-pre-line">
-                                      {formatAnswer(questionnaireAnswers[question.id])}
+                                      {formatAnswer(answer)}
                                     </p>
                                   </div>
                                 );
