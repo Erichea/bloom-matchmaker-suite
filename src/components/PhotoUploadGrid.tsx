@@ -294,16 +294,25 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
   };
 
   const handleCropComplete = async (croppedBlob: Blob) => {
-    if (!sheetContext) return;
+    console.log("handleCropComplete called with blob:", croppedBlob.size, "bytes");
+    if (!sheetContext) {
+      console.error("No sheetContext available");
+      return;
+    }
 
+    console.log("Starting upload process...");
     setUploading(true);
     setCropDialogOpen(false);
 
     try {
       // Convert blob to file for compression
+      console.log("Converting blob to file...");
       const croppedFile = new File([croppedBlob], originalFileName, { type: "image/webp" });
+      console.log("Compressing image...");
       const compressedFile = await compressImage(croppedFile);
+      console.log("Compressed file size:", compressedFile.size, "bytes");
       const fileName = `${userId}/${Date.now()}.webp`;
+      console.log("Uploading to storage as:", fileName);
 
       const { error: uploadError } = await supabase.storage
         .from("profile-photos")
@@ -312,24 +321,35 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
           upsert: false,
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        throw uploadError;
+      }
 
+      console.log("Upload successful, getting public URL...");
       const {
         data: { publicUrl },
       } = supabase.storage.from("profile-photos").getPublicUrl(fileName);
+      console.log("Public URL:", publicUrl);
 
       if (sheetContext.photo) {
+        console.log("Updating existing photo:", sheetContext.photo.id);
         await removeFromStorage(sheetContext.photo.photo_url);
         const { error: updateError } = await supabase
           .from("profile_photos")
           .update({ photo_url: publicUrl })
           .eq("id", sheetContext.photo.id);
 
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error("Update error:", updateError);
+          throw updateError;
+        }
 
+        console.log("Photo updated successfully");
         toast({ title: "Photo updated", description: "The photo has been replaced." });
       } else {
         const insertIndex = Math.min(sheetContext.slotIndex, sortedPhotos.length);
+        console.log("Inserting new photo at index:", insertIndex);
 
         const { data, error: insertError } = await supabase
           .from("profile_photos")
@@ -342,15 +362,21 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
           .select("*")
           .single();
 
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error("Insert error:", insertError);
+          throw insertError;
+        }
 
+        console.log("Photo inserted, updating order...");
         const updatedOrder = [...sortedPhotos];
         updatedOrder.splice(insertIndex, 0, data as Photo);
         await persistOrdering(updatedOrder);
 
+        console.log("Photo uploaded successfully");
         toast({ title: "Photo uploaded", description: "Your photo has been added." });
       }
 
+      console.log("Calling onPhotosUpdate...");
       onPhotosUpdate();
     } catch (error: any) {
       console.error("Upload error", error);
