@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { ImageCropDialog } from "@/components/ImageCropDialog";
 
 const MAX_PHOTOS = 6;
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
@@ -147,6 +148,9 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
   const [uploading, setUploading] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetContext, setSheetContext] = useState<SheetContext | null>(null);
+  const [cropDialogOpen, setCropDialogOpen] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [originalFileName, setOriginalFileName] = useState<string>("");
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -281,10 +285,24 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
       return;
     }
 
+    // Create a temporary URL for the image to show in the crop dialog
+    const imageUrl = URL.createObjectURL(file);
+    setImageToCrop(imageUrl);
+    setOriginalFileName(file.name);
+    setCropDialogOpen(true);
+    closeSheet();
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    if (!sheetContext) return;
+
     setUploading(true);
+    setCropDialogOpen(false);
 
     try {
-      const compressedFile = await compressImage(file);
+      // Convert blob to file for compression
+      const croppedFile = new File([croppedBlob], originalFileName, { type: "image/webp" });
+      const compressedFile = await compressImage(croppedFile);
       const fileName = `${userId}/${Date.now()}.webp`;
 
       const { error: uploadError } = await supabase.storage
@@ -343,8 +361,24 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
       });
     } finally {
       setUploading(false);
-      event.target.value = "";
-      closeSheet();
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      if (imageToCrop) {
+        URL.revokeObjectURL(imageToCrop);
+        setImageToCrop(null);
+      }
+    }
+  };
+
+  const handleCropCancel = () => {
+    setCropDialogOpen(false);
+    if (imageToCrop) {
+      URL.revokeObjectURL(imageToCrop);
+      setImageToCrop(null);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -496,6 +530,15 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
           </div>
         </SheetContent>
       </Sheet>
+
+      {imageToCrop && (
+        <ImageCropDialog
+          open={cropDialogOpen}
+          imageUrl={imageToCrop}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+        />
+      )}
     </div>
   );
 };
