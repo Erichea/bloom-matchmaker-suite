@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Heart, UserPlus, LogIn } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const signInSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -36,22 +37,57 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("signin");
   const [showEmailConfirmationMessage, setShowEmailConfirmationMessage] = useState(false);
+  const [hasValidAccessCode, setHasValidAccessCode] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
 
-  // Check if user came from access code validation
-  const hasValidAccessCode = sessionStorage.getItem('validAccessCode');
-
   // Check if coming from "I already have an account" link
   const isSignInOnly = searchParams.get('mode') === 'signin';
 
+  // Validate access code on mount
   useEffect(() => {
-    if (hasValidAccessCode) {
-      setActiveTab("signup");
-    }
-  }, [hasValidAccessCode]);
+    const validateStoredAccessCode = async () => {
+      const storedCode = sessionStorage.getItem('validAccessCode');
+
+      if (!storedCode) {
+        setHasValidAccessCode(false);
+        return;
+      }
+
+      // Verify the code is still valid server-side
+      try {
+        const { data: validationResult, error } = await supabase.rpc("validate_access_code", {
+          p_code: storedCode,
+        });
+
+        const codeData = Array.isArray(validationResult) ? validationResult[0] : null;
+
+        // Check if code is valid, not used, and not expired
+        const isValid =
+          !error &&
+          codeData &&
+          !codeData.is_used &&
+          (!codeData.expires_at || new Date(codeData.expires_at) >= new Date());
+
+        if (!isValid) {
+          // Clear invalid code from session storage
+          sessionStorage.removeItem('validAccessCode');
+          setHasValidAccessCode(false);
+        } else {
+          setHasValidAccessCode(true);
+          setActiveTab("signup");
+        }
+      } catch (error) {
+        console.error("Error validating access code:", error);
+        sessionStorage.removeItem('validAccessCode');
+        setHasValidAccessCode(false);
+      }
+    };
+
+    validateStoredAccessCode();
+  }, []);
 
   const signInForm = useForm<SignInForm>({
     resolver: zodResolver(signInSchema),

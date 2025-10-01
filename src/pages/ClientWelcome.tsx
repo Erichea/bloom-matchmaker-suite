@@ -128,7 +128,7 @@ const ClientWelcome = () => {
           </span>
         </Link>
         <Link
-          to="/auth"
+          to="/auth?mode=signin"
           className="hidden items-center gap-2 rounded-full border border-white/20 px-5 py-2 text-[0.65rem] uppercase tracking-[0.35em] text-white/70 transition hover:border-white/35 hover:text-white md:inline-flex"
         >
           <LogIn className="h-3.5 w-3.5" /> Sign in
@@ -197,7 +197,7 @@ const ClientWelcome = () => {
           <div className="flex flex-col gap-2 text-[0.65rem] uppercase tracking-[0.25em] text-white/70">
             <span className="inline-flex items-center gap-3 self-center md:self-start">
               <span className="h-px w-6 bg-white/40" /> Already a member?
-              <Link to="/auth" className="text-white transition hover:opacity-80">Sign in</Link>
+              <Link to="/auth?mode=signin" className="text-white transition hover:opacity-80">Sign in</Link>
             </span>
             <span className="inline-flex items-center gap-3 self-center md:self-start">
               <span className="h-px w-6 bg-white/40" /> Need help? Contact your matchmaker concierge.
