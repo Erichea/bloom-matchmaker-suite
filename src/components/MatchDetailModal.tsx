@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -44,6 +44,20 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
       age--;
     }
     return age;
+  };
+
+  const getProfilePhoto = (profile: any): string | null => {
+    if (!profile) return null;
+    if (profile.photo_url) return profile.photo_url;
+    const photos = Array.isArray(profile.profile_photos) ? profile.profile_photos : [];
+    if (!photos.length) return null;
+    const sorted = [...photos].sort((a, b) => {
+      if (a.is_primary === b.is_primary) {
+        return (a.order_index ?? 0) - (b.order_index ?? 0);
+      }
+      return a.is_primary ? -1 : 1;
+    });
+    return sorted[0]?.photo_url ?? null;
   };
 
   const handleResponse = async (response: 'accepted' | 'rejected') => {
@@ -118,6 +132,7 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
   const initials = name.split(' ').map((n: string) => n[0]).join('').toUpperCase();
   const age = otherProfile.date_of_birth ? calculateAge(otherProfile.date_of_birth) : null;
   const location = [otherProfile.city, otherProfile.country].filter(Boolean).join(', ');
+  const otherProfilePhoto = getProfilePhoto(otherProfile);
 
   // Determine match state
   const isMutualMatch = match.match_status === "both_accepted";
@@ -141,10 +156,14 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
         <div className="space-y-6">
           {/* Profile Header */}
           <div className="text-center space-y-4">
-            <Avatar className="w-24 h-24 mx-auto border-4 border-primary/20">
-              <AvatarFallback className="text-2xl bg-primary-muted text-primary">
-                {initials}
-              </AvatarFallback>
+            <Avatar className="mx-auto h-24 w-24 border-4 border-primary/20">
+              {otherProfilePhoto ? (
+                <AvatarImage src={otherProfilePhoto} alt={name || "Match"} />
+              ) : (
+                <AvatarFallback className="bg-primary-muted text-2xl text-primary">
+                  {initials}
+                </AvatarFallback>
+              )}
             </Avatar>
             
             <div>

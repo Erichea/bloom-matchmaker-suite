@@ -272,7 +272,7 @@ const ClientDashboard = () => {
           {profileStatus === "approved" && (
             <Button
               variant="ghost"
-              onClick={() => navigate("/profile-questionnaire")}
+              onClick={() => navigate("/client/profile/edit")}
               className="hidden rounded-full border border-white/15 px-6 py-2 text-[0.65rem] uppercase tracking-[0.28em] text-white/80 transition hover:border-white/35 hover:text-white md:inline-flex"
             >
               Update profile
@@ -351,7 +351,7 @@ const ClientDashboard = () => {
               </p>
               <Button
                 variant="ghost"
-                onClick={() => navigate("/profile-questionnaire")}
+                onClick={() => navigate("/client/profile/edit")}
                 className="inline-flex w-full items-center justify-center gap-2 self-center rounded-full border border-white/15 px-6 py-3 text-[0.65rem] uppercase tracking-[0.28em] text-white/80 transition hover:border-white/35 hover:text-white md:w-auto md:self-start"
               >
                 <User className="h-3.5 w-3.5" /> Update profile preferences
@@ -385,7 +385,11 @@ const ClientDashboard = () => {
                     : "Complete your profile questionnaire to submit for matchmaker review."}
                 </p>
                 <Button
-                  onClick={() => navigate("/profile-questionnaire")}
+                  onClick={() =>
+                    navigate(
+                      profileStatus === "rejected" ? "/client/profile/edit" : "/profile-questionnaire"
+                    )
+                  }
                   className="w-full rounded-full bg-[hsl(var(--brand-primary))] px-8 py-3 text-sm font-medium uppercase tracking-[0.3em] text-white transition hover:opacity-90"
                 >
                   {profileStatus === "rejected" ? "Update questionnaire" : "Continue questionnaire"}

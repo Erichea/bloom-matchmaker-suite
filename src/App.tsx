@@ -11,6 +11,7 @@ import ClientDashboard from "./pages/ClientDashboard";
 import AuthPage from "./pages/AuthPage";
 import ProfileSetup from "./pages/ProfileSetup";
 import ProfileQuestionnairePage from "./pages/ProfileQuestionairePage";
+import ProfileEditPage from "./pages/ProfileEditPage";
 import NotFound from "./pages/NotFound";
 import ClientsPage from "./pages/admin/ClientsPage";
 import AccessCodesPage from "./pages/admin/AccessCodesPage";
@@ -81,6 +82,7 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="/profile-questionnaire" element={<ProfileQuestionnairePage />} />
+            <Route path="/client/profile/edit" element={<ProfileEditPage />} />
             <Route path="/client/dashboard" element={<ClientDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

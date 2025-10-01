@@ -1,31 +1,37 @@
-import { useState, useCallback } from 'react';
-import { Camera, X, Plus, Lightbulb, GripVertical } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import imageCompression from 'browser-image-compression';
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Camera, GripVertical, Lightbulb, Plus, Trash2, X } from "lucide-react";
+import imageCompression from "browser-image-compression";
 import {
   DndContext,
-  closestCenter,
+  DragEndEvent,
   KeyboardSensor,
   PointerSensor,
+  closestCenter,
   useSensor,
   useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
-  arrayMove,
   SortableContext,
+  arrayMove,
+  rectSortingStrategy,
   sortableKeyboardCoordinates,
   useSortable,
-  rectSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
-interface Photo {
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+
+const MAX_PHOTOS = 6;
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+
+export interface Photo {
   id: string;
   photo_url: string;
   order_index: number;
+  is_primary: boolean | null;
 }
 
 interface PhotoUploadGridProps {
@@ -35,7 +41,26 @@ interface PhotoUploadGridProps {
   onPhotosUpdate: () => void;
 }
 
-const SortablePhotoSlot = ({ photo, onDelete }: { photo: Photo | null; onDelete?: () => void }) => {
+interface SortableSlotProps {
+  id: string;
+  index: number;
+  photo: Photo | null;
+  uploading: boolean;
+  onOpenSheet: (slotIndex: number, photo?: Photo) => void;
+  onDelete: (photo: Photo) => void;
+}
+
+interface SheetContext {
+  slotIndex: number;
+  photo?: Photo;
+}
+
+const getStoragePath = (url: string) => {
+  const parts = url.split("/profile-photos/");
+  return parts.length > 1 ? parts[1] : null;
+};
+
+const SortableSlot = ({ id, index, photo, uploading, onOpenSheet, onDelete }: SortableSlotProps) => {
   const {
     attributes,
     listeners,
@@ -43,254 +68,356 @@ const SortablePhotoSlot = ({ photo, onDelete }: { photo: Photo | null; onDelete?
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: photo?.id || 'empty', disabled: !photo });
+    isOver,
+  } = useSortable({
+    id,
+    disabled: !photo,
+    data: {
+      slotIndex: index,
+      photoId: photo?.id ?? null,
+    },
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.6 : 1,
   };
 
-  if (!photo) {
-    return (
-      <div className="aspect-square rounded-2xl border-2 border-dashed border-border bg-muted/30 flex items-center justify-center">
-        <Camera className="w-8 h-8 text-muted-foreground" />
-      </div>
-    );
-  }
+  const handleClick = () => {
+    if (uploading) return;
+    onOpenSheet(index, photo ?? undefined);
+  };
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="aspect-square rounded-2xl overflow-hidden relative group cursor-move"
-      {...attributes}
-      {...listeners}
-    >
-      <img src={photo.photo_url} alt="" className="w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-        <GripVertical className="w-6 h-6 text-white" />
-      </div>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete?.();
-        }}
-        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
+    <div ref={setNodeRef} style={style} {...attributes} className="aspect-square">
+      <div
+        onClick={handleClick}
+        {...(photo ? listeners : {})}
+        className={`relative flex h-full w-full items-center justify-center overflow-hidden rounded-[16px] border transition-all ${
+          photo ? "border-border bg-muted/10" : "border-dashed border-border bg-muted/30 hover:bg-muted/40"
+        } ${isOver && !photo ? "border-primary/70 bg-primary/10" : ""}`}
       >
-        <X className="w-5 h-5" />
-      </button>
+        {photo ? (
+          <>
+            <img src={photo.photo_url} alt="Profile" className="h-full w-full object-cover" />
+            <div className="absolute inset-0 flex flex-col justify-between bg-black/0 p-3 transition-opacity group-hover:bg-black/30">
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onDelete(photo);
+                  }}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-all hover:bg-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black group-hover:opacity-100"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="flex items-center justify-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="rounded-full bg-black/60 p-2 text-white">
+                  <GripVertical className="h-4 w-4" />
+                </div>
+                <span className="rounded-full bg-black/60 px-3 py-1 text-xs uppercase tracking-[0.2em] text-white">
+                  Drag to reorder
+                </span>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-muted-foreground">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Camera className="h-6 w-6" />
+            </div>
+            <div className="text-center text-sm">
+              <p className="font-medium">Add photo</p>
+              <p className="text-xs text-muted-foreground">Tap to upload</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
 export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: PhotoUploadGridProps) => {
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [uploading, setUploading] = useState(false);
-  const [showSheet, setShowSheet] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetContext, setSheetContext] = useState<SheetContext | null>(null);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        delay: 120,
+        tolerance: 8,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
-  const compressImage = async (file: File): Promise<File> => {
+  const sortedPhotos = useMemo(
+    () => [...photos].sort((a, b) => a.order_index - b.order_index),
+    [photos]
+  );
+
+  const slots = useMemo(
+    () =>
+      Array.from({ length: MAX_PHOTOS }, (_, index) => ({
+        id: `slot-${index}`,
+        index,
+        photo: sortedPhotos[index] ?? null,
+      })),
+    [sortedPhotos]
+  );
+
+  const openSheet = (slotIndex: number, photo?: Photo) => {
+    if (!photo && sortedPhotos.length >= MAX_PHOTOS) {
+      toast({
+        title: "All slots filled",
+        description: "Remove a photo before uploading a new one.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSheetContext({ slotIndex, photo });
+    setSheetOpen(true);
+  };
+
+  const closeSheet = () => {
+    setSheetOpen(false);
+    setSheetContext(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const persistOrdering = useCallback(async (ordered: Photo[]) => {
+    await Promise.all(
+      ordered.map((photo, index) =>
+        supabase
+          .from("profile_photos")
+          .update({
+            order_index: index,
+            is_primary: index === 0,
+          })
+          .eq("id", photo.id)
+      )
+    );
+  }, []);
+
+  const removeFromStorage = useCallback(async (photoUrl: string) => {
+    const path = getStoragePath(photoUrl);
+    if (!path) return;
+    await supabase.storage.from("profile-photos").remove([path]);
+  }, []);
+
+  const handleDelete = useCallback(
+    async (photo: Photo) => {
+      try {
+        await removeFromStorage(photo.photo_url);
+        const { error } = await supabase
+          .from("profile_photos")
+          .delete()
+          .eq("id", photo.id);
+
+        if (error) throw error;
+
+        const remaining = sortedPhotos.filter((item) => item.id !== photo.id);
+        if (remaining.length) {
+          await persistOrdering(remaining);
+        }
+
+        toast({ title: "Photo deleted", description: "Photo removed successfully." });
+        closeSheet();
+        onPhotosUpdate();
+      } catch (error: any) {
+        console.error("Delete failed", error);
+        toast({
+          title: "Delete failed",
+          description: error?.message ?? "Unable to delete the photo.",
+          variant: "destructive",
+        });
+      }
+    },
+    [persistOrdering, removeFromStorage, sortedPhotos, toast, onPhotosUpdate]
+  );
+
+  const compressImage = async (file: File) => {
     const options = {
       maxSizeMB: 1,
       maxWidthOrHeight: 1080,
       useWebWorker: true,
-      fileType: 'image/webp',
+      fileType: "image/webp",
     };
 
     try {
       const compressedFile = await imageCompression(file, options);
-      return new File([compressedFile], file.name.replace(/\.[^/.]+$/, '.webp'), {
-        type: 'image/webp',
+      return new File([compressedFile], file.name.replace(/\.[^/.]+$/, ".webp"), {
+        type: "image/webp",
       });
     } catch (error) {
-      console.error('Compression error:', error);
+      console.error("Compression error", error);
       return file;
     }
   };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
+    const file = event.target.files?.[0];
+    if (!file || !sheetContext) return;
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      toast({
+        title: "File too large",
+        description: "Choose a photo that is 10MB or smaller before compression.",
+        variant: "destructive",
+      });
+      event.target.value = "";
+      return;
+    }
 
     setUploading(true);
-    setShowSheet(false);
 
     try {
-      const file = files[0];
-      
-      // Compress image
       const compressedFile = await compressImage(file);
-      
-      // Upload to Supabase Storage
-      const fileExt = 'webp';
-      const fileName = `${userId}/${Date.now()}.${fileExt}`;
-      
+      const fileName = `${userId}/${Date.now()}.webp`;
+
       const { error: uploadError } = await supabase.storage
-        .from('profile-photos')
+        .from("profile-photos")
         .upload(fileName, compressedFile, {
-          cacheControl: '3600',
+          cacheControl: "3600",
           upsert: false,
         });
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('profile-photos')
-        .getPublicUrl(fileName);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("profile-photos").getPublicUrl(fileName);
 
-      // Save to database
-      const nextOrderIndex = photos.length;
-      const { error: dbError } = await supabase
-        .from('profile_photos')
-        .insert({
-          profile_id: profileId,
-          photo_url: publicUrl,
-          order_index: nextOrderIndex,
-          is_primary: photos.length === 0,
-        });
+      if (sheetContext.photo) {
+        await removeFromStorage(sheetContext.photo.photo_url);
+        const { error: updateError } = await supabase
+          .from("profile_photos")
+          .update({ photo_url: publicUrl })
+          .eq("id", sheetContext.photo.id);
 
-      if (dbError) throw dbError;
+        if (updateError) throw updateError;
 
-      toast({
-        title: "Photo uploaded!",
-        description: "Your photo has been added successfully.",
-      });
+        toast({ title: "Photo updated", description: "The photo has been replaced." });
+      } else {
+        const insertIndex = Math.min(sheetContext.slotIndex, sortedPhotos.length);
+
+        const { data, error: insertError } = await supabase
+          .from("profile_photos")
+          .insert({
+            profile_id: profileId,
+            photo_url: publicUrl,
+            order_index: insertIndex,
+            is_primary: sortedPhotos.length === 0 && insertIndex === 0,
+          })
+          .select("*")
+          .single();
+
+        if (insertError) throw insertError;
+
+        const updatedOrder = [...sortedPhotos];
+        updatedOrder.splice(insertIndex, 0, data as Photo);
+        await persistOrdering(updatedOrder);
+
+        toast({ title: "Photo uploaded", description: "Your photo has been added." });
+      }
 
       onPhotosUpdate();
     } catch (error: any) {
-      console.error('Upload error:', error);
+      console.error("Upload error", error);
       toast({
         title: "Upload failed",
-        description: error.message || "Failed to upload photo. Please try again.",
+        description: error?.message ?? "We couldn't upload that photo. Please try again.",
         variant: "destructive",
       });
     } finally {
       setUploading(false);
-      event.target.value = '';
+      event.target.value = "";
+      closeSheet();
     }
   };
 
-  const handleDelete = async (photoId: string, photoUrl: string) => {
-    try {
-      // Extract file path from URL
-      const urlParts = photoUrl.split('/profile-photos/');
-      if (urlParts.length > 1) {
-        const filePath = urlParts[1];
-        
-        // Delete from storage
-        await supabase.storage
-          .from('profile-photos')
-          .remove([filePath]);
+  const handleDragEnd = useCallback(
+    async (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+
+      const activeSlotIndex = slots.findIndex((slot) => slot.id === active.id);
+      const overSlotIndex = slots.findIndex((slot) => slot.id === over.id);
+      const activePhoto = slots[activeSlotIndex]?.photo;
+
+      if (!activePhoto) return;
+
+      const ordered = [...sortedPhotos];
+      const fromIndex = ordered.findIndex((photo) => photo.id === activePhoto.id);
+      if (fromIndex === -1) return;
+
+      const toIndex = Math.min(overSlotIndex, ordered.length - 1);
+      const nextOrder = arrayMove(ordered, fromIndex, toIndex);
+
+      try {
+        await persistOrdering(nextOrder);
+        onPhotosUpdate();
+      } catch (error) {
+        console.error("Reorder failed", error);
+        toast({
+          title: "Reorder failed",
+          description: "We couldn't reorder the photos. Please try again.",
+          variant: "destructive",
+        });
       }
+    },
+    [slots, sortedPhotos, persistOrdering, onPhotosUpdate, toast]
+  );
 
-      // Delete from database
-      const { error } = await supabase
-        .from('profile_photos')
-        .delete()
-        .eq('id', photoId);
-
-      if (error) throw error;
-
+  const handleCameraRoll = () => {
+    if (uploading) return;
+    if (!sheetContext || (!sheetContext.photo && sortedPhotos.length >= MAX_PHOTOS)) {
       toast({
-        title: "Photo deleted",
-        description: "Photo removed successfully.",
-      });
-
-      onPhotosUpdate();
-    } catch (error: any) {
-      toast({
-        title: "Delete failed",
-        description: error.message || "Failed to delete photo.",
+        title: "All slots filled",
+        description: "Remove a photo before uploading a new one.",
         variant: "destructive",
       });
+      return;
     }
+
+    fileInputRef.current?.click();
   };
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (!over || active.id === over.id) return;
-
-    const oldIndex = photos.findIndex((p) => p.id === active.id);
-    const newIndex = photos.findIndex((p) => p.id === over.id);
-
-    const reorderedPhotos = arrayMove(photos, oldIndex, newIndex);
-
-    // Update order_index in database
-    try {
-      const updates = reorderedPhotos.map((photo, index) => ({
-        id: photo.id,
-        order_index: index,
-      }));
-
-      for (const update of updates) {
-        await supabase
-          .from('profile_photos')
-          .update({ order_index: update.order_index })
-          .eq('id', update.id);
-      }
-
-      onPhotosUpdate();
-    } catch (error: any) {
-      toast({
-        title: "Reorder failed",
-        description: "Failed to reorder photos.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleSlotClick = (index: number) => {
-    if (index < photos.length) return; // Don't open sheet for filled slots
-    setSelectedSlot(index);
-    setShowSheet(true);
-  };
-
-  const sortedPhotos = [...photos].sort((a, b) => a.order_index - b.order_index);
-  const slots = Array.from({ length: 6 }, (_, i) => sortedPhotos[i] || null);
+  const filledCount = sortedPhotos.length;
+  const currentSheetPhoto = sheetContext?.photo;
 
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold mb-2">Pick your videos and photos</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Tap to edit, drag to reorder
-        </p>
+        <h3 className="mb-2 text-lg font-semibold">Pick your videos and photos</h3>
+        <p className="text-sm text-muted-foreground">Upload up to six photos to introduce yourself.</p>
       </div>
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={sortedPhotos.map((p) => p.id)} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-3 gap-4">
-            {slots.map((photo, index) => (
-              <div key={photo?.id || `slot-${index}`} onClick={() => handleSlotClick(index)}>
-                {photo ? (
-                  <SortablePhotoSlot photo={photo} onDelete={() => handleDelete(photo.id, photo.photo_url)} />
-                ) : (
-                  <label className="block cursor-pointer">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleFileSelect}
-                      disabled={uploading}
-                    />
-                    <div className="aspect-square rounded-2xl border-2 border-dashed border-border bg-muted/30 flex flex-col items-center justify-center gap-2 hover:bg-muted/50 transition-colors">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Plus className="w-6 h-6 text-primary" />
-                      </div>
-                    </div>
-                  </label>
-                )}
-              </div>
+        <SortableContext items={slots.map((slot) => slot.id)} strategy={rectSortingStrategy}>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+            {slots.map((slot) => (
+              <SortableSlot
+                key={slot.id}
+                id={slot.id}
+                index={slot.index}
+                photo={slot.photo}
+                uploading={uploading}
+                onOpenSheet={openSheet}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         </SortableContext>
@@ -298,50 +425,74 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
 
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>Tap to edit, drag to reorder</span>
-        <span>{photos.length} of 6 required</span>
+        <span>
+          {filledCount} of {MAX_PHOTOS}
+        </span>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-4 flex items-start gap-3">
-        <Lightbulb className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+      <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
+        <Lightbulb className="mt-0.5 h-5 w-5 text-primary" />
         <div>
-          <p className="text-sm font-medium mb-1">Not sure which photos to use?</p>
-          <button className="text-sm text-primary hover:underline">
+          <p className="mb-1 text-sm font-medium">Not sure which photos to use?</p>
+          <button type="button" className="text-sm text-primary underline-offset-4 hover:underline">
             See what works based on research.
           </button>
         </div>
       </div>
 
-      <Sheet open={showSheet} onOpenChange={setShowSheet}>
-        <SheetContent side="bottom" className="h-[300px]">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*,.heic,.HEIC,.heif,.HEIF"
+        className="hidden"
+        onChange={handleFileSelect}
+      />
+
+      <Sheet
+        open={sheetOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeSheet();
+          } else {
+            setSheetOpen(true);
+          }
+        }}
+      >
+        <SheetContent side="bottom" className="h-auto pb-8">
           <SheetHeader>
-            <SheetTitle>Pick your videos and photos</SheetTitle>
-            <SheetDescription>Choose where to upload from</SheetDescription>
+            <SheetTitle>{currentSheetPhoto ? "Edit photo" : "Add a new photo"}</SheetTitle>
+            <SheetDescription>
+              {currentSheetPhoto
+                ? "Replace or remove this photo to refresh your gallery."
+                : "Choose where to pull your next photo from."}
+            </SheetDescription>
           </SheetHeader>
+
           <div className="mt-6 space-y-3">
-            <button
-              className="w-full py-4 text-center text-lg font-medium border rounded-lg hover:bg-muted transition-colors"
-              disabled
-            >
-              Instagram
-            </button>
-            <label className="block">
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileSelect}
-                disabled={uploading}
-              />
-              <div className="w-full py-4 text-center text-lg font-medium border rounded-lg hover:bg-muted transition-colors cursor-pointer">
-                {uploading ? 'Uploading...' : 'Camera Roll'}
-              </div>
-            </label>
-            <button
-              onClick={() => setShowSheet(false)}
-              className="w-full py-4 text-center text-lg font-medium border rounded-lg hover:bg-muted transition-colors"
-            >
+            <Button variant="outline" className="h-12 w-full justify-between" disabled>
+              <span>Instagram</span>
+              <span className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Coming soon</span>
+            </Button>
+
+            <Button onClick={handleCameraRoll} className="h-12 w-full justify-between" disabled={uploading}>
+              <span>{uploading ? "Uploading…" : "Camera Roll"}</span>
+              <Plus className="h-4 w-4" />
+            </Button>
+
+            {currentSheetPhoto && (
+              <Button
+                variant="outline"
+                onClick={() => handleDelete(currentSheetPhoto)}
+                className="h-12 w-full justify-between border-destructive/40 text-destructive hover:bg-destructive/10"
+              >
+                <span>Remove photo</span>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+
+            <Button variant="ghost" onClick={closeSheet} className="h-12 w-full">
               Cancel
-            </button>
+            </Button>
           </div>
         </SheetContent>
       </Sheet>

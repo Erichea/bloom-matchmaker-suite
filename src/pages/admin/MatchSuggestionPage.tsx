@@ -13,6 +13,7 @@ import {
   type SortingState,
   type ColumnFiltersState,
 } from "@tanstack/react-table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -50,6 +51,7 @@ interface UserMatchStats {
   pending_matches: number;
   mutual_matches: number;
   rejected_matches: number;
+  primary_photo_url?: string | null;
 }
 
 const columnsConfig: ColumnDef<UserMatchStats>[] = [
@@ -67,16 +69,32 @@ const columnsConfig: ColumnDef<UserMatchStats>[] = [
         <ArrowUpDown className="ml-2 h-3.5 w-3.5" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="py-1">
-        <div className="text-sm font-semibold">
-          {row.original.first_name} {row.original.last_name}
+    cell: ({ row }) => {
+      const fullName = `${row.original.first_name ?? ""} ${row.original.last_name ?? ""}`.trim();
+      const initials = fullName
+        .split(" ")
+        .filter(Boolean)
+        .map((part) => part[0])
+        .join("")
+        .toUpperCase() || "?";
+      const photoUrl = row.original.primary_photo_url;
+
+      return (
+        <div className="flex items-center gap-3 py-1">
+          <Avatar className="h-9 w-9">
+            {photoUrl ? (
+              <AvatarImage src={photoUrl} alt={fullName || "Client"} />
+            ) : (
+              <AvatarFallback>{initials}</AvatarFallback>
+            )}
+          </Avatar>
+          <div>
+            <div className="text-sm font-semibold">{fullName || "Unnamed"}</div>
+            <div className="mt-0.5 text-xs text-muted-foreground">{row.original.email}</div>
+          </div>
         </div>
-        <div className="mt-0.5 text-xs text-muted-foreground">
-          {row.original.email}
-        </div>
-      </div>
-    ),
+      );
+    },
   },
   {
     accessorKey: "total_matches",
@@ -190,6 +208,17 @@ const MatchSuggestionPage = () => {
 
   const columns = useMemo(() => columnsConfig, []);
 
+  const getPrimaryPhotoFromEntries = (entries: any[]): string | null => {
+    if (!entries || !entries.length) return null;
+    const sorted = [...entries].sort((a, b) => {
+      if (a.is_primary === b.is_primary) {
+        return (a.order_index ?? 0) - (b.order_index ?? 0);
+      }
+      return a.is_primary ? -1 : 1;
+    });
+    return sorted[0]?.photo_url ?? null;
+  };
+
   const table = useReactTable({
     data: stats,
     columns,
@@ -222,7 +251,36 @@ const MatchSuggestionPage = () => {
           throw error;
         }
 
-        setStats((data || []) as any[]);
+        const statsData = ((data || []) as UserMatchStats[]);
+        const profileIds = statsData.map((entry) => entry.profile_id).filter(Boolean);
+
+        if (profileIds.length) {
+          const { data: photoRows, error: photosError } = await supabase
+            .from('profile_photos')
+            .select('profile_id, photo_url, is_primary, order_index')
+            .in('profile_id', profileIds);
+
+          if (photosError) throw photosError;
+
+          const grouped = (photoRows || []).reduce((acc: Record<string, any[]>, row: any) => {
+            if (!acc[row.profile_id]) {
+              acc[row.profile_id] = [];
+            }
+            acc[row.profile_id].push(row);
+            return acc;
+          }, {} as Record<string, any[]>);
+
+          const enriched = statsData.map((entry) => ({
+            ...entry,
+            primary_photo_url: grouped[entry.profile_id]
+              ? getPrimaryPhotoFromEntries(grouped[entry.profile_id])
+              : null,
+          }));
+
+          setStats(enriched);
+        } else {
+          setStats(statsData);
+        }
       } catch (error: unknown) {
         console.error("Error fetching user match stats:", error);
         toast({

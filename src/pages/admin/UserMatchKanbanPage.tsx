@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, Plus, Heart, Clock, CheckCircle, XCircle, GripVertical, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProfileLibraryModal } from "@/components/ProfileLibraryModal";
@@ -31,6 +31,7 @@ interface OtherProfile {
   country: string;
   profession: string;
   date_of_birth: string;
+  photo_url?: string | null;
 }
 
 interface KanbanMatch {
@@ -113,6 +114,7 @@ const MatchCard = ({ match, isDragging }: MatchCardProps) => {
   const name = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
   const age = calculateAge(profile.date_of_birth);
+  const photoUrl = profile.photo_url ?? null;
 
   const {
     attributes,
@@ -152,9 +154,13 @@ const MatchCard = ({ match, isDragging }: MatchCardProps) => {
             </div>
 
             <Avatar className="w-10 h-10 ring-2 ring-border">
-              <AvatarFallback className="text-xs font-semibold bg-accent text-accent-foreground">
-                {initials}
-              </AvatarFallback>
+              {photoUrl ? (
+                <AvatarImage src={photoUrl} alt={name || "Profile"} />
+              ) : (
+                <AvatarFallback className="bg-accent text-xs font-semibold text-accent-foreground">
+                  {initials}
+                </AvatarFallback>
+              )}
             </Avatar>
 
             <div className="flex-1 min-w-0">
@@ -190,6 +196,19 @@ const calculateAge = (dateOfBirth: string) => {
     age--;
   }
   return age;
+};
+
+const selectPrimaryPhoto = (
+  photos: Array<{ photo_url: string; is_primary: boolean | null; order_index: number | null }>
+): string | null => {
+  if (!photos.length) return null;
+  const sorted = [...photos].sort((a, b) => {
+    if (a.is_primary === b.is_primary) {
+      return (a.order_index ?? 0) - (b.order_index ?? 0);
+    }
+    return a.is_primary ? -1 : 1;
+  });
+  return sorted[0]?.photo_url ?? null;
 };
 
 // Mobile list view component
@@ -280,7 +299,44 @@ const UserMatchKanbanPage = () => {
         match_id: match.match_id || `match-${index}`,
       }));
 
-      setMatches(matchesWithIds);
+      const profileIds = matchesWithIds
+        .map((match) => match.other_profile?.id)
+        .filter((id): id is string => Boolean(id));
+
+      let matchesEnriched = matchesWithIds;
+
+      if (profileIds.length) {
+        const { data: photosData, error: photosError } = await supabase
+          .from('profile_photos')
+          .select('profile_id, photo_url, is_primary, order_index')
+          .in('profile_id', profileIds);
+
+        if (photosError) throw photosError;
+
+        const grouped = (photosData || []).reduce((acc: Record<string, any[]>, photo: any) => {
+          if (!acc[photo.profile_id]) {
+            acc[photo.profile_id] = [];
+          }
+          acc[photo.profile_id].push(photo);
+          return acc;
+        }, {} as Record<string, any[]>);
+
+        matchesEnriched = matchesWithIds.map((match) => {
+          const otherId = match.other_profile?.id;
+          if (otherId && grouped[otherId]) {
+            return {
+              ...match,
+              other_profile: {
+                ...match.other_profile,
+                photo_url: selectPrimaryPhoto(grouped[otherId]),
+              },
+            };
+          }
+          return match;
+        });
+      }
+
+      setMatches(matchesEnriched);
     } catch (error: any) {
       toast({
         title: "Oops! Something went wrong",

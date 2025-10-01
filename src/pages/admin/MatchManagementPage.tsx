@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Heart,
@@ -35,6 +35,41 @@ interface Match {
   profile_2: any;
   admin_notes: string | null;
 }
+
+const getPrimaryPhotoUrl = (profile: any): string | null => {
+  if (!profile) return null;
+  if (profile.photo_url) return profile.photo_url;
+  const photos = Array.isArray(profile.profile_photos) ? profile.profile_photos : [];
+  if (!photos.length) return null;
+  const sorted = [...photos].sort((a, b) => {
+    if (a.is_primary === b.is_primary) {
+      return (a.order_index ?? 0) - (b.order_index ?? 0);
+    }
+    return a.is_primary ? -1 : 1;
+  });
+  return sorted[0]?.photo_url ?? null;
+};
+
+const renderProfileAvatar = (profile: any, size = "w-10 h-10") => {
+  const photoUrl = getPrimaryPhotoUrl(profile);
+  const name = `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim();
+  const initials = name
+    .split(" ")
+    .filter(Boolean)
+    .map((segment: string) => segment[0])
+    .join("")
+    .toUpperCase() || "?";
+
+  return (
+    <Avatar className={size}>
+      {photoUrl ? (
+        <AvatarImage src={photoUrl} alt={name || "Profile"} />
+      ) : (
+        <AvatarFallback>{initials}</AvatarFallback>
+      )}
+    </Avatar>
+  );
+};
 
 const MatchManagementPage = () => {
   const { toast } = useToast();
@@ -89,8 +124,24 @@ const MatchManagementPage = () => {
         .from('matches')
         .select(`
           *,
-          profile_1:profiles!matches_profile_1_id_fkey(*),
-          profile_2:profiles!matches_profile_2_id_fkey(*)
+          profile_1:profiles!matches_profile_1_id_fkey(
+            *,
+            profile_photos (
+              id,
+              photo_url,
+              is_primary,
+              order_index
+            )
+          ),
+          profile_2:profiles!matches_profile_2_id_fkey(
+            *,
+            profile_photos (
+              id,
+              photo_url,
+              is_primary,
+              order_index
+            )
+          )
         `)
         .order('suggested_at', { ascending: false });
 
@@ -260,11 +311,7 @@ const MatchManagementPage = () => {
                     <div key={match.id} className="card-interactive p-4">
                       <div className="flex items-center space-x-4 flex-1">
                         <div className="flex items-center space-x-2">
-                          <Avatar className="w-10 h-10">
-                            <AvatarFallback>
-                              {match.profile_1?.first_name?.[0]}{match.profile_1?.last_name?.[0]}
-                            </AvatarFallback>
-                          </Avatar>
+                          {renderProfileAvatar(match.profile_1)}
                           <div>
                             <p className="font-medium">{match.profile_1?.first_name} {match.profile_1?.last_name}</p>
                             <p className="text-xs text-muted-foreground">
@@ -276,11 +323,7 @@ const MatchManagementPage = () => {
                         <Heart className="w-5 h-5 text-primary flex-shrink-0" />
 
                         <div className="flex items-center space-x-2">
-                          <Avatar className="w-10 h-10">
-                            <AvatarFallback>
-                              {match.profile_2?.first_name?.[0]}{match.profile_2?.last_name?.[0]}
-                            </AvatarFallback>
-                          </Avatar>
+                          {renderProfileAvatar(match.profile_2)}
                           <div>
                             <p className="font-medium">{match.profile_2?.first_name} {match.profile_2?.last_name}</p>
                             <p className="text-xs text-muted-foreground">
@@ -336,11 +379,7 @@ const MatchManagementPage = () => {
                     <div key={match.id} className="flex items-center justify-between p-4 rounded-xl bg-success/10 border border-success/20">
                       <div className="flex items-center space-x-4 flex-1">
                         <div className="flex items-center space-x-2">
-                          <Avatar className="w-10 h-10">
-                            <AvatarFallback>
-                              {match.profile_1?.first_name?.[0]}{match.profile_1?.last_name?.[0]}
-                            </AvatarFallback>
-                          </Avatar>
+                          {renderProfileAvatar(match.profile_1)}
                           <div>
                             <p className="font-medium">{match.profile_1?.first_name} {match.profile_1?.last_name}</p>
                             <p className="text-xs text-success">Interested ❤️</p>
@@ -350,11 +389,7 @@ const MatchManagementPage = () => {
                         <CheckCircle className="w-5 h-5 text-success flex-shrink-0" />
 
                         <div className="flex items-center space-x-2">
-                          <Avatar className="w-10 h-10">
-                            <AvatarFallback>
-                              {match.profile_2?.first_name?.[0]}{match.profile_2?.last_name?.[0]}
-                            </AvatarFallback>
-                          </Avatar>
+                          {renderProfileAvatar(match.profile_2)}
                           <div>
                             <p className="font-medium">{match.profile_2?.first_name} {match.profile_2?.last_name}</p>
                             <p className="text-xs text-success">Interested ❤️</p>
@@ -408,11 +443,7 @@ const MatchManagementPage = () => {
                     <div key={match.id} className="flex items-center justify-between p-4 rounded-xl bg-destructive/5 border border-destructive/20">
                       <div className="flex items-center space-x-4 flex-1">
                         <div className="flex items-center space-x-2">
-                          <Avatar className="w-10 h-10">
-                            <AvatarFallback>
-                              {match.profile_1?.first_name?.[0]}{match.profile_1?.last_name?.[0]}
-                            </AvatarFallback>
-                          </Avatar>
+                          {renderProfileAvatar(match.profile_1)}
                           <div>
                             <p className="font-medium">{match.profile_1?.first_name} {match.profile_1?.last_name}</p>
                             <p className="text-xs text-muted-foreground">
@@ -424,11 +455,7 @@ const MatchManagementPage = () => {
                         <XCircle className="w-5 h-5 text-destructive flex-shrink-0" />
 
                         <div className="flex items-center space-x-2">
-                          <Avatar className="w-10 h-10">
-                            <AvatarFallback>
-                              {match.profile_2?.first_name?.[0]}{match.profile_2?.last_name?.[0]}
-                            </AvatarFallback>
-                          </Avatar>
+                          {renderProfileAvatar(match.profile_2)}
                           <div>
                             <p className="font-medium">{match.profile_2?.first_name} {match.profile_2?.last_name}</p>
                             <p className="text-xs text-muted-foreground">
@@ -552,11 +579,7 @@ const MatchManagementPage = () => {
                 {/* Match Overview */}
                 <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
                   <div className="flex items-center space-x-4">
-                    <Avatar className="w-12 h-12">
-                      <AvatarFallback>
-                        {selectedMatch.profile_1?.first_name?.[0]}{selectedMatch.profile_1?.last_name?.[0]}
-                      </AvatarFallback>
-                    </Avatar>
+                    {renderProfileAvatar(selectedMatch.profile_1, "w-12 h-12")}
                     <div>
                       <p className="font-semibold">{selectedMatch.profile_1?.first_name} {selectedMatch.profile_1?.last_name}</p>
                       <p className="text-sm text-muted-foreground">
@@ -578,11 +601,7 @@ const MatchManagementPage = () => {
                         } • {selectedMatch.profile_2?.city}, {selectedMatch.profile_2?.country}
                       </p>
                     </div>
-                    <Avatar className="w-12 h-12">
-                      <AvatarFallback>
-                        {selectedMatch.profile_2?.first_name?.[0]}{selectedMatch.profile_2?.last_name?.[0]}
-                      </AvatarFallback>
-                    </Avatar>
+                    {renderProfileAvatar(selectedMatch.profile_2, "w-12 h-12")}
                   </div>
                 </div>
 

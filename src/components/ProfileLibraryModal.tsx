@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ProfileForSuggestion {
@@ -14,6 +14,7 @@ interface ProfileForSuggestion {
   last_name: string;
   email: string;
   is_already_suggested: boolean;
+  primary_photo_url?: string | null;
 }
 
 interface ProfileLibraryModalProps {
@@ -22,6 +23,17 @@ interface ProfileLibraryModalProps {
   sourceProfileId: string;
   onSuggestSuccess: () => void;
 }
+
+const selectPrimaryPhoto = (entries: Array<{ photo_url: string; is_primary: boolean | null; order_index: number | null }>) => {
+  if (!entries || !entries.length) return null;
+  const sorted = [...entries].sort((a, b) => {
+    if (a.is_primary === b.is_primary) {
+      return (a.order_index ?? 0) - (b.order_index ?? 0);
+    }
+    return a.is_primary ? -1 : 1;
+  });
+  return sorted[0]?.photo_url ?? null;
+};
 
 export const ProfileLibraryModal = ({ open, onOpenChange, sourceProfileId, onSuggestSuccess }: ProfileLibraryModalProps) => {
   const { user } = useAuth();
@@ -36,7 +48,36 @@ export const ProfileLibraryModal = ({ open, onOpenChange, sourceProfileId, onSug
       setLoading(true);
       const { data, error } = await supabase.rpc('get_profiles_for_suggestion' as any, { p_profile_id: sourceProfileId });
       if (error) throw error;
-      setProfiles((data || []) as ProfileForSuggestion[]);
+      const profilesData = ((data || []) as ProfileForSuggestion[]);
+
+      if (profilesData.length) {
+        const profileIds = profilesData.map((profile) => profile.id);
+        const { data: photoRows, error: photosError } = await supabase
+          .from('profile_photos')
+          .select('profile_id, photo_url, is_primary, order_index')
+          .in('profile_id', profileIds);
+
+        if (photosError) throw photosError;
+
+        const grouped = (photoRows || []).reduce((acc: Record<string, any[]>, row: any) => {
+          if (!acc[row.profile_id]) {
+            acc[row.profile_id] = [];
+          }
+          acc[row.profile_id].push(row);
+          return acc;
+        }, {} as Record<string, any[]>);
+
+        const enriched = profilesData.map((profile) => ({
+          ...profile,
+          primary_photo_url: grouped[profile.id]
+            ? selectPrimaryPhoto(grouped[profile.id])
+            : null,
+        }));
+
+        setProfiles(enriched);
+      } else {
+        setProfiles([]);
+      }
     } catch (error) {
       toast({ title: "Error", description: "Could not load profiles for suggestion.", variant: "destructive" });
     } finally {
@@ -129,7 +170,11 @@ export const ProfileLibraryModal = ({ open, onOpenChange, sourceProfileId, onSug
                       className="flex-shrink-0"
                     />
                     <Avatar className="w-10 h-10 flex-shrink-0">
-                      <AvatarFallback className="bg-accent text-accent-foreground text-sm font-semibold">{initials}</AvatarFallback>
+                      {profile.primary_photo_url ? (
+                        <AvatarImage src={profile.primary_photo_url} alt={name || 'Profile'} />
+                      ) : (
+                        <AvatarFallback className="bg-accent text-accent-foreground text-sm font-semibold">{initials}</AvatarFallback>
+                      )}
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm truncate">{name}</p>
