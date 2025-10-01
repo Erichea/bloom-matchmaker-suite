@@ -634,6 +634,22 @@ const ClientsPage = () => {
     ? `${selectedClient.first_name ?? ""} ${selectedClient.last_name ?? ""}`.trim() || "Unnamed"
     : "";
   const currentPrimaryPhoto = getPrimaryPhoto(selectedClient?.profile_photos ?? []);
+  const sortedProfilePhotos = useMemo(() => {
+    if (!selectedClient?.profile_photos?.length) return [] as ProfilePhoto[];
+
+    return selectedClient.profile_photos
+      .filter((photo): photo is ProfilePhoto => Boolean(photo?.photo_url))
+      .slice()
+      .sort((a, b) => {
+        const primaryRankA = a.is_primary ? 0 : 1;
+        const primaryRankB = b.is_primary ? 0 : 1;
+        if (primaryRankA !== primaryRankB) return primaryRankA - primaryRankB;
+
+        const orderA = a.order_index ?? 0;
+        const orderB = b.order_index ?? 0;
+        return orderA - orderB;
+      });
+  }, [selectedClient?.profile_photos]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -851,6 +867,40 @@ const ClientsPage = () => {
               </div>
             ) : selectedProfile ? (
               <div className="space-y-6 px-6 py-6">
+                {sortedProfilePhotos.length > 0 && (
+                  <section>
+                    <Card>
+                      <CardContent className="p-4 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-sm font-semibold text-muted-foreground">Photo gallery</h3>
+                          <span className="text-xs text-muted-foreground">
+                            {sortedProfilePhotos.length} photo{sortedProfilePhotos.length === 1 ? "" : "s"}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                          {sortedProfilePhotos.map((photo, index) => (
+                            <div
+                              key={photo.id}
+                              className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted/40"
+                            >
+                              <img
+                                src={photo.photo_url}
+                                alt={`${currentFullName || "Client"} photo ${index + 1}`}
+                                className="h-full w-full object-cover"
+                              />
+                              {(photo.is_primary || index === 0) && (
+                                <span className="absolute left-2 top-2 rounded-full bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground">
+                                  Primary
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </section>
+                )}
+
                 <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Card>
                     <CardContent className="p-4 space-y-3">
