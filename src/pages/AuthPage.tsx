@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,9 +39,13 @@ const AuthPage = () => {
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
 
   // Check if user came from access code validation
   const hasValidAccessCode = sessionStorage.getItem('validAccessCode');
+
+  // Check if coming from "I already have an account" link
+  const isSignInOnly = searchParams.get('mode') === 'signin';
 
   useEffect(() => {
     if (hasValidAccessCode) {
@@ -184,22 +188,26 @@ const AuthPage = () => {
               Sign in or finish your invitation.
             </h1>
             <p className="text-sm leading-7 text-white/75 md:text-base">
-              Continue your curated introductions or finalize your invitation after entering your private access code.
+              {isSignInOnly
+                ? "Sign in to continue your curated introductions."
+                : "Continue your curated introductions or finalize your invitation after entering your private access code."}
             </p>
-            <div className="flex flex-col gap-2 text-[0.65rem] uppercase tracking-[0.25em] text-white/70">
-              {hasValidAccessCode ? (
-                <div className="inline-flex items-center justify-center gap-3 self-center rounded-full border border-white/20 bg-white/10 px-6 py-2 text-white md:self-start">
-                  <span className="h-px w-6 bg-white/50" /> Invitation verified — finish below
-                </div>
-              ) : (
-                <Link
-                  to="/client"
-                  className="inline-flex items-center justify-center gap-3 self-center rounded-full border border-white/20 bg-white/5 px-6 py-2 transition hover:border-white/40 hover:text-white md:self-start"
-                >
-                  <span className="h-px w-6 bg-white/40" /> Validate access code first
-                </Link>
-              )}
-            </div>
+            {!isSignInOnly && (
+              <div className="flex flex-col gap-2 text-[0.65rem] uppercase tracking-[0.25em] text-white/70">
+                {hasValidAccessCode ? (
+                  <div className="inline-flex items-center justify-center gap-3 self-center rounded-full border border-white/20 bg-white/10 px-6 py-2 text-white md:self-start">
+                    <span className="h-px w-6 bg-white/50" /> Invitation verified — finish below
+                  </div>
+                ) : (
+                  <Link
+                    to="/client"
+                    className="inline-flex items-center justify-center gap-3 self-center rounded-full border border-white/20 bg-white/5 px-6 py-2 transition hover:border-white/40 hover:text-white md:self-start"
+                  >
+                    <span className="h-px w-6 bg-white/40" /> Validate access code first
+                  </Link>
+                )}
+              </div>
+            )}
           </div>
 
           <motion.div
@@ -218,17 +226,17 @@ const AuthPage = () => {
               </div>
 
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
-                {hasValidAccessCode ? (
-                  <TabsList className="flex w-full flex-col gap-2 rounded-2xl bg-white/10 p-2 text-[0.65rem] uppercase tracking-[0.25em] text-white/70 sm:flex-row">
+                {hasValidAccessCode && !isSignInOnly ? (
+                  <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-white/10 p-2 text-[0.65rem] uppercase tracking-[0.25em] text-white/70">
                     <TabsTrigger
                       value="signin"
-                      className="flex-1 rounded-xl px-4 py-2 transition data-[state=active]:bg-white data-[state=active]:text-[hsl(var(--brand-secondary))] data-[state=active]:shadow-sm"
+                      className="rounded-xl px-4 py-2 transition data-[state=active]:bg-white data-[state=active]:text-[hsl(var(--brand-secondary))] data-[state=active]:shadow-sm"
                     >
                       Sign In
                     </TabsTrigger>
                     <TabsTrigger
                       value="signup"
-                      className="flex-1 rounded-xl px-4 py-2 transition data-[state=active]:bg-white data-[state=active]:text-[hsl(var(--brand-secondary))] data-[state=active]:shadow-sm"
+                      className="rounded-xl px-4 py-2 transition data-[state=active]:bg-white data-[state=active]:text-[hsl(var(--brand-secondary))] data-[state=active]:shadow-sm"
                     >
                       Sign Up
                     </TabsTrigger>
@@ -302,12 +310,14 @@ const AuthPage = () => {
                       </Button>
                     </form>
                   </Form>
-                  <div className="text-center text-xs text-white/70">
-                    Have an invitation but no account yet? Switch to sign up once your code is verified.
-                  </div>
+                  {!isSignInOnly && (
+                    <div className="text-center text-xs text-white/70">
+                      Have an invitation but no account yet? Switch to sign up once your code is verified.
+                    </div>
+                  )}
                 </TabsContent>
 
-                {hasValidAccessCode && (
+                {hasValidAccessCode && !isSignInOnly && (
                   <TabsContent value="signup" className="space-y-4">
                     <div className="rounded-2xl border border-white/20 bg-white/10 p-4 text-center text-xs text-white/80">
                       Invitation confirmed — complete your membership details.

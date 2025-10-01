@@ -104,7 +104,7 @@ const Index = () => {
                 Get started
               </PremiumButton>
             </Link>
-            <Link to="/auth" className="w-full sm:w-auto">
+            <Link to="/auth?mode=signin" className="w-full sm:w-auto">
               <button className="w-full rounded-full border border-white/30 bg-white/10 px-10 py-3 text-sm font-medium uppercase tracking-[0.3em] text-white transition hover:border-white/45 hover:bg-white/15">
                 I already have an account
               </button>
