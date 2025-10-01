@@ -255,6 +255,7 @@ const ClientDashboard = () => {
       const otherUserResponse = isProfile1 ? match.profile_2_response : match.profile_1_response;
       const other = isProfile1 ? match.profile_2 : match.profile_1;
       const name = other ? `${other.first_name ?? ""} ${other.last_name ?? ""}`.trim() || "Untitled" : "Match";
+      const avatarUrl = other?.photo_url || (Array.isArray(other?.photos) && other.photos[0]?.photo_url) || undefined;
 
       const matchSummary = {
         id: match.id,
@@ -262,6 +263,7 @@ const ClientDashboard = () => {
         compatibility: match.compatibility_score,
         subtitle: match.suggested_at ? new Date(match.suggested_at).toLocaleDateString() : undefined,
         match: match,
+        avatarUrl,
       };
 
       // Categorize based on responses
