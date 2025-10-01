@@ -58,16 +58,15 @@ const Index = () => {
         transition={{ duration: 18, repeat: Infinity, repeatType: "mirror" }}
       />
 
-      <header className="relative z-10 flex items-center justify-between px-6 pb-6 pt-8 md:px-10">
+      <header className="relative z-10 flex items-center px-6 pb-6 pt-8 md:px-10">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 text-sm font-semibold uppercase tracking-[0.3em]">
             B
           </div>
-          <span className="text-xs font-semibold uppercase tracking-[0.45em] text-white/70">
-            Bloom Matchmaker Suite
+          <span className="text-xs font-semibold uppercase tracking-[0.45em] text-white">
+            Bloom
           </span>
         </div>
-        <span className="text-[0.65rem] uppercase tracking-[0.5em] text-white/50">Concierge access</span>
       </header>
 
       <main className="relative z-10 flex flex-1 items-center px-6 pb-16 md:px-10">
@@ -91,7 +90,7 @@ const Index = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            Step into your curated matchmaking studio.
+            Bloom.
           </motion.h1>
 
           <motion.div
@@ -112,23 +111,11 @@ const Index = () => {
             </Link>
           </motion.div>
 
-          <motion.div
-            className="flex flex-col items-center gap-2 text-[0.65rem] uppercase tracking-[0.45em] text-white/50 md:flex-row md:items-center"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-          >
-            <span>Tailored onboarding</span>
-            <span className="hidden h-[1px] w-8 bg-white/30 md:block" />
-            <span>Real matchmakers</span>
-            <span className="hidden h-[1px] w-8 bg-white/30 md:block" />
-            <span>By invitation</span>
-          </motion.div>
         </motion.div>
       </main>
 
       <footer className="relative z-10 flex justify-center px-6 pb-8 text-[0.6rem] uppercase tracking-[0.4em] text-white/40 md:px-10">
-        © {currentYear} Bloom Matchmaker Suite
+        © {currentYear} Bloom
       </footer>
     </div>
   );
