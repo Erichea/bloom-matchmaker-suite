@@ -11,42 +11,42 @@ All colors MUST be HSL.
   :root {
     /* Clean Base Colors */
     --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
+    --foreground: 160 5% 12%;
 
     /* Card & Surface Colors */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
+    --card-foreground: 160 5% 12%;
     --surface: 0 0% 98%;
     --surface-elevated: 0 0% 100%;
 
     /* Brand Palette */
-    --brand-primary: 330 58% 48%;
-    --brand-primary-foreground: 0 0% 100%;
-    --brand-secondary: 0 0% 12%;
+    --brand-primary: 3 56% 72%;
+    --brand-primary-foreground: 160 5% 12%;
+    --brand-secondary: 160 5% 12%;
     --brand-secondary-foreground: 0 0% 98%;
 
     /* Popover Colors */
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
+    --popover-foreground: 160 5% 12%;
 
     /* Primary - Clean Dark */
-    --primary: 0 0% 9%;
+    --primary: 160 5% 12%;
     --primary-foreground: 0 0% 98%;
-    --primary-hover: 0 0% 20%;
+    --primary-hover: 160 6% 20%;
     --primary-muted: 0 0% 96%;
 
     /* Secondary */
     --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 9%;
+    --secondary-foreground: 160 5% 12%;
 
     /* Muted */
     --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted-foreground: 160 5% 42%;
 
     /* Accent - Subtle Pink */
-    --accent: 330 50% 50%;
-    --accent-foreground: 0 0% 100%;
-    --accent-soft: 330 60% 96%;
+    --accent: 3 56% 72%;
+    --accent-foreground: 160 5% 12%;
+    --accent-soft: 3 60% 95%;
 
     /* Status Colors */
     --success: 142 71% 45%;
@@ -62,10 +62,10 @@ All colors MUST be HSL.
     --destructive-soft: 0 60% 95%;
 
     /* Interactive Elements */
-    --border: 0 0% 90%;
-    --border-hover: 0 0% 70%;
+    --border: 160 4% 88%;
+    --border-hover: 160 5% 68%;
     --input: 0 0% 100%;
-    --ring: 330 50% 50%;
+    --ring: 3 56% 72%;
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -77,50 +77,50 @@ All colors MUST be HSL.
 
     /* Sidebar */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 9%;
-    --sidebar-primary: 0 0% 9%;
+    --sidebar-foreground: 160 5% 12%;
+    --sidebar-primary: 160 5% 12%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 0 0% 96%;
-    --sidebar-accent-foreground: 0 0% 9%;
+    --sidebar-accent-foreground: 160 5% 12%;
     --sidebar-border: 0 0% 90%;
-    --sidebar-ring: 330 50% 50%;
+    --sidebar-ring: 3 56% 72%;
   }
 
   .dark {
-    --background: 0 0% 9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --primary-hover: 0 0% 85%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 64%;
-    --accent: 330 50% 50%;
-    --accent-foreground: 0 0% 100%;
+    --background: 160 6% 12%;
+    --foreground: 0 0% 94%;
+    --card: 160 6% 12%;
+    --card-foreground: 0 0% 94%;
+    --popover: 160 6% 12%;
+    --popover-foreground: 0 0% 94%;
+    --primary: 0 0% 94%;
+    --primary-foreground: 160 5% 12%;
+    --primary-hover: 0 0% 80%;
+    --secondary: 160 6% 18%;
+    --secondary-foreground: 0 0% 94%;
+    --muted: 160 6% 18%;
+    --muted-foreground: 0 0% 72%;
+    --accent: 3 56% 72%;
+    --accent-foreground: 160 5% 12%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 15%;
-    --border-hover: 0 0% 30%;
-    --input: 0 0% 15%;
-    --ring: 330 50% 50%;
-    --sidebar-background: 0 0% 9%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 330 50% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 15%;
-    --sidebar-ring: 330 50% 50%;
+    --border: 160 6% 18%;
+    --border-hover: 160 6% 28%;
+    --input: 160 6% 18%;
+    --ring: 3 56% 72%;
+    --sidebar-background: 160 6% 12%;
+    --sidebar-foreground: 0 0% 94%;
+    --sidebar-primary: 3 56% 72%;
+    --sidebar-primary-foreground: 160 5% 12%;
+    --sidebar-accent: 160 6% 18%;
+    --sidebar-accent-foreground: 0 0% 94%;
+    --sidebar-border: 160 6% 18%;
+    --sidebar-ring: 3 56% 72%;
 
-    --brand-primary: 330 60% 52%;
-    --brand-primary-foreground: 0 0% 100%;
+    --brand-primary: 3 56% 72%;
+    --brand-primary-foreground: 160 5% 12%;
     --brand-secondary: 0 0% 90%;
-    --brand-secondary-foreground: 0 0% 9%;
+    --brand-secondary-foreground: 160 5% 12%;
   }
 }
 
