@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User, LogOut } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Match {
   id: string;
@@ -24,6 +25,13 @@ interface Match {
   profile_2: any;
 }
 
+interface ProfilePhoto {
+  photo_url: string;
+  is_primary: boolean | null;
+  order_index: number | null;
+  created_at?: string | null;
+}
+
 const ClientDashboard = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -34,6 +42,7 @@ const ClientDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
   const createBasicProfile = useCallback(async () => {
     if (!user) return;
 
@@ -53,6 +62,7 @@ const ClientDashboard = () => {
 
       if (error) throw error;
       setProfile(data);
+      setProfilePhotoUrl(null);
       return data;
     } catch (error: any) {
       toast({
@@ -65,6 +75,30 @@ const ClientDashboard = () => {
     }
   }, [toast, user]);
 
+  const loadPrimaryProfilePhoto = useCallback(async (profileId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("profile_photos")
+        .select("photo_url, is_primary, order_index, created_at")
+        .eq("profile_id", profileId)
+        .order("is_primary", { ascending: false })
+        .order("order_index", { ascending: true })
+        .order("created_at", { ascending: true })
+        .limit(1);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setProfilePhotoUrl(data[0].photo_url);
+      } else {
+        setProfilePhotoUrl(null);
+      }
+    } catch (error) {
+      console.error("Error loading profile photo:", error);
+      setProfilePhotoUrl(null);
+    }
+  }, []);
+
   const fetchProfile = useCallback(async () => {
     if (!user) return;
 
@@ -75,7 +109,11 @@ const ClientDashboard = () => {
         await supabase.from("profiles").update({ completion_percentage: completionData }).eq("user_id", user.id);
       }
 
-      const { data, error } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*, profile_photos ( photo_url, is_primary, order_index, created_at )")
+        .eq("user_id", user.id)
+        .single();
 
       let profileData = data;
       if (error && error.code !== "PGRST116") throw error;
@@ -86,6 +124,20 @@ const ClientDashboard = () => {
       }
 
       setProfile(profileData);
+      if (profileData?.profile_photos && Array.isArray(profileData.profile_photos) && profileData.profile_photos.length > 0) {
+        const primary = [...profileData.profile_photos]
+          .sort((a: ProfilePhoto, b: ProfilePhoto) => {
+            const primaryRankA = a.is_primary ? 0 : 1;
+            const primaryRankB = b.is_primary ? 0 : 1;
+            if (primaryRankA !== primaryRankB) return primaryRankA - primaryRankB;
+            return (a.order_index ?? 0) - (b.order_index ?? 0);
+          })[0];
+        setProfilePhotoUrl(primary?.photo_url ?? null);
+      } else if (profileData?.id) {
+        await loadPrimaryProfilePhoto(profileData.id);
+      } else {
+        setProfilePhotoUrl(null);
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -95,7 +147,7 @@ const ClientDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, toast, createBasicProfile]);
+  }, [user, toast, createBasicProfile, loadPrimaryProfilePhoto]);
 
   const fetchMatches = useCallback(async () => {
     if (!user) return;
@@ -162,6 +214,23 @@ const ClientDashboard = () => {
   };
 
   const currentProfileId = profile?.id ?? null;
+
+  const userInitials = useMemo(() => {
+    const name = `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim();
+    if (name) {
+      return name
+        .split(" ")
+        .filter(Boolean)
+        .map((segment) => segment[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+    }
+    if (user?.email) {
+      return user.email.slice(0, 2).toUpperCase();
+    }
+    return "B";
+  }, [profile?.first_name, profile?.last_name, user?.email]);
 
   const categorizedMatches = useMemo(() => {
     if (!matches.length || !currentProfileId) {
@@ -269,6 +338,18 @@ const ClientDashboard = () => {
           </span>
         </div>
         <div className="flex items-center gap-3">
+          <Avatar className="h-9 w-9 border border-white/25">
+            {profilePhotoUrl ? (
+              <AvatarImage
+                src={profilePhotoUrl}
+                alt={profile?.first_name ? `${profile.first_name}'s profile photo` : "Profile photo"}
+              />
+            ) : (
+              <AvatarFallback className="bg-white/15 text-[0.65rem] uppercase tracking-[0.3em] text-white">
+                {userInitials}
+              </AvatarFallback>
+            )}
+          </Avatar>
           {profileStatus === "approved" && (
             <Button
               variant="ghost"
