@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { format } from "date-fns";
+import { Plate, PlateContent, usePlateEditor } from "platejs/react";
+import { BaseParagraphPlugin } from "platejs";
+import { BaseSlashPlugin } from "@platejs/slash-command";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Textarea } from "@/components/ui/textarea";
 
 interface ClientNotesEditorProps {
   profileId: string;
@@ -13,46 +15,59 @@ interface ClientNotesEditorProps {
 
 const extractTextFromNode = (node: any): string => {
   if (!node) return "";
-
-  // Direct text node
   if (node.text) return node.text;
-
-  // Node with content array (TipTap format)
   if (node.content && Array.isArray(node.content)) {
     return node.content.map(extractTextFromNode).join("");
   }
-
-  // Node with children array (Slate/Plate format)
   if (node.children && Array.isArray(node.children)) {
     return node.children.map(extractTextFromNode).join("");
   }
-
   return "";
 };
 
-const parseInitialContent = (content: string | null): string => {
-  if (!content) return "";
+const parseInitialContent = (content: string | null): any[] => {
+  if (!content) {
+    return [
+      {
+        type: "p",
+        children: [{ text: "" }],
+      },
+    ];
+  }
 
   try {
     const parsed = JSON.parse(content);
 
     // TipTap format: { type: "doc", content: [...] }
     if (parsed.type === "doc" && parsed.content) {
-      return parsed.content.map((node: any) => {
-        const text = extractTextFromNode(node);
-        // Add newline between block elements
-        return text;
-      }).filter(Boolean).join("\n");
+      const text = parsed.content.map((node: any) => extractTextFromNode(node)).filter(Boolean).join("\n");
+      return [
+        {
+          type: "p",
+          children: [{ text }],
+        },
+      ];
     }
 
     // Slate/Plate format: array of nodes
-    if (Array.isArray(parsed)) {
-      return parsed.map((node: any) => extractTextFromNode(node)).filter(Boolean).join("\n");
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed;
     }
 
-    return content;
+    // Plain text
+    return [
+      {
+        type: "p",
+        children: [{ text: typeof parsed === "string" ? parsed : content }],
+      },
+    ];
   } catch (error) {
-    return content;
+    return [
+      {
+        type: "p",
+        children: [{ text: content }],
+      },
+    ];
   }
 };
 
@@ -63,28 +78,34 @@ const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt, onSave
   );
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const lastSyncedContent = useRef<string>("");
-  const [currentContent, setCurrentContent] = useState<string>("");
+
+  const initialValue = useMemo(() => parseInitialContent(initialContent), [initialContent]);
+
+  const editor = usePlateEditor({
+    plugins: [
+      BaseParagraphPlugin,
+      BaseSlashPlugin,
+    ],
+    value: initialValue,
+  });
 
   useEffect(() => {
-    const parsed = parseInitialContent(initialContent);
-    lastSyncedContent.current = parsed;
-    setCurrentContent(parsed);
+    const synced = JSON.stringify(editor.children);
+    lastSyncedContent.current = synced;
     setStatus("idle");
     setLastSavedAt(initialUpdatedAt ? new Date(initialUpdatedAt) : null);
-  }, [initialContent, initialUpdatedAt]);
+  }, [editor, initialUpdatedAt]);
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setCurrentContent(e.target.value);
-  }, []);
+  const handleChange = useCallback(({ value }: { value: any }) => {
+    const json = JSON.stringify(value);
 
-  useEffect(() => {
-    if (!profileId || currentContent === lastSyncedContent.current) return;
+    if (json === lastSyncedContent.current) return;
 
     setStatus("saving");
     const handler = setTimeout(async () => {
       const { error } = await supabase
         .from("profiles")
-        .update({ admin_notes: currentContent })
+        .update({ admin_notes: json })
         .eq("id", profileId);
 
       if (error) {
@@ -98,15 +119,15 @@ const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt, onSave
         return;
       }
 
-      lastSyncedContent.current = currentContent;
+      lastSyncedContent.current = json;
       const savedAt = new Date();
       setLastSavedAt(savedAt);
       setStatus("saved");
-      onSaved?.({ content: currentContent, savedAt: savedAt.toISOString() });
+      onSaved?.({ content: json, savedAt: savedAt.toISOString() });
     }, 1000);
 
     return () => clearTimeout(handler);
-  }, [currentContent, profileId, toast, onSaved]);
+  }, [profileId, toast, onSaved]);
 
   const formattedTimestamp = useMemo(() => {
     if (!lastSavedAt) return null;
@@ -130,13 +151,13 @@ const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt, onSave
         <span>{statusLabel}</span>
         {status === "saving" && <span className="text-foreground">●</span>}
       </div>
-      <div className="flex-1 pt-4">
-        <Textarea
-          value={currentContent}
-          onChange={handleChange}
-          placeholder="Start taking notes..."
-          className="h-full min-h-full resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-sm leading-relaxed"
-        />
+      <div className="flex-1 overflow-y-auto pt-4">
+        <Plate editor={editor} onChange={handleChange}>
+          <PlateContent
+            className="slate-editor focus:outline-none h-full"
+            placeholder="Type / for commands or start writing..."
+          />
+        </Plate>
       </div>
     </div>
   );
