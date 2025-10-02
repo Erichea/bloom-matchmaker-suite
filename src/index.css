@@ -239,65 +239,79 @@ All colors MUST be HSL.
 }
 
 @layer components {
-  .tiptap {
+  /* Plate.js editor styles */
+  .slate-editor {
     @apply prose prose-sm max-w-none text-foreground leading-relaxed;
   }
 
-  .tiptap h1 {
-    @apply mt-8 text-2xl font-semibold text-foreground;
+  .slate-editor h1 {
+    @apply mt-8 text-2xl font-bold text-foreground;
   }
 
-  .tiptap h2 {
+  .slate-editor h2 {
     @apply mt-6 text-xl font-semibold text-foreground;
   }
 
-  .tiptap h3 {
+  .slate-editor h3 {
     @apply mt-5 text-lg font-semibold text-foreground;
   }
 
-  .tiptap p,
-  .tiptap ul,
-  .tiptap ol,
-  .tiptap pre {
+  .slate-editor p {
     @apply mt-3;
   }
 
-  .tiptap ul,
-  .tiptap ol {
-    @apply pl-6;
+  .slate-editor ul,
+  .slate-editor ol {
+    @apply mt-3 pl-6;
   }
 
-  .tiptap ul[data-type="taskList"] {
+  .slate-editor ul[data-slate-node="element"][class*="todo"] {
     @apply list-none pl-0;
   }
 
-  .tiptap ul[data-type="taskList"] li {
-    @apply flex items-center gap-3 pl-0;
+  .slate-editor li[data-slate-node="element"][class*="todo"] {
+    @apply flex items-center gap-3 pl-0 mt-2;
   }
 
-  .tiptap ul[data-type="taskList"] input[type="checkbox"] {
-    @apply h-4 w-4 flex-shrink-0 rounded border-border text-primary focus:ring-ring;
+  .slate-editor input[type="checkbox"] {
+    @apply h-4 w-4 flex-shrink-0 rounded border-border text-primary focus:ring-ring cursor-pointer;
   }
 
-  .tiptap blockquote {
-    @apply border-l-2 border-border pl-4 text-muted-foreground italic;
+  .slate-editor blockquote {
+    @apply my-4 border-l-4 border-border pl-4 text-muted-foreground italic;
   }
 
-  .tiptap pre {
-    @apply overflow-x-auto rounded-lg border border-border bg-muted/60 p-4 font-mono text-sm;
+  .slate-editor pre {
+    @apply mt-3 overflow-x-auto rounded-lg border border-border bg-muted/60 p-4 font-mono text-sm;
   }
 
-  .tiptap hr {
+  .slate-editor code {
+    @apply rounded bg-muted px-1.5 py-0.5 font-mono text-sm;
+  }
+
+  .slate-editor hr {
     @apply my-6 border-border;
   }
 
-  .tiptap a {
+  .slate-editor a {
     @apply text-primary underline-offset-4 hover:underline;
   }
 
-  .tiptap .is-editor-empty:first-child::before {
-    content: attr(data-placeholder);
-    @apply pointer-events-none text-muted-foreground;
+  .slate-editor strong {
+    @apply font-semibold;
+  }
+
+  .slate-editor em {
+    @apply italic;
+  }
+
+  .slate-editor del {
+    @apply line-through;
+  }
+
+  .slate-editor [data-slate-placeholder="true"]::before {
+    content: attr(placeholder);
+    @apply pointer-events-none absolute text-muted-foreground opacity-50;
   }
 }
 
