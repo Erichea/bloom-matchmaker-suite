@@ -28,6 +28,15 @@ CREATE POLICY "Users can update their own answers"
     USING (auth.uid() = user_id)
     WITH CHECK (auth.uid() = user_id);
 
+-- Create trigger function if it doesn't exist
+CREATE OR REPLACE FUNCTION trigger_set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Add updated_at trigger
 CREATE TRIGGER set_updated_at
     BEFORE UPDATE ON profile_answers

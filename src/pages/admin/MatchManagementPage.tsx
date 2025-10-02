@@ -6,6 +6,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Heart,
   Clock,
   CheckCircle,
@@ -14,7 +24,8 @@ import {
   Users,
   TrendingUp,
   Calendar,
-  MessageSquare
+  MessageSquare,
+  Trash2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -77,6 +88,8 @@ const MatchManagementPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingMatchId, setDeletingMatchId] = useState<string | null>(null);
   const [stats, setStats] = useState({
     totalMatches: 0,
     pendingMatches: 0,
@@ -209,6 +222,46 @@ const MatchManagementPage = () => {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  const handleDeleteMatch = async () => {
+    if (!deletingMatchId) return;
+
+    try {
+      const { data, error } = await supabase.rpc('delete_match', {
+        p_match_id: deletingMatchId
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast({
+          title: "Match deleted",
+          description: `Match and ${data.notifications_deleted || 0} related notification(s) have been removed`,
+        });
+
+        // Refresh matches
+        await fetchMatches();
+
+        // Close dialogs
+        setDeleteDialogOpen(false);
+        setDetailsModalOpen(false);
+        setDeletingMatchId(null);
+      } else {
+        throw new Error(data?.message || 'Failed to delete match');
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete match",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const confirmDeleteMatch = (matchId: string) => {
+    setDeletingMatchId(matchId);
+    setDeleteDialogOpen(true);
   };
 
   if (loading) {
@@ -568,7 +621,18 @@ const MatchManagementPage = () => {
         <Dialog open={detailsModalOpen} onOpenChange={setDetailsModalOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Match Details</DialogTitle>
+              <DialogTitle className="flex items-center justify-between">
+                <span>Match Details</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => confirmDeleteMatch(selectedMatch?.id || '')}
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Match
+                </Button>
+              </DialogTitle>
               <DialogDescription>
                 View complete information about this match suggestion
               </DialogDescription>
@@ -699,6 +763,30 @@ const MatchManagementPage = () => {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Match?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete this match suggestion and all related notifications.
+                This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setDeletingMatchId(null)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteMatch}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete Match
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

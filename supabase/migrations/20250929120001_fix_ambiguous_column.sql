@@ -1,5 +1,6 @@
 -- Fix ambiguous column reference in calculate_profile_completion function
-CREATE OR REPLACE FUNCTION public.calculate_profile_completion(input_profile_id UUID)
+DROP FUNCTION IF EXISTS public.calculate_profile_completion(UUID);
+CREATE FUNCTION public.calculate_profile_completion(input_profile_id UUID)
 RETURNS INTEGER AS $$
 DECLARE
   completion_score INTEGER := 0;
