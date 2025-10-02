@@ -1224,8 +1224,8 @@ const ClientsPage = () => {
                 </div>
               ) : selectedProfile ? (
                 <Tabs value={detailTab} onValueChange={setDetailTab} className="flex h-full flex-col">
-                  <div className="flex items-center justify-between border-b px-6 py-3 flex-shrink-0">
-                    <TabsList className="grid w-full max-w-xl grid-cols-4">
+                  <div className="border-b px-6 py-3 flex-shrink-0">
+                    <TabsList className="inline-grid grid-cols-4">
                       <TabsTrigger value="profile">Profile</TabsTrigger>
                       <TabsTrigger value="matches" className="gap-2">
                         Matches
@@ -1449,7 +1449,7 @@ const ClientsPage = () => {
                                 alt={`${currentFullName || "Client"} photo ${index + 1}`}
                                 className="h-full w-full object-cover"
                               />
-                              {(photo.is_primary || index === 0) && (
+                              {photo.is_primary && (
                                 <Badge className="absolute left-2 top-2 text-xs">Primary</Badge>
                               )}
                             </div>

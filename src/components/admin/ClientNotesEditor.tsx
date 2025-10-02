@@ -93,6 +93,7 @@ const COMMAND_ITEMS: CommandItem[] = [
   {
     title: "Numbered list",
     description: "Organize items with numbers",
+    icon: ListOrdered,
     keywords: ["ordered", "list", "number"],
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).toggleOrderedList().run();
