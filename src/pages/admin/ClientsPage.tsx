@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   flexRender,
   getCoreRowModel,
@@ -203,6 +204,7 @@ const ClientsPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const userId = user?.id ?? null;
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [view, setView] = useState<ViewMode>("active");
   const [clients, setClients] = useState<ClientRow[]>([]);
@@ -420,6 +422,17 @@ const ClientsPage = () => {
   useEffect(() => {
     fetchClients(view);
   }, [fetchClients, view]);
+
+  // Auto-open profile from URL parameter
+  useEffect(() => {
+    const profileId = searchParams.get('profileId');
+    if (profileId && !cockpitOpen) {
+      setSelectedClientId(profileId);
+      setCockpitOpen(true);
+      // Clear the parameter after opening
+      setSearchParams({});
+    }
+  }, [searchParams, cockpitOpen, setSearchParams]);
 
   useEffect(() => {
     updateStatusFilter("all");

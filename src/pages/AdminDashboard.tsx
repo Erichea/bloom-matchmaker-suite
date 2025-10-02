@@ -270,7 +270,7 @@ const AdminDashboard = () => {
                 ) : recentUpdates.slice(0, 5).map((profile) => (
                   <div
                     key={profile.id}
-                    onClick={() => navigate(`/admin/clients/${profile.id}`)}
+                    onClick={() => navigate(`/admin/clients?profileId=${profile.id}`)}
                     className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border-soft hover:bg-muted/50 cursor-pointer transition-colors"
                   >
                     <div className="flex items-center space-x-3">
@@ -329,7 +329,7 @@ const AdminDashboard = () => {
                 ) : recentProfiles.slice(0, 5).map((profile) => (
                   <div
                     key={profile.id}
-                    onClick={() => navigate(`/admin/clients/${profile.id}`)}
+                    onClick={() => navigate(`/admin/clients?profileId=${profile.id}`)}
                     className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border-soft hover:bg-muted/50 cursor-pointer transition-colors"
                   >
                     <div className="flex items-center space-x-3">
