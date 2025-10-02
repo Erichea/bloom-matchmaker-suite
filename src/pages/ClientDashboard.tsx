@@ -58,7 +58,7 @@ const ClientDashboard = () => {
           status: "incomplete",
           completion_percentage: 0,
         })
-        .select()
+        .select("*, profile_photos ( photo_url, is_primary, order_index, created_at )")
         .single();
 
       if (error) throw error;

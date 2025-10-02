@@ -891,7 +891,7 @@ const ClientsPage = () => {
                         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                           {sortedProfilePhotos.map((photo, index) => (
                             <div
-                              key={photo.id}
+                              key={photo.photo_url || index}
                               className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted/40"
                             >
                               <img

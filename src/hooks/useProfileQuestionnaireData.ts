@@ -153,7 +153,7 @@ export const useProfileQuestionnaireData = () => {
 
       if (error) throw error;
 
-      return (data as SubmitProfileResult) ?? { success: false };
+      return (data as any as SubmitProfileResult) ?? { success: false };
     } catch (error) {
       console.error("Submit profile error:", error);
       toast({
