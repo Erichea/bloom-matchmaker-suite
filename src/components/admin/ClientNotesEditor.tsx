@@ -279,9 +279,9 @@ const SlashCommand = Extension.create({
                 showOnCreate: true,
                 interactive: true,
                 trigger: "manual",
-                placement: "left-start",
+                placement: "bottom-start",
                 animation: "shift-away-subtle",
-              });
+              })[0];
             },
             onUpdate(props) {
               component?.updateProps(props);
@@ -329,6 +329,7 @@ const SlashCommand = Extension.create({
         },
         command: ({ editor, range, props }) => {
           props.command({ editor, range });
+          editor.chain().focus().run();
         },
       }),
     ];

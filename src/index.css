@@ -272,11 +272,11 @@ All colors MUST be HSL.
   }
 
   .tiptap ul[data-type="taskList"] li {
-    @apply flex items-start gap-3 pl-0;
+    @apply flex items-center gap-3 pl-0;
   }
 
   .tiptap ul[data-type="taskList"] input[type="checkbox"] {
-    @apply mt-1 h-4 w-4 rounded border-border text-primary focus:ring-ring;
+    @apply h-4 w-4 flex-shrink-0 rounded border-border text-primary focus:ring-ring;
   }
 
   .tiptap blockquote {
