@@ -223,7 +223,7 @@ const ClientDashboard = () => {
       // Clear the query parameter
       setSearchParams({});
     }
-  }, [searchParams, matches, modalOpen]);
+  }, [searchParams, matches, modalOpen, handleOpenMatch, setSearchParams]);
 
   const handleSignOut = async () => {
     await signOut();

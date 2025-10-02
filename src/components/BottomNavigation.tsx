@@ -1,6 +1,6 @@
 import { Home, Bell, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -9,20 +9,22 @@ export const BottomNavigation = () => {
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
 
-  useEffect(() => {
+  const fetchUnreadCount = useCallback(async () => {
     if (!user) return;
 
-    const fetchUnreadCount = async () => {
-      const { count } = await supabase
-        .from("notifications")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .eq("is_read", false);
+    const { count } = await supabase
+      .from("notifications")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("is_read", false);
 
-      setUnreadCount(count || 0);
-    };
+    setUnreadCount(count || 0);
+  }, [user]);
 
+  useEffect(() => {
     fetchUnreadCount();
+
+    if (!user) return;
 
     // Subscribe to changes
     const channel = supabase
@@ -44,7 +46,7 @@ export const BottomNavigation = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, fetchUnreadCount]);
 
   const isActive = (path: string) => location.pathname === path;
 

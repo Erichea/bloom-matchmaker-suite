@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "./AdminSidebar";
 import { Bell, User, LogOut } from "lucide-react";
@@ -25,21 +25,23 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
 
-  useEffect(() => {
+  const fetchUnreadCount = useCallback(async () => {
     if (!user) return;
 
-    const fetchUnreadCount = async () => {
-      const { count } = await supabase
-        .from("notifications")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .eq("user_type", "admin")
-        .eq("is_read", false);
+    const { count } = await supabase
+      .from("notifications")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("user_type", "admin")
+      .eq("is_read", false);
 
-      setUnreadCount(count || 0);
-    };
+    setUnreadCount(count || 0);
+  }, [user]);
 
+  useEffect(() => {
     fetchUnreadCount();
+
+    if (!user) return;
 
     // Subscribe to changes
     const channel = supabase
@@ -61,7 +63,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, fetchUnreadCount]);
 
   const handleSignOut = async () => {
     await signOut();

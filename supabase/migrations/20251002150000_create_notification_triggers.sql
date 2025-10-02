@@ -8,12 +8,12 @@ DECLARE
   profile2_name text;
 BEGIN
   -- Get user IDs and names for both profiles
-  SELECT user_id, first_name || ' ' || last_name
+  SELECT user_id, first_name || ' ' || COALESCE(last_name, '')
   INTO profile1_user_id, profile1_name
   FROM profiles
   WHERE id = NEW.profile_1_id;
 
-  SELECT user_id, first_name || ' ' || last_name
+  SELECT user_id, first_name || ' ' || COALESCE(last_name, '')
   INTO profile2_user_id, profile2_name
   FROM profiles
   WHERE id = NEW.profile_2_id;
