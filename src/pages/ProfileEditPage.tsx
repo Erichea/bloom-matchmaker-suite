@@ -52,10 +52,10 @@ const ProfileEditPage = () => {
   }, [user, navigate]);
 
   const completionPercentage = useMemo(() => {
-    return calculateCompletionPercentage(answers, profileQuestions);
+    return calculateCompletionPercentage(answers, profileQuestions, profileQuestionCategories);
   }, [answers]);
 
-  const completedCategories = useMemo(() => {
+  const completedCategoryList = useMemo(() => {
     return getCompletedCategories(answers, profileQuestions, profileQuestionCategories);
   }, [answers]);
 
@@ -64,11 +64,11 @@ const ProfileEditPage = () => {
       const categoryQuestions = profileQuestions
         .filter((q) => q.category === category)
         .map((q) => {
-          const userAnswer = answers.find((a) => a.question_id === q.id);
+          const userAnswer = answers[q.id];
           return {
             id: q.id,
             title: q.title,
-            answer: formatAnswer(userAnswer?.answer),
+            answer: formatAnswer(userAnswer),
           };
         });
 
@@ -125,9 +125,12 @@ const ProfileEditPage = () => {
             <CardContent>
               <Progress value={completionPercentage} className="h-2" />
               <div className="mt-4 flex flex-wrap gap-2">
-                {completedCategories.map((cat, idx) => (
-                  <Badge key={idx} variant={cat.completed ? "default" : "outline"}>
-                    {cat.category}
+                {profileQuestionCategories.map((category) => (
+                  <Badge 
+                    key={category} 
+                    variant={completedCategoryList.includes(category) ? "default" : "outline"}
+                  >
+                    {category}
                   </Badge>
                 ))}
               </div>
@@ -139,7 +142,12 @@ const ProfileEditPage = () => {
               <CardTitle>Photos & Videos</CardTitle>
             </CardHeader>
             <CardContent>
-              <PhotoUploadGrid />
+              <PhotoUploadGrid
+                userId={user.id}
+                profileId={profile?.id || ""}
+                photos={photos}
+                onPhotosUpdate={refreshPhotos}
+              />
             </CardContent>
           </Card>
 
@@ -148,7 +156,16 @@ const ProfileEditPage = () => {
               <CardTitle>Questionnaire</CardTitle>
             </CardHeader>
             <CardContent>
-              <QuestionnaireStepper />
+              <QuestionnaireStepper
+                answers={answers}
+                questions={profileQuestions}
+                categories={profileQuestionCategories}
+                completedCategories={completedCategoryList}
+                currentQuestionIndex={currentQuestionIndex}
+                onCurrentQuestionIndexChange={setCurrentQuestionIndex}
+                onAnswer={saveAnswer}
+                showSaveExit={false}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -190,7 +207,7 @@ const ProfileEditPage = () => {
           </Card>
 
           {viewSections.map((section, sectionIdx) => (
-            <Card key={sectionIdx} className="card">
+            <Card key={sectionIdx}>
               <CardHeader>
                 <CardTitle>{section.category}</CardTitle>
               </CardHeader>
