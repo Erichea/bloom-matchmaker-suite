@@ -146,6 +146,42 @@ BEGIN
       NEW.id,
       'match'
     );
+
+    -- Notify admin about mutual match
+    DECLARE
+      admin_user_id uuid;
+    BEGIN
+      SELECT user_id INTO admin_user_id
+      FROM user_roles
+      WHERE role = 'admin'
+      LIMIT 1;
+
+      IF admin_user_id IS NOT NULL THEN
+        INSERT INTO notifications (
+          user_id,
+          user_type,
+          notification_type,
+          title,
+          description,
+          redirect_url,
+          icon_type,
+          priority,
+          related_entity_id,
+          related_entity_type
+        ) VALUES (
+          admin_user_id,
+          'admin',
+          'mutual_match',
+          'Mutual match: ' || profile1_name || ' & ' || profile2_name,
+          'Both users have accepted the match',
+          '/admin/matches',
+          'approval',
+          'medium',
+          NEW.id,
+          'match'
+        );
+      END IF;
+    END;
   END IF;
 
   RETURN NEW;
@@ -182,16 +218,20 @@ BEGIN
         description,
         redirect_url,
         icon_type,
-        priority
+        priority,
+        related_entity_id,
+        related_entity_type
       ) VALUES (
         admin_user_id,
         'admin',
         'pending_review',
-        'New profile pending review',
+        'Profile review: ' || client_name,
         client_name || ' has submitted their profile for review',
         '/admin/clients',
         'pending_review',
-        'high'
+        'high',
+        NEW.id,
+        'profile'
       );
     END IF;
   END IF;
