@@ -5,15 +5,13 @@ type IconComponentType = React.ElementType<{ className?: string }>;
 export interface InteractiveMenuItem {
   label: string;
   icon: IconComponentType;
-  onClick?: () => void;
   badge?: number;
 }
 
 export interface InteractiveMenuProps {
   items?: InteractiveMenuItem[];
   accentColor?: string;
-  activeIndex?: number;
-  onActiveIndexChange?: (index: number) => void;
+  onItemClick?: (index: number, item: InteractiveMenuItem) => void;
 }
 
 const defaultItems: InteractiveMenuItem[] = [
@@ -26,7 +24,7 @@ const defaultItems: InteractiveMenuItem[] = [
 
 const defaultAccentColor = 'var(--component-active-color-default)';
 
-const InteractiveMenu: React.FC<InteractiveMenuProps> = ({ items, accentColor, activeIndex: controlledActiveIndex, onActiveIndexChange }) => {
+const InteractiveMenu: React.FC<InteractiveMenuProps> = ({ items, accentColor, onItemClick }) => {
 
   const finalItems = useMemo(() => {
      const isValid = items && Array.isArray(items) && items.length >= 2 && items.length <= 5;
@@ -37,16 +35,13 @@ const InteractiveMenu: React.FC<InteractiveMenuProps> = ({ items, accentColor, a
      return items;
   }, [items]);
 
-  const [internalActiveIndex, setInternalActiveIndex] = useState(0);
-  const activeIndex = controlledActiveIndex !== undefined ? controlledActiveIndex : internalActiveIndex;
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
       if (activeIndex >= finalItems.length) {
-          const newIndex = 0;
-          setInternalActiveIndex(newIndex);
-          onActiveIndexChange?.(newIndex);
+          setActiveIndex(0);
       }
-  }, [finalItems, activeIndex, onActiveIndexChange]);
+  }, [finalItems, activeIndex]);
 
   const textRefs = useRef<(HTMLElement | null)[]>([]);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -70,12 +65,9 @@ const InteractiveMenu: React.FC<InteractiveMenuProps> = ({ items, accentColor, a
     };
   }, [activeIndex, finalItems]);
 
-  const handleItemClick = (index: number, onClick?: () => void) => {
-    if (controlledActiveIndex === undefined) {
-      setInternalActiveIndex(index);
-    }
-    onActiveIndexChange?.(index);
-    onClick?.();
+  const handleItemClick = (index: number) => {
+    setActiveIndex(index);
+    onItemClick?.(index, finalItems[index]);
   };
 
   const navStyle = useMemo(() => {
@@ -100,7 +92,7 @@ const InteractiveMenu: React.FC<InteractiveMenuProps> = ({ items, accentColor, a
           <button
             key={item.label}
             className={`menu__item ${isActive ? 'active' : ''}`}
-            onClick={() => handleItemClick(index, item.onClick)}
+            onClick={() => handleItemClick(index)}
             ref={(el) => (itemRefs.current[index] = el)}
             style={{ '--lineWidth': '0px' } as React.CSSProperties}
           >

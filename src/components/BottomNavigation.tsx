@@ -1,12 +1,11 @@
 import { Home, Bell, User } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { InteractiveMenu } from "@/components/ui/interactive-menu";
+import { InteractiveMenu, InteractiveMenuItem } from "@/components/ui/modern-mobile-menu";
 
 export const BottomNavigation = () => {
-  const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
@@ -50,31 +49,29 @@ export const BottomNavigation = () => {
     };
   }, [user, fetchUnreadCount]);
 
-  const navItems = useMemo(() => [
-    { path: "/client/dashboard", icon: Home, label: "Home" },
-    { path: "/client/updates", icon: Bell, label: "Updates", badge: unreadCount },
-    { path: "/client/profile", icon: User, label: "Profile" },
+  const navPaths = useMemo(() => [
+    "/client/dashboard",
+    "/client/updates",
+    "/client/profile",
+  ], []);
+
+  const menuItems: InteractiveMenuItem[] = useMemo(() => [
+    { label: "Home", icon: Home },
+    { label: "Updates", icon: Bell, badge: unreadCount },
+    { label: "Profile", icon: User },
   ], [unreadCount]);
 
-  const activeIndex = useMemo(() => {
-    const index = navItems.findIndex(item => item.path === location.pathname);
-    return index >= 0 ? index : 0;
-  }, [location.pathname, navItems]);
-
-  const menuItems = useMemo(() => navItems.map((item) => ({
-    label: item.label,
-    icon: item.icon,
-    badge: item.badge,
-    onClick: () => navigate(item.path),
-  })), [navItems, navigate]);
+  const handleItemClick = useCallback((index: number) => {
+    navigate(navPaths[index]);
+  }, [navigate, navPaths]);
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border">
       <div className="mx-auto max-w-md">
         <InteractiveMenu
           items={menuItems}
-          activeIndex={activeIndex}
           accentColor="hsl(var(--brand-primary))"
+          onItemClick={handleItemClick}
         />
       </div>
     </div>
