@@ -1,4 +1,3 @@
-import type { ComponentType } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   flexRender,
@@ -66,6 +65,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import ClientNotesEditor from "@/components/admin/ClientNotesEditor";
 
 interface ProfilePhoto {
   photo_url: string | null;
@@ -102,6 +102,7 @@ interface DetailedProfile extends ClientRow {
   rejection_reason: string | null;
   interests: string[] | null;
   lifestyle: string[] | null;
+  updated_at: string;
 }
 
 type ViewMode = "active" | "deleted";
@@ -343,7 +344,8 @@ const ClientsPage = () => {
     setSelectedClientId(null);
     setSelectedProfile(null);
     setQuestionnaireAnswers({});
-  }, []);
+    setDetailTab("profile");
+  }, [setDetailTab]);
 
   const refreshData = useCallback(
     async (targetProfileId?: string | null) => {
@@ -709,6 +711,55 @@ const ClientsPage = () => {
     </div>
   );
 
+  const reduceNodeToText = useCallback((node: any): string => {
+    if (!node) return "";
+    if (node.type === "text") {
+      return node.text || "";
+    }
+
+    if (Array.isArray(node.content)) {
+      return node.content
+        .map((child: any) => reduceNodeToText(child))
+        .join(
+          node.type === "paragraph" ||
+            node.type === "doc" ||
+            node.type?.includes("heading") ||
+            node.type?.includes("list")
+            ? "\n"
+            : " ",
+        );
+    }
+
+    return "";
+  }, []);
+
+  const adminNotesPreview = useMemo(() => {
+    if (!selectedProfile?.admin_notes) return "";
+    try {
+      const parsed = JSON.parse(selectedProfile.admin_notes);
+      if (parsed && typeof parsed === "object") {
+        return reduceNodeToText(parsed).trim();
+      }
+      return selectedProfile.admin_notes;
+    } catch (error) {
+      return selectedProfile.admin_notes;
+    }
+  }, [reduceNodeToText, selectedProfile?.admin_notes]);
+
+  const handleNotesSaved = useCallback(
+    ({ content, savedAt }: { content: string; savedAt: string }) => {
+      setSelectedProfile((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          admin_notes: content,
+          updated_at: savedAt,
+        };
+      });
+    },
+    [setSelectedProfile],
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container-app py-6 md:py-8">
@@ -1037,12 +1088,14 @@ const ClientsPage = () => {
                               <p>{selectedProfile.about_me}</p>
                             </div>
                           )}
-                          {selectedProfile.admin_notes && (
+                          {adminNotesPreview && (
                             <div>
                               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                                 Admin notes
                               </p>
-                              <p>{selectedProfile.admin_notes}</p>
+                              <p className="whitespace-pre-line text-sm text-muted-foreground">
+                                {adminNotesPreview}
+                              </p>
                             </div>
                           )}
                         </div>
@@ -1124,7 +1177,7 @@ const ClientsPage = () => {
                                       : "Not provided",
                                   )}
                                   {renderInfoField("About", selectedProfile.about_me)}
-                                  {renderInfoField("Admin notes", selectedProfile.admin_notes)}
+                                  {renderInfoField("Admin notes", adminNotesPreview)}
                                 </div>
                               </AccordionContent>
                             </AccordionItem>
@@ -1226,10 +1279,14 @@ const ClientsPage = () => {
                         </div>
                       )}
                     </TabsContent>
-                    <TabsContent value="notes" className="h-full overflow-y-auto px-6 py-6">
-                      <div className="flex h-full flex-col items-center justify-center gap-2 text-sm text-muted-foreground">
-                        <span className="font-medium">Notes</span>
-                        <span>Coming soon.</span>
+                    <TabsContent value="notes" className="flex h-full flex-col px-6 py-6">
+                      <div className="flex-1 overflow-hidden rounded-xl border border-border bg-background px-6 py-5 shadow-sm">
+                        <ClientNotesEditor
+                          profileId={selectedProfile.id}
+                          initialContent={selectedProfile.admin_notes}
+                          initialUpdatedAt={selectedProfile.updated_at}
+                          onSaved={handleNotesSaved}
+                        />
                       </div>
                     </TabsContent>
                   </div>

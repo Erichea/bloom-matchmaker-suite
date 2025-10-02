@@ -238,6 +238,69 @@ All colors MUST be HSL.
   }
 }
 
+@layer components {
+  .tiptap {
+    @apply prose prose-sm max-w-none text-foreground leading-relaxed;
+  }
+
+  .tiptap h1 {
+    @apply mt-8 text-2xl font-semibold text-foreground;
+  }
+
+  .tiptap h2 {
+    @apply mt-6 text-xl font-semibold text-foreground;
+  }
+
+  .tiptap h3 {
+    @apply mt-5 text-lg font-semibold text-foreground;
+  }
+
+  .tiptap p,
+  .tiptap ul,
+  .tiptap ol,
+  .tiptap pre {
+    @apply mt-3;
+  }
+
+  .tiptap ul,
+  .tiptap ol {
+    @apply pl-6;
+  }
+
+  .tiptap ul[data-type="taskList"] {
+    @apply list-none pl-0;
+  }
+
+  .tiptap ul[data-type="taskList"] li {
+    @apply flex items-start gap-3 pl-0;
+  }
+
+  .tiptap ul[data-type="taskList"] input[type="checkbox"] {
+    @apply mt-1 h-4 w-4 rounded border-border text-primary focus:ring-ring;
+  }
+
+  .tiptap blockquote {
+    @apply border-l-2 border-border pl-4 text-muted-foreground italic;
+  }
+
+  .tiptap pre {
+    @apply overflow-x-auto rounded-lg border border-border bg-muted/60 p-4 font-mono text-sm;
+  }
+
+  .tiptap hr {
+    @apply my-6 border-border;
+  }
+
+  .tiptap a {
+    @apply text-primary underline-offset-4 hover:underline;
+  }
+
+  .tiptap .is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    @apply pointer-events-none text-muted-foreground;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
