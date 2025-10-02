@@ -1224,7 +1224,7 @@ const ClientsPage = () => {
                 </div>
               ) : selectedProfile ? (
                 <Tabs value={detailTab} onValueChange={setDetailTab} className="flex h-full flex-col">
-                  <div className="flex items-center justify-between border-b px-6 py-3">
+                  <div className="flex items-center justify-between border-b px-6 py-3 flex-shrink-0">
                     <TabsList className="grid w-full max-w-xl grid-cols-4">
                       <TabsTrigger value="profile">Profile</TabsTrigger>
                       <TabsTrigger value="matches" className="gap-2">
@@ -1242,10 +1242,9 @@ const ClientsPage = () => {
                       <TabsTrigger value="notes">Notes</TabsTrigger>
                     </TabsList>
                   </div>
-                  <div className="flex-1 overflow-hidden">
-                    <TabsContent value="profile" className="m-0 flex h-full flex-col overflow-hidden px-6 py-6">
-                      <ScrollArea className="h-full">
-                        <div className="space-y-4 pr-4">
+                  <div className="flex-1 overflow-hidden min-h-0">
+                    <TabsContent value="profile" className="m-0 h-full px-6 py-6 overflow-auto">
+                      <div className="space-y-4">
                           <Accordion type="multiple" className="space-y-3">
                             <AccordionItem value="personal" className="rounded-md border border-border">
                               <AccordionTrigger className="px-4 py-3 text-sm font-semibold">
@@ -1359,10 +1358,9 @@ const ClientsPage = () => {
                               </AccordionContent>
                             </AccordionItem>
                           </Accordion>
-                        </div>
-                      </ScrollArea>
+                      </div>
                     </TabsContent>
-                    <TabsContent value="matches" className="m-0 h-full overflow-y-auto px-6 py-6">
+                    <TabsContent value="matches" className="m-0 h-full px-6 py-6 overflow-auto">
                       {matchesLoading ? (
                         <div className="flex h-full items-center justify-center">
                           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -1438,7 +1436,7 @@ const ClientsPage = () => {
                         </div>
                       )}
                     </TabsContent>
-                    <TabsContent value="photos" className="m-0 h-full overflow-y-auto px-6 py-6">
+                    <TabsContent value="photos" className="m-0 h-full px-6 py-6 overflow-auto">
                       {sortedProfilePhotos.length ? (
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                           {sortedProfilePhotos.map((photo, index) => (
@@ -1463,8 +1461,8 @@ const ClientsPage = () => {
                         </div>
                       )}
                     </TabsContent>
-                    <TabsContent value="notes" className="m-0 flex h-full flex-col px-6 py-6">
-                      <div className="flex-1 overflow-hidden rounded-xl border border-border bg-background px-6 py-5 shadow-sm">
+                    <TabsContent value="notes" className="m-0 h-full px-6 py-6 overflow-auto">
+                      <div className="h-full rounded-xl border border-border bg-background px-6 py-5 shadow-sm overflow-hidden">
                         <ClientNotesEditor
                           profileId={selectedProfile.id}
                           initialContent={selectedProfile.admin_notes}
