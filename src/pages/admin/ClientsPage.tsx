@@ -321,6 +321,14 @@ const ClientsPage = () => {
     }
   }, [selectedClientId]);
 
+  const handleCloseDetail = useCallback(() => {
+    setCockpitOpen(false);
+    setSelectedClientId(null);
+    setSelectedProfile(null);
+    setQuestionnaireAnswers({});
+    setDetailTab("profile");
+  }, [setDetailTab]);
+
   useEffect(() => {
     if (!cockpitOpen) return;
 
@@ -338,14 +346,6 @@ const ClientsPage = () => {
     setSelectedClientId(client.id);
     setCockpitOpen(true);
   };
-
-  const handleCloseDetail = useCallback(() => {
-    setCockpitOpen(false);
-    setSelectedClientId(null);
-    setSelectedProfile(null);
-    setQuestionnaireAnswers({});
-    setDetailTab("profile");
-  }, [setDetailTab]);
 
   const refreshData = useCallback(
     async (targetProfileId?: string | null) => {
