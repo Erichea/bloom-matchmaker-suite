@@ -84,6 +84,12 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 160 5% 12%;
     --sidebar-border: 0 0% 90%;
     --sidebar-ring: 3 56% 72%;
+    --component-inactive-color: var(--muted-foreground);
+    --component-bg: var(--card);
+    --component-shadow: var(--border);
+    --component-active-bg: var(--secondary);
+    --component-line-inactive-color: var(--border);
+    --component-active-color-default: var(--accent-foreground);
   }
 
   .dark {
@@ -121,6 +127,18 @@ All colors MUST be HSL.
     --brand-primary-foreground: 160 5% 12%;
     --brand-secondary: 0 0% 90%;
     --brand-secondary-foreground: 160 5% 12%;
+    --component-inactive-color: var(--muted-foreground);
+    --component-bg: var(--card);
+    --component-shadow: var(--border);
+    --component-active-bg: var(--secondary);
+    --component-line-inactive-color: var(--muted-foreground);
+    --component-active-color-default: var(--accent-foreground);
+  }
+  .theme {
+    --color-chart-2: var(--color-chart-2);
+    --color-chart-3: var(--color-chart-3);
+    --color-chart-4: var(--color-chart-4);
+    --color-chart-5: var(--color-chart-5);
   }
 }
 
@@ -364,5 +382,40 @@ All colors MUST be HSL.
 
   .show-desktop {
     @apply block;
+  }
+}
+
+/* ---break---
+*/
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ---break---
+*/
+
+@theme inline {
+  @keyframes iconBounce {
+  0%, 100% {
+    transform: translateY(0);
+    }
+  20% {
+    transform: translateY(-0.3em);
+    }
+  40% {
+    transform: translateY(0);
+    }
+  60% {
+    transform: translateY(-0.1em);
+    }
+  80% {
+    transform: translateY(0);
+    }
   }
 }
