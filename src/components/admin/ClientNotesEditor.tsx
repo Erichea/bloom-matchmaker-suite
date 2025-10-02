@@ -1,15 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createPlateEditor, Plate, PlateContent } from "@platejs/core";
-import { createParagraphPlugin } from "@platejs/basic-nodes";
-import { createHeadingPlugin } from "@platejs/basic-nodes";
-import { createBlockquotePlugin } from "@platejs/basic-nodes";
-import { createCodeBlockPlugin } from "@platejs/basic-nodes";
-import { createHorizontalRulePlugin } from "@platejs/basic-nodes";
-import { createBoldPlugin, createItalicPlugin, createUnderlinePlugin, createStrikethroughPlugin, createCodePlugin } from "@platejs/basic-marks";
-import { createListPlugin, createTodoListPlugin } from "@platejs/list";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ClientNotesEditorProps {
   profileId: string;
@@ -18,34 +11,23 @@ interface ClientNotesEditorProps {
   onSaved?: (payload: { content: string; savedAt: string }) => void;
 }
 
-const parseInitialContent = (content: string | null) => {
-  if (!content) {
-    return [
-      {
-        type: "p",
-        children: [{ text: "" }],
-      },
-    ];
-  }
+const parseInitialContent = (content: string | null): string => {
+  if (!content) return "";
 
   try {
     const parsed = JSON.parse(content);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed;
+    if (Array.isArray(parsed)) {
+      // Convert Slate/Plate format to plain text
+      return parsed.map((node: any) => {
+        if (node.children) {
+          return node.children.map((child: any) => child.text || "").join("");
+        }
+        return "";
+      }).join("\n");
     }
-    return [
-      {
-        type: "p",
-        children: [{ text: content }],
-      },
-    ];
+    return content;
   } catch (error) {
-    return [
-      {
-        type: "p",
-        children: [{ text: content }],
-      },
-    ];
+    return content;
   }
 };
 
@@ -58,51 +40,20 @@ const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt, onSave
   const lastSyncedContent = useRef<string>("");
   const [currentContent, setCurrentContent] = useState<string>("");
 
-  const plugins = useMemo(
-    () => [
-      createParagraphPlugin(),
-      createHeadingPlugin(),
-      createBlockquotePlugin(),
-      createCodeBlockPlugin(),
-      createHorizontalRulePlugin(),
-      createBoldPlugin(),
-      createItalicPlugin(),
-      createUnderlinePlugin(),
-      createStrikethroughPlugin(),
-      createCodePlugin(),
-      createListPlugin(),
-      createTodoListPlugin(),
-    ],
-    []
-  );
-
-  const initialValue = useMemo(() => parseInitialContent(initialContent), [initialContent]);
-
-  const editor = useMemo(
-    () =>
-      createPlateEditor({
-        plugins,
-        value: initialValue,
-      }),
-    [plugins, initialValue]
-  );
-
   useEffect(() => {
-    const synced = JSON.stringify(editor.children);
-    lastSyncedContent.current = synced;
-    setCurrentContent(synced);
+    const parsed = parseInitialContent(initialContent);
+    lastSyncedContent.current = parsed;
+    setCurrentContent(parsed);
     setStatus("idle");
     setLastSavedAt(initialUpdatedAt ? new Date(initialUpdatedAt) : null);
-  }, [editor, initialUpdatedAt]);
+  }, [initialContent, initialUpdatedAt]);
 
-  const handleChange = useCallback((value: any) => {
-    const json = JSON.stringify(value);
-    setCurrentContent(json);
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCurrentContent(e.target.value);
   }, []);
 
   useEffect(() => {
-    if (!profileId || !currentContent) return;
-    if (currentContent === lastSyncedContent.current) return;
+    if (!profileId || currentContent === lastSyncedContent.current) return;
 
     setStatus("saving");
     const handler = setTimeout(async () => {
@@ -154,13 +105,13 @@ const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt, onSave
         <span>{statusLabel}</span>
         {status === "saving" && <span className="text-foreground">●</span>}
       </div>
-      <div className="flex-1 overflow-y-auto pt-4">
-        <Plate editor={editor} onChange={handleChange}>
-          <PlateContent
-            className="slate-editor focus:outline-none"
-            placeholder="Type / for commands or start writing..."
-          />
-        </Plate>
+      <div className="flex-1 pt-4">
+        <Textarea
+          value={currentContent}
+          onChange={handleChange}
+          placeholder="Start taking notes..."
+          className="h-full min-h-full resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-sm leading-relaxed"
+        />
       </div>
     </div>
   );
