@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { Home, Briefcase, Calendar, Shield, Settings } from 'lucide-react';
 
 type IconComponentType = React.ElementType<{ className?: string }>;
-
 export interface InteractiveMenuItem {
   label: string;
   icon: IconComponentType;
@@ -10,112 +10,119 @@ export interface InteractiveMenuItem {
 }
 
 export interface InteractiveMenuProps {
-  items: InteractiveMenuItem[];
+  items?: InteractiveMenuItem[];
   accentColor?: string;
   activeIndex?: number;
   onActiveIndexChange?: (index: number) => void;
 }
 
-const defaultAccentColor = 'hsl(var(--primary))';
+const defaultItems: InteractiveMenuItem[] = [
+    { label: 'home', icon: Home },
+    { label: 'strategy', icon: Briefcase },
+    { label: 'period', icon: Calendar },
+    { label: 'security', icon: Shield },
+    { label: 'settings', icon: Settings },
+];
 
-export const InteractiveMenu: React.FC<InteractiveMenuProps> = ({
-  items,
-  accentColor = defaultAccentColor,
-  activeIndex: controlledActiveIndex,
-  onActiveIndexChange
-}) => {
+const defaultAccentColor = 'var(--component-active-color-default)';
+
+const InteractiveMenu: React.FC<InteractiveMenuProps> = ({ items, accentColor, activeIndex: controlledActiveIndex, onActiveIndexChange }) => {
+
+  const finalItems = useMemo(() => {
+     const isValid = items && Array.isArray(items) && items.length >= 2 && items.length <= 5;
+     if (!isValid) {
+        console.warn("InteractiveMenu: 'items' prop is invalid or missing. Using default items.", items);
+        return defaultItems;
+     }
+     return items;
+  }, [items]);
+
   const [internalActiveIndex, setInternalActiveIndex] = useState(0);
-  const activeIndex = controlledActiveIndex ?? internalActiveIndex;
+  const activeIndex = controlledActiveIndex !== undefined ? controlledActiveIndex : internalActiveIndex;
 
-  const textRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  useEffect(() => {
+      if (activeIndex >= finalItems.length) {
+          const newIndex = 0;
+          setInternalActiveIndex(newIndex);
+          onActiveIndexChange?.(newIndex);
+      }
+  }, [finalItems, activeIndex, onActiveIndexChange]);
+
+  const textRefs = useRef<(HTMLElement | null)[]>([]);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const lineRef = useRef<HTMLDivElement>(null);
 
-  const setActiveIndex = (index: number) => {
+  useEffect(() => {
+    const setLineWidth = () => {
+      const activeItemElement = itemRefs.current[activeIndex];
+      const activeTextElement = textRefs.current[activeIndex];
+
+      if (activeItemElement && activeTextElement) {
+        const textWidth = activeTextElement.offsetWidth;
+        activeItemElement.style.setProperty('--lineWidth', `${textWidth}px`);
+      }
+    };
+
+    setLineWidth();
+
+    window.addEventListener('resize', setLineWidth);
+    return () => {
+      window.removeEventListener('resize', setLineWidth);
+    };
+  }, [activeIndex, finalItems]);
+
+  const handleItemClick = (index: number, onClick?: () => void) => {
     if (controlledActiveIndex === undefined) {
       setInternalActiveIndex(index);
     }
     onActiveIndexChange?.(index);
-  };
-
-  useEffect(() => {
-    if (activeIndex >= items.length) {
-      setActiveIndex(0);
-    }
-  }, [items, activeIndex]);
-
-  useEffect(() => {
-    const setLinePosition = () => {
-      const activeItemElement = itemRefs.current[activeIndex];
-      const activeTextElement = textRefs.current[activeIndex];
-      const lineElement = lineRef.current;
-
-      if (activeItemElement && activeTextElement && lineElement) {
-        const textWidth = activeTextElement.getBoundingClientRect().width;
-        const itemLeft = activeItemElement.offsetLeft;
-        const itemWidth = activeItemElement.offsetWidth;
-        const textLeft = activeTextElement.offsetLeft;
-
-        const lineLeft = itemLeft + textLeft;
-        lineElement.style.width = `${textWidth}px`;
-        lineElement.style.transform = `translateX(${lineLeft}px)`;
-      }
-    };
-
-    setLinePosition();
-    window.addEventListener('resize', setLinePosition);
-    return () => window.removeEventListener('resize', setLinePosition);
-  }, [activeIndex, items]);
-
-  const handleClick = (index: number, onClick?: () => void) => {
-    setActiveIndex(index);
     onClick?.();
   };
 
+  const navStyle = useMemo(() => {
+      const activeColor = accentColor || defaultAccentColor;
+      return { '--component-active-color': activeColor } as React.CSSProperties;
+  }, [accentColor]);
+
   return (
-    <nav className="relative flex items-center justify-around gap-2 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div
-        ref={lineRef}
-        className="absolute bottom-0 left-0 h-0.5 rounded-full transition-all duration-300 ease-out"
-        style={{ backgroundColor: accentColor }}
-      />
-      {items.map((item, index) => {
-        const Icon = item.icon;
+    <nav
+      className="menu"
+      role="navigation"
+      style={navStyle}
+    >
+      {finalItems.map((item, index) => {
         const isActive = index === activeIndex;
+        const isTextActive = isActive;
+
+
+        const IconComponent = item.icon;
 
         return (
           <button
-            key={index}
+            key={item.label}
+            className={`menu__item ${isActive ? 'active' : ''}`}
+            onClick={() => handleItemClick(index, item.onClick)}
             ref={(el) => (itemRefs.current[index] = el)}
-            onClick={() => handleClick(index, item.onClick)}
-            className="relative flex flex-col items-center gap-1.5 px-4 py-3 transition-all duration-300"
-            style={{
-              color: isActive ? accentColor : 'hsl(var(--muted-foreground))',
-            }}
+            style={{ '--lineWidth': '0px' } as React.CSSProperties}
           >
-            <div className="relative">
-              <Icon
-                className={`h-6 w-6 transition-all duration-300 ${
-                  isActive ? 'scale-110' : 'scale-100'
-                }`}
-              />
+            <div className="menu__icon">
+              <IconComponent className="icon" />
               {item.badge !== undefined && item.badge > 0 && (
-                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-semibold text-destructive-foreground">
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-semibold text-destructive-foreground">
                   {item.badge > 99 ? "99+" : item.badge}
                 </span>
               )}
             </div>
-            <span
+            <strong
+              className={`menu__text ${isTextActive ? 'active' : ''}`}
               ref={(el) => (textRefs.current[index] = el)}
-              className={`text-xs transition-all duration-300 ${
-                isActive ? 'font-semibold' : 'font-normal'
-              }`}
             >
               {item.label}
-            </span>
+            </strong>
           </button>
         );
       })}
     </nav>
   );
 };
+
+export {InteractiveMenu}
