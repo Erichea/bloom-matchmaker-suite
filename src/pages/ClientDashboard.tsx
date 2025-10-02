@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MatchList } from "@/components/experience/MatchList";
 import MatchDetailModal from "@/components/MatchDetailModal";
@@ -38,6 +38,7 @@ const ClientDashboard = () => {
   const { user, session, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [profile, setProfile] = useState<any>(null);
   const [matches, setMatches] = useState<Match[]>([]);
@@ -205,6 +206,16 @@ const ClientDashboard = () => {
 
     loadData();
   }, [user, session, authLoading, navigate, fetchProfile, fetchMatches]);
+
+  // Handle opening match from notification (query parameter)
+  useEffect(() => {
+    const matchId = searchParams.get('match');
+    if (matchId && matches.length > 0 && !modalOpen) {
+      handleOpenMatch(matchId);
+      // Clear the query parameter
+      setSearchParams({});
+    }
+  }, [searchParams, matches, modalOpen]);
 
   const handleSignOut = async () => {
     await signOut();

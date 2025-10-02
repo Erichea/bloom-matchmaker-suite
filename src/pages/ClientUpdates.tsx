@@ -17,6 +17,8 @@ interface Notification {
   redirect_url: string | null;
   icon_type: string | null;
   created_at: string;
+  related_entity_id?: string | null;
+  related_entity_type?: string | null;
 }
 
 const getIconByType = (iconType: string | null) => {
@@ -94,6 +96,7 @@ export const ClientUpdates = () => {
   }, [user]);
 
   const handleNotificationClick = async (notification: Notification) => {
+    // Mark as read
     if (!notification.is_read) {
       await supabase
         .from("notifications")
@@ -101,6 +104,7 @@ export const ClientUpdates = () => {
         .eq("id", notification.id);
     }
 
+    // Navigate to the redirect URL if provided
     if (notification.redirect_url) {
       navigate(notification.redirect_url);
     }

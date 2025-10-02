@@ -20,7 +20,7 @@ BEGIN
 
   -- Only create notifications for newly suggested matches (pending status)
   IF NEW.match_status = 'pending' OR NEW.match_status IS NULL THEN
-    -- Notify profile 1
+    -- Notify profile 1 about profile 2
     INSERT INTO notifications (
       user_id,
       user_type,
@@ -29,19 +29,23 @@ BEGIN
       description,
       redirect_url,
       icon_type,
-      priority
+      priority,
+      related_entity_id,
+      related_entity_type
     ) VALUES (
       profile1_user_id,
       'client',
       'new_match',
-      'New match suggestion',
+      'New match with ' || profile2_name,
       'You have a new curated match waiting for your review',
-      '/client/dashboard',
+      '/client/dashboard?match=' || NEW.id,
       'match',
-      'medium'
+      'medium',
+      NEW.id,
+      'match'
     );
 
-    -- Notify profile 2
+    -- Notify profile 2 about profile 1
     INSERT INTO notifications (
       user_id,
       user_type,
@@ -50,16 +54,20 @@ BEGIN
       description,
       redirect_url,
       icon_type,
-      priority
+      priority,
+      related_entity_id,
+      related_entity_type
     ) VALUES (
       profile2_user_id,
       'client',
       'new_match',
-      'New match suggestion',
+      'New match with ' || profile1_name,
       'You have a new curated match waiting for your review',
-      '/client/dashboard',
+      '/client/dashboard?match=' || NEW.id,
       'match',
-      'medium'
+      'medium',
+      NEW.id,
+      'match'
     );
   END IF;
 
@@ -98,16 +106,20 @@ BEGIN
       description,
       redirect_url,
       icon_type,
-      priority
+      priority,
+      related_entity_id,
+      related_entity_type
     ) VALUES (
       profile1_user_id,
       'client',
       'mutual_match',
-      'It''s a mutual match!',
-      'You have a mutual match with ' || profile2_name || '!',
-      '/client/dashboard',
+      'Mutual match with ' || profile2_name || '!',
+      'Congratulations! You both matched. Start your conversation.',
+      '/client/dashboard?match=' || NEW.id,
       'match',
-      'high'
+      'high',
+      NEW.id,
+      'match'
     );
 
     -- Notify profile 2 about mutual match with profile 1
@@ -119,16 +131,20 @@ BEGIN
       description,
       redirect_url,
       icon_type,
-      priority
+      priority,
+      related_entity_id,
+      related_entity_type
     ) VALUES (
       profile2_user_id,
       'client',
       'mutual_match',
-      'It''s a mutual match!',
-      'You have a mutual match with ' || profile1_name || '!',
-      '/client/dashboard',
+      'Mutual match with ' || profile1_name || '!',
+      'Congratulations! You both matched. Start your conversation.',
+      '/client/dashboard?match=' || NEW.id,
       'match',
-      'high'
+      'high',
+      NEW.id,
+      'match'
     );
   END IF;
 
