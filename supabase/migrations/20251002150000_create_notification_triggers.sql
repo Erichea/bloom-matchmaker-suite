@@ -18,8 +18,8 @@ BEGIN
   FROM profiles
   WHERE id = NEW.profile_2_id;
 
-  -- Only create notifications for newly suggested matches
-  IF NEW.match_status = 'suggested' OR NEW.match_status IS NULL THEN
+  -- Only create notifications for newly suggested matches (pending status)
+  IF NEW.match_status = 'pending' OR NEW.match_status IS NULL THEN
     -- Notify profile 1
     INSERT INTO notifications (
       user_id,
