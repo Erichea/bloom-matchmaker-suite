@@ -76,6 +76,8 @@ export const AdminUpdates = () => {
         query = query.eq("notification_type", "pending_review");
       } else if (filter === "profile_updates") {
         query = query.eq("notification_type", "profile_update");
+      } else if (filter === "client_actions") {
+        query = query.eq("notification_type", "client_action");
       }
 
       query = query.order("created_at", { ascending: false });
@@ -189,6 +191,7 @@ export const AdminUpdates = () => {
                   <SelectItem value="unread">Unread only</SelectItem>
                   <SelectItem value="pending_review">Pending reviews</SelectItem>
                   <SelectItem value="profile_updates">Profile updates</SelectItem>
+                  <SelectItem value="client_actions">Client actions</SelectItem>
                 </SelectContent>
               </Select>
               <Button variant="outline" onClick={handleRefresh} disabled={refreshing}>
