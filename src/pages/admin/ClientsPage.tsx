@@ -22,6 +22,7 @@ import {
   Undo2,
   MapPin,
   Mail,
+  Phone,
   Calendar,
   Loader2,
   CheckCircle,
@@ -42,14 +43,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -69,6 +63,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface ProfilePhoto {
   photo_url: string | null;
@@ -168,6 +165,7 @@ const ClientsPage = () => {
   const [selectedProfile, setSelectedProfile] = useState<DetailedProfile | null>(null);
   const [questionnaireAnswers, setQuestionnaireAnswers] = useState<QuestionnaireAnswers>({});
   const [detailLoading, setDetailLoading] = useState(false);
+  const [detailTab, setDetailTab] = useState("profile");
 
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
@@ -316,10 +314,36 @@ const ClientsPage = () => {
     }
   }, [cockpitOpen, selectedClientId, loadClientDetails]);
 
+  useEffect(() => {
+    if (selectedClientId) {
+      setDetailTab("profile");
+    }
+  }, [selectedClientId]);
+
+  useEffect(() => {
+    if (!cockpitOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        handleCloseDetail();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [cockpitOpen, handleCloseDetail]);
+
   const handleRowClick = (client: ClientRow) => {
     setSelectedClientId(client.id);
     setCockpitOpen(true);
   };
+
+  const handleCloseDetail = useCallback(() => {
+    setCockpitOpen(false);
+    setSelectedClientId(null);
+    setSelectedProfile(null);
+    setQuestionnaireAnswers({});
+  }, []);
 
   const refreshData = useCallback(
     async (targetProfileId?: string | null) => {
@@ -661,6 +685,29 @@ const ClientsPage = () => {
         return orderA - orderB;
       });
   }, [selectedClient?.profile_photos]);
+  const completionPercentage = selectedProfile?.completion_percentage ?? 0;
+  const statusLabel = selectedProfile
+    ? selectedProfile.status === "pending_approval"
+      ? "Pending review"
+      : selectedProfile.status.replace("_", " ")
+    : "";
+  const statusBadgeClass = selectedProfile
+    ? selectedProfile.status === "approved"
+      ? "badge-success"
+      : selectedProfile.status === "pending_approval"
+        ? "badge-warning"
+        : selectedProfile.status === "rejected"
+          ? "badge-error"
+          : ""
+    : "";
+  const renderInfoField = (label: string, value: string | number | null | undefined) => (
+    <div className="flex flex-col gap-1">
+      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
+      <span className="text-sm text-foreground">
+        {value === null || value === undefined || value === "" ? "Not provided" : value}
+      </span>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -832,241 +879,14 @@ const ClientsPage = () => {
         </div>
       </div>
 
-      <Sheet open={cockpitOpen} onOpenChange={setCockpitOpen}>
-        <SheetContent className="w-full sm:max-w-xl md:max-w-3xl flex flex-col p-0">
-          <SheetHeader className="border-b px-6 py-4">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-12 w-12">
-                  {currentPrimaryPhoto ? (
-                    <AvatarImage src={currentPrimaryPhoto} alt={currentFullName} />
-                  ) : (
-                    <AvatarFallback>{currentFullName.slice(0, 2).toUpperCase() || "?"}</AvatarFallback>
-                  )}
-                </Avatar>
-                <div>
-                  <SheetTitle>{currentFullName || "Client profile"}</SheetTitle>
-                  <SheetDescription>
-                    {selectedProfile?.email ? selectedProfile.email : "No email on file"}
-                  </SheetDescription>
-                </div>
-              </div>
-              {selectedProfile?.deleted_at ? (
-                <Badge variant="outline" className="text-xs">Deleted {formatDate(selectedProfile.deleted_at)}</Badge>
-              ) : (
-                selectedProfile && (
-                  <Badge className={
-                    selectedProfile.status === "approved"
-                      ? "badge-success"
-                      : selectedProfile.status === "pending_approval"
-                        ? "badge-warning"
-                        : selectedProfile.status === "rejected"
-                          ? "badge-error"
-                          : ""
-                  }>
-                    {selectedProfile.status === "pending_approval" ? "Pending review" : selectedProfile.status.replace("_", " ")}
-                  </Badge>
-                )
-              )}
+      {cockpitOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-background">
+          <div className="flex items-center justify-between border-b px-6 py-4">
+            <div>
+              <h2 className="text-lg font-semibold">Client overview</h2>
+              <p className="text-sm text-muted-foreground">{currentFullName || "Client profile"}</p>
             </div>
-          </SheetHeader>
-
-          <ScrollArea className="flex-1">
-            {detailLoading ? (
-              <div className="flex items-center justify-center py-16">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : selectedProfile ? (
-              <div className="space-y-6 px-6 py-6">
-                {sortedProfilePhotos.length > 0 && (
-                  <section>
-                    <Card>
-                      <CardContent className="p-4 space-y-4">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-sm font-semibold text-muted-foreground">Photo gallery</h3>
-                          <span className="text-xs text-muted-foreground">
-                            {sortedProfilePhotos.length} photo{sortedProfilePhotos.length === 1 ? "" : "s"}
-                          </span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                          {sortedProfilePhotos.map((photo, index) => (
-                            <div
-                              key={photo.photo_url || index}
-                              className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted/40"
-                            >
-                              <img
-                                src={photo.photo_url}
-                                alt={`${currentFullName || "Client"} photo ${index + 1}`}
-                                className="h-full w-full object-cover"
-                              />
-                              {(photo.is_primary || index === 0) && (
-                                <span className="absolute left-2 top-2 rounded-full bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground">
-                                  Primary
-                                </span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </section>
-                )}
-
-                <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card>
-                    <CardContent className="p-4 space-y-3">
-                      <h3 className="text-sm font-semibold text-muted-foreground">Contact</h3>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
-                        <span>{selectedProfile.email || "No email on file"}</span>
-                      </div>
-                      {selectedProfile.phone && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <span className="font-medium text-muted-foreground">Phone</span>
-                          <span>{selectedProfile.phone}</span>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-2 text-sm">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span>
-                          {[selectedProfile.city, selectedProfile.country].filter(Boolean).join(", ") || "Location not set"}
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardContent className="p-4 space-y-3">
-                      <h3 className="text-sm font-semibold text-muted-foreground">Profile Status</h3>
-                      <div className="flex items-center gap-2 text-sm">
-                        <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                        <span>Completion: {selectedProfile.completion_percentage ?? 0}%</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>Created {formatDate(selectedProfile.created_at)}</span>
-                      </div>
-                      {selectedProfile.submitted_for_review_at && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>
-                            Submitted {formatDate(selectedProfile.submitted_for_review_at)}
-                          </span>
-                        </div>
-                      )}
-                      {selectedProfile.approved_at && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-                          <span>Approved {formatDate(selectedProfile.approved_at)}</span>
-                        </div>
-                      )}
-                      {selectedProfile.rejected_at && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <ShieldAlert className="h-4 w-4 text-muted-foreground" />
-                          <span>Rejected {formatDate(selectedProfile.rejected_at)}</span>
-                        </div>
-                      )}
-                      {selectedProfile.deleted_at && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Trash2 className="h-4 w-4 text-muted-foreground" />
-                          <span>Deleted {formatDate(selectedProfile.deleted_at, true)}</span>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </section>
-
-                <section>
-                  <Card>
-                    <CardContent className="p-4 space-y-3">
-                      <h3 className="text-sm font-semibold text-muted-foreground">About</h3>
-                      <div className="space-y-2 text-sm leading-relaxed">
-                        <div>
-                          <span className="font-medium text-muted-foreground">Profession: </span>
-                          <span>{selectedProfile.profession || "Not specified"}</span>
-                        </div>
-                        <div>
-                          <span className="font-medium text-muted-foreground">About me: </span>
-                          <span>{selectedProfile.about_me || "No introduction provided"}</span>
-                        </div>
-                        {selectedProfile.admin_notes && (
-                          <div>
-                            <span className="font-medium text-muted-foreground">Admin notes: </span>
-                            <span>{selectedProfile.admin_notes}</span>
-                          </div>
-                        )}
-                        {selectedProfile.rejection_reason && (
-                          <div>
-                            <span className="font-medium text-muted-foreground">Last rejection reason: </span>
-                            <span>{selectedProfile.rejection_reason}</span>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </section>
-
-                <section>
-                  <h3 className="text-sm font-semibold text-muted-foreground mb-3">Questionnaire answers</h3>
-                  {Object.keys(questionnaireAnswers).length === 0 && (
-                    <Card className="border-warning/50 bg-warning/5 mb-4">
-                      <CardContent className="p-4">
-                        <p className="text-sm text-warning">
-                          No questionnaire answers found. The user may not have started the questionnaire yet, or the completion percentage may be incorrect.
-                        </p>
-                      </CardContent>
-                    </Card>
-                  )}
-                  <div className="space-y-4">
-                    {profileQuestionCategories.map((category) => {
-                      const categoryQuestions = profileQuestions.filter((question) => question.category === category);
-                      const answeredCount = categoryQuestions.filter((question) => questionnaireAnswers[question.id]).length;
-                      const isComplete = answeredCount === categoryQuestions.length;
-
-                      return (
-                        <Card key={category} className="border-muted">
-                          <CardContent className="p-4 space-y-3">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className="font-medium text-sm text-foreground">{category}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {answeredCount} of {categoryQuestions.length} answered
-                                </p>
-                              </div>
-                            </div>
-                            <div className="space-y-3">
-                              {categoryQuestions.map((question) => {
-                                const AnswerIcon = question.icon;
-                                const answer = questionnaireAnswers[question.id];
-                                return (
-                                  <div key={question.id} className="border border-border rounded-md p-3">
-                                    <div className="flex items-center gap-2 text-sm font-medium mb-2">
-                                      <AnswerIcon className="h-4 w-4 text-muted-foreground" />
-                                      <span>{question.title}</span>
-                                    </div>
-                                    <p className="text-sm text-muted-foreground whitespace-pre-line">
-                                      {formatAnswer(answer)}
-                                    </p>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                </section>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center py-16">
-                <p className="text-sm text-muted-foreground">Select a client to view details</p>
-              </div>
-            )}
-          </ScrollArea>
-
-          <div className="border-t px-6 py-4 flex flex-wrap items-center gap-2 justify-between">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {selectedProfile?.status === "pending_approval" && (
                 <>
                   <Button size="sm" onClick={() => handleApprove()} className="btn-accent">
@@ -1075,28 +895,354 @@ const ClientsPage = () => {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => setRejectDialogOpen(true)}
+                    onClick={() => {
+                      setRejectionReason("");
+                      setRejectDialogOpen(true);
+                    }}
                     className="btn-secondary"
                   >
                     Reject
                   </Button>
                 </>
               )}
-            </div>
-            <div className="flex flex-wrap gap-2">
               {selectedProfile?.deleted_at ? (
                 <Button size="sm" className="btn-accent" onClick={() => setRestoreDialogOpen(true)}>
-                  <Undo2 className="h-4 w-4 mr-1" /> Restore
+                  <Undo2 className="mr-1 h-4 w-4" /> Restore
                 </Button>
               ) : (
                 <Button size="sm" variant="destructive" onClick={() => setDeleteDialogOpen(true)}>
-                  <Trash2 className="h-4 w-4 mr-1" /> Delete
+                  <Trash2 className="mr-1 h-4 w-4" /> Delete
                 </Button>
+              )}
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={handleCloseDetail}
+                aria-label="Close client details"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
+            <aside className="w-full border-b bg-muted/20 lg:w-[32%] lg:border-b-0 lg:border-r xl:w-[28%]">
+              {detailLoading && !selectedProfile ? (
+                <div className="flex h-full items-center justify-center py-12 text-muted-foreground">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                </div>
+              ) : selectedProfile ? (
+                <ScrollArea className="h-full">
+                  <div className="space-y-6 px-6 py-6">
+                    <div className="flex flex-col items-center gap-4 text-center">
+                      <div className="h-44 w-44 overflow-hidden rounded-xl border border-border bg-muted">
+                        {currentPrimaryPhoto ? (
+                          <img
+                            src={currentPrimaryPhoto}
+                            alt={currentFullName}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-3xl font-semibold text-muted-foreground">
+                            {(currentFullName.slice(0, 2) || "?").toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-xl font-semibold text-foreground">{currentFullName || "Client profile"}</h3>
+                        <p className="break-all text-sm text-muted-foreground">
+                          {selectedProfile.email || "No email on file"}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {statusLabel && <Badge className={`capitalize ${statusBadgeClass}`}>{statusLabel}</Badge>}
+                        {selectedProfile.deleted_at && (
+                          <Badge variant="outline" className="text-xs uppercase tracking-wide">
+                            Deleted
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <Separator />
+                    <div className="space-y-4 text-sm">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                          <span>Profile completion</span>
+                          <span>{completionPercentage}%</span>
+                        </div>
+                        <Progress value={completionPercentage} className="h-2" />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <span>{selectedProfile.email || "No email"}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <span>{selectedProfile.phone || "No phone on file"}</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                          <span>
+                            {[selectedProfile.city, selectedProfile.country].filter(Boolean).join(", ") ||
+                              "Location not set"}
+                          </span>
+                        </div>
+                      </div>
+                      <Separator />
+                      <div className="space-y-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          <span>Created {formatDate(selectedProfile.created_at)}</span>
+                        </div>
+                        {selectedProfile.submitted_for_review_at && (
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            <span>Submitted {formatDate(selectedProfile.submitted_for_review_at)}</span>
+                          </div>
+                        )}
+                        {selectedProfile.approved_at && (
+                          <div className="flex items-center gap-2">
+                            <ShieldCheck className="h-4 w-4" />
+                            <span>Approved {formatDate(selectedProfile.approved_at)}</span>
+                          </div>
+                        )}
+                        {selectedProfile.rejected_at && (
+                          <div className="flex items-center gap-2">
+                            <ShieldAlert className="h-4 w-4" />
+                            <span>Rejected {formatDate(selectedProfile.rejected_at)}</span>
+                          </div>
+                        )}
+                        {selectedProfile.deleted_at && (
+                          <div className="flex items-center gap-2">
+                            <Trash2 className="h-4 w-4" />
+                            <span>Deleted {formatDate(selectedProfile.deleted_at, true)}</span>
+                          </div>
+                        )}
+                      </div>
+                      {(selectedProfile.profession || selectedProfile.about_me || selectedProfile.admin_notes) && (
+                        <div className="space-y-2">
+                          {selectedProfile.profession && (
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                Profession
+                              </p>
+                              <p>{selectedProfile.profession}</p>
+                            </div>
+                          )}
+                          {selectedProfile.about_me && (
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                About
+                              </p>
+                              <p>{selectedProfile.about_me}</p>
+                            </div>
+                          )}
+                          {selectedProfile.admin_notes && (
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                Admin notes
+                              </p>
+                              <p>{selectedProfile.admin_notes}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </ScrollArea>
+              ) : (
+                <div className="flex h-full items-center justify-center py-12 text-sm text-muted-foreground">
+                  Select a client to view details
+                </div>
+              )}
+            </aside>
+            <div className="flex-1 overflow-hidden">
+              {detailLoading && !selectedProfile ? (
+                <div className="flex h-full items-center justify-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : selectedProfile ? (
+                <Tabs value={detailTab} onValueChange={setDetailTab} className="flex h-full flex-col">
+                  <div className="flex items-center justify-between border-b px-6 py-3">
+                    <TabsList className="grid w-full max-w-xl grid-cols-4">
+                      <TabsTrigger value="profile">Profile</TabsTrigger>
+                      <TabsTrigger value="matches">Matches</TabsTrigger>
+                      <TabsTrigger value="photos" className="gap-2">
+                        Photos
+                        <Badge variant="secondary" className="text-[0.7rem] font-medium">
+                          {sortedProfilePhotos.length}
+                        </Badge>
+                      </TabsTrigger>
+                      <TabsTrigger value="notes">Notes</TabsTrigger>
+                    </TabsList>
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <TabsContent value="profile" className="flex h-full flex-col overflow-hidden px-6 py-6">
+                      <ScrollArea className="h-full">
+                        <div className="space-y-4 pr-4">
+                          <Accordion type="multiple" className="space-y-3">
+                            <AccordionItem value="personal" className="rounded-md border border-border">
+                              <AccordionTrigger className="px-4 py-3 text-sm font-semibold">
+                                Personal information
+                              </AccordionTrigger>
+                              <AccordionContent className="px-4 pb-4">
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                  {renderInfoField("First name", selectedProfile.first_name)}
+                                  {renderInfoField("Last name", selectedProfile.last_name)}
+                                  {renderInfoField("Email", selectedProfile.email)}
+                                  {renderInfoField("Phone", selectedProfile.phone)}
+                                  {renderInfoField(
+                                    "Location",
+                                    [selectedProfile.city, selectedProfile.country].filter(Boolean).join(", ") ||
+                                      "Location not set",
+                                  )}
+                                  {renderInfoField(
+                                    "Date of birth",
+                                    selectedProfile.date_of_birth ? formatDate(selectedProfile.date_of_birth) : "Not provided",
+                                  )}
+                                  {renderInfoField("Profession", selectedProfile.profession)}
+                                  {renderInfoField("Status", statusLabel)}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="lifestyle" className="rounded-md border border-border">
+                              <AccordionTrigger className="px-4 py-3 text-sm font-semibold">
+                                Lifestyle & interests
+                              </AccordionTrigger>
+                              <AccordionContent className="px-4 pb-4">
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                  {renderInfoField(
+                                    "Interests",
+                                    selectedProfile.interests?.length
+                                      ? selectedProfile.interests.join(", ")
+                                      : "Not provided",
+                                  )}
+                                  {renderInfoField(
+                                    "Lifestyle",
+                                    selectedProfile.lifestyle?.length
+                                      ? selectedProfile.lifestyle.join(", ")
+                                      : "Not provided",
+                                  )}
+                                  {renderInfoField("About", selectedProfile.about_me)}
+                                  {renderInfoField("Admin notes", selectedProfile.admin_notes)}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="questionnaire" className="rounded-md border border-border">
+                              <AccordionTrigger className="px-4 py-3 text-sm font-semibold">
+                                Questionnaire responses
+                              </AccordionTrigger>
+                              <AccordionContent className="px-4 pb-4">
+                                {Object.keys(questionnaireAnswers).length === 0 ? (
+                                  <Card className="border-warning/50 bg-warning/5">
+                                    <CardContent className="p-4 text-sm text-warning">
+                                      No questionnaire responses have been saved for this client yet.
+                                    </CardContent>
+                                  </Card>
+                                ) : (
+                                  <Accordion type="multiple" className="space-y-2">
+                                    {profileQuestionCategories.map((category) => {
+                                      const categoryQuestions = profileQuestions.filter(
+                                        (question) => question.category === category,
+                                      );
+                                      const answeredCount = categoryQuestions.filter(
+                                        (question) => questionnaireAnswers[question.id],
+                                      ).length;
+
+                                      return (
+                                        <AccordionItem
+                                          key={category}
+                                          value={category}
+                                          className="rounded-md border border-border"
+                                        >
+                                          <AccordionTrigger className="px-3 py-2 text-sm font-medium">
+                                            <div className="flex w-full items-center justify-between gap-2">
+                                              <span>{category}</span>
+                                              <span className="text-xs font-normal text-muted-foreground">
+                                                {answeredCount} of {categoryQuestions.length} answered
+                                              </span>
+                                            </div>
+                                          </AccordionTrigger>
+                                          <AccordionContent className="px-3 pb-3">
+                                            <div className="space-y-2">
+                                              {categoryQuestions.map((question) => {
+                                                const AnswerIcon = question.icon;
+                                                const answer = questionnaireAnswers[question.id];
+                                                return (
+                                                  <div
+                                                    key={question.id}
+                                                    className="rounded-md border border-border p-3 text-sm"
+                                                  >
+                                                    <div className="mb-2 flex items-center gap-2 font-medium">
+                                                      <AnswerIcon className="h-4 w-4 text-muted-foreground" />
+                                                      <span>{question.title}</span>
+                                                    </div>
+                                                    <p className="whitespace-pre-line text-muted-foreground">
+                                                      {formatAnswer(answer)}
+                                                    </p>
+                                                  </div>
+                                                );
+                                              })}
+                                            </div>
+                                          </AccordionContent>
+                                        </AccordionItem>
+                                      );
+                                    })}
+                                  </Accordion>
+                                )}
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        </div>
+                      </ScrollArea>
+                    </TabsContent>
+                    <TabsContent value="matches" className="h-full overflow-y-auto px-6 py-6">
+                      <div className="flex h-full items-center justify-center rounded-md border border-dashed border-border text-sm text-muted-foreground">
+                        Match details will appear here once this client has activity.
+                      </div>
+                    </TabsContent>
+                    <TabsContent value="photos" className="h-full overflow-y-auto px-6 py-6">
+                      {sortedProfilePhotos.length ? (
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                          {sortedProfilePhotos.map((photo, index) => (
+                            <div
+                              key={photo.photo_url || index}
+                              className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted/50"
+                            >
+                              <img
+                                src={photo.photo_url ?? undefined}
+                                alt={`${currentFullName || "Client"} photo ${index + 1}`}
+                                className="h-full w-full object-cover"
+                              />
+                              {(photo.is_primary || index === 0) && (
+                                <Badge className="absolute left-2 top-2 text-xs">Primary</Badge>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex h-full items-center justify-center rounded-md border border-dashed border-border text-sm text-muted-foreground">
+                          No photos uploaded yet.
+                        </div>
+                      )}
+                    </TabsContent>
+                    <TabsContent value="notes" className="h-full overflow-y-auto px-6 py-6">
+                      <div className="flex h-full flex-col items-center justify-center gap-2 text-sm text-muted-foreground">
+                        <span className="font-medium">Notes</span>
+                        <span>Coming soon.</span>
+                      </div>
+                    </TabsContent>
+                  </div>
+                </Tabs>
+              ) : (
+                <div className="flex h-full items-center justify-center px-6 py-6 text-sm text-muted-foreground">
+                  Select a client to view details
+                </div>
               )}
             </div>
           </div>
-        </SheetContent>
-      </Sheet>
+        </div>
+      )}
 
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
         <DialogContent>
