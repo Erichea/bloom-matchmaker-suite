@@ -392,7 +392,16 @@ const ClientsPage = () => {
         loadMatches(profileId);
 
         // Track profile view for recently viewed list
-        await supabase.rpc("track_profile_view", { p_profile_id: profileId });
+        try {
+          const { error: trackError } = await supabase.rpc("track_profile_view", { p_profile_id: profileId });
+          if (trackError) {
+            console.error("Failed to track profile view:", trackError);
+          } else {
+            console.debug("Profile view tracked successfully for:", profileId);
+          }
+        } catch (trackingError) {
+          console.error("Error tracking profile view:", trackingError);
+        }
       } catch (error: any) {
         console.error("Failed to load profile", error);
         toast({
