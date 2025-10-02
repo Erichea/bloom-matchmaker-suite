@@ -11,20 +11,45 @@ interface ClientNotesEditorProps {
   onSaved?: (payload: { content: string; savedAt: string }) => void;
 }
 
+const extractTextFromNode = (node: any): string => {
+  if (!node) return "";
+
+  // Direct text node
+  if (node.text) return node.text;
+
+  // Node with content array (TipTap format)
+  if (node.content && Array.isArray(node.content)) {
+    return node.content.map(extractTextFromNode).join("");
+  }
+
+  // Node with children array (Slate/Plate format)
+  if (node.children && Array.isArray(node.children)) {
+    return node.children.map(extractTextFromNode).join("");
+  }
+
+  return "";
+};
+
 const parseInitialContent = (content: string | null): string => {
   if (!content) return "";
 
   try {
     const parsed = JSON.parse(content);
-    if (Array.isArray(parsed)) {
-      // Convert Slate/Plate format to plain text
-      return parsed.map((node: any) => {
-        if (node.children) {
-          return node.children.map((child: any) => child.text || "").join("");
-        }
-        return "";
-      }).join("\n");
+
+    // TipTap format: { type: "doc", content: [...] }
+    if (parsed.type === "doc" && parsed.content) {
+      return parsed.content.map((node: any) => {
+        const text = extractTextFromNode(node);
+        // Add newline between block elements
+        return text;
+      }).filter(Boolean).join("\n");
     }
+
+    // Slate/Plate format: array of nodes
+    if (Array.isArray(parsed)) {
+      return parsed.map((node: any) => extractTextFromNode(node)).filter(Boolean).join("\n");
+    }
+
     return content;
   } catch (error) {
     return content;
