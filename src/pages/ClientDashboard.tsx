@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
+
+// Simple CSS animation instead of framer-motion for better performance
+const floatAnimation = `
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(15px, -10px); }
+  }
+`;
 import { Button } from "@/components/ui/button";
 import { MatchList } from "@/components/experience/MatchList";
 import MatchDetailModal from "@/components/MatchDetailModal";
@@ -329,32 +337,23 @@ const ClientDashboard = () => {
   const completionPercentage = profile?.completion_percentage || 0;
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[hsl(var(--brand-secondary))] pb-20 text-white">
+    <>
+      <style>{floatAnimation}</style>
+      <div className="relative flex min-h-screen flex-col overflow-hidden bg-[hsl(var(--brand-secondary))] pb-20 text-white">
       <MatchDetailModal match={selectedMatch} open={modalOpen} onOpenChange={setModalOpen} onMatchResponse={handleMatchResponse} />
 
-      <video
-        className="absolute inset-0 h-full w-full object-cover"
-        autoPlay
-        muted
-        loop
-        playsInline
-        poster="/placeholder.svg"
-      >
-        <source src="https://storage.googleapis.com/coverr-main/mp4/Mt_Baker.mp4" type="video/mp4" />
-      </video>
+      {/* Static gradient background - much faster than video */}
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,hsl(var(--brand-secondary))_0%,#2a3c3a_50%,#1f2b2a_100%)]" />
 
-      <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(29,32,31,0.92)_0%,rgba(29,32,31,0.78)_40%,rgba(29,32,31,0.6)_100%)]" />
-      <div className="absolute inset-0 backdrop-blur-sm" />
+      {/* Simplified gradient overlay */}
+      <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(29,32,31,0.85)_0%,rgba(29,32,31,0.65)_40%,rgba(29,32,31,0.45)_100%)]" />
 
-      <motion.div
-        className="pointer-events-none absolute -left-24 top-1/3 h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(223,146,142,0.35)_0%,rgba(223,146,142,0)_70%)]"
-        animate={{ y: [-20, 10, -20], x: [0, 15, 0] }}
-        transition={{ duration: 14, repeat: Infinity, repeatType: "mirror" }}
-      />
-      <motion.div
-        className="pointer-events-none absolute -bottom-16 right-[-6rem] h-[32rem] w-[32rem] rounded-full bg-[radial-gradient(circle,rgba(223,146,142,0.25)_0%,rgba(223,146,142,0)_70%)]"
-        animate={{ y: [10, -15, 10], x: [0, -20, 0] }}
-        transition={{ duration: 18, repeat: Infinity, repeatType: "mirror" }}
+      {/* Reduced animations - only one blob with simpler CSS animation */}
+      <div
+        className="pointer-events-none absolute -left-24 top-1/3 h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(223,146,142,0.25)_0%,rgba(223,146,142,0)_70%)] opacity-60"
+        style={{
+          animation: 'float 20s ease-in-out infinite',
+        }}
       />
 
       <header className="relative z-10 flex items-center justify-between px-6 pb-6 pt-8 md:px-10">
@@ -590,7 +589,8 @@ const ClientDashboard = () => {
         </motion.div>
       </main>
       <BottomNavigation />
-    </div>
+      </div>
+    </>
   );
 };
 
