@@ -1,5 +1,5 @@
 import { Home, Bell, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,6 +7,7 @@ import { InteractiveMenu, InteractiveMenuItem } from "@/components/ui/modern-mob
 
 export const BottomNavigation = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -61,16 +62,22 @@ export const BottomNavigation = () => {
     { label: "Profile", icon: User },
   ], [unreadCount]);
 
+  const activeIndex = useMemo(() => {
+    const index = navPaths.findIndex(path => path === location.pathname);
+    return index >= 0 ? index : 0;
+  }, [location.pathname, navPaths]);
+
   const handleItemClick = useCallback((index: number) => {
     navigate(navPaths[index]);
   }, [navigate, navPaths]);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border">
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/15 bg-white/[0.08] backdrop-blur-xl supports-[backdrop-filter]:bg-white/[0.08]">
       <div className="mx-auto max-w-md">
         <InteractiveMenu
           items={menuItems}
-          accentColor="hsl(var(--brand-primary))"
+          accentColor="white"
+          activeIndex={activeIndex}
           onItemClick={handleItemClick}
         />
       </div>

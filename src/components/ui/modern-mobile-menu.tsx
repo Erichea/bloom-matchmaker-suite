@@ -11,6 +11,7 @@ export interface InteractiveMenuItem {
 export interface InteractiveMenuProps {
   items?: InteractiveMenuItem[];
   accentColor?: string;
+  activeIndex?: number;
   onItemClick?: (index: number, item: InteractiveMenuItem) => void;
 }
 
@@ -24,7 +25,7 @@ const defaultItems: InteractiveMenuItem[] = [
 
 const defaultAccentColor = 'var(--component-active-color-default)';
 
-const InteractiveMenu: React.FC<InteractiveMenuProps> = ({ items, accentColor, onItemClick }) => {
+const InteractiveMenu: React.FC<InteractiveMenuProps> = ({ items, accentColor, activeIndex: controlledActiveIndex, onItemClick }) => {
 
   const finalItems = useMemo(() => {
      const isValid = items && Array.isArray(items) && items.length >= 2 && items.length <= 5;
@@ -35,11 +36,12 @@ const InteractiveMenu: React.FC<InteractiveMenuProps> = ({ items, accentColor, o
      return items;
   }, [items]);
 
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [internalActiveIndex, setInternalActiveIndex] = useState(0);
+  const activeIndex = controlledActiveIndex !== undefined ? controlledActiveIndex : internalActiveIndex;
 
   useEffect(() => {
       if (activeIndex >= finalItems.length) {
-          setActiveIndex(0);
+          setInternalActiveIndex(0);
       }
   }, [finalItems, activeIndex]);
 
@@ -66,7 +68,9 @@ const InteractiveMenu: React.FC<InteractiveMenuProps> = ({ items, accentColor, o
   }, [activeIndex, finalItems]);
 
   const handleItemClick = (index: number) => {
-    setActiveIndex(index);
+    if (controlledActiveIndex === undefined) {
+      setInternalActiveIndex(index);
+    }
     onItemClick?.(index, finalItems[index]);
   };
 

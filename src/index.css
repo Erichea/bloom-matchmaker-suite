@@ -426,7 +426,7 @@ All colors MUST be HSL.
   justify-content: space-around;
   align-items: center;
   width: 100%;
-  background-color: hsl(var(--component-bg));
+  background-color: transparent;
   padding: 0.5rem;
   position: relative;
 }
@@ -443,7 +443,7 @@ All colors MUST be HSL.
   cursor: pointer;
   position: relative;
   transition: color 0.3s ease;
-  color: hsl(var(--component-inactive-color));
+  color: rgba(255, 255, 255, 0.6);
   flex: 1;
   min-width: 0;
 }
