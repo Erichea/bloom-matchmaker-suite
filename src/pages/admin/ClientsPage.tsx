@@ -111,6 +111,43 @@ type QuestionnaireAnswers = Record<string, any>;
 
 type StatusFilter = "all" | "pending_approval" | "approved" | "rejected" | "incomplete";
 
+interface MatchSummaryProfile {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  city: string | null;
+  country: string | null;
+  profession: string | null;
+  date_of_birth: string | null;
+}
+
+interface MatchSummary {
+  match_id: string;
+  match_status: string | null;
+  compatibility_score: number | null;
+  other_profile: MatchSummaryProfile | null;
+}
+
+type MatchStatusVariant = "default" | "secondary" | "destructive" | "outline";
+
+const MATCH_STATUS_META: Record<string, { label: string; variant: MatchStatusVariant }> = {
+  pending: { label: "Awaiting responses", variant: "secondary" },
+  profile_1_accepted: { label: "Accepted by client", variant: "default" },
+  profile_2_accepted: { label: "Accepted by match", variant: "default" },
+  both_accepted: { label: "Mutual match", variant: "default" },
+  profile_1_rejected: { label: "Declined by client", variant: "destructive" },
+  profile_2_rejected: { label: "Declined by match", variant: "destructive" },
+  rejected: { label: "Rejected", variant: "destructive" },
+};
+
+const getMatchStatusMeta = (status?: string | null) => {
+  if (!status) {
+    return { label: "Status unknown", variant: "outline" as MatchStatusVariant };
+  }
+  return MATCH_STATUS_META[status] ?? { label: "Status unknown", variant: "outline" };
+};
+
 const STATUS_FILTER_OPTIONS: Array<{ value: StatusFilter; label: string }> = [
   { value: "all", label: "All statuses" },
   { value: "pending_approval", label: "Pending review" },
@@ -165,6 +202,9 @@ const ClientsPage = () => {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [selectedProfile, setSelectedProfile] = useState<DetailedProfile | null>(null);
   const [questionnaireAnswers, setQuestionnaireAnswers] = useState<QuestionnaireAnswers>({});
+  const [matches, setMatches] = useState<MatchSummary[]>([]);
+  const [matchesLoading, setMatchesLoading] = useState(false);
+  const [matchesError, setMatchesError] = useState<string | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailTab, setDetailTab] = useState("profile");
 
@@ -242,12 +282,44 @@ const ClientsPage = () => {
     [toast],
   );
 
+  const loadMatches = useCallback(async (profileId: string) => {
+    try {
+      setMatchesLoading(true);
+      setMatchesError(null);
+
+      const { data, error } = await supabase.rpc("get_matches_for_kanban" as any, {
+        p_profile_id: profileId,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      const matchList: MatchSummary[] = (data as any[] | null)?.map((match) => ({
+        match_id: match.match_id,
+        match_status: match.match_status ?? null,
+        compatibility_score: match.compatibility_score ?? null,
+        other_profile: match.other_profile ?? null,
+      })) ?? [];
+
+      setMatches(matchList);
+    } catch (error: any) {
+      console.error("Failed to load matches", error);
+      setMatches([]);
+      setMatchesError(error.message || "Unable to load matches.");
+    } finally {
+      setMatchesLoading(false);
+    }
+  }, []);
+
   const loadClientDetails = useCallback(
     async (profileId: string) => {
       try {
         setDetailLoading(true);
         setSelectedProfile(null);
         setQuestionnaireAnswers({});
+        setMatches([]);
+        setMatchesError(null);
 
         const { data: profile, error } = await supabase
           .from("profiles")
@@ -265,6 +337,19 @@ const ClientsPage = () => {
         }
 
         const detailedProfile = profile as any;
+
+        const { data: photosData, error: photosError } = await supabase
+          .from("profile_photos")
+          .select("photo_url, is_primary, order_index")
+          .eq("profile_id", profileId)
+          .order("is_primary", { ascending: false, nullsFirst: false })
+          .order("order_index", { ascending: true, nullsFirst: true });
+
+        if (!photosError) {
+          detailedProfile.profile_photos = photosData || [];
+        } else {
+          console.error("Failed to load profile photos", photosError);
+        }
 
         if (detailedProfile?.user_id) {
           const { data: answersData, error: answersError } = await supabase
@@ -285,6 +370,7 @@ const ClientsPage = () => {
         }
 
         setSelectedProfile(detailedProfile);
+        loadMatches(profileId);
       } catch (error: any) {
         console.error("Failed to load profile", error);
         toast({
@@ -297,7 +383,7 @@ const ClientsPage = () => {
         setDetailLoading(false);
       }
     },
-    [toast],
+    [toast, loadMatches],
   );
 
   useEffect(() => {
@@ -326,6 +412,9 @@ const ClientsPage = () => {
     setSelectedClientId(null);
     setSelectedProfile(null);
     setQuestionnaireAnswers({});
+    setMatches([]);
+    setMatchesError(null);
+    setMatchesLoading(false);
     setDetailTab("profile");
   }, [setDetailTab]);
 
@@ -1119,7 +1208,12 @@ const ClientsPage = () => {
                   <div className="flex items-center justify-between border-b px-6 py-3">
                     <TabsList className="grid w-full max-w-xl grid-cols-4">
                       <TabsTrigger value="profile">Profile</TabsTrigger>
-                      <TabsTrigger value="matches">Matches</TabsTrigger>
+                      <TabsTrigger value="matches" className="gap-2">
+                        Matches
+                        <Badge variant="secondary" className="text-[0.7rem] font-medium">
+                          {matchesLoading ? "…" : matches.length}
+                        </Badge>
+                      </TabsTrigger>
                       <TabsTrigger value="photos" className="gap-2">
                         Photos
                         <Badge variant="secondary" className="text-[0.7rem] font-medium">
@@ -1250,9 +1344,82 @@ const ClientsPage = () => {
                       </ScrollArea>
                     </TabsContent>
                     <TabsContent value="matches" className="h-full overflow-y-auto px-6 py-6">
-                      <div className="flex h-full items-center justify-center rounded-md border border-dashed border-border text-sm text-muted-foreground">
-                        Match details will appear here once this client has activity.
-                      </div>
+                      {matchesLoading ? (
+                        <div className="flex h-full items-center justify-center">
+                          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                        </div>
+                      ) : matchesError ? (
+                        <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+                          <p className="text-sm text-muted-foreground">{matchesError}</p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => selectedProfile && loadMatches(selectedProfile.id)}
+                          >
+                            Try again
+                          </Button>
+                        </div>
+                      ) : matches.length ? (
+                        <div className="space-y-4">
+                          {matches.map((match) => {
+                            const other = match.other_profile;
+                            const nameParts = [other?.first_name, other?.last_name].filter(Boolean);
+                            const fullName = nameParts.join(" ") || "Unnamed profile";
+                            const initials = nameParts.length
+                              ? nameParts
+                                  .map((part) => (part ? part[0] : ""))
+                                  .join("")
+                                  .slice(0, 2)
+                                  .toUpperCase()
+                              : "??";
+                            const location = [other?.city, other?.country].filter(Boolean).join(", ");
+                            const statusMeta = getMatchStatusMeta(match.match_status);
+                            const compatibilityLabel =
+                              typeof match.compatibility_score === "number"
+                                ? `${Math.round(match.compatibility_score)}%`
+                                : "—";
+
+                            return (
+                              <Card key={match.match_id}>
+                                <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+                                  <div className="flex items-start gap-3">
+                                    <Avatar className="h-10 w-10">
+                                      <AvatarFallback>{initials}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="space-y-1">
+                                      <div className="flex flex-wrap items-center gap-2">
+                                        <p className="text-sm font-semibold text-foreground">{fullName}</p>
+                                        <Badge variant={statusMeta.variant}>{statusMeta.label}</Badge>
+                                      </div>
+                                      {location && (
+                                        <p className="text-xs text-muted-foreground">{location}</p>
+                                      )}
+                                      {other?.profession && (
+                                        <p className="text-xs text-muted-foreground">{other.profession}</p>
+                                      )}
+                                      {other?.email && (
+                                        <p className="text-xs text-muted-foreground">{other.email}</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col items-start gap-1 sm:items-end">
+                                    <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                                      Compatibility
+                                    </span>
+                                    <span className="text-lg font-semibold text-foreground">
+                                      {compatibilityLabel}
+                                    </span>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="flex h-full items-center justify-center rounded-md border border-dashed border-border text-sm text-muted-foreground">
+                          No matches recorded yet for this client.
+                        </div>
+                      )}
                     </TabsContent>
                     <TabsContent value="photos" className="h-full overflow-y-auto px-6 py-6">
                       {sortedProfilePhotos.length ? (
