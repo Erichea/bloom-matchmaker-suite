@@ -148,6 +148,20 @@ const getMatchStatusMeta = (status?: string | null) => {
   return MATCH_STATUS_META[status] ?? { label: "Status unknown", variant: "outline" };
 };
 
+const formatMatchName = (profile?: MatchSummaryProfile | null) => {
+  if (!profile) return "Unnamed profile";
+  const parts = [] as string[];
+  if (profile.first_name) parts.push(profile.first_name);
+  if (profile.last_name) parts.push(profile.last_name);
+  if (parts.length === 0 && profile.email) return profile.email;
+  return parts.join(" ") || "Unnamed profile";
+};
+
+const formatMatchLocation = (profile?: MatchSummaryProfile | null) => {
+  if (!profile) return "";
+  return [profile.city, profile.country].filter(Boolean).join(", ");
+};
+
 const STATUS_FILTER_OPTIONS: Array<{ value: StatusFilter; label: string }> = [
   { value: "all", label: "All statuses" },
   { value: "pending_approval", label: "Pending review" },
@@ -1368,16 +1382,14 @@ const ClientsPage = () => {
                         <div className="space-y-4">
                           {matches.map((match) => {
                             const other = match.other_profile;
-                            const nameParts = [other?.first_name, other?.last_name].filter(Boolean);
-                            const fullName = nameParts.join(" ") || "Unnamed profile";
-                            const initials = nameParts.length
-                              ? nameParts
-                                  .map((part) => (part ? part[0] : ""))
-                                  .join("")
-                                  .slice(0, 2)
-                                  .toUpperCase()
-                              : "??";
-                            const location = [other?.city, other?.country].filter(Boolean).join(", ");
+                            const fullName = formatMatchName(other);
+                            const initials = fullName
+                              .split(" ")
+                              .map((part) => part?.[0] ?? "")
+                              .join("")
+                              .slice(0, 2)
+                              .toUpperCase() || "??";
+                            const location = formatMatchLocation(other);
                             const statusMeta = getMatchStatusMeta(match.match_status);
                             const compatibilityLabel =
                               typeof match.compatibility_score === "number"
