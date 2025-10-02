@@ -1,48 +1,158 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, UserCheck, UserX, Heart, TrendingUp, Calendar } from "lucide-react";
+import { Users, UserCheck, UserX, Heart, TrendingUp, Eye } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+interface DashboardStats {
+  totalClients: number;
+  pendingApproval: number;
+  activeProfiles: number;
+  successfulMatches: number;
+}
+
+interface RecentProfile {
+  id: string;
+  first_name: string;
+  last_name: string;
+  status: string;
+  updated_at: string;
+  photo_url?: string;
+}
 
 const AdminDashboard = () => {
-  const stats = [
+  const navigate = useNavigate();
+  const [stats, setStats] = useState<DashboardStats>({
+    totalClients: 0,
+    pendingApproval: 0,
+    activeProfiles: 0,
+    successfulMatches: 0,
+  });
+  const [recentProfiles, setRecentProfiles] = useState<RecentProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        // Get total clients count
+        const { count: totalCount } = await supabase
+          .from("profiles")
+          .select("*", { count: "exact", head: true })
+          .is("deleted_at", null);
+
+        // Get pending approval count
+        const { count: pendingCount } = await supabase
+          .from("profiles")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "pending_approval")
+          .is("deleted_at", null);
+
+        // Get active profiles count
+        const { count: activeCount } = await supabase
+          .from("profiles")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "approved")
+          .is("deleted_at", null);
+
+        // Get successful matches (both_accepted) count
+        const { count: matchesCount } = await supabase
+          .from("matches")
+          .select("*", { count: "exact", head: true })
+          .eq("match_status", "both_accepted");
+
+        setStats({
+          totalClients: totalCount || 0,
+          pendingApproval: pendingCount || 0,
+          activeProfiles: activeCount || 0,
+          successfulMatches: matchesCount || 0,
+        });
+
+        // Get recently updated profiles (last 10)
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select(`
+            id,
+            first_name,
+            last_name,
+            status,
+            updated_at,
+            profile_photos (
+              photo_url,
+              is_primary
+            )
+          `)
+          .is("deleted_at", null)
+          .order("updated_at", { ascending: false })
+          .limit(10);
+
+        if (profiles) {
+          const profilesWithPhotos = profiles.map((profile: any) => {
+            const primaryPhoto = profile.profile_photos?.find((p: any) => p.is_primary);
+            const photoUrl = primaryPhoto?.photo_url || profile.profile_photos?.[0]?.photo_url;
+
+            return {
+              id: profile.id,
+              first_name: profile.first_name || "Unknown",
+              last_name: profile.last_name || "",
+              status: profile.status,
+              updated_at: profile.updated_at,
+              photo_url: photoUrl,
+            };
+          });
+          setRecentProfiles(profilesWithPhotos);
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  const getTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (seconds < 60) return "just now";
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+    return `${Math.floor(seconds / 86400)} days ago`;
+  };
+
+  const statsConfig = [
     {
       title: "Total Clients",
-      value: "247",
-      change: "+12%",
+      value: stats.totalClients.toString(),
       icon: Users,
       description: "Active client base",
       color: "text-primary"
     },
     {
       title: "Pending Approval",
-      value: "18",
-      change: "+3",
+      value: stats.pendingApproval.toString(),
       icon: UserX,
       description: "Profiles awaiting review",
       color: "text-warning"
     },
     {
       title: "Active Profiles",
-      value: "186",
-      change: "+8%",
+      value: stats.activeProfiles.toString(),
       icon: UserCheck,
       description: "Approved and matching",
       color: "text-success"
     },
     {
       title: "Successful Matches",
-      value: "42",
-      change: "+15%",
+      value: stats.successfulMatches.toString(),
       icon: Heart,
-      description: "This month",
+      description: "Both accepted",
       color: "text-accent"
     }
-  ];
-
-  const recentActivity = [
-    { name: "Emma Wilson", action: "Profile completed", time: "2 min ago", status: "pending" },
-    { name: "James Rodriguez", action: "Match accepted", time: "15 min ago", status: "success" },
-    { name: "Sarah Chen", action: "Profile updated", time: "1 hour ago", status: "info" },
-    { name: "Michael Brown", action: "Date feedback submitted", time: "2 hours ago", status: "success" },
   ];
 
   return (
@@ -62,7 +172,7 @@ const AdminDashboard = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, index) => {
+          {statsConfig.map((stat, index) => {
             const Icon = stat.icon;
             return (
               <Card key={index} className="card-premium">
@@ -73,11 +183,10 @@ const AdminDashboard = () => {
                   <Icon className={`h-5 w-5 ${stat.color}`} />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-foreground">{stat.value}</div>
+                  <div className="text-3xl font-bold text-foreground">
+                    {loading ? "..." : stat.value}
+                  </div>
                   <div className="flex items-center space-x-2 mt-2">
-                    <Badge variant="secondary" className="text-xs">
-                      {stat.change}
-                    </Badge>
                     <p className="text-xs text-muted-foreground">{stat.description}</p>
                   </div>
                 </CardContent>
@@ -93,35 +202,48 @@ const AdminDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <TrendingUp className="mr-2 h-5 w-5 text-primary" />
-                Recent Activity
+                Recent Profile Updates
               </CardTitle>
-              <CardDescription>Latest updates from your clients</CardDescription>
+              <CardDescription>Latest profile changes</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border-soft">
+                {loading ? (
+                  <p className="text-muted-foreground text-center py-4">Loading...</p>
+                ) : recentProfiles.slice(0, 5).map((profile) => (
+                  <div
+                    key={profile.id}
+                    onClick={() => navigate(`/admin/clients/${profile.id}`)}
+                    className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border-soft hover:bg-muted/50 cursor-pointer transition-colors"
+                  >
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-full bg-primary-muted flex items-center justify-center">
-                        <span className="text-sm font-medium text-primary">
-                          {activity.name.split(' ').map(n => n[0]).join('')}
-                        </span>
-                      </div>
+                      <Avatar className="h-10 w-10">
+                        {profile.photo_url ? (
+                          <AvatarImage src={profile.photo_url} alt={profile.first_name} />
+                        ) : (
+                          <AvatarFallback className="bg-primary-muted text-primary">
+                            {profile.first_name[0]}{profile.last_name[0] || ""}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
                       <div>
-                        <p className="font-medium text-foreground">{activity.name}</p>
-                        <p className="text-sm text-muted-foreground">{activity.action}</p>
+                        <p className="font-medium text-foreground">
+                          {profile.first_name} {profile.last_name}
+                        </p>
+                        <p className="text-sm text-muted-foreground">Profile updated</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-muted-foreground">{activity.time}</p>
-                      <Badge 
+                      <p className="text-xs text-muted-foreground">{getTimeAgo(profile.updated_at)}</p>
+                      <Badge
                         className={`mt-1 ${
-                          activity.status === 'pending' ? 'badge-warning' :
-                          activity.status === 'success' ? 'badge-success' :
-                          'badge-pending'
+                          profile.status === 'pending_approval' ? 'badge-warning' :
+                          profile.status === 'approved' ? 'badge-success' :
+                          profile.status === 'rejected' ? 'badge-error' :
+                          'badge-neutral'
                         }`}
                       >
-                        {activity.status}
+                        {profile.status.replace('_', ' ')}
                       </Badge>
                     </div>
                   </div>
@@ -130,37 +252,48 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Performance Overview */}
+          {/* Recently Viewed Client Profiles */}
           <Card className="card-premium">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Calendar className="mr-2 h-5 w-5 text-accent" />
-                This Month's Performance
+                <Eye className="mr-2 h-5 w-5 text-accent" />
+                Recently Updated Profiles
               </CardTitle>
-              <CardDescription>Key metrics and trends</CardDescription>
+              <CardDescription>Click to view profile details</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center p-3 rounded-lg bg-success/10 border border-success/20">
-                <div>
-                  <p className="text-sm text-muted-foreground">Success Rate</p>
-                  <p className="text-2xl font-bold text-success">85%</p>
+            <CardContent className="space-y-3">
+              {loading ? (
+                <p className="text-muted-foreground text-center py-4">Loading...</p>
+              ) : recentProfiles.slice(0, 5).map((profile) => (
+                <div
+                  key={profile.id}
+                  onClick={() => navigate(`/admin/clients/${profile.id}`)}
+                  className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border border-border hover:bg-muted/40 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center space-x-3">
+                    <Avatar className="h-12 w-12">
+                      {profile.photo_url ? (
+                        <AvatarImage src={profile.photo_url} alt={profile.first_name} />
+                      ) : (
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          {profile.first_name[0]}{profile.last_name[0] || ""}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {profile.first_name} {profile.last_name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {getTimeAgo(profile.updated_at)}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge variant="outline">
+                    {profile.status.replace('_', ' ')}
+                  </Badge>
                 </div>
-                <TrendingUp className="h-8 w-8 text-success" />
-              </div>
-              <div className="flex justify-between items-center p-3 rounded-lg bg-primary/10 border border-primary/20">
-                <div>
-                  <p className="text-sm text-muted-foreground">New Registrations</p>
-                  <p className="text-2xl font-bold text-primary">24</p>
-                </div>
-                <Users className="h-8 w-8 text-primary" />
-              </div>
-              <div className="flex justify-between items-center p-3 rounded-lg bg-accent/10 border border-accent/20">
-                <div>
-                  <p className="text-sm text-muted-foreground">Active Matches</p>
-                  <p className="text-2xl font-bold text-accent">156</p>
-                </div>
-                <Heart className="h-8 w-8 text-accent" />
-              </div>
+              ))}
             </CardContent>
           </Card>
         </div>
