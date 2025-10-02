@@ -390,6 +390,9 @@ const ClientsPage = () => {
         console.debug("Detailed profile loaded", detailedProfile);
         setSelectedProfile(detailedProfile);
         loadMatches(profileId);
+
+        // Track profile view for recently viewed list
+        await supabase.rpc("track_profile_view", { p_profile_id: profileId });
       } catch (error: any) {
         console.error("Failed to load profile", error);
         toast({

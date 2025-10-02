@@ -69,38 +69,44 @@ const AdminDashboard = () => {
           successfulMatches: matchesCount || 0,
         });
 
-        // Get recently updated profiles (last 10)
-        const { data: profiles } = await supabase
-          .from("profiles")
+        // Get recently viewed profiles by current admin
+        const { data: viewedProfiles } = await supabase
+          .from("profile_views")
           .select(`
-            id,
-            first_name,
-            last_name,
-            status,
-            updated_at,
-            profile_photos (
-              photo_url,
-              is_primary
+            viewed_at,
+            profile:profiles (
+              id,
+              first_name,
+              last_name,
+              status,
+              updated_at,
+              profile_photos (
+                photo_url,
+                is_primary
+              )
             )
           `)
-          .is("deleted_at", null)
-          .order("updated_at", { ascending: false })
+          .eq("admin_user_id", (await supabase.auth.getUser()).data.user?.id)
+          .order("viewed_at", { ascending: false })
           .limit(10);
 
-        if (profiles) {
-          const profilesWithPhotos = profiles.map((profile: any) => {
-            const primaryPhoto = profile.profile_photos?.find((p: any) => p.is_primary);
-            const photoUrl = primaryPhoto?.photo_url || profile.profile_photos?.[0]?.photo_url;
+        if (viewedProfiles) {
+          const profilesWithPhotos = viewedProfiles
+            .filter((vp: any) => vp.profile) // Filter out null profiles
+            .map((vp: any) => {
+              const profile = vp.profile;
+              const primaryPhoto = profile.profile_photos?.find((p: any) => p.is_primary);
+              const photoUrl = primaryPhoto?.photo_url || profile.profile_photos?.[0]?.photo_url;
 
-            return {
-              id: profile.id,
-              first_name: profile.first_name || "Unknown",
-              last_name: profile.last_name || "",
-              status: profile.status,
-              updated_at: profile.updated_at,
-              photo_url: photoUrl,
-            };
-          });
+              return {
+                id: profile.id,
+                first_name: profile.first_name || "Unknown",
+                last_name: profile.last_name || "",
+                status: profile.status,
+                updated_at: vp.viewed_at, // Use viewed_at instead of updated_at
+                photo_url: photoUrl,
+              };
+            });
           setRecentProfiles(profilesWithPhotos);
         }
       } catch (error) {
@@ -197,27 +203,31 @@ const AdminDashboard = () => {
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Activity */}
-          <Card className="card-premium">
+          {/* Recently Viewed Client Profiles */}
+          <Card className="card-premium lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <TrendingUp className="mr-2 h-5 w-5 text-primary" />
-                Recent Profile Updates
+                <Eye className="mr-2 h-5 w-5 text-accent" />
+                Recently Viewed Profiles
               </CardTitle>
-              <CardDescription>Latest profile changes</CardDescription>
+              <CardDescription>Profiles you've recently opened - click to view again</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {loading ? (
-                  <p className="text-muted-foreground text-center py-4">Loading...</p>
-                ) : recentProfiles.slice(0, 5).map((profile) => (
+                  <p className="text-muted-foreground text-center py-4 col-span-2">Loading...</p>
+                ) : recentProfiles.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-4 col-span-2">
+                    No profiles viewed yet. Open a client profile to see it here.
+                  </p>
+                ) : recentProfiles.map((profile) => (
                   <div
                     key={profile.id}
                     onClick={() => navigate(`/admin/clients/${profile.id}`)}
                     className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border-soft hover:bg-muted/50 cursor-pointer transition-colors"
                   >
                     <div className="flex items-center space-x-3">
-                      <Avatar className="h-10 w-10">
+                      <Avatar className="h-12 w-12">
                         {profile.photo_url ? (
                           <AvatarImage src={profile.photo_url} alt={profile.first_name} />
                         ) : (
@@ -230,70 +240,24 @@ const AdminDashboard = () => {
                         <p className="font-medium text-foreground">
                           {profile.first_name} {profile.last_name}
                         </p>
-                        <p className="text-sm text-muted-foreground">Profile updated</p>
+                        <p className="text-xs text-muted-foreground">
+                          Viewed {getTimeAgo(profile.updated_at)}
+                        </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground">{getTimeAgo(profile.updated_at)}</p>
-                      <Badge
-                        className={`mt-1 ${
-                          profile.status === 'pending_approval' ? 'badge-warning' :
-                          profile.status === 'approved' ? 'badge-success' :
-                          profile.status === 'rejected' ? 'badge-error' :
-                          'badge-neutral'
-                        }`}
-                      >
-                        {profile.status.replace('_', ' ')}
-                      </Badge>
-                    </div>
+                    <Badge
+                      className={`${
+                        profile.status === 'pending_approval' ? 'badge-warning' :
+                        profile.status === 'approved' ? 'badge-success' :
+                        profile.status === 'rejected' ? 'badge-error' :
+                        'badge-neutral'
+                      }`}
+                    >
+                      {profile.status.replace('_', ' ')}
+                    </Badge>
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Recently Viewed Client Profiles */}
-          <Card className="card-premium">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Eye className="mr-2 h-5 w-5 text-accent" />
-                Recently Updated Profiles
-              </CardTitle>
-              <CardDescription>Click to view profile details</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {loading ? (
-                <p className="text-muted-foreground text-center py-4">Loading...</p>
-              ) : recentProfiles.slice(0, 5).map((profile) => (
-                <div
-                  key={profile.id}
-                  onClick={() => navigate(`/admin/clients/${profile.id}`)}
-                  className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border border-border hover:bg-muted/40 cursor-pointer transition-colors"
-                >
-                  <div className="flex items-center space-x-3">
-                    <Avatar className="h-12 w-12">
-                      {profile.photo_url ? (
-                        <AvatarImage src={profile.photo_url} alt={profile.first_name} />
-                      ) : (
-                        <AvatarFallback className="bg-primary/10 text-primary">
-                          {profile.first_name[0]}{profile.last_name[0] || ""}
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
-                    <div>
-                      <p className="font-medium text-foreground">
-                        {profile.first_name} {profile.last_name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {getTimeAgo(profile.updated_at)}
-                      </p>
-                    </div>
-                  </div>
-                  <Badge variant="outline">
-                    {profile.status.replace('_', ' ')}
-                  </Badge>
-                </div>
-              ))}
             </CardContent>
           </Card>
         </div>
