@@ -295,6 +295,8 @@ const ClientsPage = () => {
         throw error;
       }
 
+      console.debug("Matches RPC result", { profileId, data });
+
       const matchList: MatchSummary[] = (data as any[] | null)?.map((match) => ({
         match_id: match.match_id,
         match_status: match.match_status ?? null,
@@ -302,6 +304,7 @@ const ClientsPage = () => {
         other_profile: match.other_profile ?? null,
       })) ?? [];
 
+      console.debug("Transformed matches", matchList);
       setMatches(matchList);
     } catch (error: any) {
       console.error("Failed to load matches", error);
@@ -346,6 +349,7 @@ const ClientsPage = () => {
           .order("order_index", { ascending: true, nullsFirst: true });
 
         if (!photosError) {
+          console.debug("Profile photos fetched", photosData);
           detailedProfile.profile_photos = photosData || [];
         } else {
           console.error("Failed to load profile photos", photosError);
@@ -369,6 +373,7 @@ const ClientsPage = () => {
           setQuestionnaireAnswers(answersMap);
         }
 
+        console.debug("Detailed profile loaded", detailedProfile);
         setSelectedProfile(detailedProfile);
         loadMatches(profileId);
       } catch (error: any) {
