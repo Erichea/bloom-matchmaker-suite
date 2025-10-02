@@ -215,6 +215,24 @@ const ClientDashboard = () => {
     loadData();
   }, [user, session, authLoading, navigate, fetchProfile, fetchMatches]);
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
+
+  const currentProfileId = profile?.id ?? null;
+
+  const handleOpenMatch = useCallback((matchId: string) => {
+    const match = matches.find((item) => item.id === matchId);
+    if (match) {
+      setSelectedMatch({
+        ...match,
+        current_profile_id: currentProfileId,
+      });
+      setModalOpen(true);
+    }
+  }, [matches, currentProfileId]);
+
   // Handle opening match from notification (query parameter)
   useEffect(() => {
     const matchId = searchParams.get('match');
@@ -225,27 +243,9 @@ const ClientDashboard = () => {
     }
   }, [searchParams, matches, modalOpen, handleOpenMatch, setSearchParams]);
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate("/");
-  };
-
-  const handleOpenMatch = (matchId: string) => {
-    const match = matches.find((item) => item.id === matchId);
-    if (match) {
-      setSelectedMatch({
-        ...match,
-        current_profile_id: currentProfileId,
-      });
-      setModalOpen(true);
-    }
-  };
-
   const handleMatchResponse = () => {
     fetchMatches();
   };
-
-  const currentProfileId = profile?.id ?? null;
 
   const userInitials = useMemo(() => {
     const name = `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim();
