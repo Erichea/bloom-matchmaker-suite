@@ -157,6 +157,51 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          description: string
+          icon_type: string | null
+          id: string
+          is_read: boolean
+          notification_type: string
+          priority: string | null
+          redirect_url: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          user_type: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          icon_type?: string | null
+          id?: string
+          is_read?: boolean
+          notification_type: string
+          priority?: string | null
+          redirect_url?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          user_type: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          icon_type?: string | null
+          id?: string
+          is_read?: boolean
+          notification_type?: string
+          priority?: string | null
+          redirect_url?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          user_type?: string
+        }
+        Relationships: []
+      }
       profile_answers: {
         Row: {
           answer: Json

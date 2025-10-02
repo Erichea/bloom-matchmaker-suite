@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useProfileQuestionnaireData } from "@/hooks/useProfileQuestionnaireData";
+import { BottomNavigation } from "@/components/BottomNavigation";
 import {
   calculateCompletionPercentage,
   getCompletedCategories,
@@ -50,164 +51,146 @@ const ProfileEditPage = () => {
     }
   }, [user, navigate]);
 
-  const completedCategories = useMemo(
-    () => getCompletedCategories(answers, profileQuestions, profileQuestionCategories),
-    [answers]
-  );
-
-  const completionPercentage = useMemo(
-    () => calculateCompletionPercentage(answers, profileQuestions, profileQuestionCategories),
-    [answers]
-  );
-
-  const viewSections = useMemo(() => {
-    return profileQuestionCategories.map((category) => ({
-      category,
-      questions: profileQuestions
-        .filter((question) => question.category === category)
-        .map((question) => ({
-          id: question.id,
-          title: question.title,
-          answer: formatAnswer(answers[question.id]),
-        })),
-    }));
+  const completionPercentage = useMemo(() => {
+    return calculateCompletionPercentage(answers, profileQuestions);
   }, [answers]);
 
-  if (!user) {
-    return null;
-  }
+  const completedCategories = useMemo(() => {
+    return getCompletedCategories(answers, profileQuestions, profileQuestionCategories);
+  }, [answers]);
 
-  if (loading || !profile) {
+  const viewSections = useMemo(() => {
+    return profileQuestionCategories.map((category) => {
+      const categoryQuestions = profileQuestions
+        .filter((q) => q.category === category)
+        .map((q) => {
+          const userAnswer = answers.find((a) => a.question_id === q.id);
+          return {
+            id: q.id,
+            title: q.title,
+            answer: formatAnswer(userAnswer?.answer),
+          };
+        });
+
+      return { category, questions: categoryQuestions };
+    });
+  }, [answers]);
+
+  const handleSave = async () => {
+    toast({ title: "Profile saved", description: "Your changes have been saved successfully." });
+    navigate("/client/dashboard");
+  };
+
+  const handleCancel = () => {
+    navigate("/client/dashboard");
+  };
+
+  if (loading || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-20 w-20 animate-spin rounded-full border-b-2 border-primary" />
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  const fullName = `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim() || "Profile";
-
-  const handleCancel = () => {
-    navigate(-1);
-  };
-
-  const handleDone = () => {
-    toast({
-      title: "Profile updated",
-      description: "Your latest edits are saved.",
-    });
-    navigate(-1);
-  };
-
   return (
-    <Tabs
-      value={activeTab}
-      onValueChange={(value) => setActiveTab(value as "edit" | "view")}
-      className="min-h-screen bg-background"
-    >
-      <div className="border-b border-border bg-card/60 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl flex-col gap-4 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Button variant="ghost" onClick={handleCancel} className="text-sm font-medium">
-              Cancel
-            </Button>
-            <span className="text-sm font-semibold uppercase tracking-[0.35em] text-muted-foreground">
-              {fullName}
-            </span>
-            <Button onClick={handleDone} className="btn-premium px-5">
-              Done
-            </Button>
-          </div>
-          <TabsList className="w-full justify-start gap-2 rounded-full bg-muted/70 p-1 sm:w-auto">
-            <TabsTrigger value="edit" className="rounded-full px-4 py-2 text-sm">
-              Edit
-            </TabsTrigger>
-            <TabsTrigger value="view" className="rounded-full px-4 py-2 text-sm">
-              View
-            </TabsTrigger>
-          </TabsList>
+    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "edit" | "view")} className="min-h-screen bg-background pb-20">
+      <div className="sticky top-0 z-40 border-b border-border bg-background">
+        <div className="flex h-16 items-center justify-between px-4">
+          <Button variant="ghost" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <h1 className="text-lg font-semibold">{profile?.first_name || "Profile"}</h1>
+          <Button variant="ghost" onClick={handleSave}>
+            Done
+          </Button>
         </div>
+        <TabsList className="mx-4 mb-2 grid w-auto grid-cols-2">
+          <TabsTrigger value="edit">Edit</TabsTrigger>
+          <TabsTrigger value="view">View</TabsTrigger>
+        </TabsList>
       </div>
 
-      <div className="mx-auto w-full max-w-5xl px-6 py-8">
-        <TabsContent value="edit" className="space-y-8">
-          <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card/60 p-6">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-xl font-semibold">Profile completion</h2>
-                <p className="text-sm text-muted-foreground">Keep refining your story as life evolves.</p>
+      <div className="mx-auto max-w-2xl space-y-4 p-4">
+        <TabsContent value="edit" className="mt-0 space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Profile Completion</CardTitle>
+                <Badge variant={completionPercentage === 100 ? "default" : "secondary"}>
+                  {completionPercentage}%
+                </Badge>
               </div>
-              <Badge variant="outline" className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
-                {completionPercentage}% complete
-              </Badge>
-            </div>
-            <Progress value={completionPercentage} className="h-2" />
-          </div>
-
-          <Card className="card-premium">
-            <CardHeader className="flex flex-row items-start justify-between gap-4">
-              <div>
-                <CardTitle>Photos & videos</CardTitle>
-                <p className="text-sm text-muted-foreground">Drag to reorder. Tap to replace or remove.</p>
-              </div>
-              <Badge variant="outline" className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
-                {photos.length} / 6
-              </Badge>
             </CardHeader>
             <CardContent>
-              <PhotoUploadGrid
-                userId={user.id}
-                profileId={profile.id}
-                photos={photos}
-                onPhotosUpdate={refreshPhotos}
-              />
+              <Progress value={completionPercentage} className="h-2" />
+              <div className="mt-4 flex flex-wrap gap-2">
+                {completedCategories.map((cat, idx) => (
+                  <Badge key={idx} variant={cat.completed ? "default" : "outline"}>
+                    {cat.category}
+                  </Badge>
+                ))}
+              </div>
             </CardContent>
           </Card>
 
-          <QuestionnaireStepper
-            answers={answers}
-            questions={profileQuestions}
-            categories={profileQuestionCategories}
-            completedCategories={completedCategories}
-            currentQuestionIndex={currentQuestionIndex}
-            onCurrentQuestionIndexChange={setCurrentQuestionIndex}
-            onAnswer={saveAnswer}
-            showSaveExit={false}
-            renderFinalAction={() => null}
-          />
+          <Card>
+            <CardHeader>
+              <CardTitle>Photos & Videos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PhotoUploadGrid />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Questionnaire</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <QuestionnaireStepper />
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        <TabsContent value="view" className="space-y-8">
-          <Card className="card-premium">
+        <TabsContent value="view" className="mt-0 space-y-6">
+          <Card>
             <CardHeader>
-              <CardTitle>Gallery preview</CardTitle>
-              <p className="text-sm text-muted-foreground">Your first photo is shown on admin views and matches.</p>
+              <CardTitle>Photos</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {photos.length === 0 ? (
-                  <p className="col-span-full text-sm text-muted-foreground">No photos uploaded yet.</p>
-                ) : (
+                {photos.length > 0 ? (
                   photos
-                    .slice()
-                    .sort((a, b) => a.order_index - b.order_index)
-                    .map((photo) => (
-                      <div key={photo.id} className="relative overflow-hidden rounded-[16px] border border-border">
-                        <img src={photo.photo_url} alt="Profile" className="h-full w-full object-cover" />
+                    .sort((a, b) => {
+                      if (a.is_primary !== b.is_primary) return a.is_primary ? -1 : 1;
+                      return (a.order_index || 0) - (b.order_index || 0);
+                    })
+                    .map((photo, index) => (
+                      <div key={photo.id} className="relative aspect-square overflow-hidden rounded-lg">
+                        <img
+                          src={photo.photo_url}
+                          alt={`Photo ${index + 1}`}
+                          className="h-full w-full object-cover"
+                        />
                         {photo.is_primary && (
-                          <span className="absolute left-2 top-2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+                          <span className="absolute left-2 top-2 rounded-full bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground">
                             Primary
                           </span>
                         )}
                       </div>
                     ))
+                ) : (
+                  <p className="col-span-full text-center text-sm text-muted-foreground">
+                    No photos uploaded yet
+                  </p>
                 )}
               </div>
             </CardContent>
           </Card>
 
-          {viewSections.map((section) => (
-            <Card key={section.category} className="card">
+          {viewSections.map((section, sectionIdx) => (
+            <Card key={sectionIdx} className="card">
               <CardHeader>
                 <CardTitle>{section.category}</CardTitle>
               </CardHeader>
@@ -223,6 +206,8 @@ const ProfileEditPage = () => {
           ))}
         </TabsContent>
       </div>
+
+      <BottomNavigation />
     </Tabs>
   );
 };

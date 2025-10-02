@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { BottomNavigation } from "@/components/BottomNavigation";
 
 interface Match {
   id: string;
@@ -317,7 +318,7 @@ const ClientDashboard = () => {
   const completionPercentage = profile?.completion_percentage || 0;
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[hsl(var(--brand-secondary))] text-white">
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[hsl(var(--brand-secondary))] pb-20 text-white">
       <MatchDetailModal match={selectedMatch} open={modalOpen} onOpenChange={setModalOpen} onMatchResponse={handleMatchResponse} />
 
       <video
@@ -577,6 +578,7 @@ const ClientDashboard = () => {
           </motion.div>
         </motion.div>
       </main>
+      <BottomNavigation />
     </div>
   );
 };
