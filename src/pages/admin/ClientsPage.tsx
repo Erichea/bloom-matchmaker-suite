@@ -1243,7 +1243,7 @@ const ClientsPage = () => {
                     </TabsList>
                   </div>
                   <div className="flex-1 overflow-hidden">
-                    <TabsContent value="profile" className="flex h-full flex-col overflow-hidden px-6 py-6">
+                    <TabsContent value="profile" className="m-0 flex h-full flex-col overflow-hidden px-6 py-6">
                       <ScrollArea className="h-full">
                         <div className="space-y-4 pr-4">
                           <Accordion type="multiple" className="space-y-3">
@@ -1362,7 +1362,7 @@ const ClientsPage = () => {
                         </div>
                       </ScrollArea>
                     </TabsContent>
-                    <TabsContent value="matches" className="h-full overflow-y-auto px-6 py-6">
+                    <TabsContent value="matches" className="m-0 h-full overflow-y-auto px-6 py-6">
                       {matchesLoading ? (
                         <div className="flex h-full items-center justify-center">
                           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -1438,7 +1438,7 @@ const ClientsPage = () => {
                         </div>
                       )}
                     </TabsContent>
-                    <TabsContent value="photos" className="h-full overflow-y-auto px-6 py-6">
+                    <TabsContent value="photos" className="m-0 h-full overflow-y-auto px-6 py-6">
                       {sortedProfilePhotos.length ? (
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                           {sortedProfilePhotos.map((photo, index) => (
@@ -1463,7 +1463,7 @@ const ClientsPage = () => {
                         </div>
                       )}
                     </TabsContent>
-                    <TabsContent value="notes" className="flex h-full flex-col px-6 py-6">
+                    <TabsContent value="notes" className="m-0 flex h-full flex-col px-6 py-6">
                       <div className="flex-1 overflow-hidden rounded-xl border border-border bg-background px-6 py-5 shadow-sm">
                         <ClientNotesEditor
                           profileId={selectedProfile.id}
