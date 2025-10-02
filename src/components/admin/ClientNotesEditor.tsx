@@ -1,23 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { format } from "date-fns";
-import { Plate, PlateContent, usePlateEditor, PlateElement, useEditorRef, useElement } from "platejs/react";
+import { Plate, PlateContent, usePlateEditor } from "platejs/react";
 import { BaseParagraphPlugin } from "platejs";
-import { SlashInputPlugin as BaseSlashInputPlugin, SlashPlugin as BaseSlashPlugin } from "@platejs/slash-command/react";
-import { filterWords } from "@platejs/combobox";
-import { useComboboxInput, useHTMLInputCursorState } from "@platejs/combobox/react";
-import { KEYS } from "@platejs/utils";
-import { Editor, Transforms, Element as SlateElement } from "slate";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Heading1,
-  Heading2,
-  Heading3,
-  Text,
-  Quote,
-  Code,
-  Minus,
-} from "lucide-react";
+import { Editor, Element as SlateElement, Point, Range, Transforms } from "slate";
+import { ReactEditor } from "slate-react";
+import { Heading1, Heading2, Heading3, Minus, Quote, Code, Text } from "lucide-react";
 
 interface ClientNotesEditorProps {
   profileId: string;
@@ -51,7 +40,6 @@ const parseInitialContent = (content: string | null): any[] => {
   try {
     const parsed = JSON.parse(content);
 
-    // TipTap format: { type: "doc", content: [...] }
     if (parsed.type === "doc" && parsed.content) {
       const text = parsed.content.map((node: any) => extractTextFromNode(node)).filter(Boolean).join("\n");
       return [
@@ -62,12 +50,10 @@ const parseInitialContent = (content: string | null): any[] => {
       ];
     }
 
-    // Slate/Plate format: array of nodes
     if (Array.isArray(parsed) && parsed.length > 0) {
       return parsed;
     }
 
-    // Plain text
     return [
       {
         type: "p",
@@ -84,255 +70,181 @@ const parseInitialContent = (content: string | null): any[] => {
   }
 };
 
-type SlashCommandAction = (editor: Editor) => void;
-
-interface SlashCommandItem {
+type SlashCommand = {
   id: string;
   label: string;
   description: string;
   keywords?: string[];
-  icon: React.ReactNode;
-  action: SlashCommandAction;
-}
+  icon: ReactNode;
+  action: (editor: Editor) => void;
+};
 
-const SLASH_COMMANDS: SlashCommandItem[] = [
+const SLASH_COMMANDS: SlashCommand[] = [
   {
     id: "paragraph",
     label: "Paragraph",
-    description: "Just plain text",
+    description: "Basic text",
     keywords: ["text", "body"],
     icon: <Text className="h-4 w-4" />,
     action: (editor) => {
       Transforms.setNodes(
         editor,
-        { type: KEYS.p },
-        {
-          match: (node) => SlateElement.isElement(node) && Editor.isBlock(editor, node),
-        },
+        { type: "p" },
+        { match: (node) => SlateElement.isElement(node) && Editor.isBlock(editor, node) },
       );
     },
   },
   {
     id: "heading-1",
     label: "Heading 1",
-    description: "Large section heading",
+    description: "Large section title",
     keywords: ["title", "h1"],
     icon: <Heading1 className="h-4 w-4" />,
     action: (editor) => {
       Transforms.setNodes(
         editor,
-        { type: KEYS.h1 },
-        {
-          match: (node) => SlateElement.isElement(node) && Editor.isBlock(editor, node),
-        },
+        { type: "h1" },
+        { match: (node) => SlateElement.isElement(node) && Editor.isBlock(editor, node) },
       );
     },
   },
   {
     id: "heading-2",
     label: "Heading 2",
-    description: "Medium section heading",
+    description: "Section heading",
     keywords: ["subtitle", "h2"],
     icon: <Heading2 className="h-4 w-4" />,
     action: (editor) => {
       Transforms.setNodes(
         editor,
-        { type: KEYS.h2 },
-        {
-          match: (node) => SlateElement.isElement(node) && Editor.isBlock(editor, node),
-        },
+        { type: "h2" },
+        { match: (node) => SlateElement.isElement(node) && Editor.isBlock(editor, node) },
       );
     },
   },
   {
     id: "heading-3",
     label: "Heading 3",
-    description: "Small section heading",
+    description: "Small heading",
     keywords: ["subheading", "h3"],
     icon: <Heading3 className="h-4 w-4" />,
     action: (editor) => {
       Transforms.setNodes(
         editor,
-        { type: KEYS.h3 },
-        {
-          match: (node) => SlateElement.isElement(node) && Editor.isBlock(editor, node),
-        },
+        { type: "h3" },
+        { match: (node) => SlateElement.isElement(node) && Editor.isBlock(editor, node) },
       );
     },
   },
   {
     id: "quote",
     label: "Callout",
-    description: "Highlight a key insight",
-    keywords: ["blockquote", "quote"],
+    description: "Stylized quote",
+    keywords: ["blockquote", "quote", "callout"],
     icon: <Quote className="h-4 w-4" />,
     action: (editor) => {
       Transforms.setNodes(
         editor,
-        { type: KEYS.blockquote },
-        {
-          match: (node) => SlateElement.isElement(node) && Editor.isBlock(editor, node),
-        },
+        { type: "blockquote" },
+        { match: (node) => SlateElement.isElement(node) && Editor.isBlock(editor, node) },
       );
     },
   },
   {
     id: "code",
     label: "Code block",
-    description: "Capture technical snippets",
+    description: "Capture code snippets",
     keywords: ["code", "snippet"],
     icon: <Code className="h-4 w-4" />,
     action: (editor) => {
       Transforms.setNodes(
         editor,
-        { type: KEYS.codeBlock },
-        {
-          match: (node) => SlateElement.isElement(node) && Editor.isBlock(editor, node),
-        },
+        { type: "code_block" },
+        { match: (node) => SlateElement.isElement(node) && Editor.isBlock(editor, node) },
       );
     },
   },
   {
     id: "divider",
     label: "Divider",
-    description: "Visually separate content",
+    description: "Separate sections",
     keywords: ["separator", "line", "hr"],
     icon: <Minus className="h-4 w-4" />,
     action: (editor) => {
-      const hrNode = { type: KEYS.hr, children: [{ text: "" }] } as SlateElement;
-      Transforms.insertNodes(editor, hrNode);
-      const paragraphNode = { type: KEYS.p, children: [{ text: "" }] } as SlateElement;
-      Transforms.insertNodes(editor, paragraphNode);
+      const divider = { type: "divider", children: [{ text: "" }] } as SlateElement;
+      Transforms.insertNodes(editor, divider);
+      const paragraph = { type: "p", children: [{ text: "" }] } as SlateElement;
+      Transforms.insertNodes(editor, paragraph, { select: true });
     },
   },
 ];
 
-const SlashInputElement = (props: any) => {
-  const editor = useEditorRef();
-  const element = useElement<any>();
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const cursorState = useHTMLInputCursorState(inputRef);
-  const [query, setQuery] = useState(() => element?.query ?? "");
-  const [highlightedIndex, setHighlightedIndex] = useState(0);
+interface SlashState {
+  open: boolean;
+  start: Point | null;
+  query: string;
+  highlight: number;
+}
 
-  const { props: comboboxInputProps, cancelInput } = useComboboxInput({
-    ref: inputRef,
-    cursorState,
-    onCancelInput: () => {
-      setQuery("");
-    },
+type SlashMenuPosition = { top: number; left: number } | null;
+
+const filterCommands = (commands: SlashCommand[], query: string) => {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return commands;
+  return commands.filter((command) => {
+    const haystack = [command.label, command.description, ...(command.keywords ?? [])]
+      .join(" ")
+      .toLowerCase();
+    return haystack.includes(normalized);
   });
+};
 
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    setQuery(element?.query ?? "");
-  }, [element?.query]);
-
-  const handleUpdateQuery = useCallback(
-    (value: string) => {
-      setQuery(value);
-      const path = editor.api.findPath(element);
-      if (!path) return;
-      editor.tf.setNodes({ query: value }, { at: path });
-    },
-    [editor, element],
-  );
-
-  const filteredCommands = useMemo(() => {
-    const normalized = query.trim();
-    if (!normalized) return SLASH_COMMANDS;
-    return SLASH_COMMANDS.filter((command) => {
-      const haystack = `${command.label} ${command.description} ${(command.keywords || []).join(" ")}`;
-      return filterWords(haystack, normalized, { prefixMode: "last-word" });
-    });
-  }, [query]);
-
-  useEffect(() => {
-    if (highlightedIndex >= filteredCommands.length) {
-      setHighlightedIndex(filteredCommands.length ? 0 : -1);
-    }
-  }, [filteredCommands, highlightedIndex]);
-
-  const handleSelect = useCallback(
-    (command: SlashCommandItem) => {
-      cancelInput("manual", true);
-      command.action(editor);
-      editor.tf.focus();
-    },
-    [cancelInput, editor],
-  );
-
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLInputElement>) => {
-      comboboxInputProps.onKeyDown(event);
-      if (event.defaultPrevented) return;
-
-      if (event.key === "ArrowDown") {
-        event.preventDefault();
-        if (!filteredCommands.length) return;
-        setHighlightedIndex((prev) => (prev + 1) % filteredCommands.length);
-      } else if (event.key === "ArrowUp") {
-        event.preventDefault();
-        if (!filteredCommands.length) return;
-        setHighlightedIndex((prev) => (prev - 1 + filteredCommands.length) % filteredCommands.length);
-      } else if (event.key === "Enter") {
-        if (!filteredCommands.length) return;
-        event.preventDefault();
-        const item = filteredCommands[Math.max(highlightedIndex, 0)];
-        handleSelect(item);
-      }
-    },
-    [comboboxInputProps, filteredCommands, handleSelect, highlightedIndex],
-  );
-
-  return (
-    <PlateElement asChild {...props}>
-      <span
-        {...props.attributes}
-        contentEditable={false}
-        className="relative z-50 inline-flex min-w-[220px] flex-col rounded-md border border-border bg-popover p-2 shadow-lg"
-      >
-        <input
-          ref={inputRef}
-          value={query}
-          onChange={(event) => handleUpdateQuery(event.target.value.replace(/^\//, ""))}
-          onKeyDown={handleKeyDown}
-          onBlur={comboboxInputProps.onBlur}
-          placeholder="Type a command..."
-          className="mb-2 w-full rounded-sm border border-border bg-background px-2 py-1 text-sm focus:border-primary focus:outline-none"
-        />
-        <div className="flex max-h-60 flex-col gap-2 overflow-y-auto">
-          {filteredCommands.length === 0 ? (
-            <div className="px-2 py-3 text-sm text-muted-foreground">No results</div>
-          ) : (
-            filteredCommands.map((command, index) => (
-              <button
-                key={command.id}
-                type="button"
-                onMouseDown={(event) => {
-                  event.preventDefault();
-                  handleSelect(command);
-                }}
-                className={`flex w-full items-start gap-3 rounded-md px-2 py-2 text-left text-sm transition-colors ${
-                  index === highlightedIndex ? "bg-muted" : "hover:bg-muted"
-                }`}
-              >
-                <span className="mt-0.5 text-muted-foreground">{command.icon}</span>
-                <span className="flex flex-col gap-1">
-                  <span className="font-medium text-foreground">{command.label}</span>
-                  <span className="text-xs text-muted-foreground">{command.description}</span>
-                </span>
-              </button>
-            ))
-          )}
+const renderElement = (props: any) => {
+  const { element, attributes, children } = props;
+  switch (element.type) {
+    case "h1":
+      return (
+        <h1 {...attributes} className="text-2xl font-semibold tracking-tight">
+          {children}
+        </h1>
+      );
+    case "h2":
+      return (
+        <h2 {...attributes} className="text-xl font-semibold">
+          {children}
+        </h2>
+      );
+    case "h3":
+      return (
+        <h3 {...attributes} className="text-lg font-semibold">
+          {children}
+        </h3>
+      );
+    case "blockquote":
+      return (
+        <blockquote {...attributes} className="border-l-4 border-muted pl-4 italic text-muted-foreground">
+          {children}
+        </blockquote>
+      );
+    case "code_block":
+      return (
+        <pre {...attributes} className="rounded-md bg-muted p-3 text-sm font-mono">
+          <code>{children}</code>
+        </pre>
+      );
+    case "divider":
+      return (
+        <div {...attributes} contentEditable={false} className="my-6">
+          <hr className="border-border" />
         </div>
-        {props.children}
-      </span>
-    </PlateElement>
-  );
+      );
+    default:
+      return (
+        <p {...attributes} className="leading-7">
+          {children}
+        </p>
+      );
+  }
 };
 
 const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt, onSaved }: ClientNotesEditorProps) => {
@@ -343,23 +255,63 @@ const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt, onSave
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const lastSyncedContent = useRef<string>("");
   const saveTimeoutRef = useRef<number | null>(null);
+  const [slashState, setSlashState] = useState<SlashState>({ open: false, start: null, query: "", highlight: 0 });
+  const [slashPosition, setSlashPosition] = useState<SlashMenuPosition>(null);
 
   const initialValue = useMemo(() => parseInitialContent(initialContent), [initialContent]);
 
-  const slashInputPlugin = useMemo(
-    () => BaseSlashInputPlugin.extend({ component: SlashInputElement }),
-    [],
-  );
-
-  const slashPlugin = useMemo(
-    () => BaseSlashPlugin.extend({ plugins: [slashInputPlugin] }),
-    [slashInputPlugin],
-  );
-
   const editor = usePlateEditor({
-    plugins: [BaseParagraphPlugin, slashInputPlugin, slashPlugin],
+    plugins: [BaseParagraphPlugin],
     value: initialValue,
   });
+
+  const filteredCommands = useMemo(
+    () => filterCommands(SLASH_COMMANDS, slashState.query),
+    [slashState.query],
+  );
+
+  const closeSlashMenu = useCallback(
+    (options: { removeCommand?: boolean } = {}) => {
+      const { removeCommand = true } = options;
+      if (removeCommand && slashState.start && editor.selection) {
+        const range = { anchor: slashState.start, focus: editor.selection.anchor };
+        Transforms.delete(editor, { at: range });
+      }
+      setSlashState({ open: false, start: null, query: "", highlight: 0 });
+      setSlashPosition(null);
+    },
+    [editor, slashState.start, editor.selection, slashState.open],
+  );
+
+  const applySlashCommand = useCallback(
+    (command: SlashCommand) => {
+      if (!slashState.start || !editor.selection) return;
+      const range = { anchor: slashState.start, focus: editor.selection.anchor };
+      Transforms.delete(editor, { at: range });
+      setSlashState({ open: false, start: null, query: "", highlight: 0 });
+      setSlashPosition(null);
+      command.action(editor);
+    },
+    [editor, slashState.start],
+  );
+
+  const moveHighlight = useCallback(
+    (direction: 1 | -1) => {
+      if (!filteredCommands.length) return;
+      setSlashState((prev) => {
+        const next = (prev.highlight + direction + filteredCommands.length) % filteredCommands.length;
+        return { ...prev, highlight: next };
+      });
+    },
+    [filteredCommands.length],
+  );
+
+  useEffect(() => {
+    if (!slashState.open) return;
+    if (slashState.highlight >= filteredCommands.length) {
+      setSlashState((prev) => ({ ...prev, highlight: filteredCommands.length ? 0 : 0 }));
+    }
+  }, [filteredCommands.length, slashState.open, slashState.highlight]);
 
   useEffect(() => {
     const synced = JSON.stringify(editor.children);
@@ -376,40 +328,70 @@ const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt, onSave
     };
   }, []);
 
-  const handleChange = useCallback(({ value }: { value: any }) => {
-    const json = JSON.stringify(value);
-
-    if (json === lastSyncedContent.current) return;
-
-    setStatus("saving");
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
+  useEffect(() => {
+    if (!slashState.open) return;
+    if (!slashState.start || !editor.selection || !Range.isCollapsed(editor.selection)) {
+      closeSlashMenu({ removeCommand: false });
+      return;
     }
 
-    saveTimeoutRef.current = window.setTimeout(async () => {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ admin_notes: json })
-        .eq("id", profileId);
+    const range = { anchor: slashState.start, focus: editor.selection.anchor };
+    let text = Editor.string(editor, range);
+    if (!text.startsWith("/")) {
+      closeSlashMenu({ removeCommand: false });
+      return;
+    }
 
-      if (error) {
-        console.error("Failed to save admin notes", error);
-        setStatus("error");
-        toast({
-          title: "Unable to save",
-          description: "We couldn't save your notes. We'll retry when new changes are made.",
-          variant: "destructive",
-        });
-        return;
+    const query = text.slice(1);
+    if (query !== slashState.query) {
+      setSlashState((prev) => ({ ...prev, query }));
+    }
+
+    try {
+      const domRange = ReactEditor.toDOMRange(editor as any, range);
+      const rect = domRange.getBoundingClientRect();
+      setSlashPosition({ top: rect.bottom + window.scrollY + 6, left: rect.left + window.scrollX });
+    } catch (error) {
+      setSlashPosition(null);
+    }
+  }, [editor, slashState.open, slashState.start, slashState.query, editor.selection, closeSlashMenu]);
+
+  const handleChange = useCallback(
+    ({ value }: { value: any }) => {
+      const json = JSON.stringify(value);
+      if (json === lastSyncedContent.current) return;
+
+      setStatus("saving");
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
       }
 
-      lastSyncedContent.current = json;
-      const savedAt = new Date();
-      setLastSavedAt(savedAt);
-      setStatus("saved");
-      onSaved?.({ content: json, savedAt: savedAt.toISOString() });
-    }, 1000);
-  }, [profileId, toast, onSaved]);
+      saveTimeoutRef.current = window.setTimeout(async () => {
+        const { error } = await supabase
+          .from("profiles")
+          .update({ admin_notes: json })
+          .eq("id", profileId);
+
+        if (error) {
+          console.error("Failed to save admin notes", error);
+          setStatus("error");
+          toast({
+            title: "Unable to save",
+            description: "We couldn't save your notes. We'll retry when new changes are made.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        lastSyncedContent.current = json;
+        const savedAt = new Date();
+        setLastSavedAt(savedAt);
+        setStatus("saved");
+        onSaved?.({ content: json, savedAt: savedAt.toISOString() });
+      }, 1000);
+    },
+    [profileId, toast, onSaved],
+  );
 
   const formattedTimestamp = useMemo(() => {
     if (!lastSavedAt) return null;
@@ -427,6 +409,56 @@ const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt, onSave
     return formattedTimestamp ? `Last edited ${formattedTimestamp}` : "Start taking notes";
   }, [status, formattedTimestamp]);
 
+  const handleEditorKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (!editor) return;
+
+      if (slashState.open) {
+        if (event.key === "ArrowDown" || (event.key === "Tab" && !event.shiftKey)) {
+          event.preventDefault();
+          moveHighlight(1);
+          return;
+        }
+        if (event.key === "ArrowUp" || (event.key === "Tab" && event.shiftKey)) {
+          event.preventDefault();
+          moveHighlight(-1);
+          return;
+        }
+        if (event.key === "Enter") {
+          event.preventDefault();
+          const command = filteredCommands[slashState.highlight] ?? filteredCommands[0];
+          if (command) {
+            applySlashCommand(command);
+          }
+          return;
+        }
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeSlashMenu();
+          return;
+        }
+      }
+
+      if (
+        event.key === "/" &&
+        !event.altKey &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !slashState.open
+      ) {
+        if (!editor.selection || !Range.isCollapsed(editor.selection)) return;
+        event.preventDefault();
+        Transforms.insertText(editor, "/");
+        const anchorAfterInsert = editor.selection?.anchor;
+        const slashStart = anchorAfterInsert ? Editor.before(editor, anchorAfterInsert, { unit: "character" }) : null;
+        if (slashStart) {
+          setSlashState({ open: true, start: slashStart, query: "", highlight: 0 });
+        }
+      }
+    },
+    [editor, slashState.open, slashState.highlight, moveHighlight, filteredCommands, applySlashCommand, closeSlashMenu],
+  );
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-border pb-3 text-xs text-muted-foreground">
@@ -438,9 +470,46 @@ const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt, onSave
           <PlateContent
             className="slate-editor focus:outline-none h-full"
             placeholder="Type / for commands or start writing..."
+            onKeyDown={handleEditorKeyDown}
+            renderElement={renderElement}
           />
         </Plate>
       </div>
+      {slashState.open && slashPosition && (
+        <div
+          className="fixed z-50 w-72 overflow-hidden rounded-lg border border-border bg-popover shadow-lg"
+          style={{ top: slashPosition.top, left: slashPosition.left }}
+        >
+          <div className="max-h-64 overflow-y-auto py-2">
+            {filteredCommands.length === 0 ? (
+              <div className="px-3 py-2 text-sm text-muted-foreground">No results</div>
+            ) : (
+              filteredCommands.map((command, index) => {
+                const isActive = index === slashState.highlight;
+                return (
+                  <button
+                    key={command.id}
+                    type="button"
+                    className={`flex w-full items-start gap-3 px-3 py-2 text-left text-sm transition-colors ${
+                      isActive ? "bg-muted" : "hover:bg-muted"
+                    }`}
+                    onMouseDown={(event) => {
+                      event.preventDefault();
+                      applySlashCommand(command);
+                    }}
+                  >
+                    <span className="mt-0.5 text-muted-foreground">{command.icon}</span>
+                    <span className="flex flex-col gap-1">
+                      <span className="font-medium text-foreground">{command.label}</span>
+                      <span className="text-xs text-muted-foreground">{command.description}</span>
+                    </span>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
