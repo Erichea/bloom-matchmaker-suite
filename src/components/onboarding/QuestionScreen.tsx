@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ArrowRight, ArrowLeft, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,12 +7,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { format } from "date-fns";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
 import type { QuestionnaireQuestion } from "@/hooks/useOnboardingQuestionnaire";
 
 interface QuestionScreenProps {
@@ -37,10 +34,42 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
   const [localAnswer, setLocalAnswer] = useState<any>(answer);
   const [isValid, setIsValid] = useState(false);
   const [autocompleteOpen, setAutocompleteOpen] = useState(false);
+  const [dateError, setDateError] = useState<string>("");
+
+  // Date input states
+  const [dayValue, setDayValue] = useState("");
+  const [monthValue, setMonthValue] = useState("");
+  const [yearValue, setYearValue] = useState("");
+
+  // Refs for date inputs
+  const dayRef = useRef<HTMLInputElement>(null);
+  const monthRef = useRef<HTMLInputElement>(null);
+  const yearRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setLocalAnswer(answer);
-  }, [answer, question.id]);
+
+    // Parse date for date question
+    if (question.question_type === "date" && answer && answer !== '') {
+      try {
+        const date = new Date(answer);
+        if (!isNaN(date.getTime())) {
+          setDayValue(String(date.getDate()).padStart(2, '0'));
+          setMonthValue(String(date.getMonth() + 1).padStart(2, '0'));
+          setYearValue(String(date.getFullYear()));
+        }
+      } catch (e) {
+        // Invalid date, keep empty
+        setDayValue("");
+        setMonthValue("");
+        setYearValue("");
+      }
+    } else if (question.question_type === "date") {
+      setDayValue("");
+      setMonthValue("");
+      setYearValue("");
+    }
+  }, [answer, question.id, question.question_type]);
 
   useEffect(() => {
     // Validate answer
@@ -170,37 +199,136 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
         );
 
       case "date":
-        const selectedDate = localAnswer && localAnswer !== '' ? new Date(localAnswer) : undefined;
-        const isValidDate = selectedDate && !isNaN(selectedDate.getTime());
+        const handleDateFieldChange = (field: 'day' | 'month' | 'year', value: string) => {
+          // Only allow numbers
+          const numericValue = value.replace(/\D/g, '');
+
+          // Limit input lengths
+          if (field === 'day' && numericValue.length > 2) return;
+          if (field === 'month' && numericValue.length > 2) return;
+          if (field === 'year' && numericValue.length > 4) return;
+
+          // Update the field
+          if (field === 'day') setDayValue(numericValue);
+          if (field === 'month') setMonthValue(numericValue);
+          if (field === 'year') setYearValue(numericValue);
+
+          // Auto-advance to next field
+          if (field === 'day' && numericValue.length === 2) {
+            monthRef.current?.focus();
+          } else if (field === 'month' && numericValue.length === 2) {
+            yearRef.current?.focus();
+          }
+
+          // Get the new values
+          const newDay = field === 'day' ? numericValue : dayValue;
+          const newMonth = field === 'month' ? numericValue : monthValue;
+          const newYear = field === 'year' ? numericValue : yearValue;
+
+          // Try to create a valid date
+          if (newDay && newMonth && newYear && newYear.length === 4) {
+            const day = parseInt(newDay);
+            const month = parseInt(newMonth);
+            const year = parseInt(newYear);
+
+            // Validate ranges
+            if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900) {
+              setDateError("Enter a valid date of birth");
+              setLocalAnswer(null);
+              return;
+            }
+
+            // Create date (month is 0-indexed in JS Date)
+            const testDate = new Date(year, month - 1, day);
+
+            // Check if date is valid
+            if (
+              testDate.getDate() !== day ||
+              testDate.getMonth() !== month - 1 ||
+              testDate.getFullYear() !== year
+            ) {
+              setDateError("Enter a valid date of birth");
+              setLocalAnswer(null);
+              return;
+            }
+
+            // Check age (must be at least 18)
+            const age = (new Date().getTime() - testDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+            if (age < 18) {
+              setDateError("You must be at least 18 years old");
+              setLocalAnswer(null);
+              return;
+            }
+
+            if (age > 100) {
+              setDateError("Enter a valid date of birth");
+              setLocalAnswer(null);
+              return;
+            }
+
+            // Valid date
+            setDateError("");
+            setLocalAnswer(testDate.toISOString());
+          } else {
+            setDateError("");
+            setLocalAnswer(null);
+          }
+        };
 
         return (
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal text-lg",
-                  !localAnswer && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-5 w-5" />
-                {isValidDate ? format(selectedDate, "PPP") : "Pick a date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={isValidDate ? selectedDate : undefined}
-                onSelect={(date) => setLocalAnswer(date?.toISOString() || null)}
-                initialFocus
-                className="pointer-events-auto"
-                disabled={(date) => {
-                  const age = (new Date().getTime() - date.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
-                  return age < 18 || age > 100;
-                }}
-              />
-            </PopoverContent>
-          </Popover>
+          <div className="space-y-4">
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <Label htmlFor="day" className="text-sm text-muted-foreground mb-2 block">Day</Label>
+                <Input
+                  ref={dayRef}
+                  id="day"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="DD"
+                  value={dayValue}
+                  onChange={(e) => handleDateFieldChange('day', e.target.value)}
+                  className="text-center text-xl h-14 border-b-2 border-t-0 border-x-0 rounded-none px-2"
+                  maxLength={2}
+                  autoFocus
+                />
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="month" className="text-sm text-muted-foreground mb-2 block">Month</Label>
+                <Input
+                  ref={monthRef}
+                  id="month"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="MM"
+                  value={monthValue}
+                  onChange={(e) => handleDateFieldChange('month', e.target.value)}
+                  className="text-center text-xl h-14 border-b-2 border-t-0 border-x-0 rounded-none px-2"
+                  maxLength={2}
+                />
+              </div>
+              <div className="flex-[1.5]">
+                <Label htmlFor="year" className="text-sm text-muted-foreground mb-2 block">Year</Label>
+                <Input
+                  ref={yearRef}
+                  id="year"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="YYYY"
+                  value={yearValue}
+                  onChange={(e) => handleDateFieldChange('year', e.target.value)}
+                  className="text-center text-xl h-14 border-b-2 border-t-0 border-x-0 rounded-none px-2"
+                  maxLength={4}
+                />
+              </div>
+            </div>
+            {dateError && (
+              <p className="text-sm text-destructive">{dateError}</p>
+            )}
+          </div>
         );
 
       case "number":
