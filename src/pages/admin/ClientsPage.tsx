@@ -34,7 +34,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { profileQuestionCategories, profileQuestions } from "@/constants/profileQuestions";
+import { questionnaireCategories } from "@/constants/questionnaireCategories";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -109,6 +109,15 @@ interface DetailedProfile extends ClientRow {
 type ViewMode = "active" | "deleted";
 
 type QuestionnaireAnswers = Record<string, any>;
+
+interface QuestionnaireQuestion {
+  id: string;
+  question_text_en: string;
+  subtitle_en: string | null;
+  icon_name: string | null;
+  question_type: string;
+  options: any;
+}
 
 type StatusFilter = "all" | "pending_approval" | "approved" | "rejected" | "incomplete";
 
@@ -218,6 +227,7 @@ const ClientsPage = () => {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [selectedProfile, setSelectedProfile] = useState<DetailedProfile | null>(null);
   const [questionnaireAnswers, setQuestionnaireAnswers] = useState<QuestionnaireAnswers>({});
+  const [questionnaireQuestions, setQuestionnaireQuestions] = useState<QuestionnaireQuestion[]>([]);
   const [matches, setMatches] = useState<MatchSummary[]>([]);
   const [matchesLoading, setMatchesLoading] = useState(false);
   const [matchesError, setMatchesError] = useState<string | null>(null);
@@ -337,8 +347,22 @@ const ClientsPage = () => {
         setDetailLoading(true);
         setSelectedProfile(null);
         setQuestionnaireAnswers({});
+        setQuestionnaireQuestions([]);
         setMatches([]);
         setMatchesError(null);
+
+        // Fetch questionnaire questions
+        const { data: questionsData, error: questionsError } = await supabase
+          .from("questionnaire_questions")
+          .select("id, question_text_en, subtitle_en, icon_name, question_type, options")
+          .eq("version", 1)
+          .order("question_order");
+
+        if (questionsError) {
+          console.error("Failed to load questionnaire questions", questionsError);
+        } else {
+          setQuestionnaireQuestions(questionsData || []);
+        }
 
         const { data: profile, error } = await supabase
           .from("profiles")
@@ -456,6 +480,7 @@ const ClientsPage = () => {
     setSelectedClientId(null);
     setSelectedProfile(null);
     setQuestionnaireAnswers({});
+    setQuestionnaireQuestions([]);
     setMatches([]);
     setMatchesError(null);
     setMatchesLoading(false);
@@ -1331,9 +1356,9 @@ const ClientsPage = () => {
                                   </Card>
                                 ) : (
                                   <Accordion type="multiple" className="space-y-2">
-                                    {profileQuestionCategories.map((category) => {
-                                      const categoryQuestions = profileQuestions.filter(
-                                        (question) => question.category === category,
+                                    {questionnaireCategories.map((category) => {
+                                      const categoryQuestions = questionnaireQuestions.filter(
+                                        (question) => category.questionIds.includes(question.id as any),
                                       );
                                       const answeredCount = categoryQuestions.filter(
                                         (question) => questionnaireAnswers[question.id],
@@ -1341,13 +1366,13 @@ const ClientsPage = () => {
 
                                       return (
                                         <AccordionItem
-                                          key={category}
-                                          value={category}
+                                          key={category.name}
+                                          value={category.name}
                                           className="rounded-md border border-border"
                                         >
                                           <AccordionTrigger className="px-3 py-2 text-sm font-medium">
                                             <div className="flex w-full items-center justify-between gap-2">
-                                              <span>{category}</span>
+                                              <span>{category.name}</span>
                                               <span className="text-xs font-normal text-muted-foreground">
                                                 {answeredCount} of {categoryQuestions.length} answered
                                               </span>
@@ -1356,7 +1381,6 @@ const ClientsPage = () => {
                                           <AccordionContent className="px-3 pb-3">
                                             <div className="space-y-2">
                                               {categoryQuestions.map((question) => {
-                                                const AnswerIcon = question.icon;
                                                 const answer = questionnaireAnswers[question.id];
                                                 return (
                                                   <div
@@ -1364,9 +1388,13 @@ const ClientsPage = () => {
                                                     className="rounded-md border border-border p-3 text-sm"
                                                   >
                                                     <div className="mb-2 flex items-center gap-2 font-medium">
-                                                      <AnswerIcon className="h-4 w-4 text-muted-foreground" />
-                                                      <span>{question.title}</span>
+                                                      <span>{question.question_text_en}</span>
                                                     </div>
+                                                    {question.subtitle_en && (
+                                                      <p className="mb-2 text-xs text-muted-foreground">
+                                                        {question.subtitle_en}
+                                                      </p>
+                                                    )}
                                                     <p className="whitespace-pre-line text-muted-foreground">
                                                       {formatAnswer(answer)}
                                                     </p>
