@@ -21,10 +21,18 @@ interface SubscribeOptions {
 }
 
 interface NotificationPayload {
+  action?: "send";
   userId: string;
-  templateId: string;
-  payload: Record<string, any>;
+  templateId?: string;
+  payload?: Record<string, any>;
   channels?: ("push" | "email" | "sms")[];
+  // Direct web_push support (no template required)
+  web_push?: {
+    title: string;
+    message: string;
+    icon?: string;
+    url?: string;
+  };
 }
 
 /**
@@ -257,11 +265,11 @@ export async function sendTestPush(userId: string): Promise<{ success: boolean; 
       body: {
         action: "send",
         userId,
-        templateId: "test.push",
-        payload: {
-          title: "Test Notification",
-          message: "This is a test push notification",
-          url: "/client/dashboard"
+        web_push: {
+          title: "Test Notification 🔔",
+          message: "This is a test push notification from Bloom Matchmaker!",
+          icon: window.location.origin + "/icon-192.png",
+          url: window.location.origin + "/client/dashboard"
         },
         channels: ["push"]
       } as NotificationPayload

@@ -18,10 +18,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const NOTIFICATION_API_BASE_URL = "https://api.notificationapi.com";
+const NOTIFICATION_API_BASE_URL = Deno.env.get("NOTIFICATION_API_BASE_URL") || "https://api.notificationapi.com";
 const CLIENT_ID = Deno.env.get("NOTIFICATION_API_CLIENT_ID")!;
 const SECRET_KEY = Deno.env.get("NOTIFICATION_API_SECRET")!;
-const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY")!;
+const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY") || "";
 
 interface NotificationPayload {
   action: "get-config" | "subscribe" | "unsubscribe" | "send";
@@ -30,6 +30,13 @@ interface NotificationPayload {
   channels?: ("push" | "email" | "sms")[];
   templateId?: string;
   payload?: Record<string, any>;
+  // Direct web_push support (no template required)
+  web_push?: {
+    title: string;
+    message: string;
+    icon?: string;
+    url?: string;
+  };
 }
 
 // Helper: Create Supabase client with auth context
@@ -163,11 +170,36 @@ async function handleUnsubscribe(userId: string): Promise<Response> {
 // Action: Send notification via NotificationAPI
 async function handleSend(
   userId: string,
-  templateId: string,
+  templateId: string | undefined,
   payload: Record<string, any>,
-  channels: string[]
+  channels: string[],
+  webPush?: { title: string; message: string; icon?: string; url?: string }
 ): Promise<Response> {
   try {
+    // Build request body based on whether template or direct web_push is used
+    let requestBody: any;
+
+    if (webPush) {
+      // Direct web_push sending (no template required)
+      requestBody = {
+        type: 'send',
+        to: { id: userId },
+        web_push: webPush
+      };
+    } else if (templateId) {
+      // Template-based sending
+      requestBody = {
+        notificationId: templateId,
+        user: { id: userId },
+        mergeTags: payload
+      };
+    } else {
+      return new Response(
+        JSON.stringify({ success: false, error: "Either templateId or web_push must be provided" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     // Send notification via NotificationAPI
     // Docs: https://www.notificationapi.com/docs/server/sending
     const sendResponse = await fetch(
@@ -178,13 +210,7 @@ async function handleSend(
           "Content-Type": "application/json",
           "Authorization": `Basic ${btoa(`${CLIENT_ID}:${SECRET_KEY}`)}`
         },
-        body: JSON.stringify({
-          notificationId: templateId,
-          user: {
-            id: userId
-          },
-          mergeTags: payload
-        })
+        body: JSON.stringify(requestBody)
       }
     );
 
@@ -192,7 +218,7 @@ async function handleSend(
       const errorText = await sendResponse.text();
       console.error("[notify] NotificationAPI send failed:", errorText);
       return new Response(
-        JSON.stringify({ success: false, error: "Failed to send notification" }),
+        JSON.stringify({ success: false, error: "Failed to send notification", details: errorText }),
         { status: 500, headers: { "Content-Type": "application/json" } }
       );
     }
@@ -252,9 +278,10 @@ serve(async (req: Request) => {
       case "send":
         return await handleSend(
           body.userId || userId,
-          body.templateId!,
+          body.templateId,
           body.payload || {},
-          body.channels || ["push"]
+          body.channels || ["push"],
+          body.web_push
         );
 
       default:

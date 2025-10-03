@@ -328,8 +328,8 @@ export default function NotificationSettings() {
               </div>
             )}
 
-            {/* Test Button (Dev/Debug) */}
-            {pushSubscribed && process.env.NODE_ENV === "development" && (
+            {/* Test Button */}
+            {pushSubscribed && (
               <Button
                 variant="outline"
                 onClick={handleTestPush}
