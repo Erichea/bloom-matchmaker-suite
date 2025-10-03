@@ -20,6 +20,7 @@ import UserMatchKanbanPage from "./pages/admin/UserMatchKanbanPage";
 import MatchManagementPage from "./pages/admin/MatchManagementPage";
 import { AdminUpdates } from "./pages/admin/AdminUpdates";
 import { ClientUpdates } from "./pages/ClientUpdates";
+import NotificationSettings from "./pages/NotificationSettings";
 import { AdminLayout } from "./components/AdminLayout";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -97,6 +98,7 @@ const App = () => (
             <Route path="/client/dashboard" element={<ClientDashboard />} />
             <Route path="/client/updates" element={<ClientUpdates />} />
             <Route path="/client/profile" element={<ProfileEditPage />} />
+            <Route path="/client/settings/notifications" element={<NotificationSettings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
