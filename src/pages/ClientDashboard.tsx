@@ -496,7 +496,7 @@ const ClientDashboard = () => {
                 <Button
                   onClick={() =>
                     navigate(
-                      profileStatus === "rejected" ? "/client/profile/edit" : "/profile-questionnaire"
+                      profileStatus === "rejected" ? "/client/profile/edit" : "/onboarding"
                     )
                   }
                   className="w-full rounded-full bg-[hsl(var(--brand-primary))] px-8 py-3 text-sm font-medium uppercase tracking-[0.3em] text-white transition hover:opacity-90"

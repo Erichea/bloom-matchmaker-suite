@@ -137,9 +137,9 @@ const AuthPage = () => {
         duration: 4000,
       });
 
-      // Redirect to client dashboard after a brief delay
+      // Redirect to onboarding flow after a brief delay
       setTimeout(() => {
-        navigate("/client/dashboard");
+        navigate("/onboarding");
       }, 1500);
     }
     setLoading(false);
