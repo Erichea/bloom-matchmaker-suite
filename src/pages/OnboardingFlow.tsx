@@ -59,7 +59,7 @@ export default function OnboardingFlow() {
         setPhotos(photosData || []);
 
         // Determine starting step based on progress
-        if ((photosData?.length || 0) > 0 && profileData.status !== "pending_approval") {
+        if ((photosData?.length || 0) >= 6 && profileData.status !== "pending_approval") {
           setCurrentStep("questionnaire");
         }
       }
@@ -69,10 +69,10 @@ export default function OnboardingFlow() {
   }, [user, navigate]);
 
   const handlePhotoComplete = () => {
-    if (photos.length === 0) {
+    if (photos.length < 6) {
       toast({
-        title: "At least one photo required",
-        description: "Please upload at least one photo to continue",
+        title: "6 photos required",
+        description: `Please upload ${6 - photos.length} more photo${6 - photos.length > 1 ? 's' : ''} to continue`,
         variant: "destructive",
       });
       return;
@@ -147,14 +147,18 @@ export default function OnboardingFlow() {
 
   const getIconComponent = (iconName: string | null) => {
     if (!iconName) return <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center" />;
-    
-    const IconComponent = (LucideIcons as any)[iconName.split("-").map((word: string) => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join("")];
-    
+
+    // Convert kebab-case to PascalCase (e.g., "graduation-cap" -> "GraduationCap")
+    const pascalCaseName = iconName
+      .split("-")
+      .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join("");
+
+    const IconComponent = (LucideIcons as any)[pascalCaseName];
+
     return (
       <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-        {IconComponent && <IconComponent className="h-8 w-8 text-primary" />}
+        {IconComponent ? <IconComponent className="h-8 w-8 text-primary" /> : null}
       </div>
     );
   };
@@ -178,7 +182,7 @@ export default function OnboardingFlow() {
               Add your photos
             </h1>
             <p className="text-base text-muted-foreground">
-              Upload at least one photo to get started
+              Upload 6 photos to showcase your personality ({photos.length}/6)
             </p>
           </div>
 
@@ -194,7 +198,7 @@ export default function OnboardingFlow() {
           <div className="flex justify-end mt-8 pt-6 border-t">
             <Button
               onClick={handlePhotoComplete}
-              disabled={photos.length === 0}
+              disabled={photos.length < 6}
               size="lg"
               className="rounded-full h-14 px-8"
             >
