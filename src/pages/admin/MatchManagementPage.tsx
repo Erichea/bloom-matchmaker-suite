@@ -234,10 +234,12 @@ const MatchManagementPage = () => {
 
       if (error) throw error;
 
-      if (data?.success) {
+      const result = data as { success: boolean; message?: string; notifications_deleted?: number };
+
+      if (result?.success) {
         toast({
           title: "Match deleted",
-          description: `Match and ${data.notifications_deleted || 0} related notification(s) have been removed`,
+          description: `Match and ${result.notifications_deleted || 0} related notification(s) have been removed`,
         });
 
         // Refresh matches
@@ -248,7 +250,7 @@ const MatchManagementPage = () => {
         setDetailsModalOpen(false);
         setDeletingMatchId(null);
       } else {
-        throw new Error(data?.message || 'Failed to delete match');
+        throw new Error(result?.message || 'Failed to delete match');
       }
     } catch (error: any) {
       toast({

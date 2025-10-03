@@ -167,6 +167,8 @@ export type Database = {
           notification_type: string
           priority: string | null
           redirect_url: string | null
+          related_entity_id: string | null
+          related_entity_type: string | null
           title: string
           updated_at: string
           user_id: string
@@ -181,6 +183,8 @@ export type Database = {
           notification_type: string
           priority?: string | null
           redirect_url?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
           title: string
           updated_at?: string
           user_id: string
@@ -195,6 +199,8 @@ export type Database = {
           notification_type?: string
           priority?: string | null
           redirect_url?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -208,6 +214,7 @@ export type Database = {
           created_at: string
           id: string
           question_id: string
+          questionnaire_version: number | null
           updated_at: string
           user_id: string | null
         }
@@ -216,6 +223,7 @@ export type Database = {
           created_at?: string
           id?: string
           question_id: string
+          questionnaire_version?: number | null
           updated_at?: string
           user_id?: string | null
         }
@@ -224,6 +232,7 @@ export type Database = {
           created_at?: string
           id?: string
           question_id?: string
+          questionnaire_version?: number | null
           updated_at?: string
           user_id?: string | null
         }
@@ -257,6 +266,35 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "profile_photos_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_views: {
+        Row: {
+          admin_user_id: string
+          id: string
+          profile_id: string
+          viewed_at: string
+        }
+        Insert: {
+          admin_user_id: string
+          id?: string
+          profile_id: string
+          viewed_at?: string
+        }
+        Update: {
+          admin_user_id?: string
+          id?: string
+          profile_id?: string
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_views_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -428,6 +466,72 @@ export type Database = {
           },
         ]
       }
+      questionnaire_questions: {
+        Row: {
+          conditional_on: string | null
+          conditional_value: string | null
+          created_at: string | null
+          help_text_en: string | null
+          help_text_fr: string | null
+          icon_name: string | null
+          id: string
+          is_required: boolean | null
+          options: Json | null
+          profile_field_mapping: string | null
+          question_order: number
+          question_text_en: string
+          question_text_fr: string | null
+          question_type: string
+          subtitle_en: string | null
+          subtitle_fr: string | null
+          updated_at: string | null
+          validation_rules: Json | null
+          version: number
+        }
+        Insert: {
+          conditional_on?: string | null
+          conditional_value?: string | null
+          created_at?: string | null
+          help_text_en?: string | null
+          help_text_fr?: string | null
+          icon_name?: string | null
+          id: string
+          is_required?: boolean | null
+          options?: Json | null
+          profile_field_mapping?: string | null
+          question_order: number
+          question_text_en: string
+          question_text_fr?: string | null
+          question_type: string
+          subtitle_en?: string | null
+          subtitle_fr?: string | null
+          updated_at?: string | null
+          validation_rules?: Json | null
+          version?: number
+        }
+        Update: {
+          conditional_on?: string | null
+          conditional_value?: string | null
+          created_at?: string | null
+          help_text_en?: string | null
+          help_text_fr?: string | null
+          icon_name?: string | null
+          id?: string
+          is_required?: boolean | null
+          options?: Json | null
+          profile_field_mapping?: string | null
+          question_order?: number
+          question_text_en?: string
+          question_text_fr?: string | null
+          question_type?: string
+          subtitle_en?: string | null
+          subtitle_fr?: string | null
+          updated_at?: string | null
+          validation_rules?: Json | null
+          version?: number
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -477,6 +581,10 @@ export type Database = {
           p_suggested_by: string
         }
         Returns: undefined
+      }
+      delete_match: {
+        Args: { p_match_id: string }
+        Returns: Json
       }
       get_matches_for_kanban: {
         Args: { p_profile_id: string }
@@ -554,6 +662,10 @@ export type Database = {
       submit_profile_for_review: {
         Args: { p_user_id: string }
         Returns: Json
+      }
+      track_profile_view: {
+        Args: { p_profile_id: string }
+        Returns: undefined
       }
       validate_access_code: {
         Args: { p_code: string }
