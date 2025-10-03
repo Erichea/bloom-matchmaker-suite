@@ -60,7 +60,7 @@ async function validateAuth(req: Request): Promise<{ userId: string; error?: Res
       userId: "",
       error: new Response(
         JSON.stringify({ success: false, error: "Missing authorization header" }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
+        { status: 401, headers: corsHeaders() }
       )
     };
   }
@@ -73,12 +73,22 @@ async function validateAuth(req: Request): Promise<{ userId: string; error?: Res
       userId: "",
       error: new Response(
         JSON.stringify({ success: false, error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
+        { status: 401, headers: corsHeaders() }
       )
     };
   }
 
   return { userId: user.id };
+}
+
+// Helper: Add CORS headers to response
+function corsHeaders() {
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "authorization, content-type",
+    "Content-Type": "application/json"
+  };
 }
 
 // Action: Get configuration (VAPID key)
@@ -91,7 +101,7 @@ function handleGetConfig(): Response {
       success: true,
       vapidPublicKey: VAPID_PUBLIC_KEY
     }),
-    { headers: { "Content-Type": "application/json" } }
+    { headers: corsHeaders() }
   );
 }
 
@@ -126,19 +136,19 @@ async function handleSubscribe(
       console.error("[notify] NotificationAPI identify failed:", errorText);
       return new Response(
         JSON.stringify({ success: false, error: "Failed to register with NotificationAPI" }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
+        { status: 500, headers: corsHeaders() }
       );
     }
 
     return new Response(
       JSON.stringify({ success: true }),
-      { headers: { "Content-Type": "application/json" } }
+      { headers: corsHeaders() }
     );
   } catch (error) {
     console.error("[notify] Subscribe error:", error);
     return new Response(
       JSON.stringify({ success: false, error: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      { status: 500, headers: corsHeaders() }
     );
   }
 }
@@ -159,13 +169,13 @@ async function handleUnsubscribe(userId: string): Promise<Response> {
 
     return new Response(
       JSON.stringify({ success: true }),
-      { headers: { "Content-Type": "application/json" } }
+      { headers: corsHeaders() }
     );
   } catch (error) {
     console.error("[notify] Unsubscribe error:", error);
     return new Response(
       JSON.stringify({ success: false, error: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      { status: 500, headers: corsHeaders() }
     );
   }
 }
@@ -199,7 +209,7 @@ async function handleSend(
     } else {
       return new Response(
         JSON.stringify({ success: false, error: "Either templateId or web_push must be provided" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        { status: 400, headers: corsHeaders() }
       );
     }
 
@@ -222,20 +232,20 @@ async function handleSend(
       console.error("[notify] NotificationAPI send failed:", errorText);
       return new Response(
         JSON.stringify({ success: false, error: "Failed to send notification", details: errorText }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
+        { status: 500, headers: corsHeaders() }
       );
     }
 
     const result = await sendResponse.json();
     return new Response(
       JSON.stringify({ success: true, data: result }),
-      { headers: { "Content-Type": "application/json" } }
+      { headers: corsHeaders() }
     );
   } catch (error) {
     console.error("[notify] Send error:", error);
     return new Response(
       JSON.stringify({ success: false, error: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      { status: 500, headers: corsHeaders() }
     );
   }
 }
@@ -290,14 +300,14 @@ serve(async (req: Request) => {
       default:
         return new Response(
           JSON.stringify({ success: false, error: "Invalid action" }),
-          { status: 400, headers: { "Content-Type": "application/json" } }
+          { status: 400, headers: corsHeaders() }
         );
     }
   } catch (error) {
     console.error("[notify] Error:", error);
     return new Response(
       JSON.stringify({ success: false, error: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      { status: 500, headers: corsHeaders() }
     );
   }
 });
