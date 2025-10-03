@@ -193,12 +193,18 @@ export async function subscribeUser(options: SubscribeOptions): Promise<{ succes
 
     if (!subscription) {
       // Get VAPID public key from Edge Function
-      const { data: configData } = await supabase.functions.invoke("notify", {
+      const { data: configData, error: configError } = await supabase.functions.invoke("notify", {
         body: { action: "get-config" }
       });
 
+      if (DEBUG) console.debug("[Notifications] Config response:", { configData, configError });
+
+      if (configError) {
+        return { success: false, error: `Config error: ${configError.message}` };
+      }
+
       if (!configData?.vapidPublicKey) {
-        return { success: false, error: "Failed to get VAPID key" };
+        return { success: false, error: `Failed to get VAPID key. Response: ${JSON.stringify(configData)}` };
       }
 
       subscription = await registration.pushManager.subscribe({

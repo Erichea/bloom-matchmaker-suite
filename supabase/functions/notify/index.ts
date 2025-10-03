@@ -83,6 +83,9 @@ async function validateAuth(req: Request): Promise<{ userId: string; error?: Res
 
 // Action: Get configuration (VAPID key)
 function handleGetConfig(): Response {
+  console.log("[notify] VAPID_PUBLIC_KEY:", VAPID_PUBLIC_KEY ? "SET" : "EMPTY");
+  console.log("[notify] VAPID_PUBLIC_KEY length:", VAPID_PUBLIC_KEY?.length || 0);
+
   return new Response(
     JSON.stringify({
       success: true,
