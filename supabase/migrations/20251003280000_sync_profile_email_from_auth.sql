@@ -26,9 +26,15 @@ CREATE TRIGGER sync_profile_email_trigger
   FOR EACH ROW
   EXECUTE FUNCTION sync_profile_email_from_auth();
 
+-- Temporarily disable the completion trigger for backfill
+ALTER TABLE public.profiles DISABLE TRIGGER update_profile_completion_trigger;
+
 -- Backfill existing profiles with email from auth.users
 UPDATE public.profiles p
 SET email = au.email
 FROM auth.users au
 WHERE p.user_id = au.id
   AND (p.email IS NULL OR p.email = '');
+
+-- Re-enable the completion trigger
+ALTER TABLE public.profiles ENABLE TRIGGER update_profile_completion_trigger;
