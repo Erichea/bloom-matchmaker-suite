@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useNotificationAPI } from '@notificationapi/react';
+import { NotificationAPIProvider } from '@notificationapi/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -27,7 +27,7 @@ export default function NotificationSettings() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const notificationAPI = useNotificationAPI();
+  const notificationAPI = NotificationAPIProvider.useNotificationAPIContext();
 
   const [preferences, setPreferences] = useState<any>(null);
   const [pushEnabled, setPushEnabled] = useState(false);
