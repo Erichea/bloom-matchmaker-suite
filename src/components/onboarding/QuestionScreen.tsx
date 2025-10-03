@@ -40,6 +40,7 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
   const [dayValue, setDayValue] = useState("");
   const [monthValue, setMonthValue] = useState("");
   const [yearValue, setYearValue] = useState("");
+  const [focusedField, setFocusedField] = useState<'day' | 'month' | 'year' | null>(null);
 
   // Refs for date inputs
   const dayRef = useRef<HTMLInputElement>(null);
@@ -199,8 +200,6 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
         );
 
       case "date":
-        const [focusedField, setFocusedField] = useState<'day' | 'month' | 'year' | null>(null);
-
         const handleDateFieldChange = (field: 'day' | 'month' | 'year', value: string) => {
           // Only allow numbers
           const numericValue = value.replace(/\D/g, '');
