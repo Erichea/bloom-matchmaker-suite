@@ -112,24 +112,34 @@ async function handleSubscribe(
   channels: string[]
 ): Promise<Response> {
   try {
+    const apiUrl = `${NOTIFICATION_API_BASE_URL}/${CLIENT_ID}/users/${userId}`;
+    console.log("[notify] Subscribing user to NotificationAPI:", {
+      url: apiUrl,
+      baseUrl: NOTIFICATION_API_BASE_URL,
+      clientIdLength: CLIENT_ID?.length || 0,
+      secretKeyLength: SECRET_KEY?.length || 0,
+      hasSubscription: !!subscription
+    });
+
     // Register user with NotificationAPI
     // Docs: https://www.notificationapi.com/docs/server/users/identify
-    const identifyResponse = await fetch(
-      `${NOTIFICATION_API_BASE_URL}/${CLIENT_ID}/users/${userId}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Basic ${btoa(`${CLIENT_ID}:${SECRET_KEY}`)}`
-        },
-        body: JSON.stringify({
-          webPush: {
-            keys: subscription.keys,
-            endpoint: subscription.endpoint
+    const identifyResponse = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Basic ${btoa(`${CLIENT_ID}:${SECRET_KEY}`)}`
+      },
+      body: JSON.stringify({
+        webPushTokens: [
+          {
+            sub: {
+              endpoint: subscription.endpoint,
+              keys: subscription.keys
+            }
           }
-        })
-      }
-    );
+        ]
+      })
+    });
 
     if (!identifyResponse.ok) {
       const errorText = await identifyResponse.text();
