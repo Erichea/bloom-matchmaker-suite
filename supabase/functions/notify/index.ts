@@ -121,6 +121,20 @@ async function handleSubscribe(
       hasSubscription: !!subscription
     });
 
+    const requestBody = {
+      id: userId,
+      webPushTokens: [
+        {
+          sub: {
+            endpoint: subscription.endpoint,
+            keys: subscription.keys
+          }
+        }
+      ]
+    };
+
+    console.log("[notify] Request body:", JSON.stringify(requestBody, null, 2));
+
     // Register user with NotificationAPI
     // Docs: https://www.notificationapi.com/docs/server/users/identify
     const identifyResponse = await fetch(apiUrl, {
@@ -129,16 +143,7 @@ async function handleSubscribe(
         "Content-Type": "application/json",
         "Authorization": `Basic ${btoa(`${CLIENT_ID}:${SECRET_KEY}`)}`
       },
-      body: JSON.stringify({
-        webPushTokens: [
-          {
-            sub: {
-              endpoint: subscription.endpoint,
-              keys: subscription.keys
-            }
-          }
-        ]
-      })
+      body: JSON.stringify(requestBody)
     });
 
     if (!identifyResponse.ok) {
