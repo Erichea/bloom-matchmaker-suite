@@ -60,3 +60,9 @@ SET
   help_text_en = 'This helps us find compatible matches for you',
   profile_field_mapping = NULL  -- Will be handled separately in code
 WHERE id = 'dating_preference';
+
+-- Update name question to remove "optional" subtitle
+UPDATE public.questionnaire_questions
+SET subtitle_en = NULL,
+    subtitle_fr = NULL
+WHERE id = 'name';
