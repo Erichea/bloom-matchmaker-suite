@@ -45,11 +45,13 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
   useEffect(() => {
     // Validate answer
     if (question.id === "name" && question.options?.fields) {
-      // For name question, only first name is required
+      // For name question, both first and last name are required
       setIsValid(
         Array.isArray(localAnswer) &&
         localAnswer[0] &&
-        localAnswer[0].trim().length > 0
+        localAnswer[0].trim().length > 0 &&
+        localAnswer[1] &&
+        localAnswer[1].trim().length > 0
       );
     } else if (question.question_type === "multiple_choice") {
       const maxSelections = question.validation_rules?.max_selections;
@@ -96,7 +98,7 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                 />
               </div>
               <div>
-                <Label htmlFor="last_name" className="text-base mb-2 block">Last name (optional)</Label>
+                <Label htmlFor="last_name" className="text-base mb-2 block">Last name *</Label>
                 <Input
                   id="last_name"
                   value={names[1] || ""}
@@ -104,9 +106,6 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                   className="text-lg"
                   placeholder="Your last name"
                 />
-                <p className="text-sm text-muted-foreground mt-2">
-                  Only shared with your matches
-                </p>
               </div>
             </div>
           );
@@ -171,6 +170,9 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
         );
 
       case "date":
+        const selectedDate = localAnswer && localAnswer !== '' ? new Date(localAnswer) : undefined;
+        const isValidDate = selectedDate && !isNaN(selectedDate.getTime());
+
         return (
           <Popover>
             <PopoverTrigger asChild>
@@ -182,14 +184,14 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                 )}
               >
                 <CalendarIcon className="mr-2 h-5 w-5" />
-                {localAnswer ? format(new Date(localAnswer), "PPP") : "Pick a date"}
+                {isValidDate ? format(selectedDate, "PPP") : "Pick a date"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
-                selected={localAnswer ? new Date(localAnswer) : undefined}
-                onSelect={(date) => setLocalAnswer(date?.toISOString())}
+                selected={isValidDate ? selectedDate : undefined}
+                onSelect={(date) => setLocalAnswer(date?.toISOString() || null)}
                 initialFocus
                 className="pointer-events-auto"
                 disabled={(date) => {

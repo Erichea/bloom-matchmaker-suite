@@ -67,6 +67,15 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
       answersData?.forEach((item) => {
         savedAnswers[item.question_id] = item.answer;
       });
+
+      // Pre-fill name from profile if not already answered
+      if (!savedAnswers['name'] && profileData) {
+        savedAnswers['name'] = [
+          profileData.first_name || '',
+          profileData.last_name || ''
+        ];
+      }
+
       setAnswers(savedAnswers);
 
       // Determine current question index based on progress
@@ -86,6 +95,12 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
 
   const saveAnswer = async (questionId: string, answer: any) => {
     try {
+      // Don't save null/undefined answers
+      if (answer === null || answer === undefined) {
+        console.warn('Skipping save for null/undefined answer');
+        return;
+      }
+
       // Save to profile_answers table
       const { error } = await supabase
         .from("profile_answers")
