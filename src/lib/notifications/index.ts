@@ -200,10 +200,12 @@ export async function subscribeUser(options: SubscribeOptions): Promise<{ succes
       if (DEBUG) console.debug("[Notifications] Config response:", { configData, configError });
 
       if (configError) {
-        return { success: false, error: `Config error: ${configError.message}` };
+        console.error("[Notifications] Config error details:", configError);
+        return { success: false, error: `Config error: ${JSON.stringify(configError)}` };
       }
 
       if (!configData?.vapidPublicKey) {
+        console.error("[Notifications] Invalid config data:", configData);
         return { success: false, error: `Failed to get VAPID key. Response: ${JSON.stringify(configData)}` };
       }
 

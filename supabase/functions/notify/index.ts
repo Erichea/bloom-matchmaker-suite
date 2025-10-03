@@ -267,6 +267,8 @@ serve(async (req: Request) => {
     const body: NotificationPayload = await req.json();
     const { action } = body;
 
+    console.log("[notify] Request received:", { action, method: req.method });
+
     // Get config doesn't require auth
     if (action === "get-config") {
       return handleGetConfig();
@@ -305,8 +307,17 @@ serve(async (req: Request) => {
     }
   } catch (error) {
     console.error("[notify] Error:", error);
+    console.error("[notify] Error details:", {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({
+        success: false,
+        error: error.message,
+        details: error.name
+      }),
       { status: 500, headers: corsHeaders() }
     );
   }
