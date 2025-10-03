@@ -83,7 +83,7 @@ export default function OnboardingFlow() {
         setPhotos(photosData || []);
 
         // Determine starting step based on progress
-        if ((photosData?.length || 0) >= 6 && profileData.status !== "pending_approval") {
+        if ((photosData?.length || 0) >= 1 && profileData.status !== "pending_approval") {
           setCurrentStep("questionnaire");
         }
       }
@@ -93,10 +93,10 @@ export default function OnboardingFlow() {
   }, [user, navigate]);
 
   const handlePhotoComplete = () => {
-    if (photos.length < 6) {
+    if (photos.length < 1) {
       toast({
-        title: "6 photos required",
-        description: `Please upload ${6 - photos.length} more photo${6 - photos.length > 1 ? 's' : ''} to continue`,
+        title: "At least 1 photo required",
+        description: "Please upload at least 1 photo to continue",
         variant: "destructive",
       });
       return;
@@ -206,7 +206,7 @@ export default function OnboardingFlow() {
               Add your photos
             </h1>
             <p className="text-base text-muted-foreground">
-              Upload 6 photos to showcase your personality ({photos.length}/6)
+              Upload at least 1 photo to get started
             </p>
           </div>
 
@@ -222,7 +222,7 @@ export default function OnboardingFlow() {
           <div className="flex justify-end mt-8 pt-6 border-t">
             <Button
               onClick={handlePhotoComplete}
-              disabled={photos.length < 6}
+              disabled={photos.length < 1}
               size="lg"
               className="rounded-full h-14 px-8"
             >

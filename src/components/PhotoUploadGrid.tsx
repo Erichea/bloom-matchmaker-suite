@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Camera, GripVertical, Lightbulb, Plus, Trash2, X } from "lucide-react";
+import { Camera, GripVertical, Plus, Trash2, X } from "lucide-react";
 import imageCompression from "browser-image-compression";
 import {
   DndContext,
@@ -374,7 +374,6 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
         await persistOrdering(updatedOrder);
 
         console.log("Photo uploaded successfully");
-        toast({ title: "Photo uploaded", description: "Your photo has been added." });
       }
 
       console.log("Calling onPhotosUpdate...");
@@ -493,16 +492,6 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
         <span>
           {filledCount} of {MAX_PHOTOS}
         </span>
-      </div>
-
-      <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
-        <Lightbulb className="mt-0.5 h-5 w-5 text-primary" />
-        <div>
-          <p className="mb-1 text-sm font-medium">Not sure which photos to use?</p>
-          <button type="button" className="text-sm text-primary underline-offset-4 hover:underline">
-            See what works based on research.
-          </button>
-        </div>
       </div>
 
       <input
