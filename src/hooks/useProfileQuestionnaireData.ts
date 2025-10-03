@@ -23,6 +23,7 @@ export const useProfileQuestionnaireData = () => {
   const [profile, setProfile] = useState<any>(null);
   const [photos, setPhotos] = useState<ProfilePhoto[]>([]);
   const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [questions, setQuestions] = useState<any[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -59,6 +60,18 @@ export const useProfileQuestionnaireData = () => {
     }
   }, [user?.id, loadPhotosForProfile]);
 
+  const loadQuestions = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("questionnaire_questions")
+      .select("*")
+      .eq("version", 1)
+      .order("question_order");
+
+    if (error) throw error;
+
+    setQuestions(data || []);
+  }, []);
+
   const loadSavedAnswers = useCallback(async () => {
     if (!user?.id) return;
 
@@ -81,16 +94,17 @@ export const useProfileQuestionnaireData = () => {
   }, [user?.id]);
 
   useEffect(() => {
-    if (!user?.id) {
-      setLoading(false);
-      return;
-    }
-
     setLoading(true);
 
     const fetchAll = async () => {
       try {
-        await Promise.all([loadProfile(), loadSavedAnswers()]);
+        // Load questions first (doesn't require user)
+        await loadQuestions();
+
+        // Load profile and answers if user is logged in
+        if (user?.id) {
+          await Promise.all([loadProfile(), loadSavedAnswers()]);
+        }
       } catch (error) {
         console.error("Error loading questionnaire data:", error);
       } finally {
@@ -99,7 +113,7 @@ export const useProfileQuestionnaireData = () => {
     };
 
     fetchAll();
-  }, [user?.id, loadProfile, loadSavedAnswers]);
+  }, [user?.id, loadQuestions, loadProfile, loadSavedAnswers]);
 
   const refreshPhotos = useCallback(async () => {
     if (!profile?.id) return;
@@ -178,6 +192,7 @@ export const useProfileQuestionnaireData = () => {
     profile,
     photos,
     answers,
+    questions,
     currentQuestionIndex,
     setCurrentQuestionIndex,
     loading,

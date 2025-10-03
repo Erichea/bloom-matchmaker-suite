@@ -12,13 +12,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useProfileQuestionnaireData } from "@/hooks/useProfileQuestionnaireData";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import {
+  adaptQuestionsForDisplay,
+  getCategoriesFromQuestions,
+} from "@/utils/questionnaireAdapter";
+import {
   calculateCompletionPercentage,
   getCompletedCategories,
 } from "@/utils/profileQuestionnaire";
-import {
-  profileQuestionCategories,
-  profileQuestions,
-} from "@/constants/profileQuestions";
 
 const formatAnswer = (answer: any): string => {
   if (answer === null || answer === undefined) return "Not answered";
@@ -38,6 +38,7 @@ const ProfileEditPage = () => {
     profile,
     photos,
     answers,
+    questions: dbQuestions,
     currentQuestionIndex,
     setCurrentQuestionIndex,
     loading,
@@ -51,13 +52,22 @@ const ProfileEditPage = () => {
     }
   }, [user, navigate]);
 
+  // Adapt database questions to component format
+  const profileQuestions = useMemo(() => {
+    return adaptQuestionsForDisplay(dbQuestions);
+  }, [dbQuestions]);
+
+  const profileQuestionCategories = useMemo(() => {
+    return getCategoriesFromQuestions(dbQuestions);
+  }, [dbQuestions]);
+
   const completionPercentage = useMemo(() => {
     return calculateCompletionPercentage(answers, profileQuestions, profileQuestionCategories);
-  }, [answers]);
+  }, [answers, profileQuestions, profileQuestionCategories]);
 
   const completedCategoryList = useMemo(() => {
     return getCompletedCategories(answers, profileQuestions, profileQuestionCategories);
-  }, [answers]);
+  }, [answers, profileQuestions, profileQuestionCategories]);
 
   const viewSections = useMemo(() => {
     return profileQuestionCategories.map((category) => {
@@ -74,7 +84,7 @@ const ProfileEditPage = () => {
 
       return { category, questions: categoryQuestions };
     });
-  }, [answers]);
+  }, [answers, profileQuestions, profileQuestionCategories]);
 
   const handleSave = async () => {
     toast({ title: "Profile saved", description: "Your changes have been saved successfully." });
