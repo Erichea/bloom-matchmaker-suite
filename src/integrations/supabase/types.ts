@@ -157,6 +157,54 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          email_enabled: boolean
+          id: string
+          match_notifications: boolean
+          message_notifications: boolean
+          profile_notifications: boolean
+          push_enabled: boolean
+          push_subscribed_at: string | null
+          push_subscription: Json | null
+          sms_enabled: boolean
+          system_notifications: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_enabled?: boolean
+          id?: string
+          match_notifications?: boolean
+          message_notifications?: boolean
+          profile_notifications?: boolean
+          push_enabled?: boolean
+          push_subscribed_at?: string | null
+          push_subscription?: Json | null
+          sms_enabled?: boolean
+          system_notifications?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_enabled?: boolean
+          id?: string
+          match_notifications?: boolean
+          message_notifications?: boolean
+          profile_notifications?: boolean
+          push_enabled?: boolean
+          push_subscribed_at?: string | null
+          push_subscription?: Json | null
+          sms_enabled?: boolean
+          system_notifications?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -318,6 +366,7 @@ export type Database = {
           deleted_by: string | null
           education: Database["public"]["Enums"]["education_level"] | null
           email: string | null
+          ethnicity: string | null
           faith: string | null
           first_name: string | null
           gender: Database["public"]["Enums"]["gender_type"] | null
@@ -369,6 +418,7 @@ export type Database = {
           deleted_by?: string | null
           education?: Database["public"]["Enums"]["education_level"] | null
           email?: string | null
+          ethnicity?: string | null
           faith?: string | null
           first_name?: string | null
           gender?: Database["public"]["Enums"]["gender_type"] | null
@@ -420,6 +470,7 @@ export type Database = {
           deleted_by?: string | null
           education?: Database["public"]["Enums"]["education_level"] | null
           email?: string | null
+          ethnicity?: string | null
           faith?: string | null
           first_name?: string | null
           gender?: Database["public"]["Enums"]["gender_type"] | null
@@ -600,6 +651,24 @@ export type Database = {
         Returns: {
           match_data: Json
         }[]
+      }
+      get_notification_preferences: {
+        Args: { p_user_id: string }
+        Returns: {
+          created_at: string
+          email_enabled: boolean
+          id: string
+          match_notifications: boolean
+          message_notifications: boolean
+          profile_notifications: boolean
+          push_enabled: boolean
+          push_subscribed_at: string | null
+          push_subscription: Json | null
+          sms_enabled: boolean
+          system_notifications: boolean
+          updated_at: string
+          user_id: string
+        }
       }
       get_profiles_for_suggestion: {
         Args: { p_profile_id: string }
