@@ -3,14 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  isPushSupported,
-  getPermissionStatus,
-  isSubscribed,
-  subscribeUser,
-  unsubscribeUser,
-  sendTestPush
-} from "@/lib/notifications";
+import { useNotificationAPI } from '@notificationapi/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -34,14 +27,12 @@ export default function NotificationSettings() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const notificationAPI = useNotificationAPI();
 
   const [preferences, setPreferences] = useState<any>(null);
-  const [pushSupport, setPushSupport] = useState<any>({ supported: false });
-  const [pushSubscribed, setPushSubscribed] = useState(false);
-  const [permission, setPermission] = useState<NotificationPermission>("default");
+  const [pushEnabled, setPushEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [subscribing, setSubscribing] = useState(false);
-  const [testing, setTesting] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -91,50 +82,35 @@ export default function NotificationSettings() {
   };
 
   const checkPushStatus = async () => {
-    const support = isPushSupported();
-    setPushSupport(support);
-
-    if (support.supported) {
-      setPermission(getPermissionStatus());
-      const subscribed = await isSubscribed();
-      setPushSubscribed(subscribed);
+    // Check if web push is enabled
+    if ('Notification' in window) {
+      setPushEnabled(Notification.permission === 'granted');
     }
   };
 
   const handleEnablePush = async () => {
     setSubscribing(true);
     try {
-      const result = await subscribeUser({
-        userId: user!.id,
-        channels: ["push"]
+      // Use NotificationAPI SDK to request permission
+      await notificationAPI?.askForWebPushPermission();
+
+      // Update preferences in database
+      await supabase
+        .from("notification_preferences")
+        .update({
+          push_enabled: true,
+          push_subscribed_at: new Date().toISOString()
+        })
+        .eq("user_id", user!.id);
+
+      setPushEnabled(true);
+      toast({
+        title: "Push notifications enabled",
+        description: "You'll now receive push notifications for important updates"
       });
 
-      if (result.success) {
-        // Update preferences in database
-        await supabase
-          .from("notification_preferences")
-          .update({
-            push_enabled: true,
-            push_subscribed_at: new Date().toISOString()
-          })
-          .eq("user_id", user!.id);
-
-        setPushSubscribed(true);
-        setPermission("granted");
-        toast({
-          title: "Push notifications enabled",
-          description: "You'll now receive push notifications for important updates"
-        });
-
-        // Reload preferences
-        await loadPreferences();
-      } else {
-        toast({
-          title: "Failed to enable push notifications",
-          description: result.error || "Please try again",
-          variant: "destructive"
-        });
-      }
+      // Reload preferences
+      await loadPreferences();
     } catch (error: any) {
       console.error("Error enabling push:", error);
       toast({
@@ -150,8 +126,6 @@ export default function NotificationSettings() {
   const handleDisablePush = async () => {
     setSubscribing(true);
     try {
-      await unsubscribeUser(user!.id);
-
       // Update preferences
       await supabase
         .from("notification_preferences")
@@ -162,7 +136,7 @@ export default function NotificationSettings() {
         })
         .eq("user_id", user!.id);
 
-      setPushSubscribed(false);
+      setPushEnabled(false);
       toast({
         title: "Push notifications disabled",
         description: "You won't receive push notifications anymore"
@@ -182,25 +156,41 @@ export default function NotificationSettings() {
   };
 
   const handleTestPush = async () => {
-    setTesting(true);
     try {
-      const result = await sendTestPush(user!.id);
-      if (result.success) {
+      // Send test notification via edge function
+      const { error } = await supabase.functions.invoke("notify", {
+        body: {
+          action: "send",
+          userId: user!.id,
+          web_push: {
+            title: "Test Notification 🔔",
+            message: "This is a test push notification from Bloom!",
+            icon: window.location.origin + "/icon-192.png",
+            url: window.location.origin + "/client/dashboard"
+          },
+          channels: ["push"]
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Failed to send test",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
         toast({
           title: "Test notification sent",
           description: "You should receive it shortly"
         });
-      } else {
-        toast({
-          title: "Failed to send test",
-          description: result.error,
-          variant: "destructive"
-        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sending test:", error);
-    } finally {
-      setTesting(false);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send test notification",
+        variant: "destructive"
+      });
     }
   };
 
@@ -263,81 +253,39 @@ export default function NotificationSettings() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* iOS PWA Warning */}
-            {pushSupport.requiresPWA && (
-              <Alert>
-                <Smartphone className="h-4 w-4" />
-                <AlertDescription>
-                  <div className="space-y-2">
-                    <p className="font-medium">iOS requires app installation</p>
-                    <p className="text-sm">To enable push notifications on iOS, you need to:</p>
-                    <ol className="text-sm list-decimal list-inside space-y-1">
-                      <li>Tap the <Share className="inline h-3 w-3" /> share button in Safari</li>
-                      <li>Select "Add to Home Screen"</li>
-                      <li>Open the app from your home screen</li>
-                      <li>Return here to enable notifications</li>
-                    </ol>
-                  </div>
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* Unsupported Browser */}
-            {!pushSupport.supported && !pushSupport.requiresPWA && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  {pushSupport.reason || "Push notifications are not supported on this device"}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* Permission Denied */}
-            {pushSupport.supported && permission === "denied" && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Push notifications are blocked. Please enable them in your browser settings.
-                </AlertDescription>
-              </Alert>
-            )}
-
             {/* Enable/Disable Push */}
-            {pushSupport.supported && !pushSupport.requiresPWA && (
-              <div className="flex items-center justify-between">
-                <Label htmlFor="push-enabled" className="flex-1">
-                  <div>
-                    <p className="font-medium">Enable push notifications</p>
-                    <p className="text-sm text-muted-foreground">
-                      {pushSubscribed ? "Notifications are enabled" : "Get notified instantly"}
-                    </p>
-                  </div>
-                </Label>
-                <Switch
-                  id="push-enabled"
-                  checked={pushSubscribed}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      handleEnablePush();
-                    } else {
-                      handleDisablePush();
-                    }
-                  }}
-                  disabled={subscribing || permission === "denied"}
-                />
-              </div>
-            )}
+            <div className="flex items-center justify-between">
+              <Label htmlFor="push-enabled" className="flex-1">
+                <div>
+                  <p className="font-medium">Enable push notifications</p>
+                  <p className="text-sm text-muted-foreground">
+                    {pushEnabled ? "Notifications are enabled" : "Get notified instantly"}
+                  </p>
+                </div>
+              </Label>
+              <Switch
+                id="push-enabled"
+                checked={pushEnabled}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    handleEnablePush();
+                  } else {
+                    handleDisablePush();
+                  }
+                }}
+                disabled={subscribing}
+              />
+            </div>
 
             {/* Test Button */}
-            {pushSubscribed && (
+            {pushEnabled && (
               <Button
                 variant="outline"
                 onClick={handleTestPush}
-                disabled={testing}
                 className="w-full"
               >
                 <Bell className="mr-2 h-4 w-4" />
-                {testing ? "Sending..." : "Send Test Notification"}
+                Send Test Notification
               </Button>
             )}
           </CardContent>
@@ -460,7 +408,7 @@ export default function NotificationSettings() {
         </Card>
 
         {/* Status Info */}
-        {pushSubscribed && (
+        {pushEnabled && (
           <Alert>
             <CheckCircle2 className="h-4 w-4" />
             <AlertDescription>
