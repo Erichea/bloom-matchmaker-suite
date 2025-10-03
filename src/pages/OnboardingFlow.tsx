@@ -76,16 +76,37 @@ export default function OnboardingFlow() {
           .single();
 
         if (insertError) {
-          console.error("Error creating profile:", insertError);
-          toast({
-            title: "Error",
-            description: "Failed to create profile. Please try again.",
-            variant: "destructive",
-          });
-          return;
-        }
+          if ((insertError as any)?.code === '23505') {
+            const { data: existing, error: existingError } = await supabase
+              .from("profiles")
+              .select("*")
+              .eq("user_id", user.id)
+              .order("created_at", { ascending: false })
+              .limit(1);
 
-        profileData = newProfile;
+            if (existingError) {
+              console.error("Error loading existing profile after conflict:", existingError);
+              toast({
+                title: "Error",
+                description: "Failed to load profile. Please try again.",
+                variant: "destructive",
+              });
+              return;
+            }
+
+            profileData = existing?.[0] ?? null;
+          } else {
+            console.error("Error creating profile:", insertError);
+            toast({
+              title: "Error",
+              description: "Failed to create profile. Please try again.",
+              variant: "destructive",
+            });
+            return;
+          }
+        } else {
+          profileData = newProfile;
+        }
       }
 
       if (profileData) {

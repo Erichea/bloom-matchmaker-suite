@@ -71,7 +71,25 @@ const ClientDashboard = () => {
         .select("*, profile_photos ( photo_url, is_primary, order_index, created_at )")
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if ((error as any)?.code === "23505") {
+          const { data: existing, error: existingError } = await supabase
+            .from("profiles")
+            .select("*, profile_photos ( photo_url, is_primary, order_index, created_at )")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(1);
+
+          if (existingError) throw existingError;
+          const existingProfile = existing?.[0];
+          if (existingProfile) {
+            setProfile(existingProfile);
+            setProfilePhotoUrl(null);
+            return existingProfile;
+          }
+        }
+        throw error;
+      }
       setProfile(data);
       setProfilePhotoUrl(null);
       return data;
