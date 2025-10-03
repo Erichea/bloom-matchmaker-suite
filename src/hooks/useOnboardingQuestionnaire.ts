@@ -49,11 +49,18 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
       setQuestions(questionsData || []);
 
       // Load user's profile
-      const { data: profileData } = await supabase
+      const { data: profileRows, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", userId)
-        .single();
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
+      }
+
+      const profileData = (profileRows && profileRows[0]) || null;
 
       setProfile(profileData);
 

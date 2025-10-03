@@ -44,11 +44,19 @@ export const useProfileQuestionnaireData = () => {
       .from("profiles")
       .select("*")
       .eq("user_id", user.id)
-      .single();
+      .order("created_at", { ascending: false })
+      .limit(1);
 
     if (error) throw error;
-    setProfile(data);
-    await loadPhotosForProfile(data.id);
+
+    const profileRecord = (data && data[0]) || null;
+
+    setProfile(profileRecord);
+    if (profileRecord?.id) {
+      await loadPhotosForProfile(profileRecord.id);
+    } else {
+      setPhotos([]);
+    }
   }, [user?.id, loadPhotosForProfile]);
 
   const loadSavedAnswers = useCallback(async () => {

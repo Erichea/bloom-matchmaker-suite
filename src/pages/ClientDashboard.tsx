@@ -124,10 +124,12 @@ const ClientDashboard = () => {
         .from("profiles")
         .select("*, profile_photos ( photo_url, is_primary, order_index, created_at )")
         .eq("user_id", user.id)
-        .single();
+        .order("created_at", { ascending: false })
+        .limit(1);
 
-      let profileData = data;
-      if (error && error.code !== "PGRST116") throw error;
+      if (error) throw error;
+
+      let profileData = (data && data[0]) || null;
 
       if (!profileData) {
         profileData = await createBasicProfile();
@@ -169,7 +171,16 @@ const ClientDashboard = () => {
 
       const data = rpcData ? (rpcData as any[]).map((row: any) => row.match_data) : [];
 
-      const { data: userProfile } = await supabase.from("profiles").select("id").eq("user_id", user.id).single();
+      const { data: userProfileData, error: userProfileError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (userProfileError) throw userProfileError;
+
+      const userProfile = userProfileData?.[0];
       if (!userProfile) return;
 
       setMatches(data || []);
