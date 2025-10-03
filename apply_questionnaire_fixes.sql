@@ -35,24 +35,10 @@ UPDATE public.questionnaire_questions
 SET profile_field_mapping = 'ethnicity'
 WHERE id = 'ethnicity';
 
--- Fix education level options to match enum exactly
+-- Fix education level options to remove other and prefer_not_to_say
 UPDATE public.questionnaire_questions
-SET options = '["high_school", "bachelor", "master", "phd", "other", "prefer_not_to_say"]'::jsonb
+SET options = '["High School", "Bachelor''s Degree", "Master''s Degree", "PhD"]'::jsonb
 WHERE id = 'education_level';
-
--- Update nationality question to be before city (order 4) and push city to order 5
-UPDATE public.questionnaire_questions
-SET question_order = question_order + 1
-WHERE question_order >= 4 AND id != 'nationality';
-
--- Insert country/nationality question if it doesn't exist
-INSERT INTO public.questionnaire_questions
-(id, version, question_order, question_type, question_text_en, question_text_fr, subtitle_en, options, validation_rules, is_required, profile_field_mapping, icon_name)
-VALUES
-('nationality', 1, 4, 'text', 'What''s your nationality?', 'Quelle est votre nationalité?', NULL, '{}', '{}', true, 'nationality', 'flag')
-ON CONFLICT (id, version) DO UPDATE
-SET question_order = 4,
-    profile_field_mapping = 'nationality';
 
 -- Update dating_preference to store as JSONB array
 UPDATE public.questionnaire_questions
@@ -66,3 +52,18 @@ UPDATE public.questionnaire_questions
 SET subtitle_en = NULL,
     subtitle_fr = NULL
 WHERE id = 'name';
+
+-- Remove "Always visible on profile" subtitle from height question
+UPDATE public.questionnaire_questions
+SET subtitle_en = NULL,
+    subtitle_fr = NULL
+WHERE id = 'height';
+
+-- Remove nationality question (not needed)
+DELETE FROM public.questionnaire_questions
+WHERE id = 'nationality';
+
+-- Update city question order back to 4 if needed
+UPDATE public.questionnaire_questions
+SET question_order = 4
+WHERE id = 'city' AND question_order != 4;

@@ -109,6 +109,8 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
           question_id: questionId,
           answer,
           questionnaire_version: 1,
+        }, {
+          onConflict: 'user_id,question_id'
         });
 
       if (error) throw error;
@@ -116,12 +118,33 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
       // Update local state
       setAnswers((prev) => ({ ...prev, [questionId]: answer }));
 
+      // Check if any questions depend on this question and delete their answers if condition no longer met
+      const dependentQuestions = questions.filter(
+        (q) => q.conditional_on === questionId && q.conditional_value !== answer
+      );
+
+      for (const dependentQ of dependentQuestions) {
+        // Delete the dependent question's answer from database
+        await supabase
+          .from("profile_answers")
+          .delete()
+          .eq("user_id", userId)
+          .eq("question_id", dependentQ.id);
+
+        // Remove from local state
+        setAnswers((prev) => {
+          const newAnswers = { ...prev };
+          delete newAnswers[dependentQ.id];
+          return newAnswers;
+        });
+      }
+
       // If this question maps to a profile field, update profile too
       const question = questions.find((q) => q.id === questionId);
       if (question?.profile_field_mapping) {
         const fields = question.profile_field_mapping.split(",");
         const updateData: any = {};
-        
+
         if (fields.length === 1) {
           updateData[fields[0]] = answer;
         } else {

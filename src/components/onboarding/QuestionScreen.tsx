@@ -214,26 +214,26 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
           if (field === 'year') setYearValue(numericValue);
 
           // Auto-advance to next field
-          if (field === 'day' && numericValue.length === 2) {
-            monthRef.current?.focus();
-          } else if (field === 'month' && numericValue.length === 2) {
+          if (field === 'month' && numericValue.length === 2) {
+            dayRef.current?.focus();
+          } else if (field === 'day' && numericValue.length === 2) {
             yearRef.current?.focus();
           }
 
           // Get the new values
-          const newDay = field === 'day' ? numericValue : dayValue;
           const newMonth = field === 'month' ? numericValue : monthValue;
+          const newDay = field === 'day' ? numericValue : dayValue;
           const newYear = field === 'year' ? numericValue : yearValue;
 
           // Try to create a valid date
-          if (newDay && newMonth && newYear && newYear.length === 4) {
-            const day = parseInt(newDay);
+          if (newMonth && newDay && newYear && newYear.length === 4) {
             const month = parseInt(newMonth);
+            const day = parseInt(newDay);
             const year = parseInt(newYear);
 
             // Validate ranges
             if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900) {
-              setDateError("Enter a valid date of birth");
+              setDateError("Enter a valid date of birth.");
               setLocalAnswer(null);
               return;
             }
@@ -247,7 +247,7 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
               testDate.getMonth() !== month - 1 ||
               testDate.getFullYear() !== year
             ) {
-              setDateError("Enter a valid date of birth");
+              setDateError("Enter a valid date of birth.");
               setLocalAnswer(null);
               return;
             }
@@ -255,13 +255,13 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
             // Check age (must be at least 18)
             const age = (new Date().getTime() - testDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
             if (age < 18) {
-              setDateError("You must be at least 18 years old");
+              setDateError("You must be at least 18 years old.");
               setLocalAnswer(null);
               return;
             }
 
             if (age > 100) {
-              setDateError("Enter a valid date of birth");
+              setDateError("Enter a valid date of birth.");
               setLocalAnswer(null);
               return;
             }
@@ -276,55 +276,109 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
         };
 
         return (
-          <div className="space-y-4">
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <Label htmlFor="day" className="text-sm text-muted-foreground mb-2 block">Day</Label>
-                <Input
-                  ref={dayRef}
-                  id="day"
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  placeholder="DD"
-                  value={dayValue}
-                  onChange={(e) => handleDateFieldChange('day', e.target.value)}
-                  className="text-center text-xl h-14 border-b-2 border-t-0 border-x-0 rounded-none px-2"
-                  maxLength={2}
-                  autoFocus
-                />
+          <div className="space-y-6">
+            {/* Date input fields with individual character placeholders */}
+            <div className="flex items-end gap-4">
+              {/* Month */}
+              <div className="flex gap-2">
+                <div className="flex flex-col items-center">
+                  <span className="text-4xl text-muted-foreground/40 mb-1 font-light">
+                    {monthValue[0] || 'M'}
+                  </span>
+                  <div className="w-10 border-b-2 border-foreground/20" />
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="text-4xl text-muted-foreground/40 mb-1 font-light">
+                    {monthValue[1] || 'M'}
+                  </span>
+                  <div className="w-10 border-b-2 border-foreground/20" />
+                </div>
               </div>
-              <div className="flex-1">
-                <Label htmlFor="month" className="text-sm text-muted-foreground mb-2 block">Month</Label>
-                <Input
-                  ref={monthRef}
-                  id="month"
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  placeholder="MM"
-                  value={monthValue}
-                  onChange={(e) => handleDateFieldChange('month', e.target.value)}
-                  className="text-center text-xl h-14 border-b-2 border-t-0 border-x-0 rounded-none px-2"
-                  maxLength={2}
-                />
+
+              {/* Day */}
+              <div className="flex gap-2">
+                <div className="flex flex-col items-center">
+                  <span className="text-4xl text-muted-foreground/40 mb-1 font-light">
+                    {dayValue[0] || 'D'}
+                  </span>
+                  <div className="w-10 border-b-2 border-foreground/20" />
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="text-4xl text-muted-foreground/40 mb-1 font-light">
+                    {dayValue[1] || 'D'}
+                  </span>
+                  <div className="w-10 border-b-2 border-foreground/20" />
+                </div>
               </div>
-              <div className="flex-[1.5]">
-                <Label htmlFor="year" className="text-sm text-muted-foreground mb-2 block">Year</Label>
-                <Input
-                  ref={yearRef}
-                  id="year"
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  placeholder="YYYY"
-                  value={yearValue}
-                  onChange={(e) => handleDateFieldChange('year', e.target.value)}
-                  className="text-center text-xl h-14 border-b-2 border-t-0 border-x-0 rounded-none px-2"
-                  maxLength={4}
-                />
+
+              {/* Year */}
+              <div className="flex gap-2">
+                <div className="flex flex-col items-center">
+                  <span className="text-4xl text-muted-foreground/40 mb-1 font-light">
+                    {yearValue[0] || 'Y'}
+                  </span>
+                  <div className="w-10 border-b-2 border-foreground/20" />
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="text-4xl text-muted-foreground/40 mb-1 font-light">
+                    {yearValue[1] || 'Y'}
+                  </span>
+                  <div className="w-10 border-b-2 border-foreground/20" />
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="text-4xl text-muted-foreground/40 mb-1 font-light">
+                    {yearValue[2] || 'Y'}
+                  </span>
+                  <div className="w-10 border-b-2 border-foreground/20" />
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="text-4xl text-muted-foreground/40 mb-1 font-light">
+                    {yearValue[3] || 'Y'}
+                  </span>
+                  <div className="w-10 border-b-2 border-foreground/20" />
+                </div>
               </div>
             </div>
+
+            {/* Hidden inputs for actual data entry */}
+            <div className="sr-only">
+              <Input
+                ref={monthRef}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={monthValue}
+                onChange={(e) => handleDateFieldChange('month', e.target.value)}
+                maxLength={2}
+                autoFocus
+              />
+              <Input
+                ref={dayRef}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={dayValue}
+                onChange={(e) => handleDateFieldChange('day', e.target.value)}
+                maxLength={2}
+              />
+              <Input
+                ref={yearRef}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={yearValue}
+                onChange={(e) => handleDateFieldChange('year', e.target.value)}
+                maxLength={4}
+              />
+            </div>
+
+            {/* Clickable overlay to focus on month input */}
+            <div
+              className="absolute inset-0 cursor-pointer"
+              onClick={() => monthRef.current?.focus()}
+            />
+
+            {/* Error message */}
             {dateError && (
               <p className="text-sm text-destructive">{dateError}</p>
             )}
@@ -351,16 +405,28 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
 
       case "single_choice":
         const options = Array.isArray(question.options) ? question.options : [];
+        // Ensure value is always a string to avoid controlled/uncontrolled switch
+        const radioValue = localAnswer || "";
         return (
-          <RadioGroup value={localAnswer} onValueChange={setLocalAnswer} className="space-y-3">
-            {options.map((option: string) => (
-              <div key={option} className="flex items-center space-x-3 rounded-lg border border-border p-4 hover:bg-accent">
-                <RadioGroupItem value={option} id={option} />
-                <Label htmlFor={option} className="flex-1 cursor-pointer text-base">
-                  {option}
-                </Label>
-              </div>
-            ))}
+          <RadioGroup value={radioValue} onValueChange={setLocalAnswer} className="space-y-3">
+            {options.map((option: string) => {
+              const isSelected = localAnswer === option;
+              return (
+                <div
+                  key={option}
+                  className={cn(
+                    "flex items-center space-x-3 rounded-lg border p-4 cursor-pointer",
+                    isSelected ? "border-primary" : "border-border hover:border-muted-foreground/50"
+                  )}
+                  onClick={() => setLocalAnswer(option)}
+                >
+                  <RadioGroupItem value={option} id={option} className="pointer-events-none" />
+                  <Label htmlFor={option} className="flex-1 cursor-pointer text-base pointer-events-none">
+                    {option}
+                  </Label>
+                </div>
+              );
+            })}
           </RadioGroup>
         );
 
@@ -393,6 +459,8 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                       } else {
                         setLocalAnswer(currentSelections.filter((o: string) => o !== option));
                       }
+                      // Remove focus after selection
+                      (document.activeElement as HTMLElement)?.blur();
                     }}
                   />
                   <Label htmlFor={option} className="flex-1 cursor-pointer text-base">
