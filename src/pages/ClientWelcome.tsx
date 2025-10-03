@@ -5,35 +5,13 @@ import { Input } from "@/components/ui/input";
 import { PremiumButton } from "@/components/experience/PremiumButton";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, ClipboardPaste, LogIn } from "lucide-react";
+import { Sparkles, LogIn } from "lucide-react";
 
 const ClientWelcome = () => {
   const [accessCode, setAccessCode] = useState("");
   const [isValidating, setIsValidating] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  const handlePasteFromClipboard = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      if (!text) {
-        toast({
-          title: "Clipboard is empty",
-          description: "Copy your invitation code first, then use the shortcut.",
-        });
-        return;
-      }
-
-      setAccessCode(text.trim().toUpperCase());
-    } catch (error) {
-      console.error("Clipboard access denied", error);
-      toast({
-        title: "Clipboard access needed",
-        description: "Allow clipboard permissions to paste your invitation code automatically.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -148,10 +126,6 @@ const ClientWelcome = () => {
           <h1 className="font-display text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl">
             Enter your Bloom invitation code.
           </h1>
-          <p className="max-w-xl text-sm leading-7 text-white/75 md:text-base">
-            The code keeps Bloom intentionally intimate. Paste or type the invitation your matchmaker sent to unlock the
-            private onboarding experience.
-          </p>
 
           <motion.form
             onSubmit={handleSubmit}
@@ -172,25 +146,13 @@ const ClientWelcome = () => {
                   required
                 />
               </div>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <PremiumButton
-                  type="submit"
-                  disabled={isValidating || !accessCode.trim()}
-                  className="w-full justify-center sm:flex-1"
-                >
-                  {isValidating ? "Verifying" : "Continue"}
-                </PremiumButton>
-                <button
-                  type="button"
-                  onClick={handlePasteFromClipboard}
-                  className="group flex w-full items-center justify-center gap-2 rounded-full border border-white/25 px-6 py-3 text-[0.65rem] uppercase tracking-[0.35em] text-white/70 transition hover:border-white/40 hover:text-white sm:w-auto"
-                >
-                  <ClipboardPaste className="h-4 w-4 transition-transform group-hover:scale-110" /> Paste code
-                </button>
-              </div>
-              <p className="text-center text-[0.65rem] uppercase tracking-[0.3em] text-white/70">
-                Shortcut ready — paste from your clipboard or type slowly. Verification takes only a moment.
-              </p>
+              <PremiumButton
+                type="submit"
+                disabled={isValidating || !accessCode.trim()}
+                className="w-full justify-center"
+              >
+                {isValidating ? "Verifying" : "Continue"}
+              </PremiumButton>
             </div>
           </motion.form>
 
@@ -198,9 +160,6 @@ const ClientWelcome = () => {
             <span className="inline-flex items-center gap-3 self-center md:self-start">
               <span className="h-px w-6 bg-white/40" /> Already a member?
               <Link to="/auth?mode=signin" className="text-white transition hover:opacity-80">Sign in</Link>
-            </span>
-            <span className="inline-flex items-center gap-3 self-center md:self-start">
-              <span className="h-px w-6 bg-white/40" /> Need help? Contact your matchmaker concierge.
             </span>
           </div>
         </motion.div>

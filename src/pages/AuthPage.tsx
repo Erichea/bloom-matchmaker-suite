@@ -223,25 +223,14 @@ const AuthPage = () => {
             <h1 className="font-display text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl">
               Sign in or finish your invitation.
             </h1>
-            <p className="text-sm leading-7 text-white/75 md:text-base">
-              {isSignInOnly
-                ? "Sign in to continue your curated introductions."
-                : "Continue your curated introductions or finalize your invitation after entering your private access code."}
-            </p>
-            {!isSignInOnly && (
+            {!isSignInOnly && !hasValidAccessCode && (
               <div className="flex flex-col gap-2 text-[0.65rem] uppercase tracking-[0.25em] text-white/70">
-                {hasValidAccessCode ? (
-                  <div className="inline-flex items-center justify-center gap-3 self-center rounded-full border border-white/20 bg-white/10 px-6 py-2 text-white md:self-start">
-                    <span className="h-px w-6 bg-white/50" /> Invitation verified — finish below
-                  </div>
-                ) : (
-                  <Link
-                    to="/client"
-                    className="inline-flex items-center justify-center gap-3 self-center rounded-full border border-white/20 bg-white/5 px-6 py-2 transition hover:border-white/40 hover:text-white md:self-start"
-                  >
-                    <span className="h-px w-6 bg-white/40" /> Validate access code first
-                  </Link>
-                )}
+                <Link
+                  to="/client"
+                  className="inline-flex items-center justify-center gap-3 self-center rounded-full border border-white/20 bg-white/5 px-6 py-2 transition hover:border-white/40 hover:text-white md:self-start"
+                >
+                  <span className="h-px w-6 bg-white/40" /> Validate access code first
+                </Link>
               </div>
             )}
           </div>
@@ -355,9 +344,6 @@ const AuthPage = () => {
 
                 {hasValidAccessCode && !isSignInOnly && (
                   <TabsContent value="signup" className="space-y-4">
-                    <div className="rounded-2xl border border-white/20 bg-white/10 p-4 text-center text-xs text-white/80">
-                      Invitation confirmed — complete your membership details.
-                    </div>
                     <Form {...signUpForm}>
                       <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-4 text-left">
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

@@ -48,10 +48,16 @@ export default function OnboardingFlow() {
 
       // If profile doesn't exist, create it
       if (error && error.code === 'PGRST116') {
+        // Get first and last name from user metadata
+        const firstName = user.user_metadata?.first_name || '';
+        const lastName = user.user_metadata?.last_name || '';
+
         const { data: newProfile, error: insertError } = await supabase
           .from("profiles")
           .insert({
             user_id: user.id,
+            first_name: firstName,
+            last_name: lastName,
             status: "incomplete",
           })
           .select()

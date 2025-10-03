@@ -523,11 +523,6 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
           </SheetHeader>
 
           <div className="mt-6 space-y-3">
-            <Button variant="outline" className="h-12 w-full justify-between" disabled>
-              <span>Instagram</span>
-              <span className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Coming soon</span>
-            </Button>
-
             <Button onClick={handleCameraRoll} className="h-12 w-full justify-between" disabled={uploading}>
               <span>{uploading ? "Uploading…" : "Camera Roll"}</span>
               <Plus className="h-4 w-4" />

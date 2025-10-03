@@ -76,3 +76,10 @@ SET
   help_text_en = 'Click "Take the test" to visit 16personalities.com',
   help_text_fr = 'Cliquez sur "Faire le test" pour visiter 16personalities.com'
 WHERE id = 'mbti';
+
+-- Update date of birth question help text to reflect DD/MM/YYYY format
+UPDATE public.questionnaire_questions
+SET
+  subtitle_en = 'Format: DD/MM/YYYY',
+  subtitle_fr = 'Format: JJ/MM/AAAA'
+WHERE id = 'date_of_birth';

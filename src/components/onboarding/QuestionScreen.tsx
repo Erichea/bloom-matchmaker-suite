@@ -49,7 +49,7 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
   useEffect(() => {
     setLocalAnswer(answer);
 
-    // Parse date for date question
+    // Parse date for date question (DD/MM/YYYY format)
     if (question.question_type === "date" && answer && answer !== '') {
       try {
         const date = new Date(answer);
@@ -199,6 +199,8 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
         );
 
       case "date":
+        const [focusedField, setFocusedField] = useState<'day' | 'month' | 'year' | null>(null);
+
         const handleDateFieldChange = (field: 'day' | 'month' | 'year', value: string) => {
           // Only allow numbers
           const numericValue = value.replace(/\D/g, '');
@@ -213,10 +215,10 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
           if (field === 'month') setMonthValue(numericValue);
           if (field === 'year') setYearValue(numericValue);
 
-          // Auto-advance to next field
-          if (field === 'month' && numericValue.length === 2) {
-            dayRef.current?.focus();
-          } else if (field === 'day' && numericValue.length === 2) {
+          // Auto-advance to next field (DD -> MM -> YYYY)
+          if (field === 'day' && numericValue.length === 2) {
+            monthRef.current?.focus();
+          } else if (field === 'month' && numericValue.length === 2) {
             yearRef.current?.focus();
           }
 
@@ -276,33 +278,14 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
         };
 
         return (
-          <div className="space-y-6">
-            {/* Date input fields with individual character placeholders */}
+          <div className="space-y-6 relative">
+            {/* Date input fields with individual character placeholders - DD/MM/YYYY */}
             <div className="flex items-end gap-6">
-              {/* Month */}
-              <div className="flex gap-1">
-                <div className="flex flex-col items-center">
-                  <span className={cn(
-                    "text-4xl mb-1 font-light",
-                    monthValue[0] ? "text-foreground" : "text-muted-foreground/40"
-                  )}>
-                    {monthValue[0] || 'M'}
-                  </span>
-                  <div className="w-8 border-b-2 border-foreground/20" />
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className={cn(
-                    "text-4xl mb-1 font-light",
-                    monthValue[1] ? "text-foreground" : "text-muted-foreground/40"
-                  )}>
-                    {monthValue[1] || 'M'}
-                  </span>
-                  <div className="w-8 border-b-2 border-foreground/20" />
-                </div>
-              </div>
-
               {/* Day */}
-              <div className="flex gap-1">
+              <div
+                className="flex gap-1 cursor-pointer"
+                onClick={() => dayRef.current?.focus()}
+              >
                 <div className="flex flex-col items-center">
                   <span className={cn(
                     "text-4xl mb-1 font-light",
@@ -310,7 +293,10 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                   )}>
                     {dayValue[0] || 'D'}
                   </span>
-                  <div className="w-8 border-b-2 border-foreground/20" />
+                  <div className={cn(
+                    "w-8 border-b-2 transition-colors",
+                    focusedField === 'day' ? "border-primary" : "border-foreground/20"
+                  )} />
                 </div>
                 <div className="flex flex-col items-center">
                   <span className={cn(
@@ -319,12 +305,49 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                   )}>
                     {dayValue[1] || 'D'}
                   </span>
-                  <div className="w-8 border-b-2 border-foreground/20" />
+                  <div className={cn(
+                    "w-8 border-b-2 transition-colors",
+                    focusedField === 'day' ? "border-primary" : "border-foreground/20"
+                  )} />
+                </div>
+              </div>
+
+              {/* Month */}
+              <div
+                className="flex gap-1 cursor-pointer"
+                onClick={() => monthRef.current?.focus()}
+              >
+                <div className="flex flex-col items-center">
+                  <span className={cn(
+                    "text-4xl mb-1 font-light",
+                    monthValue[0] ? "text-foreground" : "text-muted-foreground/40"
+                  )}>
+                    {monthValue[0] || 'M'}
+                  </span>
+                  <div className={cn(
+                    "w-8 border-b-2 transition-colors",
+                    focusedField === 'month' ? "border-primary" : "border-foreground/20"
+                  )} />
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className={cn(
+                    "text-4xl mb-1 font-light",
+                    monthValue[1] ? "text-foreground" : "text-muted-foreground/40"
+                  )}>
+                    {monthValue[1] || 'M'}
+                  </span>
+                  <div className={cn(
+                    "w-8 border-b-2 transition-colors",
+                    focusedField === 'month' ? "border-primary" : "border-foreground/20"
+                  )} />
                 </div>
               </div>
 
               {/* Year */}
-              <div className="flex gap-1">
+              <div
+                className="flex gap-1 cursor-pointer"
+                onClick={() => yearRef.current?.focus()}
+              >
                 <div className="flex flex-col items-center">
                   <span className={cn(
                     "text-4xl mb-1 font-light",
@@ -332,7 +355,10 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                   )}>
                     {yearValue[0] || 'Y'}
                   </span>
-                  <div className="w-8 border-b-2 border-foreground/20" />
+                  <div className={cn(
+                    "w-8 border-b-2 transition-colors",
+                    focusedField === 'year' ? "border-primary" : "border-foreground/20"
+                  )} />
                 </div>
                 <div className="flex flex-col items-center">
                   <span className={cn(
@@ -341,7 +367,10 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                   )}>
                     {yearValue[1] || 'Y'}
                   </span>
-                  <div className="w-8 border-b-2 border-foreground/20" />
+                  <div className={cn(
+                    "w-8 border-b-2 transition-colors",
+                    focusedField === 'year' ? "border-primary" : "border-foreground/20"
+                  )} />
                 </div>
                 <div className="flex flex-col items-center">
                   <span className={cn(
@@ -350,7 +379,10 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                   )}>
                     {yearValue[2] || 'Y'}
                   </span>
-                  <div className="w-8 border-b-2 border-foreground/20" />
+                  <div className={cn(
+                    "w-8 border-b-2 transition-colors",
+                    focusedField === 'year' ? "border-primary" : "border-foreground/20"
+                  )} />
                 </div>
                 <div className="flex flex-col items-center">
                   <span className={cn(
@@ -359,7 +391,10 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                   )}>
                     {yearValue[3] || 'Y'}
                   </span>
-                  <div className="w-8 border-b-2 border-foreground/20" />
+                  <div className={cn(
+                    "w-8 border-b-2 transition-colors",
+                    focusedField === 'year' ? "border-primary" : "border-foreground/20"
+                  )} />
                 </div>
               </div>
             </div>
@@ -367,22 +402,26 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
             {/* Hidden inputs for actual data entry */}
             <div className="sr-only">
               <Input
-                ref={monthRef}
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={monthValue}
-                onChange={(e) => handleDateFieldChange('month', e.target.value)}
-                maxLength={2}
-                autoFocus
-              />
-              <Input
                 ref={dayRef}
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 value={dayValue}
                 onChange={(e) => handleDateFieldChange('day', e.target.value)}
+                onFocus={() => setFocusedField('day')}
+                onBlur={() => setFocusedField(null)}
+                maxLength={2}
+                autoFocus
+              />
+              <Input
+                ref={monthRef}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={monthValue}
+                onChange={(e) => handleDateFieldChange('month', e.target.value)}
+                onFocus={() => setFocusedField('month')}
+                onBlur={() => setFocusedField(null)}
                 maxLength={2}
               />
               <Input
@@ -392,15 +431,11 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                 pattern="[0-9]*"
                 value={yearValue}
                 onChange={(e) => handleDateFieldChange('year', e.target.value)}
+                onFocus={() => setFocusedField('year')}
+                onBlur={() => setFocusedField(null)}
                 maxLength={4}
               />
             </div>
-
-            {/* Clickable overlay to focus on month input */}
-            <div
-              className="absolute inset-0 cursor-pointer"
-              onClick={() => monthRef.current?.focus()}
-            />
 
             {/* Error message */}
             {dateError && (
