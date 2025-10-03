@@ -95,6 +95,13 @@ function corsHeaders() {
 function handleGetConfig(): Response {
   console.log("[notify] VAPID_PUBLIC_KEY:", VAPID_PUBLIC_KEY ? "SET" : "EMPTY");
   console.log("[notify] VAPID_PUBLIC_KEY length:", VAPID_PUBLIC_KEY?.length || 0);
+  console.log("[notify] Environment check:", {
+    hasBaseUrl: !!NOTIFICATION_API_BASE_URL,
+    hasClientId: !!CLIENT_ID,
+    hasSecretKey: !!SECRET_KEY,
+    clientIdFirst5: CLIENT_ID?.substring(0, 5),
+    secretKeyFirst5: SECRET_KEY?.substring(0, 5)
+  });
 
   return new Response(
     JSON.stringify({
@@ -138,7 +145,7 @@ async function handleSubscribe(
     // Register user with NotificationAPI
     // Docs: https://www.notificationapi.com/docs/server/users/identify
     const identifyResponse = await fetch(apiUrl, {
-      method: "POST",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Basic ${btoa(`${CLIENT_ID}:${SECRET_KEY}`)}`
