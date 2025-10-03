@@ -40,15 +40,39 @@ export default function OnboardingFlow() {
 
     // Load profile and photos
     const loadProfile = async () => {
-      const { data: profileData } = await supabase
+      let { data: profileData, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", user.id)
         .single();
 
+      // If profile doesn't exist, create it
+      if (error && error.code === 'PGRST116') {
+        const { data: newProfile, error: insertError } = await supabase
+          .from("profiles")
+          .insert({
+            user_id: user.id,
+            status: "incomplete",
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error("Error creating profile:", insertError);
+          toast({
+            title: "Error",
+            description: "Failed to create profile. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        profileData = newProfile;
+      }
+
       if (profileData) {
         setProfileId(profileData.id);
-        
+
         // Load photos
         const { data: photosData } = await supabase
           .from("profile_photos")
