@@ -119,9 +119,19 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
       setAnswers((prev) => ({ ...prev, [questionId]: answer }));
 
       // Check if any questions depend on this question and delete their answers if condition no longer met
-      const dependentQuestions = questions.filter(
-        (q) => q.conditional_on === questionId && q.conditional_value !== answer
-      );
+      const dependentQuestions = questions.filter((q) => {
+        if (q.conditional_on !== questionId) return false;
+
+        // Check if using negative logic (NOT:value1,value2,...)
+        if (q.conditional_value?.startsWith('NOT:')) {
+          const excludedValues = q.conditional_value.substring(4).split(',').map(v => v.trim());
+          // Delete answer if current answer IS in the excluded list (question should be hidden)
+          return excludedValues.includes(answer);
+        }
+
+        // Default logic: delete answer if it doesn't match
+        return q.conditional_value !== answer;
+      });
 
       for (const dependentQ of dependentQuestions) {
         // Delete the dependent question's answer from database
@@ -176,6 +186,15 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
       // Check conditional logic
       if (question.conditional_on && question.conditional_value) {
         const conditionalAnswer = answers[question.conditional_on];
+
+        // Check if using negative logic (NOT:value1,value2,...)
+        if (question.conditional_value.startsWith('NOT:')) {
+          const excludedValues = question.conditional_value.substring(4).split(',').map(v => v.trim());
+          // Show question if answer is NOT in the excluded list
+          return !excludedValues.includes(conditionalAnswer);
+        }
+
+        // Default: show only if answer matches exactly
         return conditionalAnswer === question.conditional_value;
       }
       return true;

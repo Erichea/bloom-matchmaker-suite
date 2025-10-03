@@ -278,64 +278,88 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
         return (
           <div className="space-y-6">
             {/* Date input fields with individual character placeholders */}
-            <div className="flex items-end gap-4">
+            <div className="flex items-end gap-6">
               {/* Month */}
-              <div className="flex gap-2">
+              <div className="flex gap-1">
                 <div className="flex flex-col items-center">
-                  <span className="text-4xl text-muted-foreground/40 mb-1 font-light">
+                  <span className={cn(
+                    "text-4xl mb-1 font-light",
+                    monthValue[0] ? "text-foreground" : "text-muted-foreground/40"
+                  )}>
                     {monthValue[0] || 'M'}
                   </span>
-                  <div className="w-10 border-b-2 border-foreground/20" />
+                  <div className="w-8 border-b-2 border-foreground/20" />
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-4xl text-muted-foreground/40 mb-1 font-light">
+                  <span className={cn(
+                    "text-4xl mb-1 font-light",
+                    monthValue[1] ? "text-foreground" : "text-muted-foreground/40"
+                  )}>
                     {monthValue[1] || 'M'}
                   </span>
-                  <div className="w-10 border-b-2 border-foreground/20" />
+                  <div className="w-8 border-b-2 border-foreground/20" />
                 </div>
               </div>
 
               {/* Day */}
-              <div className="flex gap-2">
+              <div className="flex gap-1">
                 <div className="flex flex-col items-center">
-                  <span className="text-4xl text-muted-foreground/40 mb-1 font-light">
+                  <span className={cn(
+                    "text-4xl mb-1 font-light",
+                    dayValue[0] ? "text-foreground" : "text-muted-foreground/40"
+                  )}>
                     {dayValue[0] || 'D'}
                   </span>
-                  <div className="w-10 border-b-2 border-foreground/20" />
+                  <div className="w-8 border-b-2 border-foreground/20" />
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-4xl text-muted-foreground/40 mb-1 font-light">
+                  <span className={cn(
+                    "text-4xl mb-1 font-light",
+                    dayValue[1] ? "text-foreground" : "text-muted-foreground/40"
+                  )}>
                     {dayValue[1] || 'D'}
                   </span>
-                  <div className="w-10 border-b-2 border-foreground/20" />
+                  <div className="w-8 border-b-2 border-foreground/20" />
                 </div>
               </div>
 
               {/* Year */}
-              <div className="flex gap-2">
+              <div className="flex gap-1">
                 <div className="flex flex-col items-center">
-                  <span className="text-4xl text-muted-foreground/40 mb-1 font-light">
+                  <span className={cn(
+                    "text-4xl mb-1 font-light",
+                    yearValue[0] ? "text-foreground" : "text-muted-foreground/40"
+                  )}>
                     {yearValue[0] || 'Y'}
                   </span>
-                  <div className="w-10 border-b-2 border-foreground/20" />
+                  <div className="w-8 border-b-2 border-foreground/20" />
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-4xl text-muted-foreground/40 mb-1 font-light">
+                  <span className={cn(
+                    "text-4xl mb-1 font-light",
+                    yearValue[1] ? "text-foreground" : "text-muted-foreground/40"
+                  )}>
                     {yearValue[1] || 'Y'}
                   </span>
-                  <div className="w-10 border-b-2 border-foreground/20" />
+                  <div className="w-8 border-b-2 border-foreground/20" />
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-4xl text-muted-foreground/40 mb-1 font-light">
+                  <span className={cn(
+                    "text-4xl mb-1 font-light",
+                    yearValue[2] ? "text-foreground" : "text-muted-foreground/40"
+                  )}>
                     {yearValue[2] || 'Y'}
                   </span>
-                  <div className="w-10 border-b-2 border-foreground/20" />
+                  <div className="w-8 border-b-2 border-foreground/20" />
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-4xl text-muted-foreground/40 mb-1 font-light">
+                  <span className={cn(
+                    "text-4xl mb-1 font-light",
+                    yearValue[3] ? "text-foreground" : "text-muted-foreground/40"
+                  )}>
                     {yearValue[3] || 'Y'}
                   </span>
-                  <div className="w-10 border-b-2 border-foreground/20" />
+                  <div className="w-8 border-b-2 border-foreground/20" />
                 </div>
               </div>
             </div>
@@ -407,6 +431,126 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
         const options = Array.isArray(question.options) ? question.options : [];
         // Ensure value is always a string to avoid controlled/uncontrolled switch
         const radioValue = localAnswer || "";
+
+        // Special handling for MBTI question
+        if (question.id === "mbti") {
+          const mbtiGroups = [
+            {
+              name: "Analysts",
+              emoji: "🔮",
+              types: [
+                { code: "INTJ", name: "Architect" },
+                { code: "INTP", name: "Logician" },
+                { code: "ENTJ", name: "Commander" },
+                { code: "ENTP", name: "Debater" },
+              ],
+            },
+            {
+              name: "Diplomats",
+              emoji: "💚",
+              types: [
+                { code: "INFJ", name: "Advocate" },
+                { code: "INFP", name: "Mediator" },
+                { code: "ENFJ", name: "Protagonist" },
+                { code: "ENFP", name: "Campaigner" },
+              ],
+            },
+            {
+              name: "Sentinels",
+              emoji: "🛡️",
+              types: [
+                { code: "ISTJ", name: "Logistician" },
+                { code: "ISFJ", name: "Defender" },
+                { code: "ESTJ", name: "Executive" },
+                { code: "ESFJ", name: "Consul" },
+              ],
+            },
+            {
+              name: "Explorers",
+              emoji: "🗺️",
+              types: [
+                { code: "ISTP", name: "Virtuoso" },
+                { code: "ISFP", name: "Adventurer" },
+                { code: "ESTP", name: "Entrepreneur" },
+                { code: "ESFP", name: "Entertainer" },
+              ],
+            },
+          ];
+
+          return (
+            <div className="space-y-6">
+              <RadioGroup value={radioValue} onValueChange={setLocalAnswer}>
+                {mbtiGroups.map((group) => (
+                  <div key={group.name} className="space-y-3">
+                    <h3 className="font-semibold text-lg flex items-center gap-2">
+                      <span>{group.emoji}</span>
+                      <span>{group.name}</span>
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {group.types.map((type) => {
+                        const isSelected = localAnswer === type.code;
+                        return (
+                          <div
+                            key={type.code}
+                            className={cn(
+                              "flex items-center space-x-3 rounded-lg border p-4 cursor-pointer",
+                              isSelected ? "border-primary" : "border-border hover:border-muted-foreground/50"
+                            )}
+                            onClick={() => setLocalAnswer(type.code)}
+                          >
+                            <RadioGroupItem value={type.code} id={type.code} className="pointer-events-none" />
+                            <Label htmlFor={type.code} className="flex-1 cursor-pointer pointer-events-none">
+                              <div className="font-medium">{type.code}</div>
+                              <div className="text-sm text-muted-foreground">{type.name}</div>
+                            </Label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Don't know option */}
+                <div className="mt-6">
+                  {options
+                    .filter((opt) => opt.includes("Don't know") || opt.includes("Prefer not"))
+                    .map((option) => {
+                      const isSelected = localAnswer === option;
+                      return (
+                        <div
+                          key={option}
+                          className={cn(
+                            "flex items-center space-x-3 rounded-lg border p-4 cursor-pointer",
+                            isSelected ? "border-primary" : "border-border hover:border-muted-foreground/50"
+                          )}
+                          onClick={() => setLocalAnswer(option)}
+                        >
+                          <RadioGroupItem value={option} id={option} className="pointer-events-none" />
+                          <Label htmlFor={option} className="flex-1 cursor-pointer text-base pointer-events-none">
+                            {option}
+                          </Label>
+                        </div>
+                      );
+                    })}
+                </div>
+              </RadioGroup>
+
+              {/* Link to take the test */}
+              <div className="mt-6 text-center">
+                <a
+                  href="https://www.16personalities.com/free-personality-test"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline font-medium"
+                >
+                  Take the test on 16personalities.com →
+                </a>
+              </div>
+            </div>
+          );
+        }
+
+        // Default single choice rendering
         return (
           <RadioGroup value={radioValue} onValueChange={setLocalAnswer} className="space-y-3">
             {options.map((option: string) => {
@@ -445,25 +589,28 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                 <div
                   key={option}
                   className={cn(
-                    "flex items-center space-x-3 rounded-lg border border-border p-4",
-                    isDisabled ? "opacity-50" : "hover:bg-accent"
+                    "flex items-center space-x-3 rounded-lg border p-4 cursor-pointer",
+                    isDisabled ? "opacity-50" : "",
+                    isChecked ? "border-primary" : "border-border hover:border-muted-foreground/50"
                   )}
+                  onClick={() => {
+                    if (isDisabled) return;
+                    if (isChecked) {
+                      setLocalAnswer(currentSelections.filter((o: string) => o !== option));
+                    } else {
+                      setLocalAnswer([...currentSelections, option]);
+                    }
+                    // Remove focus after selection
+                    (document.activeElement as HTMLElement)?.blur();
+                  }}
                 >
                   <Checkbox
                     id={option}
                     checked={isChecked}
                     disabled={isDisabled}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setLocalAnswer([...currentSelections, option]);
-                      } else {
-                        setLocalAnswer(currentSelections.filter((o: string) => o !== option));
-                      }
-                      // Remove focus after selection
-                      (document.activeElement as HTMLElement)?.blur();
-                    }}
+                    className="pointer-events-none"
                   />
-                  <Label htmlFor={option} className="flex-1 cursor-pointer text-base">
+                  <Label htmlFor={option} className="flex-1 cursor-pointer text-base pointer-events-none">
                     {option}
                   </Label>
                 </div>

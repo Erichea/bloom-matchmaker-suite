@@ -8,11 +8,11 @@ ALTER TABLE public.questionnaire_questions
 ADD CONSTRAINT questionnaire_questions_question_type_check
 CHECK (question_type IN ('text', 'textarea', 'single_choice', 'multiple_choice', 'scale', 'date', 'number', 'autocomplete'));
 
--- Fix Q18 to add conditional logic (only show if Q17 = "Yes")
+-- Fix Q18 to add conditional logic (show UNLESS answer is "No" or "Prefer not to say")
 UPDATE public.questionnaire_questions
 SET
   conditional_on = 'marriage',
-  conditional_value = 'Yes',
+  conditional_value = 'NOT:No,Prefer not to say',
   is_required = true
 WHERE id = 'marriage_timeline';
 
@@ -67,3 +67,12 @@ WHERE id = 'nationality';
 UPDATE public.questionnaire_questions
 SET question_order = 4
 WHERE id = 'city' AND question_order != 4;
+
+-- Enhance MBTI question with better help text
+UPDATE public.questionnaire_questions
+SET
+  subtitle_en = 'Don''t know your type? Take the test - it only takes 15 minutes and really helps understand your personality!',
+  subtitle_fr = 'Vous ne connaissez pas votre type? Faites le test - cela ne prend que 15 minutes et aide vraiment à comprendre votre personnalité!',
+  help_text_en = 'Click "Take the test" to visit 16personalities.com',
+  help_text_fr = 'Cliquez sur "Faire le test" pour visiter 16personalities.com'
+WHERE id = 'mbti';
