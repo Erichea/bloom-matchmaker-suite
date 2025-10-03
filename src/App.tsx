@@ -98,7 +98,11 @@ const App = () => (
             <Route path="/client/dashboard" element={<ClientDashboard />} />
             <Route path="/client/updates" element={<ClientUpdates />} />
             <Route path="/client/profile" element={<ProfileEditPage />} />
-            <Route path="/client/settings/notifications" element={<NotificationSettings />} />
+            <Route path="/client/settings/notifications" element={
+              <ProtectedRoute>
+                <NotificationSettings />
+              </ProtectedRoute>
+            } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

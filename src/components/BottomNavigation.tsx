@@ -1,4 +1,4 @@
-import { Home, Bell, User } from "lucide-react";
+import { Home, Bell, User, Settings } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -82,12 +82,14 @@ export const BottomNavigation = () => {
     "/client/dashboard",
     "/client/updates",
     "/client/profile",
+    "/client/settings/notifications",
   ], []);
 
   const menuItems: InteractiveMenuItem[] = useMemo(() => [
     { label: "Home", icon: Home },
     { label: "Updates", icon: Bell, badge: unreadCount },
     { label: "Profile", icon: User },
+    { label: "Settings", icon: Settings },
   ], [unreadCount]);
 
   const activeIndex = useMemo(() => {
