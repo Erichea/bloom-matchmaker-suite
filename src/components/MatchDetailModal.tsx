@@ -52,12 +52,15 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
 
         if (error) throw error;
 
+        console.log("All profile answers for user:", data);
+
         // Convert array to object for easier access
         const answersMap: Record<string, any> = {};
         data?.forEach((item) => {
           answersMap[item.question_id] = item.answer;
         });
 
+        console.log("Answers map:", answersMap);
         setProfileAnswers(answersMap);
       } catch (error) {
         console.error("Error fetching profile answers:", error);
