@@ -254,6 +254,8 @@ async function handleSend(
       }
     );
 
+    console.log("[notify] NotificationAPI response status:", sendResponse.status);
+
     if (!sendResponse.ok) {
       const errorText = await sendResponse.text();
       console.error("[notify] NotificationAPI send failed:", errorText);
@@ -264,6 +266,7 @@ async function handleSend(
     }
 
     const result = await sendResponse.json();
+    console.log("[notify] NotificationAPI send succeeded:", result);
     return new Response(
       JSON.stringify({ success: true, data: result }),
       { headers: corsHeaders() }
