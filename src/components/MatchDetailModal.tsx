@@ -176,6 +176,8 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
   const currentUserResponse = isProfile1 ? match.profile_1_response : match.profile_2_response;
   const otherUserResponse = isProfile1 ? match.profile_2_response : match.profile_1_response;
 
+  console.log("Other profile data:", otherProfile);
+
   if (!otherProfile) return null;
 
   const name = `${otherProfile.first_name || ''} ${otherProfile.last_name || ''}`.trim();
