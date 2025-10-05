@@ -487,6 +487,7 @@ const ClientsPage = () => {
           console.error("Failed to load profile photos", photosError);
         }
 
+        let answersMap: QuestionnaireAnswers = {};
         if (detailedProfile?.user_id) {
           const { data: answersData, error: answersError } = await supabase
             .from("profile_answers")
@@ -497,7 +498,7 @@ const ClientsPage = () => {
             throw answersError;
           }
 
-          const answersMap = (answersData || []).reduce<QuestionnaireAnswers>((acc, curr) => {
+          answersMap = (answersData || []).reduce<QuestionnaireAnswers>((acc, curr) => {
             acc[curr.question_id] = curr.answer;
             return acc;
           }, {});
