@@ -217,8 +217,8 @@ async function handleSend(
     if (webPush) {
       // Direct web_push sending (no template required)
       requestBody = {
-        type: 'send',
-        to: { id: userId },
+        notificationId: 'test_notification',
+        user: { id: userId },
         web_push: webPush
       };
     } else if (templateId) {
@@ -237,8 +237,13 @@ async function handleSend(
 
     // Send notification via NotificationAPI
     // Docs: https://www.notificationapi.com/docs/server/sending
+    console.log("[notify] Sending to NotificationAPI:", {
+      endpoint: `${NOTIFICATION_API_BASE_URL}/${CLIENT_ID}/sender`,
+      body: requestBody
+    });
+
     const sendResponse = await fetch(
-      `${NOTIFICATION_API_BASE_URL}/${CLIENT_ID}/notifications`,
+      `${NOTIFICATION_API_BASE_URL}/${CLIENT_ID}/sender`,
       {
         method: "POST",
         headers: {
