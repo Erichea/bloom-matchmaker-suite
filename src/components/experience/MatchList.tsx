@@ -43,6 +43,7 @@ export function MatchList({ title, matches, highlightNew, className, onSelect }:
           return (
             <button
               key={match.id}
+              type="button"
               className={cn(
                 "flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-surface p-3 text-left",
                 "transition-all duration-200 hover:border-[hsl(var(--brand-primary))]/40 hover:shadow-sm",
