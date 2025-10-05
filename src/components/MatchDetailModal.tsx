@@ -53,24 +53,13 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
       }
 
       try {
-        // Run diagnostic function
-        const { data: diagData, error: diagError } = await supabase
-          .rpc("debug_match_answers", {
-            p_user_id_1: user?.id,
-            p_user_id_2: otherProfile.user_id
+        // Use RPC function to bypass RLS and fetch profile answers
+        const { data, error } = await supabase
+          .rpc("get_matched_profile_answers", {
+            p_matched_user_id: otherProfile.user_id
           });
 
-        console.log("DIAGNOSTIC RESULTS:", diagData);
-        if (diagError) console.error("Diagnostic error:", diagError);
-
-        const { data, error } = await supabase
-          .from("profile_answers")
-          .select("question_id, answer")
-          .eq("user_id", otherProfile.user_id);
-
         if (error) throw error;
-
-        console.log("Raw profile_answers data:", data);
 
         // Convert array to object for easier access
         const answersMap: Record<string, any> = {};
@@ -78,8 +67,6 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
           answersMap[item.question_id] = item.answer;
         });
 
-        console.log("Profile answers map:", answersMap);
-        console.log("Looking for: alcohol, smoking, interests, mbti, relationship_keys");
         setProfileAnswers(answersMap);
       } catch (error) {
         console.error("Error fetching profile answers:", error);
