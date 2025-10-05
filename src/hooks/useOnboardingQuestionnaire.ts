@@ -173,8 +173,23 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
         const fields = question.profile_field_mapping.split(",");
         const updateData: any = {};
 
+        // Map display values to database enum values
+        const genderMap: Record<string, string> = {
+          'Man': 'male',
+          'Woman': 'female',
+          'Nonbinary': 'non_binary',
+        };
+
         if (fields.length === 1) {
-          updateData[fields[0]] = answer;
+          const field = fields[0];
+          let value = answer;
+
+          // Apply gender mapping if this is the gender field
+          if (field === 'gender' && typeof value === 'string' && genderMap[value]) {
+            value = genderMap[value];
+          }
+
+          updateData[field] = value;
         } else {
           // Handle multi-field questions (like name)
           fields.forEach((field, index) => {
