@@ -37,12 +37,20 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
   // Fetch profile answers when the modal opens
   useEffect(() => {
     const fetchProfileAnswers = async () => {
-      if (!match || !open) return;
+      if (!match || !open) {
+        console.log("Skipping fetch - match or open is false", { match: !!match, open });
+        return;
+      }
 
       const isProfile1 = match.profile_1_id === match?.current_profile_id;
       const otherProfile = isProfile1 ? match.profile_2 : match.profile_1;
 
-      if (!otherProfile?.user_id) return;
+      console.log("Fetching profile answers for:", otherProfile?.user_id);
+
+      if (!otherProfile?.user_id) {
+        console.log("No user_id found");
+        return;
+      }
 
       try {
         const { data, error } = await supabase
@@ -52,12 +60,16 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
 
         if (error) throw error;
 
+        console.log("Raw profile_answers data:", data);
+
         // Convert array to object for easier access
         const answersMap: Record<string, any> = {};
         data?.forEach((item) => {
           answersMap[item.question_id] = item.answer;
         });
 
+        console.log("Profile answers map:", answersMap);
+        console.log("Looking for: alcohol, smoking, interests, mbti, relationship_keys");
         setProfileAnswers(answersMap);
       } catch (error) {
         console.error("Error fetching profile answers:", error);
