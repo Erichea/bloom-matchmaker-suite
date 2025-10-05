@@ -42,25 +42,45 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
       const isProfile1 = match.profile_1_id === match?.current_profile_id;
       const otherProfile = isProfile1 ? match.profile_2 : match.profile_1;
 
-      if (!otherProfile?.user_id) return;
+      console.log("=== DEBUG: Match Detail Modal ===");
+      console.log("Match object:", match);
+      console.log("isProfile1:", isProfile1);
+      console.log("current_profile_id:", match?.current_profile_id);
+      console.log("profile_1_id:", match.profile_1_id);
+      console.log("profile_2_id:", match.profile_2_id);
+      console.log("otherProfile:", otherProfile);
+      console.log("otherProfile.user_id:", otherProfile?.user_id);
+
+      if (!otherProfile?.user_id) {
+        console.error("No user_id found in otherProfile!");
+        return;
+      }
 
       try {
+        console.log("Fetching profile_answers for user_id:", otherProfile.user_id);
+
         const { data, error } = await supabase
           .from("profile_answers")
           .select("question_id, answer")
           .eq("user_id", otherProfile.user_id);
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error from Supabase:", error);
+          throw error;
+        }
 
-        console.log("All profile answers for user:", data);
+        console.log("Profile answers from database:", data);
+        console.log("Number of answers found:", data?.length || 0);
 
         // Convert array to object for easier access
         const answersMap: Record<string, any> = {};
         data?.forEach((item) => {
+          console.log(`  - ${item.question_id}:`, item.answer);
           answersMap[item.question_id] = item.answer;
         });
 
-        console.log("Answers map:", answersMap);
+        console.log("Final answers map:", answersMap);
+        console.log("=== END DEBUG ===");
         setProfileAnswers(answersMap);
       } catch (error) {
         console.error("Error fetching profile answers:", error);
