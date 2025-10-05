@@ -267,9 +267,10 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
               return;
             }
 
-            // Valid date
+            // Valid date - format as YYYY-MM-DD for PostgreSQL DATE column
             setDateError("");
-            setLocalAnswer(testDate.toISOString());
+            const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            setLocalAnswer(formattedDate);
           } else {
             setDateError("");
             setLocalAnswer(null);

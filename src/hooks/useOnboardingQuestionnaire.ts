@@ -184,10 +184,16 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
           });
         }
 
-        await supabase
+        console.log('Updating profile with data:', updateData);
+        const { error: profileError } = await supabase
           .from("profiles")
           .update(updateData)
           .eq("user_id", userId);
+
+        if (profileError) {
+          console.error('Error updating profile:', profileError);
+          throw profileError;
+        }
       }
     } catch (error) {
       console.error("Error saving answer:", error);
