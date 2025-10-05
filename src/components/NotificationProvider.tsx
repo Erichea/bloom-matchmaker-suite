@@ -22,6 +22,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       wsURL="ws.eu.notificationapi.com"
       webPushOptInMessage={false} // We'll handle opt-in manually in settings
       customServiceWorkerPath="/notificationapi-service-worker.js"
+      debug={true} // Enable debug logging
     >
       {children}
     </NotificationAPIProvider>
