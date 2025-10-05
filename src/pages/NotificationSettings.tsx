@@ -91,26 +91,60 @@ export default function NotificationSettings() {
   const handleEnablePush = async () => {
     setSubscribing(true);
     try {
-      // Use NotificationAPI SDK to request permission
-      await notificationAPI?.askForWebPushPermission();
+      // Trigger NotificationAPI SDK permission flow
+      notificationAPI?.setWebPushOptIn(true);
 
-      // Update preferences in database
-      await supabase
-        .from("notification_preferences")
-        .update({
-          push_enabled: true,
-          push_subscribed_at: new Date().toISOString()
-        })
-        .eq("user_id", user!.id);
+      // Wait for user to respond to permission dialog
+      // The SDK will handle permission request, service worker, and subscription
+      const checkPermission = () => {
+        return new Promise<NotificationPermission>((resolve) => {
+          const interval = setInterval(() => {
+            if (Notification.permission !== 'default') {
+              clearInterval(interval);
+              resolve(Notification.permission);
+            }
+          }, 100);
 
-      setPushEnabled(true);
-      toast({
-        title: "Push notifications enabled",
-        description: "You'll now receive push notifications for important updates"
-      });
+          // Timeout after 30 seconds
+          setTimeout(() => {
+            clearInterval(interval);
+            resolve(Notification.permission);
+          }, 30000);
+        });
+      };
 
-      // Reload preferences
-      await loadPreferences();
+      const permission = await checkPermission();
+
+      if (permission === 'granted') {
+        // Update preferences in database
+        await supabase
+          .from("notification_preferences")
+          .update({
+            push_enabled: true,
+            push_subscribed_at: new Date().toISOString()
+          })
+          .eq("user_id", user!.id);
+
+        setPushEnabled(true);
+        toast({
+          title: "Push notifications enabled",
+          description: "You'll now receive push notifications for important updates"
+        });
+
+        await loadPreferences();
+      } else if (permission === 'denied') {
+        toast({
+          title: "Permission denied",
+          description: "Please enable notifications in your browser settings",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "No response",
+          description: "Please try again and allow notifications",
+          variant: "destructive"
+        });
+      }
     } catch (error: any) {
       console.error("Error enabling push:", error);
       toast({
