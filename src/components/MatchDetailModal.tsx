@@ -37,23 +37,14 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
   // Fetch profile answers when the modal opens
   useEffect(() => {
     const fetchProfileAnswers = async () => {
-      if (!match || !open) {
-        console.log("Skipping fetch - match or open is false", { match: !!match, open });
-        return;
-      }
+      if (!match || !open) return;
 
       const isProfile1 = match.profile_1_id === match?.current_profile_id;
       const otherProfile = isProfile1 ? match.profile_2 : match.profile_1;
 
-      console.log("Fetching profile answers for:", otherProfile?.user_id);
-
-      if (!otherProfile?.user_id) {
-        console.log("No user_id found");
-        return;
-      }
+      if (!otherProfile?.user_id) return;
 
       try {
-        // Use RPC function to bypass RLS and fetch profile answers
         const { data, error } = await supabase
           .rpc("get_matched_profile_answers", {
             p_matched_user_id: otherProfile.user_id
