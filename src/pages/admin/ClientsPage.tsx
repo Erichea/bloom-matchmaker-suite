@@ -240,6 +240,7 @@ const ClientsPage = () => {
 
   const [matchDetailsOpen, setMatchDetailsOpen] = useState(false);
   const [selectedMatchForDetails, setSelectedMatchForDetails] = useState<MatchSummary | null>(null);
+  const [selectedMatchAnswers, setSelectedMatchAnswers] = useState<ProfileAnswers>({});
   const [suggestMatchesOpen, setSuggestMatchesOpen] = useState(false);
   const [matchSuggestions, setMatchSuggestions] = useState<MatchSummary[]>([]);
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
@@ -366,22 +367,62 @@ const ClientsPage = () => {
       // Filter out already suggested profiles and limit to top suggestions
       const availableProfiles = (profiles || []).filter((p: any) => !p.is_already_suggested).slice(0, 10);
 
-      // Create match suggestion objects
-      const suggestions: MatchSummary[] = availableProfiles.map((profile: any) => ({
-        match_id: `suggestion_${profile.id}`,
-        match_status: null,
-        compatibility_score: null, // Will be calculated on demand
-        other_profile: {
-          id: profile.id,
-          first_name: profile.first_name,
-          last_name: profile.last_name,
-          email: profile.email,
-          city: profile.city,
-          country: profile.country,
-          profession: profile.profession,
-          date_of_birth: profile.date_of_birth,
-        },
-      }));
+      // Get user_ids for fetching answers
+      const { data: profileData, error: profileDataError } = await supabase
+        .from("profiles")
+        .select("id, user_id")
+        .in("id", availableProfiles.map((p: any) => p.id));
+
+      if (profileDataError) throw profileDataError;
+
+      const userIdMap = (profileData || []).reduce((acc: Record<string, string>, p: any) => {
+        acc[p.id] = p.user_id;
+        return acc;
+      }, {});
+
+      // Get all profile answers for available profiles to calculate compatibility
+      const userIds = Object.values(userIdMap);
+      const { data: answersData, error: answersError } = await supabase
+        .from("profile_answers")
+        .select("user_id, question_id, answer")
+        .in("user_id", userIds);
+
+      if (answersError) throw answersError;
+
+      // Group answers by user_id
+      const answersByUser = (answersData || []).reduce((acc: Record<string, ProfileAnswers>, row: any) => {
+        if (!acc[row.user_id]) acc[row.user_id] = {};
+        acc[row.user_id][row.question_id] = row.answer;
+        return acc;
+      }, {});
+
+      // Calculate compatibility for each suggestion
+      const suggestions: MatchSummary[] = availableProfiles.map((profile: any) => {
+        const userId = userIdMap[profile.id];
+        const matchAnswers = answersByUser[userId] || {};
+
+        // Calculate compatibility using the existing function
+        const compatibility = calculateBidirectionalCompatibility(questionnaireAnswers, matchAnswers);
+
+        return {
+          match_id: `suggestion_${profile.id}`,
+          match_status: null,
+          compatibility_score: compatibility.average,
+          other_profile: {
+            id: profile.id,
+            first_name: profile.first_name,
+            last_name: profile.last_name,
+            email: profile.email,
+            city: profile.city,
+            country: profile.country,
+            profession: profile.profession,
+            date_of_birth: profile.date_of_birth,
+          },
+        };
+      });
+
+      // Sort by compatibility score descending
+      suggestions.sort((a, b) => (b.compatibility_score || 0) - (a.compatibility_score || 0));
 
       setMatchSuggestions(suggestions);
     } catch (error: any) {
@@ -390,7 +431,7 @@ const ClientsPage = () => {
     } finally {
       setSuggestionsLoading(false);
     }
-  }, []);
+  }, [questionnaireAnswers]);
 
   const loadClientDetails = useCallback(
     async (profileId: string) => {
@@ -1506,14 +1547,45 @@ const ClientsPage = () => {
                                     const location = formatMatchLocation(other);
                                     const statusMeta = getMatchStatusMeta(match.match_status);
 
+                                    const handleActiveMatchClick = async () => {
+                                      // Fetch match answers before opening modal
+                                      try {
+                                        const { data: matchProfileData, error: profileError } = await supabase
+                                          .from("profiles")
+                                          .select("user_id")
+                                          .eq("id", other?.id)
+                                          .single();
+
+                                        if (profileError) throw profileError;
+
+                                        const { data: matchAnswers, error: answersError } = await supabase
+                                          .from("profile_answers")
+                                          .select("question_id, answer")
+                                          .eq("user_id", matchProfileData.user_id);
+
+                                        if (answersError) throw answersError;
+
+                                        const answersMap = (matchAnswers || []).reduce<ProfileAnswers>((acc, curr) => {
+                                          acc[curr.question_id] = curr.answer;
+                                          return acc;
+                                        }, {});
+
+                                        setSelectedMatchAnswers(answersMap);
+                                        setSelectedMatchForDetails(match);
+                                        setMatchDetailsOpen(true);
+                                      } catch (error) {
+                                        console.error("Failed to load match answers:", error);
+                                        setSelectedMatchAnswers({});
+                                        setSelectedMatchForDetails(match);
+                                        setMatchDetailsOpen(true);
+                                      }
+                                    };
+
                                     return (
                                       <Card
                                         key={match.match_id}
                                         className="cursor-pointer hover:border-primary/50 transition-colors"
-                                        onClick={() => {
-                                          setSelectedMatchForDetails(match);
-                                          setMatchDetailsOpen(true);
-                                        }}
+                                        onClick={handleActiveMatchClick}
                                       >
                                         <CardContent className="p-4">
                                           <div className="flex items-start gap-3">
@@ -1582,20 +1654,47 @@ const ClientsPage = () => {
                                       .slice(0, 2)
                                       .toUpperCase() || "??";
                                     const location = formatMatchLocation(other);
+                                    const compatibilityScore = suggestion.compatibility_score || 0;
 
-                                    // Calculate bidirectional compatibility
-                                    // For now, show placeholder values
-                                    const clientToMatchScore = Math.floor(Math.random() * 40) + 60; // 60-100%
-                                    const matchToClientScore = Math.floor(Math.random() * 40) + 60; // 60-100%
+                                    const handleSuggestionClick = async () => {
+                                      // Fetch match answers before opening modal
+                                      try {
+                                        const { data: matchProfileData, error: profileError } = await supabase
+                                          .from("profiles")
+                                          .select("user_id")
+                                          .eq("id", other?.id)
+                                          .single();
+
+                                        if (profileError) throw profileError;
+
+                                        const { data: matchAnswers, error: answersError } = await supabase
+                                          .from("profile_answers")
+                                          .select("question_id, answer")
+                                          .eq("user_id", matchProfileData.user_id);
+
+                                        if (answersError) throw answersError;
+
+                                        const answersMap = (matchAnswers || []).reduce<ProfileAnswers>((acc, curr) => {
+                                          acc[curr.question_id] = curr.answer;
+                                          return acc;
+                                        }, {});
+
+                                        setSelectedMatchAnswers(answersMap);
+                                        setSelectedMatchForDetails(suggestion);
+                                        setMatchDetailsOpen(true);
+                                      } catch (error) {
+                                        console.error("Failed to load match answers:", error);
+                                        setSelectedMatchAnswers({});
+                                        setSelectedMatchForDetails(suggestion);
+                                        setMatchDetailsOpen(true);
+                                      }
+                                    };
 
                                     return (
                                       <Card
                                         key={suggestion.match_id}
                                         className="cursor-pointer hover:border-primary/50 transition-colors"
-                                        onClick={() => {
-                                          setSelectedMatchForDetails(suggestion);
-                                          setMatchDetailsOpen(true);
-                                        }}
+                                        onClick={handleSuggestionClick}
                                       >
                                         <CardContent className="p-4">
                                           <div className="flex items-start gap-3 mb-3">
@@ -1613,25 +1712,12 @@ const ClientsPage = () => {
                                             </div>
                                           </div>
 
-                                          {/* Bidirectional Compatibility Bars */}
-                                          <div className="space-y-2">
-                                            <div>
-                                              <div className="flex items-center justify-between mb-1">
-                                                <span className="text-xs text-muted-foreground">
-                                                  {currentFullName}'s fit
-                                                </span>
-                                                <span className="text-xs font-semibold">{clientToMatchScore}%</span>
-                                              </div>
-                                              <Progress value={clientToMatchScore} className="h-2" />
-                                            </div>
-                                            <div>
-                                              <div className="flex items-center justify-between mb-1">
-                                                <span className="text-xs text-muted-foreground">
-                                                  {fullName}'s fit
-                                                </span>
-                                                <span className="text-xs font-semibold">{matchToClientScore}%</span>
-                                              </div>
-                                              <Progress value={matchToClientScore} className="h-2" />
+                                          {/* Single Compatibility Score */}
+                                          <div className="flex items-center justify-between">
+                                            <span className="text-xs text-muted-foreground">Compatibility</span>
+                                            <div className="flex items-center gap-2">
+                                              <Progress value={compatibilityScore} className="h-2 w-24" />
+                                              <span className="text-sm font-semibold w-10 text-right">{compatibilityScore}%</span>
                                             </div>
                                           </div>
                                         </CardContent>
@@ -1761,6 +1847,7 @@ const ClientsPage = () => {
           onClose={() => {
             setMatchDetailsOpen(false);
             setSelectedMatchForDetails(null);
+            setSelectedMatchAnswers({});
           }}
           clientProfile={{
             id: selectedProfile.id,
@@ -1776,7 +1863,7 @@ const ClientsPage = () => {
           }}
           compatibilityScore={selectedMatchForDetails.compatibility_score || 0}
           clientAnswers={questionnaireAnswers}
-          matchAnswers={{}}
+          matchAnswers={selectedMatchAnswers}
           questions={questionnaireQuestions}
         />
       )}
