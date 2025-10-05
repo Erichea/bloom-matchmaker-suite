@@ -176,7 +176,7 @@ export default function ProfileEditPage() {
   const questionsByCategory = useMemo(() => {
     return questionnaireCategories.map(category => {
       const categoryQuestions = questions.filter(q =>
-        category.questionIds.includes(q.id as any)
+        category.questionIds.includes(q.id as string)
       );
       return {
         categoryName: category.name,

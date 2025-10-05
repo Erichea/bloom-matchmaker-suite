@@ -24,7 +24,7 @@ export interface SlashCommand {
 const toggleBlock = (editor: Editor, type: string) => {
   Transforms.setNodes(
     editor,
-    { type },
+    { type } as Partial<SlateElement>,
     {
       match: (node) => SlateElement.isElement(node) && Editor.isBlock(editor, node),
     },
@@ -33,7 +33,7 @@ const toggleBlock = (editor: Editor, type: string) => {
 
 const isListActive = (editor: Editor, listType: string) => {
   const [match] = Editor.nodes(editor, {
-    match: (node) => SlateElement.isElement(node) && node.type === listType,
+    match: (node) => SlateElement.isElement(node) && (node as any).type === listType,
   });
   return Boolean(match);
 };
@@ -41,7 +41,7 @@ const isListActive = (editor: Editor, listType: string) => {
 const unwrapLists = (editor: Editor) => {
   const listTypes = new Set(["ul", "ol"]);
   Transforms.unwrapNodes(editor, {
-    match: (node) => SlateElement.isElement(node) && listTypes.has(node.type as string),
+    match: (node) => SlateElement.isElement(node) && listTypes.has((node as any).type as string),
     split: true,
   });
 };
@@ -51,11 +51,11 @@ const toggleList = (editor: Editor, listType: "ul" | "ol") => {
   unwrapLists(editor);
   Transforms.setNodes(editor, {
     type: isActive ? "p" : "li",
-  });
+  } as Partial<SlateElement>);
   if (!isActive) {
     const list = { type: listType, children: [] as SlateElement[] } as SlateElement;
     Transforms.wrapNodes(editor, list, {
-      match: (node) => SlateElement.isElement(node) && node.type === "li",
+      match: (node) => SlateElement.isElement(node) && (node as any).type === "li",
     });
   }
 };

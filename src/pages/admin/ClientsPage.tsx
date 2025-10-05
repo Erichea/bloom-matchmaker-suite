@@ -1358,7 +1358,7 @@ const ClientsPage = () => {
                                   <Accordion type="multiple" className="space-y-2">
                                     {questionnaireCategories.map((category) => {
                                       const categoryQuestions = questionnaireQuestions.filter(
-                                        (question) => category.questionIds.includes(question.id as any),
+                                        (question) => category.questionIds.includes(question.id as string),
                                       );
                                       const answeredCount = categoryQuestions.filter(
                                         (question) => questionnaireAnswers[question.id],

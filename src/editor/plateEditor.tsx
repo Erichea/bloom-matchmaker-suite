@@ -28,12 +28,15 @@ interface NotionLikeEditorProps {
   initialValue: any[];
   onChange?: (value: any[], json: string, editor: Editor) => void;
   placeholder?: string;
+  className?: string;
 }
 
 type SlashMenuPosition = { top: number; left: number } | null;
 
+type CustomElement = SlateElement & { type?: string };
+
 type RenderElementProps = {
-  element: SlateElement;
+  element: CustomElement;
   attributes: Record<string, unknown>;
   children: ReactNode;
 };
@@ -126,7 +129,7 @@ export const NotionLikeEditor = ({
   const editor = usePlateEditor({
     plugins: [ParagraphPlugin],
     value: initialValue,
-  });
+  }) as Editor | null;
 
   const [slashState, setSlashState] = useState<SlashState>({
     open: false,
@@ -147,7 +150,7 @@ export const NotionLikeEditor = ({
       const { removeCommand = true } = options;
       if (removeCommand) {
         const { start } = slashState;
-        if (start && editor.selection) {
+        if (start && editor && editor.selection) {
           const range = { anchor: start, focus: editor.selection.anchor };
           Transforms.delete(editor, { at: range });
         }
@@ -160,7 +163,7 @@ export const NotionLikeEditor = ({
 
   const applySlashCommand = useCallback(
     (command: SlashCommand) => {
-      if (!slashState.start || !editor.selection) return;
+      if (!editor || !slashState.start || !editor.selection) return;
       const range = { anchor: slashState.start, focus: editor.selection.anchor };
       Transforms.delete(editor, { at: range });
       setSlashState({ open: false, start: null, query: "", highlight: 0 });
@@ -189,7 +192,7 @@ export const NotionLikeEditor = ({
   }, [filteredCommands.length, slashState.open, slashState.highlight]);
 
   const updateSlashPosition = useCallback(() => {
-    if (!slashState.open || !slashState.start || !editor.selection || !Range.isCollapsed(editor.selection)) {
+    if (!editor || !slashState.open || !slashState.start || !editor.selection || !Range.isCollapsed(editor.selection)) {
       return;
     }
 
@@ -225,7 +228,7 @@ export const NotionLikeEditor = ({
   }, [editor, slashState]);
 
   useEffect(() => {
-    if (!slashState.open) return;
+    if (!editor || !slashState.open) return;
     if (!slashState.start || !editor.selection || !Range.isCollapsed(editor.selection)) {
       closeSlashMenu({ removeCommand: false });
       return;
@@ -315,7 +318,7 @@ export const NotionLikeEditor = ({
         !event.metaKey &&
         !slashState.open
       ) {
-        if (!editor.selection || !Range.isCollapsed(editor.selection)) return;
+        if (!editor || !editor.selection || !Range.isCollapsed(editor.selection)) return;
         event.preventDefault();
         Transforms.insertText(editor, "/");
         const anchorAfterInsert = editor.selection?.anchor;
@@ -329,7 +332,7 @@ export const NotionLikeEditor = ({
   );
 
   return (
-    <Plate editor={editor} onChange={handleChange}>
+    <Plate editor={editor as any} onChange={handleChange as any}>
       <PlateContent
         className="slate-editor h-full focus:outline-none"
         placeholder={placeholder}
