@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ComponentType } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   flexRender,
   getCoreRowModel,
@@ -212,6 +212,7 @@ const getPrimaryPhoto = (photos?: ProfilePhoto[] | null) => {
 const ClientsPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const userId = user?.id ?? null;
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -1429,9 +1430,22 @@ const ClientsPage = () => {
                             Try again
                           </Button>
                         </div>
-                      ) : matches.length ? (
+                      ) : (
                         <div className="space-y-4">
-                          {matches.map((match) => {
+                          <div className="flex justify-end">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => selectedProfile && navigate(`/admin/matches/suggest/${selectedProfile.id}`)}
+                              className="gap-2"
+                            >
+                              <Users className="h-4 w-4" />
+                              Suggest Matches
+                            </Button>
+                          </div>
+                          {matches.length ? (
+                            <div className="space-y-4">
+                              {matches.map((match) => {
                             const other = match.other_profile;
                             const fullName = formatMatchName(other);
                             const initials = fullName
@@ -1480,12 +1494,14 @@ const ClientsPage = () => {
                                   </div>
                                 </CardContent>
                               </Card>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <div className="flex h-full items-center justify-center rounded-md border border-dashed border-border text-sm text-muted-foreground">
-                          No matches recorded yet for this client.
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <div className="flex h-full items-center justify-center rounded-md border border-dashed border-border text-sm text-muted-foreground">
+                              No matches recorded yet for this client.
+                            </div>
+                          )}
                         </div>
                       )}
                     </TabsContent>
