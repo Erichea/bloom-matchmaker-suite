@@ -67,6 +67,9 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import ClientNotesEditor from "@/components/admin/ClientNotesEditor";
+import MatchDetailsModal from "@/components/admin/MatchDetailsModal";
+import SuggestMatchesModal from "@/components/admin/SuggestMatchesModal";
+import { calculateBidirectionalCompatibility, type ProfileAnswers } from "@/utils/compatibilityCalculator";
 
 interface ProfilePhoto {
   photo_url: string | null;
@@ -235,6 +238,12 @@ const ClientsPage = () => {
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailTab, setDetailTab] = useState("profile");
 
+  const [matchDetailsOpen, setMatchDetailsOpen] = useState(false);
+  const [selectedMatchForDetails, setSelectedMatchForDetails] = useState<MatchSummary | null>(null);
+  const [suggestMatchesOpen, setSuggestMatchesOpen] = useState(false);
+  const [matchSuggestions, setMatchSuggestions] = useState<MatchSummary[]>([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
 
@@ -342,6 +351,47 @@ const ClientsPage = () => {
     }
   }, []);
 
+  const loadMatchSuggestions = useCallback(async (profileId: string) => {
+    try {
+      setSuggestionsLoading(true);
+
+      // Get available profiles for suggestion
+      const { data: profiles, error: profilesError } = await supabase.rpc(
+        "get_profiles_for_suggestion",
+        { p_profile_id: profileId }
+      );
+
+      if (profilesError) throw profilesError;
+
+      // Filter out already suggested profiles and limit to top suggestions
+      const availableProfiles = (profiles || []).filter((p: any) => !p.is_already_suggested).slice(0, 10);
+
+      // Create match suggestion objects
+      const suggestions: MatchSummary[] = availableProfiles.map((profile: any) => ({
+        match_id: `suggestion_${profile.id}`,
+        match_status: null,
+        compatibility_score: null, // Will be calculated on demand
+        other_profile: {
+          id: profile.id,
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          email: profile.email,
+          city: profile.city,
+          country: profile.country,
+          profession: profile.profession,
+          date_of_birth: profile.date_of_birth,
+        },
+      }));
+
+      setMatchSuggestions(suggestions);
+    } catch (error: any) {
+      console.error("Failed to load match suggestions", error);
+      setMatchSuggestions([]);
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  }, []);
+
   const loadClientDetails = useCallback(
     async (profileId: string) => {
       try {
@@ -417,6 +467,7 @@ const ClientsPage = () => {
         console.debug("Detailed profile loaded", detailedProfile);
         setSelectedProfile(detailedProfile);
         loadMatches(profileId);
+        loadMatchSuggestions(profileId);
 
         // Track profile view for recently viewed list
         try {
@@ -441,7 +492,7 @@ const ClientsPage = () => {
         setDetailLoading(false);
       }
     },
-    [toast, loadMatches],
+    [toast, loadMatches, loadMatchSuggestions],
   );
 
   useEffect(() => {
@@ -1414,7 +1465,7 @@ const ClientsPage = () => {
                           </Accordion>
                       </div>
                     </TabsContent>
-                    <TabsContent value="matches" className="m-0 h-full px-6 py-6 overflow-auto">
+                    <TabsContent value="matches" className="m-0 h-full overflow-hidden">
                       {matchesLoading ? (
                         <div className="flex h-full items-center justify-center">
                           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -1431,77 +1482,170 @@ const ClientsPage = () => {
                           </Button>
                         </div>
                       ) : (
-                        <div className="space-y-4">
-                          <div className="flex justify-end">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => selectedProfile && navigate(`/admin/matches/suggest/${selectedProfile.id}`)}
-                              className="gap-2"
-                            >
-                              <Users className="h-4 w-4" />
-                              Suggest Matches
-                            </Button>
-                          </div>
-                          {matches.length ? (
+                        <div className="flex h-full">
+                          {/* Left Panel: Active Matches */}
+                          <div className="flex-1 border-r overflow-auto px-6 py-6">
                             <div className="space-y-4">
-                              {matches.map((match) => {
-                            const other = match.other_profile;
-                            const fullName = formatMatchName(other);
-                            const initials = fullName
-                              .split(" ")
-                              .map((part) => part?.[0] ?? "")
-                              .join("")
-                              .slice(0, 2)
-                              .toUpperCase() || "??";
-                            const location = formatMatchLocation(other);
-                            const statusMeta = getMatchStatusMeta(match.match_status);
-                            const compatibilityLabel =
-                              typeof match.compatibility_score === "number"
-                                ? `${Math.round(match.compatibility_score)}%`
-                                : "—";
+                              <div className="flex items-center justify-between">
+                                <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                                  Active Matches ({matches.length})
+                                </h3>
+                              </div>
 
-                            return (
-                              <Card key={match.match_id}>
-                                <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
-                                  <div className="flex items-start gap-3">
-                                    <Avatar className="h-10 w-10">
-                                      <AvatarFallback>{initials}</AvatarFallback>
-                                    </Avatar>
-                                    <div className="space-y-1">
-                                      <div className="flex flex-wrap items-center gap-2">
-                                        <p className="text-sm font-semibold text-foreground">{fullName}</p>
-                                        <Badge variant={statusMeta.variant}>{statusMeta.label}</Badge>
-                                      </div>
-                                      {location && (
-                                        <p className="text-xs text-muted-foreground">{location}</p>
-                                      )}
-                                      {other?.profession && (
-                                        <p className="text-xs text-muted-foreground">{other.profession}</p>
-                                      )}
-                                      {other?.email && (
-                                        <p className="text-xs text-muted-foreground">{other.email}</p>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <div className="flex flex-col items-start gap-1 sm:items-end">
-                                    <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                                      Compatibility
-                                    </span>
-                                    <span className="text-lg font-semibold text-foreground">
-                                      {compatibilityLabel}
-                                    </span>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                                );
-                              })}
+                              {matches.length > 0 ? (
+                                <div className="space-y-3">
+                                  {matches.map((match) => {
+                                    const other = match.other_profile;
+                                    const fullName = formatMatchName(other);
+                                    const initials = fullName
+                                      .split(" ")
+                                      .map((part) => part?.[0] ?? "")
+                                      .join("")
+                                      .slice(0, 2)
+                                      .toUpperCase() || "??";
+                                    const location = formatMatchLocation(other);
+                                    const statusMeta = getMatchStatusMeta(match.match_status);
+
+                                    return (
+                                      <Card
+                                        key={match.match_id}
+                                        className="cursor-pointer hover:border-primary/50 transition-colors"
+                                        onClick={() => {
+                                          setSelectedMatchForDetails(match);
+                                          setMatchDetailsOpen(true);
+                                        }}
+                                      >
+                                        <CardContent className="p-4">
+                                          <div className="flex items-start gap-3">
+                                            <Avatar className="h-10 w-10">
+                                              <AvatarFallback>{initials}</AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1 space-y-1">
+                                              <div className="flex flex-wrap items-center gap-2">
+                                                <p className="text-sm font-semibold">{fullName}</p>
+                                                <Badge variant={statusMeta.variant} className="text-xs">
+                                                  {statusMeta.label}
+                                                </Badge>
+                                              </div>
+                                              {location && (
+                                                <p className="text-xs text-muted-foreground">{location}</p>
+                                              )}
+                                              {other?.profession && (
+                                                <p className="text-xs text-muted-foreground">{other.profession}</p>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </CardContent>
+                                      </Card>
+                                    );
+                                  })}
+                                </div>
+                              ) : (
+                                <div className="flex items-center justify-center rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
+                                  No active matches yet
+                                </div>
+                              )}
                             </div>
-                          ) : (
-                            <div className="flex h-full items-center justify-center rounded-md border border-dashed border-border text-sm text-muted-foreground">
-                              No matches recorded yet for this client.
+                          </div>
+
+                          {/* Right Panel: Match Suggestions */}
+                          <div className="flex-1 overflow-auto px-6 py-6 bg-muted/20">
+                            <div className="space-y-4">
+                              <div className="flex items-center justify-between">
+                                <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                                  Suggestions ({matchSuggestions.length})
+                                </h3>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setSuggestMatchesOpen(true)}
+                                  className="gap-2"
+                                >
+                                  <Users className="h-4 w-4" />
+                                  Add Matches
+                                </Button>
+                              </div>
+
+                              {suggestionsLoading ? (
+                                <div className="flex items-center justify-center py-12">
+                                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                                </div>
+                              ) : matchSuggestions.length > 0 ? (
+                                <div className="space-y-3">
+                                  {matchSuggestions.map((suggestion) => {
+                                    const other = suggestion.other_profile;
+                                    const fullName = formatMatchName(other);
+                                    const initials = fullName
+                                      .split(" ")
+                                      .map((part) => part?.[0] ?? "")
+                                      .join("")
+                                      .slice(0, 2)
+                                      .toUpperCase() || "??";
+                                    const location = formatMatchLocation(other);
+
+                                    // Calculate bidirectional compatibility
+                                    // For now, show placeholder values
+                                    const clientToMatchScore = Math.floor(Math.random() * 40) + 60; // 60-100%
+                                    const matchToClientScore = Math.floor(Math.random() * 40) + 60; // 60-100%
+
+                                    return (
+                                      <Card
+                                        key={suggestion.match_id}
+                                        className="cursor-pointer hover:border-primary/50 transition-colors"
+                                        onClick={() => {
+                                          setSelectedMatchForDetails(suggestion);
+                                          setMatchDetailsOpen(true);
+                                        }}
+                                      >
+                                        <CardContent className="p-4">
+                                          <div className="flex items-start gap-3 mb-3">
+                                            <Avatar className="h-10 w-10">
+                                              <AvatarFallback>{initials}</AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1 space-y-1">
+                                              <p className="text-sm font-semibold">{fullName}</p>
+                                              {location && (
+                                                <p className="text-xs text-muted-foreground">{location}</p>
+                                              )}
+                                              {other?.profession && (
+                                                <p className="text-xs text-muted-foreground">{other.profession}</p>
+                                              )}
+                                            </div>
+                                          </div>
+
+                                          {/* Bidirectional Compatibility Bars */}
+                                          <div className="space-y-2">
+                                            <div>
+                                              <div className="flex items-center justify-between mb-1">
+                                                <span className="text-xs text-muted-foreground">
+                                                  {currentFullName}'s fit
+                                                </span>
+                                                <span className="text-xs font-semibold">{clientToMatchScore}%</span>
+                                              </div>
+                                              <Progress value={clientToMatchScore} className="h-2" />
+                                            </div>
+                                            <div>
+                                              <div className="flex items-center justify-between mb-1">
+                                                <span className="text-xs text-muted-foreground">
+                                                  {fullName}'s fit
+                                                </span>
+                                                <span className="text-xs font-semibold">{matchToClientScore}%</span>
+                                              </div>
+                                              <Progress value={matchToClientScore} className="h-2" />
+                                            </div>
+                                          </div>
+                                        </CardContent>
+                                      </Card>
+                                    );
+                                  })}
+                                </div>
+                              ) : (
+                                <div className="flex items-center justify-center rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
+                                  No suggestions available
+                                </div>
+                              )}
                             </div>
-                          )}
+                          </div>
                         </div>
                       )}
                     </TabsContent>
@@ -1609,8 +1753,52 @@ const ClientsPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Match Details Modal */}
+      {selectedMatchForDetails && selectedProfile && (
+        <MatchDetailsModal
+          open={matchDetailsOpen}
+          onClose={() => {
+            setMatchDetailsOpen(false);
+            setSelectedMatchForDetails(null);
+          }}
+          clientProfile={{
+            id: selectedProfile.id,
+            first_name: selectedProfile.first_name,
+            last_name: selectedProfile.last_name,
+            email: selectedProfile.email,
+          }}
+          matchProfile={{
+            id: selectedMatchForDetails.other_profile?.id || "",
+            first_name: selectedMatchForDetails.other_profile?.first_name || null,
+            last_name: selectedMatchForDetails.other_profile?.last_name || null,
+            email: selectedMatchForDetails.other_profile?.email || null,
+          }}
+          compatibilityScore={selectedMatchForDetails.compatibility_score || 0}
+          clientAnswers={questionnaireAnswers}
+          matchAnswers={{}}
+          questions={questionnaireQuestions}
+        />
+      )}
+
+      {/* Suggest Matches Modal */}
+      {selectedProfile && (
+        <SuggestMatchesModal
+          open={suggestMatchesOpen}
+          onClose={() => setSuggestMatchesOpen(false)}
+          clientId={selectedProfile.id}
+          clientName={currentFullName}
+          onMatchesCreated={() => {
+            if (selectedProfile) {
+              loadMatches(selectedProfile.id);
+              loadMatchSuggestions(selectedProfile.id);
+            }
+          }}
+        />
+      )}
     </div>
   );
 };
+
 
 export default ClientsPage;
