@@ -98,10 +98,10 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/notification-debug" element={<NotificationDebug />} />
-            <Route path="/client/profile/edit" element={<ProfileEditPage />} />
-            <Route path="/client/dashboard" element={<ClientDashboard />} />
-            <Route path="/client/updates" element={<ClientUpdates />} />
-            <Route path="/client/profile" element={<ProfileEditPage />} />
+            <Route path="/client/profile/edit" element={<ProtectedRoute><ProfileEditPage /></ProtectedRoute>} />
+            <Route path="/client/dashboard" element={<ProtectedRoute><ClientDashboard /></ProtectedRoute>} />
+            <Route path="/client/updates" element={<ProtectedRoute><ClientUpdates /></ProtectedRoute>} />
+            <Route path="/client/profile" element={<ProtectedRoute><ProfileEditPage /></ProtectedRoute>} />
             <Route path="/client/settings/notifications" element={
               <ProtectedRoute>
                 <NotificationSettings />
