@@ -217,8 +217,8 @@ async function handleSend(
     if (webPush) {
       // Direct web_push sending (no template required)
       requestBody = {
-        notificationId: 'test_notification',
-        user: { id: userId },
+        type: 'direct_web_push',
+        to: { id: userId },
         web_push: webPush
       };
     } else if (templateId) {
