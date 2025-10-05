@@ -352,7 +352,7 @@ const ClientsPage = () => {
     }
   }, []);
 
-  const loadMatchSuggestions = useCallback(async (profileId: string) => {
+  const loadMatchSuggestions = useCallback(async (profileId: string, clientAnswers: ProfileAnswers) => {
     try {
       setSuggestionsLoading(true);
 
@@ -402,7 +402,7 @@ const ClientsPage = () => {
         const matchAnswers = answersByUser[userId] || {};
 
         // Calculate compatibility using the existing function
-        const compatibility = calculateBidirectionalCompatibility(questionnaireAnswers, matchAnswers);
+        const compatibility = calculateBidirectionalCompatibility(clientAnswers, matchAnswers);
 
         return {
           match_id: `suggestion_${profile.id}`,
@@ -431,7 +431,7 @@ const ClientsPage = () => {
     } finally {
       setSuggestionsLoading(false);
     }
-  }, [questionnaireAnswers]);
+  }, []);
 
   const loadClientDetails = useCallback(
     async (profileId: string) => {
@@ -508,7 +508,7 @@ const ClientsPage = () => {
         console.debug("Detailed profile loaded", detailedProfile);
         setSelectedProfile(detailedProfile);
         loadMatches(profileId);
-        loadMatchSuggestions(profileId);
+        loadMatchSuggestions(profileId, answersMap);
 
         // Track profile view for recently viewed list
         try {
@@ -1878,7 +1878,7 @@ const ClientsPage = () => {
           onMatchesCreated={() => {
             if (selectedProfile) {
               loadMatches(selectedProfile.id);
-              loadMatchSuggestions(selectedProfile.id);
+              loadMatchSuggestions(selectedProfile.id, questionnaireAnswers);
             }
           }}
         />
