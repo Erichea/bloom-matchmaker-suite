@@ -11,6 +11,7 @@ import ClientDashboard from "./pages/ClientDashboard";
 import AuthPage from "./pages/AuthPage";
 import ProfileSetup from "./pages/ProfileSetup";
 import OnboardingFlow from "./pages/OnboardingFlow";
+import NotificationDebug from "./pages/NotificationDebug";
 import ProfileEditPage from "./pages/ProfileEditPage";
 import NotFound from "./pages/NotFound";
 import ClientsPage from "./pages/admin/ClientsPage";
@@ -96,6 +97,7 @@ const App = () => (
                 <OnboardingFlow />
               </ProtectedRoute>
             } />
+            <Route path="/notification-debug" element={<NotificationDebug />} />
             <Route path="/client/profile/edit" element={<ProfileEditPage />} />
             <Route path="/client/dashboard" element={<ClientDashboard />} />
             <Route path="/client/updates" element={<ClientUpdates />} />

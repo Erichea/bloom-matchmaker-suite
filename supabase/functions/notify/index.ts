@@ -23,6 +23,14 @@ const CLIENT_ID = Deno.env.get("NOTIFICATION_API_CLIENT_ID")!;
 const SECRET_KEY = Deno.env.get("NOTIFICATION_API_SECRET")!;
 const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY") || "";
 
+interface PushSubscriptionJSON {
+  endpoint: string;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+}
+
 interface NotificationPayload {
   action: "get-config" | "subscribe" | "unsubscribe" | "send";
   userId?: string;
@@ -166,10 +174,10 @@ async function handleSubscribe(
       JSON.stringify({ success: true }),
       { headers: corsHeaders() }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("[notify] Subscribe error:", error);
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ success: false, error: error?.message || "Unknown error" }),
       { status: 500, headers: corsHeaders() }
     );
   }
@@ -193,10 +201,10 @@ async function handleUnsubscribe(userId: string): Promise<Response> {
       JSON.stringify({ success: true }),
       { headers: corsHeaders() }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("[notify] Unsubscribe error:", error);
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ success: false, error: error?.message || "Unknown error" }),
       { status: 500, headers: corsHeaders() }
     );
   }
@@ -271,10 +279,10 @@ async function handleSend(
       JSON.stringify({ success: true, data: result }),
       { headers: corsHeaders() }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("[notify] Send error:", error);
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ success: false, error: error?.message || "Unknown error" }),
       { status: 500, headers: corsHeaders() }
     );
   }
@@ -335,18 +343,18 @@ serve(async (req: Request) => {
           { status: 400, headers: corsHeaders() }
         );
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("[notify] Error:", error);
     console.error("[notify] Error details:", {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
+      message: error?.message,
+      stack: error?.stack,
+      name: error?.name
     });
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message,
-        details: error.name
+        error: error?.message || "Unknown error",
+        details: error?.name || "Error"
       }),
       { status: 500, headers: corsHeaders() }
     );
