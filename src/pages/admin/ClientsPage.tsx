@@ -998,19 +998,7 @@ const ClientsPage = () => {
     }
   }, [reduceNodeToText, selectedProfile?.admin_notes]);
 
-  const handleNotesSaved = useCallback(
-    ({ content, savedAt }: { content: string; savedAt: string }) => {
-      setSelectedProfile((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          admin_notes: content,
-          updated_at: savedAt,
-        };
-      });
-    },
-    [setSelectedProfile],
-  );
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -1767,7 +1755,6 @@ const ClientsPage = () => {
                           profileId={selectedProfile.id}
                           initialContent={selectedProfile.admin_notes}
                           initialUpdatedAt={selectedProfile.updated_at}
-                          onSaved={handleNotesSaved}
                         />
                       </div>
                     </TabsContent>

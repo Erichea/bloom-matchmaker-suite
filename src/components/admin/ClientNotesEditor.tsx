@@ -8,7 +8,6 @@ interface ClientNotesEditorProps {
   profileId: string;
   initialContent: string | null;
   initialUpdatedAt?: string | null;
-  onSaved?: (payload: { content: string; savedAt: string }) => void;
 }
 
 const extractTextFromNode = (node: any): string => {
@@ -66,7 +65,7 @@ const parseInitialContent = (content: string | null): any[] => {
   }
 };
 
-const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt, onSaved }: ClientNotesEditorProps) => {
+const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt }: ClientNotesEditorProps) => {
   const { toast } = useToast();
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(
     initialUpdatedAt ? new Date(initialUpdatedAt) : null,
@@ -109,10 +108,9 @@ const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt, onSave
         const savedAt = new Date();
         setLastSavedAt(savedAt);
         setStatus("saved");
-        onSaved?.({ content: json, savedAt: savedAt.toISOString() });
       }, 500);
     },
-    [profileId, toast, onSaved],
+    [profileId, toast],
   );
 
   const formattedTimestamp = useMemo(() => {
