@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +32,40 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [responding, setResponding] = useState(false);
+  const [profileAnswers, setProfileAnswers] = useState<Record<string, any>>({});
+
+  // Fetch profile answers when the modal opens
+  useEffect(() => {
+    const fetchProfileAnswers = async () => {
+      if (!match || !open) return;
+
+      const isProfile1 = match.profile_1_id === match?.current_profile_id;
+      const otherProfile = isProfile1 ? match.profile_2 : match.profile_1;
+
+      if (!otherProfile?.user_id) return;
+
+      try {
+        const { data, error } = await supabase
+          .from("profile_answers")
+          .select("question_id, answer")
+          .eq("user_id", otherProfile.user_id);
+
+        if (error) throw error;
+
+        // Convert array to object for easier access
+        const answersMap: Record<string, any> = {};
+        data?.forEach((item) => {
+          answersMap[item.question_id] = item.answer;
+        });
+
+        setProfileAnswers(answersMap);
+      } catch (error) {
+        console.error("Error fetching profile answers:", error);
+      }
+    };
+
+    fetchProfileAnswers();
+  }, [match, open]);
 
   if (!match) return null;
 
@@ -58,6 +92,19 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
       return a.is_primary ? -1 : 1;
     });
     return sorted[0]?.photo_url ?? null;
+  };
+
+  const formatAnswer = (answer: any): string => {
+    if (answer === null || answer === undefined || answer === "") {
+      return "";
+    }
+    if (Array.isArray(answer)) {
+      return answer.length ? answer.join(", ") : "";
+    }
+    if (typeof answer === "object") {
+      return JSON.stringify(answer);
+    }
+    return String(answer);
   };
 
   const handleResponse = async (response: 'accepted' | 'rejected') => {
@@ -222,23 +269,109 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
                 <User className="w-4 h-4 mr-2" />
                 About
               </h3>
-              
+
               {otherProfile.profession && (
-                <div className="flex items-center text-sm">
-                  <Briefcase className="w-4 h-4 mr-2 text-muted-foreground" />
-                  <span>{otherProfile.profession}</span>
+                <div className="flex items-start text-sm">
+                  <Briefcase className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">Profession: </span>
+                    <span>{otherProfile.profession}</span>
+                  </div>
                 </div>
               )}
 
               {otherProfile.education && (
-                <div className="flex items-center text-sm">
-                  <Calendar className="w-4 h-4 mr-2 text-muted-foreground" />
-                  <span className="capitalize">{otherProfile.education.replace('_', ' ')}</span>
+                <div className="flex items-start text-sm">
+                  <Calendar className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">Education: </span>
+                    <span className="capitalize">{otherProfile.education.replace('_', ' ')}</span>
+                  </div>
+                </div>
+              )}
+
+              {otherProfile.height_cm && (
+                <div className="flex items-start text-sm">
+                  <User className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">Height: </span>
+                    <span>{otherProfile.height_cm} cm</span>
+                  </div>
+                </div>
+              )}
+
+              {otherProfile.ethnicity && (
+                <div className="flex items-start text-sm">
+                  <User className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">Ethnicity: </span>
+                    <span>{otherProfile.ethnicity}</span>
+                  </div>
+                </div>
+              )}
+
+              {otherProfile.faith && (
+                <div className="flex items-start text-sm">
+                  <User className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">Religion: </span>
+                    <span>{otherProfile.faith}</span>
+                  </div>
+                </div>
+              )}
+
+              {profileAnswers.alcohol && (
+                <div className="flex items-start text-sm">
+                  <User className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">Drinking: </span>
+                    <span>{formatAnswer(profileAnswers.alcohol)}</span>
+                  </div>
+                </div>
+              )}
+
+              {profileAnswers.smoking && (
+                <div className="flex items-start text-sm">
+                  <User className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">Smoking: </span>
+                    <span>{formatAnswer(profileAnswers.smoking)}</span>
+                  </div>
+                </div>
+              )}
+
+              {(otherProfile.interests || profileAnswers.interests) && (
+                <div className="flex items-start text-sm">
+                  <Star className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">Interests: </span>
+                    <span>{formatAnswer(otherProfile.interests || profileAnswers.interests)}</span>
+                  </div>
+                </div>
+              )}
+
+              {profileAnswers.mbti && (
+                <div className="flex items-start text-sm">
+                  <User className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">MBTI: </span>
+                    <span>{formatAnswer(profileAnswers.mbti)}</span>
+                  </div>
+                </div>
+              )}
+
+              {profileAnswers.relationship_keys && (
+                <div className="flex items-start text-sm">
+                  <Heart className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">Key elements for a good relationship: </span>
+                    <span>{formatAnswer(profileAnswers.relationship_keys)}</span>
+                  </div>
                 </div>
               )}
 
               {otherProfile.about_me && (
-                <div className="mt-3">
+                <div className="mt-3 pt-3 border-t">
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     {otherProfile.about_me}
                   </p>
