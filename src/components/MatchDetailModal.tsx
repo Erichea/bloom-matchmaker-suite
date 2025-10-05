@@ -53,6 +53,16 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
       }
 
       try {
+        // Run diagnostic function
+        const { data: diagData, error: diagError } = await supabase
+          .rpc("debug_match_answers", {
+            p_user_id_1: user?.id,
+            p_user_id_2: otherProfile.user_id
+          });
+
+        console.log("DIAGNOSTIC RESULTS:", diagData);
+        if (diagError) console.error("Diagnostic error:", diagError);
+
         const { data, error } = await supabase
           .from("profile_answers")
           .select("question_id, answer")
