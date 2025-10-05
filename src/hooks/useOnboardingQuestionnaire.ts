@@ -102,6 +102,17 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
 
   const saveAnswer = async (questionId: string, answer: any) => {
     try {
+      // Don't save if userId is not available
+      if (!userId) {
+        console.error('Cannot save answer: userId is not available');
+        toast({
+          title: "Authentication Error",
+          description: "Please sign in again to continue",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Don't save null/undefined answers
       if (answer === null || answer === undefined) {
         console.warn('Skipping save for null/undefined answer');

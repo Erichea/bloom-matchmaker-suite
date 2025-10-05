@@ -131,16 +131,31 @@ const AuthPage = () => {
       // Clear access code from session storage after successful signup
       sessionStorage.removeItem('validAccessCode');
 
-      toast({
-        title: "Welcome to Bloom! 🎉",
-        description: "Your account has been created. Let's get started!",
-        duration: 4000,
-      });
+      // Check if user session was created (email auto-confirmed)
+      const { data: { session } } = await supabase.auth.getSession();
 
-      // Redirect to onboarding flow after a brief delay
-      setTimeout(() => {
-        navigate("/onboarding");
-      }, 1500);
+      if (session) {
+        // User is authenticated, redirect to onboarding
+        toast({
+          title: "Welcome to Bloom! 🎉",
+          description: "Your account has been created. Let's get started!",
+          duration: 4000,
+        });
+
+        // Redirect to onboarding flow after a brief delay
+        setTimeout(() => {
+          navigate("/onboarding");
+        }, 1500);
+      } else {
+        // Email confirmation required
+        setShowEmailConfirmationMessage(true);
+        setActiveTab("signin");
+        toast({
+          title: "Check your email",
+          description: "We've sent you a verification link. Please verify your email to continue.",
+          duration: 6000,
+        });
+      }
     }
     setLoading(false);
   };
