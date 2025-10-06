@@ -181,35 +181,14 @@ const AuthPage = () => {
 
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[hsl(var(--brand-secondary))] text-white">
-      <video
-        className="absolute inset-0 h-full w-full object-cover"
-        autoPlay
-        muted
-        loop
-        playsInline
-        poster="/placeholder.svg"
-      >
-        <source src="https://storage.googleapis.com/coverr-main/mp4/Mt_Baker.mp4" type="video/mp4" />
-      </video>
-
-      <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(29,32,31,0.92)_0%,rgba(29,32,31,0.78)_40%,rgba(29,32,31,0.65)_100%)]" />
-      <div className="absolute inset-0 backdrop-blur-sm" />
-
-      <motion.div
-        className="pointer-events-none absolute -left-24 top-1/3 h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(223,146,142,0.35)_0%,rgba(223,146,142,0)_70%)]"
-        animate={{ y: [-20, 10, -20], x: [0, 15, 0] }}
-        transition={{ duration: 14, repeat: Infinity, repeatType: "mirror" }}
-      />
-      <motion.div
-        className="pointer-events-none absolute -bottom-16 right-[-6rem] h-[32rem] w-[32rem] rounded-full bg-[radial-gradient(circle,rgba(223,146,142,0.25)_0%,rgba(223,146,142,0)_70%)]"
-        animate={{ y: [10, -15, 10], x: [0, -20, 0] }}
-        transition={{ duration: 18, repeat: Infinity, repeatType: "mirror" }}
-      />
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-background">
+      
+      {/* Simple gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-surface to-background" />
 
       <header className="relative z-10 flex items-center justify-between px-6 pb-6 pt-8 md:px-10">
-        <Link to="/" className="flex items-center gap-3 text-white transition hover:opacity-80">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 text-sm font-semibold uppercase tracking-[0.3em]">
+        <Link to="/" className="flex items-center gap-3 text-foreground transition hover:opacity-70">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-sm font-semibold uppercase tracking-[0.3em]">
             B
           </div>
           <span className="text-xs font-semibold uppercase tracking-[0.45em]">
@@ -218,7 +197,7 @@ const AuthPage = () => {
         </Link>
         <Link
           to="/client"
-          className="hidden rounded-full border border-white/20 px-5 py-2 text-[0.65rem] uppercase tracking-[0.35em] text-white/70 transition hover:border-white/35 hover:text-white md:block"
+          className="hidden rounded-full border border-border bg-transparent px-5 py-2.5 text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground transition hover:border-border-hover hover:text-foreground md:block"
         >
           Invitation access
         </Link>
@@ -232,19 +211,19 @@ const AuthPage = () => {
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
           <div className="flex flex-col gap-5">
-            <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-white/60 md:self-start">
+            <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-muted-foreground md:self-start">
               Private members
             </span>
-            <h1 className="font-display text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl">
+            <h1 className="font-display text-4xl font-light leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-6xl">
               Sign in or finish your invitation.
             </h1>
             {!isSignInOnly && !hasValidAccessCode && (
-              <div className="flex flex-col gap-2 text-[0.65rem] uppercase tracking-[0.25em] text-white/70">
+              <div className="flex flex-col gap-2 text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
                 <Link
                   to="/client"
-                  className="inline-flex items-center justify-center gap-3 self-center rounded-full border border-white/20 bg-white/5 px-6 py-2 transition hover:border-white/40 hover:text-white md:self-start"
+                  className="inline-flex items-center justify-center gap-3 self-center rounded-full border border-border bg-secondary px-6 py-2 transition hover:border-border-hover hover:bg-muted md:self-start"
                 >
-                  <span className="h-px w-6 bg-white/40" /> Validate access code first
+                  <span className="h-px w-6 bg-border" /> Validate access code first
                 </Link>
               </div>
             )}
@@ -256,49 +235,49 @@ const AuthPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
           >
-            <div className="rounded-[28px] border border-white/15 bg-white/[0.08] p-6 shadow-[0_32px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:p-8">
-              <div className="mb-6 space-y-1 text-center md:text-left">
-                <span className="text-[0.65rem] uppercase tracking-[0.3em] text-white/60">Bloom members</span>
-                <h2 className="text-2xl font-semibold text-white">{activeTab === "signup" ? "Create your account" : "Sign in"}</h2>
-                <p className="text-xs uppercase tracking-[0.2em] text-white/60">
+            <div className="rounded-3xl border border-border bg-card p-6 shadow-lg sm:p-8">
+              <div className="mb-6 space-y-2 text-center md:text-left">
+                <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">Bloom members</span>
+                <h2 className="font-serif text-2xl font-light text-foreground">{activeTab === "signup" ? "Create your account" : "Sign in"}</h2>
+                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                   {hasValidAccessCode ? "Invitation required" : "Members only"}
                 </p>
               </div>
 
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
                 {hasValidAccessCode && !isSignInOnly ? (
-                  <TabsList className="flex h-auto w-full items-stretch rounded-2xl bg-white/10 p-2 text-[0.65rem] uppercase tracking-[0.25em] text-white/70">
+                  <TabsList className="flex h-auto w-full items-stretch rounded-2xl bg-secondary p-2 text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
                     <TabsTrigger
                       value="signin"
-                      className="flex-1 justify-center rounded-xl px-4 py-2 transition data-[state=active]:bg-white data-[state=active]:text-[hsl(var(--brand-secondary))] data-[state=active]:shadow-sm"
+                      className="flex-1 justify-center rounded-xl px-4 py-2 transition data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
                     >
                       Sign In
                     </TabsTrigger>
                     <TabsTrigger
                       value="signup"
-                      className="flex-1 justify-center rounded-xl px-4 py-2 transition data-[state=active]:bg-white data-[state=active]:text-[hsl(var(--brand-secondary))] data-[state=active]:shadow-sm"
+                      className="flex-1 justify-center rounded-xl px-4 py-2 transition data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
                     >
                       Sign Up
                     </TabsTrigger>
                   </TabsList>
                 ) : (
-                  <div className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-center text-[0.65rem] uppercase tracking-[0.25em] text-white/70">
+                  <div className="rounded-2xl border border-border bg-secondary px-5 py-3 text-center text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
                     Sign In
                   </div>
                 )}
 
                 <TabsContent value="signin" className="space-y-4">
                   {showEmailConfirmationMessage && (
-                    <div className="rounded-2xl border border-white/20 bg-white/10 p-4 text-center text-xs text-white/80">
-                      <div className="flex items-center justify-center gap-2 text-sm text-white">
-                        <Heart className="h-4 w-4 text-white" />
+                    <div className="rounded-2xl border border-border bg-secondary p-4 text-center text-xs text-foreground">
+                      <div className="flex items-center justify-center gap-2 text-sm text-foreground">
+                        <Heart className="h-4 w-4 text-accent" />
                         Check your email for confirmation, then sign in below.
                       </div>
-                      <p className="mt-2 text-white/70">Didn&apos;t receive an email? Peek at spam or contact support.</p>
+                      <p className="mt-2 text-muted-foreground">Didn&apos;t receive an email? Peek at spam or contact support.</p>
                     </div>
                   )}
                   {!hasValidAccessCode && !showEmailConfirmationMessage && !isSignInOnly && (
-                    <div className="rounded-2xl border border-white/15 bg-white/10 p-4 text-center text-xs text-white/70">
+                    <div className="rounded-2xl border border-border bg-secondary p-4 text-center text-xs text-muted-foreground">
                       Members sign in to continue your introductions.
                     </div>
                   )}
@@ -309,9 +288,9 @@ const AuthPage = () => {
                         name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-white/80">Email</FormLabel>
+                            <FormLabel className="text-foreground">Email</FormLabel>
                             <FormControl>
-                              <Input placeholder="your@email.com" className="bg-white/95 text-[hsl(var(--brand-secondary))]" {...field} />
+                              <Input placeholder="your@email.com" className="bg-input text-foreground" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -322,12 +301,12 @@ const AuthPage = () => {
                         name="password"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-white/80">Password</FormLabel>
+                            <FormLabel className="text-foreground">Password</FormLabel>
                             <FormControl>
                               <Input
                                 type="password"
                                 placeholder="••••••••"
-                                className="bg-white/95 text-[hsl(var(--brand-secondary))]"
+                                className="bg-input text-foreground"
                                 {...field}
                               />
                             </FormControl>
@@ -335,15 +314,15 @@ const AuthPage = () => {
                           </FormItem>
                         )}
                       />
-                      <Button type="submit" className="btn-premium w-full group" disabled={loading}>
+                      <Button type="submit" className="w-full rounded-2xl bg-primary px-8 py-3 text-sm font-medium uppercase tracking-[0.25em] text-primary-foreground shadow-sm transition-all duration-300 hover:bg-primary-hover hover:shadow-md active:scale-[0.98]" disabled={loading}>
                         {loading ? (
                           <div className="flex items-center">
-                            <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white" />
+                            <div className="loading-spinner mr-2" />
                             Signing in...
                           </div>
                         ) : (
                           <div className="flex items-center">
-                            <LogIn className="mr-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            <LogIn className="mr-2 h-4 w-4" />
                             Sign In
                           </div>
                         )}
@@ -351,7 +330,7 @@ const AuthPage = () => {
                     </form>
                   </Form>
                   {!isSignInOnly && (
-                    <div className="text-center text-xs text-white/70">
+                    <div className="text-center text-xs text-muted-foreground">
                       Have an invitation but no account yet? Switch to sign up once your code is verified.
                     </div>
                   )}
@@ -367,9 +346,9 @@ const AuthPage = () => {
                             name="firstName"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-white/80">First Name</FormLabel>
+                                <FormLabel className="text-foreground">First Name</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="First name" className="bg-white/95 text-[hsl(var(--brand-secondary))]" {...field} />
+                                  <Input placeholder="First name" className="bg-input text-foreground" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -380,9 +359,9 @@ const AuthPage = () => {
                             name="lastName"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-white/80">Last Name</FormLabel>
+                                <FormLabel className="text-foreground">Last Name</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Last name" className="bg-white/95 text-[hsl(var(--brand-secondary))]" {...field} />
+                                  <Input placeholder="Last name" className="bg-input text-foreground" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -394,9 +373,9 @@ const AuthPage = () => {
                           name="email"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-white/80">Email</FormLabel>
+                              <FormLabel className="text-foreground">Email</FormLabel>
                               <FormControl>
-                                <Input placeholder="your@email.com" className="bg-white/95 text-[hsl(var(--brand-secondary))]" {...field} />
+                                <Input placeholder="your@email.com" className="bg-input text-foreground" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -407,12 +386,12 @@ const AuthPage = () => {
                           name="password"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-white/80">Password</FormLabel>
+                              <FormLabel className="text-foreground">Password</FormLabel>
                               <FormControl>
                                 <Input
                                   type="password"
                                   placeholder="Create a password"
-                                  className="bg-white/95 text-[hsl(var(--brand-secondary))]"
+                                  className="bg-input text-foreground"
                                   {...field}
                                 />
                               </FormControl>
@@ -425,12 +404,12 @@ const AuthPage = () => {
                           name="confirmPassword"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-white/80">Confirm Password</FormLabel>
+                              <FormLabel className="text-foreground">Confirm Password</FormLabel>
                               <FormControl>
                                 <Input
                                   type="password"
                                   placeholder="Repeat password"
-                                  className="bg-white/95 text-[hsl(var(--brand-secondary))]"
+                                  className="bg-input text-foreground"
                                   {...field}
                                 />
                               </FormControl>
@@ -438,15 +417,15 @@ const AuthPage = () => {
                             </FormItem>
                           )}
                         />
-                        <Button type="submit" className="btn-premium w-full group" disabled={loading}>
+                        <Button type="submit" className="w-full rounded-2xl bg-primary px-8 py-3 text-sm font-medium uppercase tracking-[0.25em] text-primary-foreground shadow-sm transition-all duration-300 hover:bg-primary-hover hover:shadow-md active:scale-[0.98]" disabled={loading}>
                           {loading ? (
                             <div className="flex items-center">
-                              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white" />
+                              <div className="loading-spinner mr-2" />
                               Creating account...
                             </div>
                           ) : (
                             <div className="flex items-center">
-                              <UserPlus className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
+                              <UserPlus className="mr-2 h-4 w-4" />
                               Create Account
                             </div>
                           )}

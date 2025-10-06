@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
-import { PremiumButton } from "@/components/experience/PremiumButton";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Sparkles, LogIn } from "lucide-react";
@@ -70,35 +70,14 @@ const ClientWelcome = () => {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[hsl(var(--brand-secondary))] text-white">
-      <video
-        className="absolute inset-0 h-full w-full object-cover"
-        autoPlay
-        muted
-        loop
-        playsInline
-        poster="/placeholder.svg"
-      >
-        <source src="https://storage.googleapis.com/coverr-main/mp4/Mt_Baker.mp4" type="video/mp4" />
-      </video>
-
-      <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(29,32,31,0.92)_0%,rgba(29,32,31,0.78)_40%,rgba(29,32,31,0.6)_100%)]" />
-      <div className="absolute inset-0 backdrop-blur-sm" />
-
-      <motion.div
-        className="pointer-events-none absolute -left-24 top-1/3 h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(223,146,142,0.35)_0%,rgba(223,146,142,0)_70%)]"
-        animate={{ y: [-20, 10, -20], x: [0, 15, 0] }}
-        transition={{ duration: 14, repeat: Infinity, repeatType: "mirror" }}
-      />
-      <motion.div
-        className="pointer-events-none absolute -bottom-16 right-[-6rem] h-[32rem] w-[32rem] rounded-full bg-[radial-gradient(circle,rgba(223,146,142,0.25)_0%,rgba(223,146,142,0)_70%)]"
-        animate={{ y: [10, -15, 10], x: [0, -20, 0] }}
-        transition={{ duration: 18, repeat: Infinity, repeatType: "mirror" }}
-      />
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-background">
+      
+      {/* Simple gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-surface to-background" />
 
       <header className="relative z-10 flex items-center justify-between px-6 pb-6 pt-8 md:px-10">
-        <Link to="/" className="flex items-center gap-3 text-white transition hover:opacity-80">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 text-sm font-semibold uppercase tracking-[0.3em]">
+        <Link to="/" className="flex items-center gap-3 text-foreground transition hover:opacity-70">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-sm font-semibold uppercase tracking-[0.3em]">
             B
           </div>
           <span className="text-xs font-semibold uppercase tracking-[0.45em]">
@@ -107,7 +86,7 @@ const ClientWelcome = () => {
         </Link>
         <Link
           to="/auth?mode=signin"
-          className="hidden items-center gap-2 rounded-full border border-white/20 px-5 py-2 text-[0.65rem] uppercase tracking-[0.35em] text-white/70 transition hover:border-white/35 hover:text-white md:inline-flex"
+          className="hidden items-center gap-2 rounded-full border border-border bg-transparent px-5 py-2.5 text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground transition hover:border-border-hover hover:text-foreground md:inline-flex"
         >
           <LogIn className="h-3.5 w-3.5" /> Sign in
         </Link>
@@ -120,10 +99,10 @@ const ClientWelcome = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-[0.65rem] uppercase tracking-[0.28em] text-white/80">
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2 text-[0.65rem] uppercase tracking-[0.28em] text-muted-foreground shadow-sm">
             <Sparkles className="h-4 w-4" /> Invitation only
           </span>
-          <h1 className="font-display text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl">
+          <h1 className="font-display text-4xl font-light leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-6xl">
             Enter your Bloom invitation code.
           </h1>
 
@@ -134,32 +113,32 @@ const ClientWelcome = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
           >
-            <div className="space-y-6 rounded-[26px] border border-white/15 bg-white/[0.08] p-6 shadow-[0_32px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:p-8">
-              <div className="space-y-2 text-left">
-                <span className="text-[0.65rem] uppercase tracking-[0.25em] text-white/65">Invitation code</span>
+            <div className="space-y-6 rounded-3xl border border-border bg-card p-6 shadow-lg sm:p-8">
+              <div className="space-y-3 text-left">
+                <span className="text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">Invitation code</span>
                 <Input
                   id="accessCode"
                   value={accessCode}
                   onChange={(event) => setAccessCode(event.target.value.toUpperCase())}
                   placeholder="BLOOM-2024"
-                  className="h-14 rounded-full border-white/20 bg-white/90 text-center text-base uppercase tracking-[0.5em] text-[hsl(var(--brand-secondary))]"
+                  className="h-14 rounded-2xl border-border bg-input text-center text-base uppercase tracking-[0.4em] text-foreground"
                   required
                 />
               </div>
-              <PremiumButton
+              <Button
                 type="submit"
                 disabled={isValidating || !accessCode.trim()}
-                className="w-full justify-center"
+                className="w-full rounded-2xl bg-primary px-8 py-3.5 text-sm font-medium uppercase tracking-[0.25em] text-primary-foreground shadow-sm transition-all duration-300 hover:bg-primary-hover hover:shadow-md active:scale-[0.98]"
               >
-                {isValidating ? "Verifying" : "Continue"}
-              </PremiumButton>
+                {isValidating ? "Verifying..." : "Continue"}
+              </Button>
             </div>
           </motion.form>
 
-          <div className="flex flex-col gap-2 text-[0.65rem] uppercase tracking-[0.25em] text-white/70">
+          <div className="flex flex-col gap-2 text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
             <span className="inline-flex items-center gap-3 self-center md:self-start">
-              <span className="h-px w-6 bg-white/40" /> Already a member?
-              <Link to="/auth?mode=signin" className="text-white transition hover:opacity-80">Sign in</Link>
+              <span className="h-px w-6 bg-border" /> Already a member?
+              <Link to="/auth?mode=signin" className="text-foreground transition hover:text-accent">Sign in</Link>
             </span>
           </div>
         </motion.div>
