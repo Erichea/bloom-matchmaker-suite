@@ -10,17 +10,7 @@ interface ClientNotesEditorProps {
   initialUpdatedAt?: string | null;
 }
 
-const extractTextFromNode = (node: any): string => {
-  if (!node) return "";
-  if (node.text) return node.text;
-  if (node.content && Array.isArray(node.content)) {
-    return node.content.map(extractTextFromNode).join("");
-  }
-  if (node.children && Array.isArray(node.children)) {
-    return node.children.map(extractTextFromNode).join("");
-  }
-  return "";
-};
+
 
 const parseInitialContent = (content: string | null): any[] => {
   if (!content) {
@@ -31,38 +21,20 @@ const parseInitialContent = (content: string | null): any[] => {
       },
     ];
   }
-
   try {
     const parsed = JSON.parse(content);
-
-    if (parsed.type === "doc" && parsed.content) {
-      const text = parsed.content.map((node: any) => extractTextFromNode(node)).filter(Boolean).join("\n");
-      return [
-        {
-          type: "p",
-          children: [{ text }],
-        },
-      ];
-    }
-
     if (Array.isArray(parsed) && parsed.length > 0) {
       return parsed;
     }
-
-    return [
-      {
-        type: "p",
-        children: [{ text: typeof parsed === "string" ? parsed : content }],
-      },
-    ];
   } catch (error) {
-    return [
-      {
-        type: "p",
-        children: [{ text: content }],
-      },
-    ];
+    // Not a valid JSON, treat as plain text
   }
+  return [
+    {
+      type: "p",
+      children: [{ text: content }],
+    },
+  ];
 };
 
 const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt }: ClientNotesEditorProps) => {
