@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Search, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ProfileOption {
   id: string;
@@ -43,6 +44,7 @@ export default function SuggestMatchesModal({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (open) {
@@ -162,8 +164,9 @@ export default function SuggestMatchesModal({
       setCreating(true);
 
       const { data, error } = await supabase.rpc("create_bulk_matches" as any, {
-        p_profile_id: clientId,
-        p_match_profile_ids: Array.from(selectedIds),
+        p_profile_1_id: clientId,
+        p_profile_2_ids: Array.from(selectedIds),
+        p_suggested_by: user?.id,
       });
 
       if (error) throw error;
