@@ -1,4 +1,5 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -29,6 +30,7 @@ interface MatchDetailsModalProps {
   clientAnswers: ProfileAnswers;
   matchAnswers: ProfileAnswers;
   questions: Question[];
+  onAddMatch?: () => void;
 }
 
 export default function MatchDetailsModal({
@@ -40,6 +42,7 @@ export default function MatchDetailsModal({
   clientAnswers,
   matchAnswers,
   questions,
+  onAddMatch,
 }: MatchDetailsModalProps) {
   const clientName = `${clientProfile.first_name ?? ""} ${clientProfile.last_name ?? ""}`.trim() || "Client";
   const matchName = `${matchProfile.first_name ?? ""} ${matchProfile.last_name ?? ""}`.trim() || "Match";
@@ -186,6 +189,17 @@ export default function MatchDetailsModal({
             </div>
           </div>
         </ScrollArea>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
+          {onAddMatch && (
+            <Button onClick={onAddMatch}>
+              Add as Active Match
+            </Button>
+          )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

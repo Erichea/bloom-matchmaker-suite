@@ -1000,6 +1000,39 @@ const ClientsPage = () => {
 
 
 
+  const handleCreateMatchFromSuggestion = useCallback(async () => {
+    if (!selectedProfile || !selectedMatchForDetails?.other_profile?.id) return;
+
+    try {
+      const { data, error } = await supabase.rpc("create_match_from_suggestion" as any, {
+        p_profile_id: selectedProfile.id,
+        p_match_profile_id: selectedMatchForDetails.other_profile.id,
+      });
+
+      if (error) throw error;
+
+      if ((data as any)?.success) {
+        toast({
+          title: "Match created",
+          description: `Successfully created a match between ${selectedProfile.first_name} and ${selectedMatchForDetails.other_profile.first_name}`,
+        });
+        refreshData(selectedProfile.id);
+        setMatchDetailsOpen(false);
+        setSelectedMatchForDetails(null);
+        setSelectedMatchAnswers({});
+      } else {
+        throw new Error((data as any)?.message || "Failed to create match");
+      }
+    } catch (error: any) {
+      console.error("Error creating match from suggestion:", error);
+      toast({
+        title: "Failed to create match",
+        description: error.message || "Please try again",
+        variant: "destructive",
+      });
+    }
+  }, [selectedProfile, selectedMatchForDetails, toast, refreshData]);
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container-app py-6 md:py-8">
@@ -1853,6 +1886,7 @@ const ClientsPage = () => {
           clientAnswers={questionnaireAnswers}
           matchAnswers={selectedMatchAnswers}
           questions={questionnaireQuestions}
+          onAddMatch={handleCreateMatchFromSuggestion}
         />
       )}
 
