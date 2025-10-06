@@ -52,10 +52,7 @@ BEGIN
     VALUES (v_profile_1_id, v_profile_2_id, v_compatibility_score, 'pending', NOW())
     RETURNING id INTO v_match_id;
 
-    -- Remove any existing suggestions for this pair to avoid duplicates
-    DELETE FROM match_suggestions
-    WHERE (client_profile_id = p_profile_id AND suggested_profile_id = p_match_profile_id)
-       OR (client_profile_id = p_match_profile_id AND suggested_profile_id = p_profile_id);
+
 
     RETURN json_build_object('success', TRUE, 'match_id', v_match_id, 'message', 'Match created successfully.');
 
