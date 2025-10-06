@@ -163,7 +163,7 @@ export default function SuggestMatchesModal({
     try {
       setCreating(true);
 
-      const { data, error } = await supabase.rpc("create_bulk_matches" as any, {
+      const { error } = await supabase.rpc("create_bulk_matches" as any, {
         p_profile_1_id: clientId,
         p_profile_2_ids: Array.from(selectedIds),
         p_suggested_by: user?.id,
@@ -171,10 +171,9 @@ export default function SuggestMatchesModal({
 
       if (error) throw error;
 
-      const result = data as any;
       toast({
         title: "Matches created",
-        description: `Successfully created ${result.created_count || selectedIds.size} match${selectedIds.size > 1 ? "es" : ""}`,
+        description: `Successfully created ${selectedIds.size} match${selectedIds.size > 1 ? "es" : ""}`,
       });
 
       onMatchesCreated?.();
