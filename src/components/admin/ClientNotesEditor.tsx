@@ -80,13 +80,21 @@ const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt }: Clie
     [profileId, initialUpdatedAt, initialContent],
   );
 
-  useEffect(() => () => saveTimeoutRef.current && clearTimeout(saveTimeoutRef.current), []);
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleChange = useCallback(
     async (_value: any[], json: string) => {
       if (json === lastSyncedContent.current) return;
       setStatus("saving");
-      saveTimeoutRef.current && clearTimeout(saveTimeoutRef.current);
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
       saveTimeoutRef.current = window.setTimeout(async () => {
         const { error } = await supabase
           .from("profiles")
@@ -140,7 +148,6 @@ const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt }: Clie
           key={editorKey}
           initialValue={initialValue}
           onChange={handleChange}
-          placeholder="Type / for commands or start writing..."
         />
       </div>
     </div>

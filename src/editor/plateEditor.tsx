@@ -1,34 +1,28 @@
-import React, { useMemo, type ReactNode } from 'react';
+import React, { useMemo, type ReactNode } from "react";
 import {
   createPlateEditor,
   Plate,
-  PlateProvider,
   PlateContent,
-} from '@platejs/react';
+} from "platejs/react";
 import {
   createParagraphPlugin,
-  ELEMENT_PARAGRAPH,
-} from '@platejs/paragraph';
-import {
   createHeadingPlugin,
+  createBlockquotePlugin,
+  createCodeBlockPlugin,
+  createListPlugin,
+  createDividerPlugin,
+  createSlashPlugin,
+  ELEMENT_PARAGRAPH,
   ELEMENT_H1,
   ELEMENT_H2,
   ELEMENT_H3,
-} from '@platejs/heading';
-import {
-  createBlockquotePlugin,
   ELEMENT_BLOCKQUOTE,
-} from '@platejs/blockquote';
-import {
-  createCodeBlockPlugin,
   ELEMENT_CODE_BLOCK,
-} from '@platejs/code-block';
-import { createListPlugin, ELEMENT_UL, ELEMENT_OL, ELEMENT_LI } from '@platejs/list';
-import {
-  createDividerPlugin,
+  ELEMENT_UL,
+  ELEMENT_OL,
+  ELEMENT_LI,
   ELEMENT_DIVIDER,
-} from '@platejs/divider';
-import { createSlashPlugin, SlashCommandItem } from '@platejs/slash-command';
+} from "@/editor/platePlugins";
 import { slashCommands } from '@/slash/commands';
 import { Editor, Element as SlateElement } from 'slate';
 
@@ -38,6 +32,14 @@ type RenderElementProps = {
   element: CustomElement;
   attributes: Record<string, unknown>;
   children: ReactNode;
+};
+
+type SlashCommandItem = {
+  key: string;
+  text: string;
+  description: string;
+  icon: ReactNode;
+  onSelected: (editor: Editor) => void;
 };
 
 const renderElement = ({ element, attributes, children }: RenderElementProps) => {
@@ -115,13 +117,20 @@ export const NotionLikeEditor = ({
   placeholder = 'Type / for commands or start writing...',
 }) => {
   const platePlugins = useMemo(() => {
-    const slashItems: SlashCommandItem[] = slashCommands.map((cmd) => ({
+    const slashItems = slashCommands.map((cmd) => ({
       key: cmd.id,
       text: cmd.label,
       description: cmd.description,
       icon: cmd.icon,
       onSelected: (editor: Editor) => cmd.action(editor),
     }));
+
+    const slashPlugin = createSlashPlugin();
+    slashPlugin.options = {
+      ...slashPlugin.options,
+      trigger: '/',
+    } as typeof slashPlugin.options;
+    (slashPlugin.options as unknown as { items: SlashCommandItem[] }).items = slashItems;
 
     return [
       createParagraphPlugin(),
@@ -130,35 +139,27 @@ export const NotionLikeEditor = ({
       createCodeBlockPlugin(),
       createListPlugin(),
       createDividerPlugin(),
-      createSlashPlugin({
-        options: {
-          items: slashItems,
-          trigger: '/',
-        },
-      }),
+      slashPlugin,
     ];
   }, []);
 
   const editor = useMemo(
-    () => createPlateEditor({ plugins: platePlugins }),
-    [platePlugins]
+    () => createPlateEditor({ plugins: platePlugins, value: initialValue }),
+    [platePlugins, initialValue]
   );
 
-  const handleOnChange = (value) => {
-    if (onChange) {
-      const json = JSON.stringify(value);
-      onChange(value, json, editor);
-    }
+  const handleOnChange = ({ value }: { value: CustomElement[] }) => {
+    if (!onChange) return;
+    const json = JSON.stringify(value);
+    onChange(value, json, editor);
   };
 
   return (
-    <PlateProvider editor={editor}>
-      <Plate initialValue={initialValue} onChange={handleOnChange}>
-        <PlateContent
-          placeholder={placeholder}
-          renderElement={renderElement}
-        />
-      </Plate>
-    </PlateProvider>
+    <Plate editor={editor} onChange={handleOnChange}>
+      <PlateContent
+        placeholder={placeholder}
+        renderElement={renderElement}
+      />
+    </Plate>
   );
 };
