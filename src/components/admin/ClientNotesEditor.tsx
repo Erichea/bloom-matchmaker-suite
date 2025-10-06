@@ -62,6 +62,7 @@ const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt }: Clie
 
   const handleChange = useCallback(
     async (_value: any[], json: string) => {
+      
       if (json === lastSyncedContent.current) return;
       setStatus("saving");
       if (saveTimeoutRef.current) {

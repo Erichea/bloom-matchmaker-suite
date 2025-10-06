@@ -1,5 +1,9 @@
 import { toPlatePlugin, type PlatePlugin } from "platejs/react";
-import { BaseParagraphPlugin } from "@platejs/core";
+import {
+  BaseParagraphPlugin,
+  createPlateUI,
+  createPlugins,
+} from "@platejs/core";
 import {
   BaseBlockquotePlugin,
   BaseHeadingPlugin,
@@ -25,20 +29,58 @@ export const ELEMENT_LI = "li" as const;
 
 const clone = <T extends PlatePlugin>(plugin: T): T => plugin.clone() as T;
 
-export const createParagraphPlugin = (): PlatePlugin => clone(toPlatePlugin(BaseParagraphPlugin));
+export const createParagraphPlugin = (): PlatePlugin =>
+  clone(toPlatePlugin(BaseParagraphPlugin));
 
 export const createHeadingPlugin = (): PlatePlugin => {
   const heading = clone(toPlatePlugin(BaseHeadingPlugin));
-  heading.plugins = [clone(toPlatePlugin(BaseH1Plugin)), clone(toPlatePlugin(BaseH2Plugin)), clone(toPlatePlugin(BaseH3Plugin))];
+  heading.plugins = [
+    clone(toPlatePlugin(BaseH1Plugin)),
+    clone(toPlatePlugin(BaseH2Plugin)),
+    clone(toPlatePlugin(BaseH3Plugin)),
+  ];
   return heading;
 };
 
-export const createBlockquotePlugin = (): PlatePlugin => clone(toPlatePlugin(BaseBlockquotePlugin));
+export const createBlockquotePlugin = (): PlatePlugin =>
+  clone(toPlatePlugin(BaseBlockquotePlugin));
 
-export const createCodeBlockPlugin = (): PlatePlugin => clone(toPlatePlugin(BaseCodeBlockPlugin));
+export const createCodeBlockPlugin = (): PlatePlugin =>
+  clone(toPlatePlugin(BaseCodeBlockPlugin));
 
-export const createListPlugin = (): PlatePlugin => clone(toPlatePlugin(BaseListPlugin));
+export const createListPlugin = (): PlatePlugin =>
+  clone(toPlatePlugin(BaseListPlugin));
 
-export const createDividerPlugin = (): PlatePlugin => clone(toPlatePlugin(BaseHorizontalRulePlugin));
+export const createDividerPlugin = (): PlatePlugin =>
+  clone(toPlatePlugin(BaseHorizontalRulePlugin));
 
-export const createSlashPlugin = (): PlatePlugin => clone(toPlatePlugin(BaseSlashPlugin));
+export const createSlashPlugin = (): PlatePlugin =>
+  clone(toPlatePlugin(BaseSlashPlugin));
+
+export const plateUI = createPlateUI({
+  p: "p",
+  h1: "h1",
+  h2: "h2",
+  h3: "h3",
+  blockquote: "blockquote",
+  code_block: "code_block",
+  hr: "hr",
+  ul: "ul",
+  ol: "ol",
+  li: "li",
+});
+
+export const platePlugins = createPlugins(
+  [
+    createParagraphPlugin(),
+    createHeadingPlugin(),
+    createBlockquotePlugin(),
+    createCodeBlockPlugin(),
+    createListPlugin(),
+    createDividerPlugin(),
+    createSlashPlugin(),
+  ],
+  {
+    components: plateUI,
+  }
+);
