@@ -29,6 +29,7 @@ import {
   Clock,
   Check,
   X,
+  Bell,
 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -250,6 +251,7 @@ const ClientsPage = () => {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
+  const [sendingTestNotification, setSendingTestNotification] = useState(false);
 
   const updateStatusFilter = useCallback((value: StatusFilter) => {
     setStatusFilter(value);
@@ -732,6 +734,52 @@ const ClientsPage = () => {
         description: error.message || "Please try again.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleSendTestNotification = async () => {
+    if (!selectedProfile?.user_id) {
+      toast({
+        title: "Error",
+        description: "No user ID found for this client",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSendingTestNotification(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("notify", {
+        body: {
+          action: "send",
+          userId: selectedProfile.user_id,
+          web_push: {
+            title: "Test Notification 🔔",
+            message: `Hi ${selectedProfile.first_name || "there"}! This is a test notification from Bloom Matchmaker.`,
+            icon: window.location.origin + "/icon-192.png",
+            url: window.location.origin + "/client/dashboard"
+          },
+          channels: ["push"]
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Test notification sent",
+        description: "Check the user's device for the notification",
+      });
+    } catch (error: any) {
+      console.error("Test notification error:", error);
+      toast({
+        title: "Failed to send test notification",
+        description: error.message || "Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingTestNotification(false);
     }
   };
 
@@ -1238,6 +1286,19 @@ const ClientsPage = () => {
                   <Trash2 className="mr-1 h-4 w-4" /> Delete
                 </Button>
               )}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleSendTestNotification}
+                disabled={sendingTestNotification || !selectedProfile?.user_id}
+              >
+                {sendingTestNotification ? (
+                  <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                ) : (
+                  <Bell className="mr-1 h-4 w-4" />
+                )}
+                Test Notification
+              </Button>
               <Button
                 size="icon"
                 variant="ghost"

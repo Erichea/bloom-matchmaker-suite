@@ -12,7 +12,8 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-const SW_PATH = "/sw.js";
+// Use NotificationAPI's service worker (configured in NotificationProvider)
+const SW_PATH = "/notificationapi-service-worker.js";
 const DEBUG = process.env.NODE_ENV === "development";
 
 interface SubscribeOptions {
@@ -209,14 +210,15 @@ export async function subscribeUser(options: SubscribeOptions): Promise<{ succes
         return { success: false, error: `Failed to get VAPID key. Response: ${JSON.stringify(configData)}` };
       }
 
+      const vapidKey = urlBase64ToUint8Array(configData.vapidPublicKey);
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(configData.vapidPublicKey)
+        applicationServerKey: vapidKey as BufferSource
       });
     }
 
     // Register subscription with NotificationAPI
-    const { data, error } = await supabase.functions.invoke("notify", {
+    const { error } = await supabase.functions.invoke("notify", {
       body: {
         action: "subscribe",
         userId: options.userId,
@@ -269,7 +271,7 @@ export async function unsubscribeUser(userId: string): Promise<void> {
  */
 export async function sendTestPush(userId: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const { data, error } = await supabase.functions.invoke("notify", {
+    const { error } = await supabase.functions.invoke("notify", {
       body: {
         action: "send",
         userId,
