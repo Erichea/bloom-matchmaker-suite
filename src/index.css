@@ -10,44 +10,44 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Nordic Base - Warm beige/cream backgrounds */
-    --background: 35 25% 95%;
+    /* Nordic Base - Very light beige/sand backgrounds (Auro-inspired) */
+    --background: 35 15% 96%;
     --foreground: 30 8% 20%;
 
-    /* Card & Surface Colors - Layered warmth */
-    --card: 35 20% 97%;
+    /* Card & Surface Colors - Subtle layering */
+    --card: 0 0% 100%;
     --card-foreground: 30 8% 20%;
-    --surface: 35 15% 92%;
-    --surface-elevated: 35 20% 98%;
+    --surface: 35 10% 94%;
+    --surface-elevated: 0 0% 100%;
 
     /* Brand Palette - Warm terracotta/earth accent */
-    --brand-primary: 25 45% 65%;
-    --brand-primary-foreground: 30 8% 20%;
+    --brand-primary: 25 40% 60%;
+    --brand-primary-foreground: 0 0% 100%;
     --brand-secondary: 30 8% 20%;
-    --brand-secondary-foreground: 35 20% 97%;
+    --brand-secondary-foreground: 35 15% 96%;
 
     /* Popover Colors */
-    --popover: 35 20% 98%;
+    --popover: 0 0% 100%;
     --popover-foreground: 30 8% 20%;
 
     /* Primary - Warm dark */
     --primary: 30 8% 20%;
-    --primary-foreground: 35 20% 97%;
+    --primary-foreground: 0 0% 100%;
     --primary-hover: 30 10% 28%;
-    --primary-muted: 35 20% 90%;
+    --primary-muted: 35 10% 92%;
 
-    /* Secondary - Soft beige */
-    --secondary: 35 15% 90%;
+    /* Secondary - Very soft beige */
+    --secondary: 35 10% 93%;
     --secondary-foreground: 30 8% 20%;
 
-    /* Muted - Warm neutral */
-    --muted: 35 12% 88%;
-    --muted-foreground: 30 6% 45%;
+    /* Muted - Subtle warm neutral */
+    --muted: 35 8% 90%;
+    --muted-foreground: 30 6% 50%;
 
     /* Accent - Warm terracotta */
-    --accent: 25 45% 65%;
-    --accent-foreground: 30 8% 20%;
-    --accent-soft: 25 35% 90%;
+    --accent: 25 40% 60%;
+    --accent-foreground: 0 0% 100%;
+    --accent-soft: 25 25% 92%;
 
     /* Status Colors - Muted tones */
     --success: 140 35% 50%;
@@ -63,10 +63,10 @@ All colors MUST be HSL.
     --destructive-soft: 5 40% 90%;
 
     /* Interactive Elements */
-    --border: 35 10% 85%;
-    --border-hover: 35 15% 70%;
-    --input: 35 20% 97%;
-    --ring: 25 45% 65%;
+    --border: 35 8% 88%;
+    --border-hover: 35 10% 75%;
+    --input: 0 0% 100%;
+    --ring: 25 40% 60%;
 
     /* Shadows - Softer, warmer */
     --shadow-sm: 0 1px 2px 0 rgb(30 20 10 / 0.04);
@@ -77,14 +77,14 @@ All colors MUST be HSL.
     --radius: 1rem;
 
     /* Sidebar */
-    --sidebar-background: 35 20% 97%;
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 30 8% 20%;
     --sidebar-primary: 30 8% 20%;
-    --sidebar-primary-foreground: 35 20% 97%;
-    --sidebar-accent: 35 15% 90%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 35 10% 93%;
     --sidebar-accent-foreground: 30 8% 20%;
-    --sidebar-border: 35 10% 88%;
-    --sidebar-ring: 25 45% 65%;
+    --sidebar-border: 35 8% 90%;
+    --sidebar-ring: 25 40% 60%;
     --component-inactive-color: var(--muted-foreground);
     --component-bg: var(--card);
     --component-shadow: var(--border);

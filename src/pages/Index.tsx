@@ -42,27 +42,17 @@ const Index = () => {
   return (
     <>
       <style>{floatAnimation}</style>
-      <div className="relative flex min-h-screen flex-col overflow-hidden bg-[hsl(var(--brand-secondary))] text-white">
-      {/* Static gradient background - much faster than video */}
-      <div className="absolute inset-0 bg-[linear-gradient(135deg,hsl(var(--brand-secondary))_0%,#2a3c3a_50%,#1f2b2a_100%)]" />
-
-      {/* Simplified gradient overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(29,32,31,0.85)_0%,rgba(29,32,31,0.65)_40%,rgba(29,32,31,0.45)_100%)]" />
-
-      {/* Reduced animations - only one blob with simpler motion */}
-      <div
-        className="pointer-events-none absolute -left-24 top-1/3 h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(223,146,142,0.25)_0%,rgba(223,146,142,0)_70%)] opacity-60"
-        style={{
-          animation: 'float 20s ease-in-out infinite',
-        }}
-      />
+      <div className="relative flex min-h-screen flex-col overflow-hidden bg-background">
+      
+      {/* Simple gradient background with subtle warmth */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-surface to-background" />
 
       <header className="relative z-10 flex items-center px-6 pb-6 pt-8 md:px-10">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 text-sm font-semibold uppercase tracking-[0.3em]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-sm font-semibold uppercase tracking-[0.3em] text-foreground">
             B
           </div>
-          <span className="text-xs font-semibold uppercase tracking-[0.45em] text-white">
+          <span className="text-xs font-semibold uppercase tracking-[0.45em] text-foreground">
             Bloom
           </span>
         </div>
@@ -70,13 +60,13 @@ const Index = () => {
 
       <main className="relative z-10 flex flex-1 items-center px-6 pb-16 md:px-10">
         <motion.div
-          className="mx-auto flex w-full max-w-2xl flex-col items-center gap-8 text-center md:items-start md:text-left"
+          className="mx-auto flex w-full max-w-2xl flex-col items-center gap-10 text-center md:items-start md:text-left"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
           <motion.span
-            className="text-[0.7rem] uppercase tracking-[0.5em] text-white/60"
+            className="text-[0.65rem] uppercase tracking-[0.4em] text-muted-foreground"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
@@ -84,7 +74,7 @@ const Index = () => {
             Private introductions. Human-first.
           </motion.span>
           <motion.h1
-            className="font-display text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl"
+            className="font-display text-5xl font-light leading-[1.05] tracking-tight text-foreground sm:text-6xl md:text-7xl"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
@@ -93,18 +83,18 @@ const Index = () => {
           </motion.h1>
 
           <motion.div
-            className="flex w-full flex-col items-center gap-3 sm:flex-row md:items-start"
+            className="flex w-full flex-col items-center gap-4 sm:flex-row md:items-start"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
             <Link to="/client" className="w-full sm:w-auto">
-              <PremiumButton className="w-full justify-center px-10 py-3 text-base uppercase tracking-[0.3em]">
+              <button className="w-full rounded-full bg-primary px-10 py-3.5 text-sm font-medium uppercase tracking-[0.25em] text-primary-foreground shadow-sm transition-all duration-300 hover:bg-primary-hover hover:shadow-md active:scale-[0.98] sm:w-auto">
                 Get started
-              </PremiumButton>
+              </button>
             </Link>
             <Link to="/auth?mode=signin" className="w-full sm:w-auto">
-              <button className="w-full rounded-full border border-white/30 bg-white/10 px-10 py-3 text-sm font-medium uppercase tracking-[0.3em] text-white transition hover:border-white/45 hover:bg-white/15">
+              <button className="w-full rounded-full border border-border bg-transparent px-10 py-3.5 text-sm font-medium uppercase tracking-[0.25em] text-foreground transition-all duration-300 hover:border-border-hover hover:bg-secondary active:scale-[0.98] sm:w-auto">
                 I already have an account
               </button>
             </Link>
@@ -113,7 +103,7 @@ const Index = () => {
         </motion.div>
       </main>
 
-      <footer className="relative z-10 flex justify-center px-6 pb-8 text-[0.6rem] uppercase tracking-[0.4em] text-white/40 md:px-10">
+      <footer className="relative z-10 flex justify-center px-6 pb-8 text-[0.6rem] uppercase tracking-[0.4em] text-muted-foreground md:px-10">
         © {currentYear} Bloom
       </footer>
       </div>
