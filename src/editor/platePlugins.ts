@@ -1,9 +1,5 @@
 import { toPlatePlugin, type PlatePlugin } from "platejs/react";
-import {
-  BaseParagraphPlugin,
-  createPlateUI,
-  createPlugins,
-} from "@platejs/core";
+import { BaseParagraphPlugin } from "@platejs/core";
 import {
   BaseBlockquotePlugin,
   BaseHeadingPlugin,
@@ -57,30 +53,14 @@ export const createDividerPlugin = (): PlatePlugin =>
 export const createSlashPlugin = (): PlatePlugin =>
   clone(toPlatePlugin(BaseSlashPlugin));
 
-export const plateUI = createPlateUI({
-  p: "p",
-  h1: "h1",
-  h2: "h2",
-  h3: "h3",
-  blockquote: "blockquote",
-  code_block: "code_block",
-  hr: "hr",
-  ul: "ul",
-  ol: "ol",
-  li: "li",
-});
+export const plateUI = {};
 
-export const platePlugins = createPlugins(
-  [
-    createParagraphPlugin(),
-    createHeadingPlugin(),
-    createBlockquotePlugin(),
-    createCodeBlockPlugin(),
-    createListPlugin(),
-    createDividerPlugin(),
-    createSlashPlugin(),
-  ],
-  {
-    components: plateUI,
-  }
-);
+export const platePlugins = [
+  createParagraphPlugin(),
+  createHeadingPlugin(),
+  createBlockquotePlugin(),
+  createCodeBlockPlugin(),
+  createListPlugin(),
+  createDividerPlugin(),
+  createSlashPlugin(),
+];
