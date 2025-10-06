@@ -7,13 +7,13 @@ export const PremiumButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <Button
         ref={ref}
-        variant={variant ?? "default"}
+        variant={variant ?? "premium"}
         className={cn(
-          "rounded-full px-6 py-2 text-sm font-medium tracking-wide",
-          "bg-[hsl(var(--brand-primary))] text-[hsl(var(--brand-primary-foreground))]",
-          "hover:bg-[hsl(var(--brand-primary))]/90 transition-all duration-200",
-          "shadow-[0_12px_30px_-12px_rgba(190,76,139,0.55)] hover:shadow-[0_16px_40px_-12px_rgba(190,76,139,0.6)]",
-          "focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-primary))]/60 focus-visible:ring-offset-2",
+          "rounded-2xl px-8 py-3 text-sm font-medium tracking-wide",
+          "bg-accent text-accent-foreground",
+          "hover:shadow-lg hover:scale-[1.02] transition-all duration-300",
+          "shadow-md active:scale-[0.98]",
+          "focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2",
           className,
         )}
         {...props}

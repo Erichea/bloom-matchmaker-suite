@@ -37,41 +37,43 @@ export function ProfileCard({
   return (
     <Card
       className={cn(
-        "relative overflow-hidden border-none bg-[hsl(var(--surface))] shadow-none",
-        "transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_25px_80px_-40px_rgba(12,12,12,0.45)]",
-        highlight && "ring-2 ring-[hsl(var(--brand-primary))]/40",
+        "relative overflow-hidden border-border/40 bg-card shadow-md backdrop-blur-sm",
+        "transition-all duration-500 hover:-translate-y-2 hover:shadow-xl",
+        highlight && "ring-2 ring-accent/30 shadow-lg",
         className,
       )}
     >
-      <CardContent className="flex flex-col gap-4 p-6">
-        <div className="flex items-center gap-4">
-          <Avatar className="h-16 w-16 border border-[hsl(var(--brand-secondary))]/20 shadow-sm">
+      <CardContent className="flex flex-col gap-5 p-8">
+        <div className="flex items-start gap-5">
+          <Avatar className="h-20 w-20 border-2 border-border/30 shadow-sm ring-2 ring-background">
             {avatarUrl ? (
-              <AvatarImage src={avatarUrl} alt={name} />
+              <AvatarImage src={avatarUrl} alt={name} className="object-cover" />
             ) : (
-              <AvatarFallback className="bg-[hsl(var(--brand-secondary))] text-[hsl(var(--brand-secondary-foreground))]">
+              <AvatarFallback className="bg-secondary text-foreground font-serif text-xl">
                 {initials}
               </AvatarFallback>
             )}
           </Avatar>
-          <div className="space-y-1">
-            <p className="text-lg font-semibold leading-none text-[hsl(var(--brand-secondary))]">
-              {name}
-              {age ? <span className="ml-2 text-sm font-normal text-muted-foreground">{age}</span> : null}
-            </p>
-            {location ? (
-              <p className="flex items-center gap-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                <MapPin className="h-3 w-3" />
+          <div className="flex-1 space-y-2">
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-xl font-serif font-light leading-tight text-foreground">
+                {name}
+              </h3>
+              {age && <span className="text-sm font-sans text-muted-foreground">{age}</span>}
+            </div>
+            {location && (
+              <p className="flex items-center gap-1.5 text-xs tracking-wide text-muted-foreground">
+                <MapPin className="h-3.5 w-3.5" />
                 {location}
               </p>
-            ) : null}
-            {headline ? <p className="text-sm text-muted-foreground">{headline}</p> : null}
+            )}
+            {headline && <p className="text-sm leading-relaxed text-muted-foreground">{headline}</p>}
           </div>
         </div>
 
-        {bio ? (
-          <p className="text-sm leading-6 text-muted-foreground">{bio}</p>
-        ) : null}
+        {bio && (
+          <p className="text-sm leading-relaxed text-muted-foreground/90">{bio}</p>
+        )}
 
         {interests?.length ? (
           <div className="flex flex-wrap gap-2">
@@ -79,7 +81,7 @@ export function ProfileCard({
               <Badge
                 key={interest}
                 variant="secondary"
-                className="rounded-full border border-transparent bg-[hsl(var(--brand-secondary))]/10 px-3 py-1 text-[0.7rem] font-medium uppercase tracking-[0.2em] text-muted-foreground"
+                className="rounded-full border-0 bg-secondary px-3.5 py-1.5 text-[0.7rem] font-medium tracking-wide text-foreground/70 hover:bg-accent hover:text-accent-foreground transition-colors"
               >
                 {interest}
               </Badge>

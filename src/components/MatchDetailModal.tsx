@@ -44,24 +44,9 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
 
       if (!otherProfile?.user_id) return;
 
-      try {
-        const { data, error } = await supabase
-          .rpc("get_matched_profile_answers", {
-            p_matched_user_id: otherProfile.user_id
-          });
-
-        if (error) throw error;
-
-        // Convert array to object for easier access
-        const answersMap: Record<string, any> = {};
-        data?.forEach((item) => {
-          answersMap[item.question_id] = item.answer;
-        });
-
-        setProfileAnswers(answersMap);
-      } catch (error) {
-        console.error("Error fetching profile answers:", error);
-      }
+      // For now, use empty profile answers
+      // TODO: Implement profile answers fetching when RPC function is available
+      setProfileAnswers({});
     };
 
     fetchProfileAnswers();
