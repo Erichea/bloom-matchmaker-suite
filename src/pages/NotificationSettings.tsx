@@ -100,18 +100,22 @@ export default function NotificationSettings() {
 
   const checkPushStatus = async () => {
     try {
-      // Check database preference, not just browser permission
+      // Get the user's preference from database
       const { data } = await supabase
         .from("notification_preferences")
         .select("push_enabled")
         .eq("user_id", user!.id)
         .single();
 
-      // User is considered "enabled" if they have it enabled in DB AND granted permission
-      const hasPermission = 'Notification' in window && Notification.permission === 'granted';
-      const dbEnabled = data?.push_enabled ?? false;
+      // Set toggle based on database preference
+      // This reflects what the user chose, not the browser permission state
+      setPushEnabled(data?.push_enabled ?? false);
 
-      setPushEnabled(hasPermission && dbEnabled);
+      // Log browser permission status for debugging
+      if ('Notification' in window) {
+        console.log('[NotificationSettings] Browser permission:', Notification.permission);
+        console.log('[NotificationSettings] DB preference:', data?.push_enabled);
+      }
     } catch (error) {
       console.error("Error checking push status:", error);
       setPushEnabled(false);
