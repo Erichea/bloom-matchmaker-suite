@@ -58,21 +58,33 @@ BEGIN
     RETURN;
   END IF;
 
-  -- Call the notify edge function asynchronously using pg_net
+  -- Call the appropriate edge function based on template ID
+  -- Use specific notificationapi-new_match function for new_match notifications
   BEGIN
     SELECT net.http_post(
-      url := v_supabase_url || '/functions/v1/notify',
+      url := v_supabase_url || CASE
+        WHEN p_template_id = 'new_match' THEN '/functions/v1/notificationapi-new_match'
+        ELSE '/functions/v1/notify'
+      END,
       headers := jsonb_build_object(
         'Content-Type', 'application/json',
         'Authorization', 'Bearer ' || v_service_role_key
       ),
-      body := jsonb_build_object(
-        'action', 'send',
-        'userId', p_user_id::text,
-        'templateId', p_template_id,
-        'payload', p_merge_tags,
-        'channels', jsonb_build_array('push')
-      )
+      body := CASE
+        WHEN p_template_id = 'new_match' THEN jsonb_build_object(
+          'userId', p_user_id::text,
+          'matchName', p_merge_tags->>'matchName',
+          'icon', p_merge_tags->>'icon',
+          'url', p_merge_tags->>'url'
+        )
+        ELSE jsonb_build_object(
+          'action', 'send',
+          'userId', p_user_id::text,
+          'templateId', p_template_id,
+          'payload', p_merge_tags,
+          'channels', jsonb_build_array('push')
+        )
+      END
     ) INTO v_request_id;
 
     -- Log success for debugging

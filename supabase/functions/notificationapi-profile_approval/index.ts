@@ -11,7 +11,18 @@ notificationapi.init(
 
 serve(async (req) => {
   try {
-    const { userId, icon, url } = await req.json();
+    const body = await req.json();
+    console.log('Received request body:', JSON.stringify(body));
+
+    const { userId, icon, url } = body;
+
+    console.log('Parsed parameters:', { userId, icon, url });
+
+    if (!userId) {
+      throw new Error('userId is required');
+    }
+
+    console.log('Sending notification to NotificationAPI...');
 
     await notificationapi.send({
       notificationId: 'profile_approval',
@@ -24,6 +35,8 @@ serve(async (req) => {
       }
     });
 
+    console.log('Notification sent successfully to user:', userId);
+
     return new Response(JSON.stringify({
       success: true
     }), {
@@ -34,6 +47,7 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Error sending notification:', error);
+    console.error('Error details:', error.message, error.stack);
     return new Response(JSON.stringify({
       success: false,
       error: error.message
