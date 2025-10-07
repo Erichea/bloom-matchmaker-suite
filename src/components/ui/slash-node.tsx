@@ -111,19 +111,10 @@ export function SlashInputElement(
 ) {
   const { editor, element } = props;
 
-  const allItems = groups.flatMap(group =>
-    group.items.map(item => ({ ...item, group: group.group }))
-  );
-
   return (
     <PlateElement {...props} as="span">
-      <InlineCombobox
-        element={element}
-        trigger="/"
-        items={allItems}
-        id="slash-menu"
-      >
-        <InlineComboboxInput placeholder="Type a command or search..." />
+      <InlineCombobox element={element} trigger="/">
+        <InlineComboboxInput />
 
         <InlineComboboxContent>
           <InlineComboboxEmpty>No results</InlineComboboxEmpty>
@@ -142,7 +133,10 @@ export function SlashInputElement(
                     keywords={keywords}
                   >
                     <div className="mr-2 text-muted-foreground">{icon}</div>
-                    {label ?? value}
+                    <div className="flex flex-col">
+                      <span>{label ?? value}</span>
+                    </div>
+                    <ChevronRightIcon className="ml-auto h-4 w-4 text-muted-foreground" />
                   </InlineComboboxItem>
                 )
               )}
