@@ -6,6 +6,8 @@ import { BasicBlocksKit } from '@/components/editor/plugins/basic-blocks-kit';
 import { BasicMarksKit } from '@/components/editor/plugins/basic-marks-kit';
 import { ListKit } from '@/components/editor/plugins/list-kit';
 import { SlashKit } from '@/components/editor/plugins/slash-kit';
+import { BlockSelectionKit } from '@/components/editor/plugins/block-selection-kit';
+import { DndKit } from '@/components/editor/plugins/dnd-kit';
 
 export const NotesEditorKit = [
   // Basic elements
@@ -16,6 +18,10 @@ export const NotesEditorKit = [
 
   // Block styles
   ...ListKit,
+
+  // Block selection and drag & drop
+  ...BlockSelectionKit,
+  ...DndKit,
 
   // Slash commands
   ...SlashKit,
