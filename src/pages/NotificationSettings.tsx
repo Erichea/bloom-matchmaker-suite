@@ -43,10 +43,23 @@ export default function NotificationSettings() {
     const init = async () => {
       await loadPreferences();
       await checkPushStatus();
+
+      // CRITICAL: Re-sync push tokens with NotificationAPI every time component mounts
+      // This fixes the issue where tokens are lost when user closes/reopens the app
+      if (notificationAPI && Notification.permission === 'granted') {
+        console.log('[NotificationSettings] Re-syncing push tokens with NotificationAPI...');
+        try {
+          // Force the SDK to re-register push subscription
+          await notificationAPI.setWebPushOptIn(true);
+          console.log('[NotificationSettings] Push tokens re-synced successfully');
+        } catch (error) {
+          console.error('[NotificationSettings] Error re-syncing push tokens:', error);
+        }
+      }
     };
 
     init();
-  }, [user]);
+  }, [user, notificationAPI]);
 
   const loadPreferences = async () => {
     try {
