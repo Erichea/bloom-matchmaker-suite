@@ -40,25 +40,13 @@ export default function NotificationSettings() {
       return;
     }
 
-    loadPreferences();
-    checkPushStatus();
-
-    // Re-register web push tokens if user has it enabled
-    const refreshPushTokens = async () => {
-      if (Notification.permission === 'granted' && notificationAPI) {
-        console.log('Refreshing push tokens with NotificationAPI...');
-        try {
-          // Tell the SDK to refresh the web push subscription
-          notificationAPI.setWebPushOptIn(true);
-        } catch (error) {
-          console.error('Error refreshing push tokens:', error);
-        }
-      }
+    const init = async () => {
+      await loadPreferences();
+      await checkPushStatus();
     };
 
-    // Delay to ensure NotificationAPI SDK is fully initialized
-    setTimeout(refreshPushTokens, 1000);
-  }, [user, notificationAPI]);
+    init();
+  }, [user]);
 
   const loadPreferences = async () => {
     try {
@@ -98,9 +86,22 @@ export default function NotificationSettings() {
   };
 
   const checkPushStatus = async () => {
-    // Check if web push is enabled
-    if ('Notification' in window) {
-      setPushEnabled(Notification.permission === 'granted');
+    try {
+      // Check database preference, not just browser permission
+      const { data } = await supabase
+        .from("notification_preferences")
+        .select("push_enabled")
+        .eq("user_id", user!.id)
+        .single();
+
+      // User is considered "enabled" if they have it enabled in DB AND granted permission
+      const hasPermission = 'Notification' in window && Notification.permission === 'granted';
+      const dbEnabled = data?.push_enabled ?? false;
+
+      setPushEnabled(hasPermission && dbEnabled);
+    } catch (error) {
+      console.error("Error checking push status:", error);
+      setPushEnabled(false);
     }
   };
 
@@ -135,8 +136,7 @@ export default function NotificationSettings() {
       console.log('Permission result:', permission);
 
       if (permission === 'granted') {
-        // Give the SDK time to register the push subscription with NotificationAPI
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        console.log('Permission granted, updating database...');
 
         // Update preferences in database
         await supabase
@@ -148,6 +148,10 @@ export default function NotificationSettings() {
           .eq("user_id", user!.id);
 
         setPushEnabled(true);
+
+        // Give SDK a moment to register tokens before showing success
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
         toast({
           title: "Push notifications enabled",
           description: "You'll now receive push notifications for important updates"
