@@ -7,23 +7,20 @@ import type { PlateEditor, PlateElementProps } from 'platejs/react';
 import {
   ChevronRightIcon,
   Code2,
-  Columns3Icon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
-  LightbulbIcon,
   ListIcon,
   ListOrdered,
   PilcrowIcon,
   Quote,
-  TableOfContentsIcon,
 } from 'lucide-react';
 import { type TComboboxInputElement, KEYS } from 'platejs';
 import { PlateElement } from 'platejs/react';
 
 import {
   insertBlock,
-} from '@/lib/plate/transforms';
+} from '@/components/editor/transforms';
 
 import {
   InlineCombobox,
@@ -33,7 +30,7 @@ import {
   InlineComboboxGroupLabel,
   InlineComboboxInput,
   InlineComboboxItem,
-} from '@/lib/plate/inline-combobox';
+} from './inline-combobox';
 
 type Group = {
   group: string;
@@ -107,27 +104,6 @@ const groups: Group[] = [
       },
     })),
   },
-  {
-    group: 'Advanced blocks',
-    items: [
-      {
-        icon: <TableOfContentsIcon />,
-        keywords: ['toc'],
-        label: 'Table of contents',
-        value: KEYS.toc,
-      },
-      {
-        icon: <Columns3Icon />,
-        label: '3 columns',
-        value: 'action_three_columns',
-      },
-    ].map((item) => ({
-      ...item,
-      onSelect: (editor, value) => {
-        insertBlock(editor, value);
-      },
-    })),
-  },
 ];
 
 export function SlashInputElement(
@@ -135,15 +111,15 @@ export function SlashInputElement(
 ) {
   const { editor, element } = props;
 
-  const allItems = groups.flatMap(group => 
+  const allItems = groups.flatMap(group =>
     group.items.map(item => ({ ...item, group: group.group }))
   );
 
   return (
     <PlateElement {...props} as="span">
-      <InlineCombobox 
-        element={element} 
-        trigger="/" 
+      <InlineCombobox
+        element={element}
+        trigger="/"
         items={allItems}
         id="slash-menu"
       >

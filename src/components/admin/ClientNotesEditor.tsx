@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { format } from "date-fns";
-import { TemplateNotesEditor } from "@/components/template-editor/TemplateNotesEditor";
+import { NotesEditor } from "@/components/editor/notes-editor";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -61,8 +61,9 @@ const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt }: Clie
   }, []);
 
   const handleChange = useCallback(
-    async (_value: any[], json: string) => {
-      
+    async (value: any[]) => {
+      const json = JSON.stringify(value);
+
       if (json === lastSyncedContent.current) return;
       setStatus("saving");
       if (saveTimeoutRef.current) {
@@ -116,8 +117,8 @@ const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt }: Clie
         <span>{statusLabel}</span>
         {status === "saving" && <span className="text-foreground">●</span>}
       </div>
-      <div className="flex-1 overflow-y-auto pt-4">
-        <TemplateNotesEditor
+      <div className="flex-1 pt-4">
+        <NotesEditor
           key={editorKey}
           value={initialValue}
           onChange={handleChange}
