@@ -172,6 +172,7 @@ const handleChange = useCallback((options: { editor: any; value: any[] }) => {
 - [x] Basic plugin structure functional
 
 ### 🔄 To Test:
+- [x] Official slash command system implemented
 - [ ] Slash menu opens on "/" trigger
 - [ ] Keyboard navigation in slash menu
 - [ ] Item insertion works correctly

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { format } from "date-fns";
-import { NotesEditor } from "@/components/plate/editor/NotesEditor";
+import { TemplateNotesEditor } from "@/components/template-editor/TemplateNotesEditor";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -117,7 +117,7 @@ const ClientNotesEditor = ({ profileId, initialContent, initialUpdatedAt }: Clie
         {status === "saving" && <span className="text-foreground">●</span>}
       </div>
       <div className="flex-1 overflow-y-auto pt-4">
-        <NotesEditor
+        <TemplateNotesEditor
           key={editorKey}
           value={initialValue}
           onChange={handleChange}
