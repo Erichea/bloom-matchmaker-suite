@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { Bell, CheckCircle2, Heart, UserCheck, AlertCircle, RefreshCw, ArrowLeft } from "lucide-react";
+import { Bell, CheckCircle2, Heart, UserCheck, AlertCircle, RefreshCw, ArrowLeft, CheckCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -115,6 +115,48 @@ export const ClientUpdates = () => {
     fetchNotifications();
   };
 
+  const handleMarkAllAsRead = async () => {
+    if (!user || notifications.length === 0) return;
+
+    try {
+      const unreadNotifications = notifications.filter(n => !n.is_read);
+      if (unreadNotifications.length === 0) return;
+
+      const notificationIds = unreadNotifications.map(n => n.id);
+
+      const { error } = await supabase
+        .from("notifications")
+        .update({ is_read: true })
+        .in("id", notificationIds);
+
+      if (error) throw error;
+
+      // Update local state
+      setNotifications(prev =>
+        prev.map(notification =>
+          notificationIds.includes(notification.id)
+            ? { ...notification, is_read: true }
+            : notification
+        )
+      );
+
+      toast({
+        title: "Success",
+        description: `Marked ${notificationIds.length} notifications as read`,
+      });
+    } catch (error) {
+      console.error("Error marking all as read:", error);
+      toast({
+        title: "Error",
+        description: "Failed to mark notifications as read",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Calculate unread count
+  const unreadCount = notifications.filter(n => !n.is_read).length;
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center pb-16">
@@ -136,17 +178,37 @@ export const ClientUpdates = () => {
             onClick={() => navigate(-1)}
             className="md:hidden"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-lg font-semibold">Updates</h1>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleRefresh}
-            disabled={refreshing}
-          >
-            <RefreshCw className={`h-5 w-5 ${refreshing ? "animate-spin" : ""}`} />
-          </Button>
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-semibold">Updates</h1>
+            {unreadCount > 0 && (
+              <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground">
+                {unreadCount}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1">
+            {unreadCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleMarkAllAsRead}
+                className="h-8 px-2 text-xs"
+              >
+                <CheckCheck className="h-3.5 w-3.5 mr-1" />
+                Mark all read
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleRefresh}
+              disabled={refreshing}
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -160,7 +222,7 @@ export const ClientUpdates = () => {
             </p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1">
             {notifications.map((notification) => {
               const Icon = getIconByType(notification.icon_type);
 
@@ -168,25 +230,27 @@ export const ClientUpdates = () => {
                 <button
                   key={notification.id}
                   onClick={() => handleNotificationClick(notification)}
-                  className={`w-full rounded-lg border border-border p-4 text-left transition-colors hover:bg-accent ${
+                  className={`w-full rounded-lg border border-border p-2.5 text-left transition-colors hover:bg-accent ${
                     !notification.is_read ? "bg-accent/50" : "bg-background"
                   }`}
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="mt-1 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
-                      <Icon className="h-5 w-5 text-primary" />
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                      <Icon className="h-3.5 w-3.5 text-primary" />
                     </div>
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-semibold leading-tight">{notification.title}</h3>
-                        {!notification.is_read && (
-                          <div className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-primary" />
-                        )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="font-medium leading-tight text-sm truncate">{notification.title}</h3>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {!notification.is_read && (
+                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                          )}
+                          <span className="text-xs text-muted-foreground">
+                            {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                          </span>
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground">{notification.description}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-                      </p>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">{notification.description}</p>
                     </div>
                   </div>
                 </button>
