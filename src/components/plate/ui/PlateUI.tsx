@@ -166,3 +166,6 @@ import {
   ELEMENT_OL,
   ELEMENT_LI,
 } from "../config/plugins";
+
+// Import slash element
+import { SlashInputElement } from "./slash-node";

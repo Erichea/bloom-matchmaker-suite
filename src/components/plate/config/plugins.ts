@@ -10,7 +10,8 @@ import {
 } from "@platejs/basic-nodes";
 import { BaseCodeBlockPlugin } from "@platejs/code-block";
 import { BaseListPlugin } from "@platejs/list";
-import { BaseSlashPlugin } from "@platejs/slash-command";
+import { BaseSlashPlugin, BaseSlashInputPlugin } from "@platejs/slash-command";
+import { SlashInputElement } from "../ui/slash-node";
 
 // Element constants
 export const ELEMENT_PARAGRAPH = "p" as const;
@@ -67,8 +68,15 @@ export const createListPlugin = (): PlatePlugin =>
   clone(toPlatePlugin(BaseListPlugin));
 
 // Slash command
-export const createSlashPlugin = (): PlatePlugin =>
-  clone(toPlatePlugin(BaseSlashPlugin));
+export const createSlashPlugin = (): PlatePlugin => {
+  const slash = clone(toPlatePlugin(BaseSlashPlugin));
+  const slashInput = clone(toPlatePlugin(BaseSlashInputPlugin));
+  
+  // Configure the slash input to use our component
+  const slashInputWithComponent = slashInput.withComponent(SlashInputElement);
+  
+  return slash;
+};
 
 // Complete plugin configuration
 export const plugins: PlatePlugin[] = [
