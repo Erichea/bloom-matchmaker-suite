@@ -42,7 +42,23 @@ export default function NotificationSettings() {
 
     loadPreferences();
     checkPushStatus();
-  }, [user]);
+
+    // Re-register web push tokens if user has it enabled
+    const refreshPushTokens = async () => {
+      if (Notification.permission === 'granted' && notificationAPI) {
+        console.log('Refreshing push tokens with NotificationAPI...');
+        try {
+          // Tell the SDK to refresh the web push subscription
+          notificationAPI.setWebPushOptIn(true);
+        } catch (error) {
+          console.error('Error refreshing push tokens:', error);
+        }
+      }
+    };
+
+    // Delay to ensure NotificationAPI SDK is fully initialized
+    setTimeout(refreshPushTokens, 1000);
+  }, [user, notificationAPI]);
 
   const loadPreferences = async () => {
     try {
@@ -91,11 +107,13 @@ export default function NotificationSettings() {
   const handleEnablePush = async () => {
     setSubscribing(true);
     try {
-      // Trigger NotificationAPI SDK permission flow
+      console.log('Enabling push notifications...');
+
+      // First, trigger NotificationAPI SDK permission flow
+      // This will request permission and register the web push subscription
       notificationAPI?.setWebPushOptIn(true);
 
       // Wait for user to respond to permission dialog
-      // The SDK will handle permission request, service worker, and subscription
       const checkPermission = () => {
         return new Promise<NotificationPermission>((resolve) => {
           const interval = setInterval(() => {
@@ -114,8 +132,12 @@ export default function NotificationSettings() {
       };
 
       const permission = await checkPermission();
+      console.log('Permission result:', permission);
 
       if (permission === 'granted') {
+        // Give the SDK time to register the push subscription with NotificationAPI
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
         // Update preferences in database
         await supabase
           .from("notification_preferences")
@@ -132,6 +154,7 @@ export default function NotificationSettings() {
         });
 
         await loadPreferences();
+        console.log('Push notifications enabled successfully');
       } else if (permission === 'denied') {
         toast({
           title: "Permission denied",
@@ -160,23 +183,30 @@ export default function NotificationSettings() {
   const handleDisablePush = async () => {
     setSubscribing(true);
     try {
-      // Update preferences
+      console.log('Disabling push notifications...');
+
+      // Tell NotificationAPI SDK to opt out (but keep tokens registered)
+      // Don't call setWebPushOptIn(false) as it might unregister tokens
+      // Just update our local preferences
+
+      // Update preferences in database
       await supabase
         .from("notification_preferences")
         .update({
-          push_enabled: false,
-          push_subscription: null,
-          push_subscribed_at: null
+          push_enabled: false
+          // DON'T clear push_subscription or push_subscribed_at
+          // This keeps the tokens registered with NotificationAPI
         })
         .eq("user_id", user!.id);
 
       setPushEnabled(false);
       toast({
         title: "Push notifications disabled",
-        description: "You won't receive push notifications anymore"
+        description: "You won't receive push notifications anymore. Re-enable anytime."
       });
 
       await loadPreferences();
+      console.log('Push notifications disabled successfully');
     } catch (error: any) {
       console.error("Error disabling push:", error);
       toast({
