@@ -86,7 +86,7 @@ const ClientWelcome = () => {
         </Link>
         <Link
           to="/auth?mode=signin"
-          className="hidden items-center gap-2 rounded-lg border border-border bg-transparent px-5 py-2.5 text-sm text-muted-foreground transition hover:border-ring hover:text-foreground md:inline-flex"
+          className="hidden items-center gap-2 rounded-lg border border-border bg-transparent px-5 py-2.5 text-sm text-muted-foreground transition hover:border-border-hover hover:text-foreground md:inline-flex"
         >
           <LogIn className="h-3.5 w-3.5" /> Sign in
         </Link>
