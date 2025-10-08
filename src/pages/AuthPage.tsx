@@ -230,45 +230,45 @@ const AuthPage = () => {
           </div>
 
           <motion.div
-            className="w-full"
+            className="w-full max-w-md"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
           >
-            <div className="rounded-3xl border border-border bg-card p-6 shadow-lg sm:p-8">
-              <div className="mb-6 space-y-2 text-center md:text-left">
+            <div className="card p-8 sm:p-10">
+              <div className="mb-8 space-y-3 text-center">
                 <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">Bloom members</span>
-                <h2 className="font-serif text-2xl font-light text-foreground">{activeTab === "signup" ? "Create your account" : "Sign in"}</h2>
-                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                  {hasValidAccessCode ? "Invitation required" : "Members only"}
+                <h2 className="text-2xl font-semibold text-foreground">{activeTab === "signup" ? "Create your account" : "Sign in"}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {hasValidAccessCode ? "Complete your invitation" : "Members only"}
                 </p>
               </div>
 
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
                 {hasValidAccessCode && !isSignInOnly ? (
-                  <TabsList className="flex h-auto w-full items-stretch rounded-2xl bg-secondary p-2 text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
+                  <TabsList className="flex h-auto w-full items-stretch rounded-lg bg-secondary p-1.5 text-sm text-muted-foreground">
                     <TabsTrigger
                       value="signin"
-                      className="flex-1 justify-center rounded-xl px-4 py-2 transition data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                      className="flex-1 justify-center rounded-md px-4 py-2.5 transition data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
                     >
                       Sign In
                     </TabsTrigger>
                     <TabsTrigger
                       value="signup"
-                      className="flex-1 justify-center rounded-xl px-4 py-2 transition data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                      className="flex-1 justify-center rounded-md px-4 py-2.5 transition data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
                     >
                       Sign Up
                     </TabsTrigger>
                   </TabsList>
                 ) : (
-                  <div className="rounded-2xl border border-border bg-secondary px-5 py-3 text-center text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
+                  <div className="rounded-lg border border-border bg-secondary px-5 py-3 text-center text-sm text-muted-foreground">
                     Sign In
                   </div>
                 )}
 
                 <TabsContent value="signin" className="space-y-4">
                   {showEmailConfirmationMessage && (
-                    <div className="rounded-2xl border border-border bg-secondary p-4 text-center text-xs text-foreground">
+                    <div className="rounded-lg border border-border bg-secondary p-4 text-center text-sm text-foreground">
                       <div className="flex items-center justify-center gap-2 text-sm text-foreground">
                         <Heart className="h-4 w-4 text-accent" />
                         Check your email for confirmation, then sign in below.
@@ -277,7 +277,7 @@ const AuthPage = () => {
                     </div>
                   )}
                   {!hasValidAccessCode && !showEmailConfirmationMessage && !isSignInOnly && (
-                    <div className="rounded-2xl border border-border bg-secondary p-4 text-center text-xs text-muted-foreground">
+                    <div className="rounded-lg border border-border bg-secondary p-4 text-center text-sm text-muted-foreground">
                       Members sign in to continue your introductions.
                     </div>
                   )}
@@ -314,7 +314,7 @@ const AuthPage = () => {
                           </FormItem>
                         )}
                       />
-                      <Button type="submit" className="w-full rounded-2xl bg-primary px-8 py-3 text-sm font-medium uppercase tracking-[0.25em] text-primary-foreground shadow-sm transition-all duration-300 hover:bg-primary-hover hover:shadow-md active:scale-[0.98]" disabled={loading}>
+                      <Button type="submit" className="btn-primary w-full" disabled={loading}>
                         {loading ? (
                           <div className="flex items-center">
                             <div className="loading-spinner mr-2" />
@@ -417,7 +417,7 @@ const AuthPage = () => {
                             </FormItem>
                           )}
                         />
-                        <Button type="submit" className="w-full rounded-2xl bg-primary px-8 py-3 text-sm font-medium uppercase tracking-[0.25em] text-primary-foreground shadow-sm transition-all duration-300 hover:bg-primary-hover hover:shadow-md active:scale-[0.98]" disabled={loading}>
+                        <Button type="submit" className="btn-primary w-full" disabled={loading}>
                           {loading ? (
                             <div className="flex items-center">
                               <div className="loading-spinner mr-2" />
