@@ -8,9 +8,8 @@ Modern smart home interface inspired design
 All colors MUST be HSL.
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 @layer base {
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
   :root {
     /* Modern Base - Clean white backgrounds */
     --background: 0 0% 100%;
