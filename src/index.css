@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,44 +13,44 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Nordic Base - Very light beige/sand backgrounds (Auro-inspired) */
-    --background: 35 15% 96%;
-    --foreground: 30 8% 20%;
+    /* New Design System - Light backgrounds */
+    --background: 32 14% 97%;
+    --foreground: 0 0% 10%;
 
-    /* Card & Surface Colors - Subtle layering */
+    /* Card & Surface Colors - Clean white cards */
     --card: 0 0% 100%;
-    --card-foreground: 30 8% 20%;
-    --surface: 35 10% 94%;
+    --card-foreground: 0 0% 10%;
+    --surface: 32 14% 97%;
     --surface-elevated: 0 0% 100%;
 
-    /* Brand Palette - Warm terracotta/earth accent */
-    --brand-primary: 25 40% 60%;
+    /* Brand Palette - Muted dark accents */
+    --brand-primary: 0 0% 10%;
     --brand-primary-foreground: 0 0% 100%;
-    --brand-secondary: 30 8% 20%;
-    --brand-secondary-foreground: 35 15% 96%;
+    --brand-secondary: 0 0% 10%;
+    --brand-secondary-foreground: 32 14% 97%;
 
     /* Popover Colors */
     --popover: 0 0% 100%;
     --popover-foreground: 30 8% 20%;
 
-    /* Primary - Warm dark */
-    --primary: 30 8% 20%;
+    /* Primary - Dark text/buttons */
+    --primary: 0 0% 10%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 30 10% 28%;
-    --primary-muted: 35 10% 92%;
+    --primary-hover: 0 0% 20%;
+    --primary-muted: 32 10% 95%;
 
-    /* Secondary - Very soft beige */
-    --secondary: 35 10% 93%;
-    --secondary-foreground: 30 8% 20%;
+    /* Secondary - Light gray backgrounds */
+    --secondary: 32 8% 96%;
+    --secondary-foreground: 0 0% 10%;
 
-    /* Muted - Subtle warm neutral */
-    --muted: 35 8% 90%;
-    --muted-foreground: 30 6% 50%;
+    /* Muted - Subtle grays */
+    --muted: 32 6% 92%;
+    --muted-foreground: 0 0% 40%;
 
-    /* Accent - Warm terracotta */
-    --accent: 25 40% 60%;
+    /* Accent - Dark accent for highlights */
+    --accent: 0 0% 10%;
     --accent-foreground: 0 0% 100%;
-    --accent-soft: 25 25% 92%;
+    --accent-soft: 32 8% 96%;
 
     /* Status Colors - Muted tones */
     --success: 140 35% 50%;
@@ -63,10 +66,10 @@ All colors MUST be HSL.
     --destructive-soft: 5 40% 90%;
 
     /* Interactive Elements */
-    --border: 35 8% 88%;
-    --border-hover: 35 10% 75%;
+    --border: 32 6% 88%;
+    --border-hover: 32 8% 80%;
     --input: 0 0% 100%;
-    --ring: 25 40% 60%;
+    --ring: 0 0% 10%;
 
     /* Shadows - Softer, warmer */
     --shadow-sm: 0 1px 2px 0 rgb(30 20 10 / 0.04);
@@ -150,23 +153,27 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-feature-settings: 'liga' 1, 'calt' 1;
   }
 
-  /* Nordic Typography - Refined and spacious */
+  /* New Typography - Modern serif for headings */
   h1 {
-    @apply text-2xl font-serif font-light tracking-tight sm:text-4xl lg:text-5xl;
+    font-family: 'Playfair Display', serif;
+    @apply text-4xl font-bold tracking-tight;
     letter-spacing: -0.02em;
   }
 
   h2 {
-    @apply text-xl font-serif font-light tracking-tight sm:text-2xl lg:text-3xl;
+    font-family: 'Playfair Display', serif;
+    @apply text-2xl font-bold;
     letter-spacing: -0.01em;
   }
 
   h3 {
-    @apply text-lg font-sans font-medium sm:text-xl;
+    font-family: 'Playfair Display', serif;
+    @apply text-lg font-semibold;
     letter-spacing: -0.01em;
   }
 
@@ -193,13 +200,13 @@ All colors MUST be HSL.
     @apply bg-transparent text-foreground font-medium rounded-2xl transition-all duration-300 hover:bg-secondary/50 active:scale-[0.98] px-6 py-3 sm:px-8 sm:py-3.5;
   }
 
-  /* Card Styles - Auro-inspired minimalism */
+  /* Card Styles - Clean and minimal */
   .card {
-    @apply bg-card rounded-3xl shadow-sm border border-border/50 overflow-hidden transition-all duration-300 hover:shadow-md;
+    @apply bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden transition-all duration-300 hover:shadow-md;
   }
 
   .card-interactive {
-    @apply bg-card rounded-3xl shadow-sm border border-border/50 overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border-hover cursor-pointer active:scale-[0.99];
+    @apply bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border-hover cursor-pointer active:scale-[0.99];
   }
 
   /* Status Badges - Minimal Nordic */

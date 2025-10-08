@@ -369,244 +369,215 @@ const ClientDashboard = () => {
     <>
       <style>{floatAnimation}</style>
       <div className="relative flex min-h-screen flex-col overflow-hidden bg-background pb-20">
-      <MatchDetailModal match={selectedMatch} open={modalOpen} onOpenChange={setModalOpen} onMatchResponse={handleMatchResponse} />
+        <MatchDetailModal match={selectedMatch} open={modalOpen} onOpenChange={setModalOpen} onMatchResponse={handleMatchResponse} />
 
-      {/* Simple gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-surface to-background" />
+        {/* Simple gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-surface to-background" />
 
-      <header className="relative z-10 flex items-center justify-between px-6 pb-6 pt-8 md:px-10">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-sm font-semibold uppercase tracking-[0.3em] text-foreground">
-            B
+        <header className="flex justify-between items-start mb-16 px-6 pt-8 md:px-10">
+          <div>
+            <p className="font-body text-base text-muted-foreground mb-2">
+              Hello, {profile?.first_name || user?.user_metadata?.first_name || 'there'}
+            </p>
+            <h1 className="text-4xl font-display font-bold">Your Next Chapter</h1>
           </div>
-          <span className="text-xs font-semibold uppercase tracking-[0.45em] text-foreground">
-            Bloom
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9 border border-border">
+          <div className="w-12 h-12 rounded-xl bg-secondary overflow-hidden">
             {profilePhotoUrl ? (
-              <AvatarImage
+              <img
+                alt="User profile picture"
+                className="w-full h-full object-cover"
                 src={profilePhotoUrl}
-                alt={profile?.first_name ? `${profile.first_name}'s profile photo` : "Profile photo"}
               />
             ) : (
-              <AvatarFallback className="bg-secondary text-[0.65rem] uppercase tracking-[0.3em] text-foreground">
+              <div className="w-full h-full bg-secondary flex items-center justify-center text-muted-foreground text-sm font-semibold">
                 {userInitials}
-              </AvatarFallback>
+              </div>
             )}
-          </Avatar>
-          {profileStatus === "approved" && (
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/client/profile/edit")}
-              className="hidden rounded-full border border-border bg-transparent px-6 py-2 text-[0.65rem] uppercase tracking-[0.28em] text-muted-foreground transition hover:border-border-hover hover:bg-secondary hover:text-foreground md:inline-flex"
-            >
-              Update profile
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            onClick={handleSignOut}
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-transparent px-4 py-2 text-[0.65rem] uppercase tracking-[0.28em] text-muted-foreground transition hover:border-border-hover hover:bg-secondary hover:text-foreground"
-          >
-            <LogOut className="h-3.5 w-3.5" /> Sign out
-          </Button>
-        </div>
-      </header>
+          </div>
+        </header>
 
-      <main className="relative z-10 flex flex-1 items-start px-6 pb-16 md:px-10">
-        <motion.div
-          className="mx-auto flex w-full max-w-4xl flex-col gap-10 text-center md:items-start md:text-left"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-        >
-          {profileStatus === "incomplete" && (
-            <div className="flex flex-col gap-4">
-              <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-muted-foreground md:self-start">
-                Complete your profile
-              </span>
-              <h1 className="font-display text-4xl font-light leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-6xl">
-                {profile?.first_name ? `Welcome, ${profile.first_name}.` : "Let's get started."}
-              </h1>
-              <p className="text-sm leading-7 text-muted-foreground md:max-w-xl md:text-base">
-                Complete your questionnaire so we can start curating perfect introductions for you.
-              </p>
-            </div>
-          )}
-
-          {profileStatus === "rejected" && (
-            <div className="flex flex-col gap-4">
-              <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-muted-foreground md:self-start">
-                Profile needs revision
-              </span>
-              <h1 className="font-display text-4xl font-light leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-6xl">
-                {profile?.first_name ? `${profile.first_name}, let's refine your profile.` : "Update required"}
-              </h1>
-              <p className="text-sm leading-7 text-muted-foreground md:max-w-xl md:text-base">
-                Your matchmaker has requested some changes to your profile. Please review and resubmit.
-              </p>
-            </div>
-          )}
-
-          {profileStatus === "pending_approval" && (
-            <div className="flex flex-col gap-4">
-              <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-muted-foreground md:self-start">
-                Under review
-              </span>
-              <h1 className="font-display text-4xl font-light leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-6xl">
-                {profile?.first_name ? `Thank you, ${profile.first_name}.` : "Profile submitted"}
-              </h1>
-              <p className="text-sm leading-7 text-muted-foreground md:max-w-xl md:text-base">
-                Your profile is being reviewed by your matchmaker. You'll be notified once approved and we start curating introductions.
-              </p>
-            </div>
-          )}
-
-          {profileStatus === "approved" && (
-            <div className="flex flex-col gap-4">
-              <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-muted-foreground md:self-start">
-                Curated introductions
-              </span>
-              <h1 className="font-display text-4xl font-light leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-6xl">
-                {profile?.first_name ? `Good to see you, ${profile.first_name}.` : "Your curated matches await."}
-              </h1>
-              <p className="text-sm leading-7 text-muted-foreground md:max-w-xl md:text-base">
-                Explore new introductions as they arrive. Each dossier is prepared intentionally so you can focus on the
-                connections that matter.
-              </p>
-              <Button
-                variant="ghost"
-                onClick={() => navigate("/client/profile/edit")}
-                className="inline-flex w-full items-center justify-center gap-2 self-center rounded-full border border-border bg-transparent px-6 py-3 text-[0.65rem] uppercase tracking-[0.28em] text-muted-foreground transition hover:border-border-hover hover:bg-secondary hover:text-foreground md:w-auto md:self-start"
-              >
-                <User className="h-3.5 w-3.5" /> Update profile preferences
-              </Button>
-            </div>
-          )}
-
+        <main className="relative z-10 flex flex-1 items-start px-6 pb-16 md:px-10">
           <motion.div
-            className="w-full"
+            className="mx-auto flex w-full max-w-4xl flex-col gap-12 text-left"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
           >
-            {(profileStatus === "incomplete" || profileStatus === "rejected") && (
-              <div className="space-y-6 rounded-3xl border border-border bg-card p-6 text-left shadow-lg sm:p-8">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">Questionnaire progress</span>
-                    <span className="font-serif text-2xl font-light text-foreground">{completionPercentage}%</span>
-                  </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
-                    <div
-                      className="h-full bg-accent transition-all duration-500"
-                      style={{ width: `${completionPercentage}%` }}
-                    />
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {profileStatus === "rejected"
-                    ? "Please update your profile and resubmit for review."
-                    : "Complete your profile questionnaire to submit for matchmaker review."}
+            {profileStatus === "incomplete" && (
+              <div className="flex flex-col gap-4">
+                <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-muted-foreground md:self-start">
+                  Complete your profile
+                </span>
+                <h1 className="font-display text-4xl font-light leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-6xl">
+                  {profile?.first_name ? `Welcome, ${profile.first_name}.` : "Let's get started."}
+                </h1>
+                <p className="text-sm leading-7 text-muted-foreground md:max-w-xl md:text-base">
+                  Complete your questionnaire so we can start curating perfect introductions for you.
                 </p>
-                <Button
-                  onClick={() =>
-                    navigate(
-                      profileStatus === "rejected" ? "/client/profile/edit" : "/onboarding"
-                    )
-                  }
-                  className="w-full rounded-2xl bg-primary px-8 py-3 text-sm font-medium uppercase tracking-[0.25em] text-primary-foreground shadow-sm transition-all duration-300 hover:bg-primary-hover hover:shadow-md active:scale-[0.98]"
-                >
-                  {profileStatus === "rejected" ? "Update questionnaire" : "Continue questionnaire"}
-                </Button>
+              </div>
+            )}
+
+            {profileStatus === "rejected" && (
+              <div className="flex flex-col gap-4">
+                <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-muted-foreground md:self-start">
+                  Profile needs revision
+                </span>
+                <h1 className="font-display text-4xl font-light leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-6xl">
+                  {profile?.first_name ? `${profile.first_name}, let's refine your profile.` : "Update required"}
+                </h1>
+                <p className="text-sm leading-7 text-muted-foreground md:max-w-xl md:text-base">
+                  Your matchmaker has requested some changes to your profile. Please review and resubmit.
+                </p>
               </div>
             )}
 
             {profileStatus === "pending_approval" && (
-              <div className="space-y-6 rounded-3xl border border-border bg-card p-6 text-left shadow-lg sm:p-8">
-                <div>
-                  <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">Profile status</span>
-                  <h2 className="font-serif text-2xl font-light text-foreground">Under review</h2>
-                </div>
-                <div className="rounded-2xl border border-dashed border-border bg-secondary p-10 text-center text-sm text-muted-foreground">
-                  Your matchmaker is carefully reviewing your profile. You'll receive a notification once approved and we can start creating your perfect introductions.
-                </div>
+              <div className="flex flex-col gap-4">
+                <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-muted-foreground md:self-start">
+                  Under review
+                </span>
+                <h1 className="font-display text-4xl font-light leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-6xl">
+                  {profile?.first_name ? `Thank you, ${profile.first_name}.` : "Profile submitted"}
+                </h1>
+                <p className="text-sm leading-7 text-muted-foreground md:max-w-xl md:text-base">
+                  Your profile is being reviewed by your matchmaker. You'll be notified once approved and we start curating introductions.
+                </p>
               </div>
             )}
 
             {profileStatus === "approved" && (
-              <div className="space-y-6">
-                {/* Your Turn */}
-                {categorizedMatches.yourTurn.length > 0 && (
-                  <div className="rounded-3xl border border-border bg-card p-6 text-left shadow-lg sm:p-8">
-                    <div className="mb-4">
-                      <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">Your turn</span>
-                      <h2 className="font-serif text-2xl font-light text-foreground">
-                        {categorizedMatches.yourTurn.length} {categorizedMatches.yourTurn.length === 1 ? "match" : "matches"} waiting
-                      </h2>
+              <>
+                <section className="mb-12">
+                  <p className="font-body text-base leading-relaxed max-w-prose text-muted-foreground">
+                    We curate connections with intention. Forget endless swiping; here, introductions are thoughtful, based on shared values and a deeper understanding of what truly matters.
+                  </p>
+                </section>
+                <section className="mb-12">
+                  <div className="bg-card p-5 rounded-2xl flex justify-between items-center shadow-sm">
+                    <div>
+                      <h2 className="text-lg font-display font-semibold">Your Preferences</h2>
+                      <p className="text-sm font-body text-muted-foreground">Fine-tune your personal criteria.</p>
                     </div>
-                    <MatchList matches={categorizedMatches.yourTurn} highlightNew onSelect={handleOpenMatch} className="space-y-4" />
+                    <button className="bg-transparent p-2 rounded-lg hover:bg-secondary transition-colors">
+                      <svg className="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                      </svg>
+                    </button>
                   </div>
-                )}
-
-                {/* Mutual Matches */}
-                {categorizedMatches.mutualMatch.length > 0 && (
-                  <div className="rounded-3xl border border-border bg-card p-6 text-left shadow-lg sm:p-8">
-                    <div className="mb-4">
-                      <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">Mutual match</span>
-                      <h2 className="font-serif text-2xl font-light text-foreground">
-                        {categorizedMatches.mutualMatch.length} {categorizedMatches.mutualMatch.length === 1 ? "connection" : "connections"}
-                      </h2>
-                    </div>
-                    <MatchList matches={categorizedMatches.mutualMatch} onSelect={handleOpenMatch} className="space-y-4" />
-                  </div>
-                )}
-
-                {/* Their Turn */}
-                {categorizedMatches.theirTurn.length > 0 && (
-                  <div className="rounded-3xl border border-border bg-card p-6 text-left shadow-lg sm:p-8">
-                    <div className="mb-4">
-                      <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">Their turn</span>
-                      <h2 className="font-serif text-2xl font-light text-foreground">
-                        Waiting for {categorizedMatches.theirTurn.length} {categorizedMatches.theirTurn.length === 1 ? "response" : "responses"}
-                      </h2>
-                    </div>
-                    <MatchList matches={categorizedMatches.theirTurn} onSelect={handleOpenMatch} className="space-y-4" />
-                  </div>
-                )}
-
-                {/* Rejected */}
-                {categorizedMatches.rejected.length > 0 && (
-                  <div className="rounded-3xl border border-border bg-card p-6 text-left shadow-lg sm:p-8">
-                    <div className="mb-4">
-                      <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">Rejected</span>
-                      <h2 className="font-serif text-2xl font-light text-foreground">
-                        {categorizedMatches.rejected.length} {categorizedMatches.rejected.length === 1 ? "match" : "matches"}
-                      </h2>
-                    </div>
-                    <MatchList matches={categorizedMatches.rejected} onSelect={handleOpenMatch} className="space-y-4" />
-                  </div>
-                )}
-
-                {/* Empty state */}
-                {categorizedMatches.yourTurn.length === 0 &&
-                 categorizedMatches.theirTurn.length === 0 &&
-                 categorizedMatches.rejected.length === 0 &&
-                 categorizedMatches.mutualMatch.length === 0 && (
-                  <div className="rounded-3xl border border-border bg-card p-6 text-left shadow-lg sm:p-8">
-                    <div className="rounded-2xl border border-dashed border-border bg-secondary p-10 text-center text-sm text-muted-foreground">
-                      Your matchmaker is curating the perfect introduction. We&apos;ll let you know the moment a dossier is ready.
-                    </div>
-                  </div>
-                )}
-              </div>
+                </section>
+              </>
             )}
+
+            <motion.div
+              className="w-full"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+            >
+              {(profileStatus === "incomplete" || profileStatus === "rejected") && (
+                <div className="space-y-6 rounded-3xl border border-border bg-card p-6 text-left shadow-lg sm:p-8">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">Questionnaire progress</span>
+                      <span className="font-serif text-2xl font-light text-foreground">{completionPercentage}%</span>
+                    </div>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
+                      <div
+                        className="h-full bg-accent transition-all duration-500"
+                        style={{ width: `${completionPercentage}%` }}
+                      />
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {profileStatus === "rejected"
+                      ? "Please update your profile and resubmit for review."
+                      : "Complete your profile questionnaire to submit for matchmaker review."}
+                  </p>
+                  <Button
+                    onClick={() =>
+                      navigate(
+                        profileStatus === "rejected" ? "/client/profile/edit" : "/onboarding"
+                      )
+                    }
+                    className="w-full rounded-2xl bg-primary px-8 py-3 text-sm font-medium uppercase tracking-[0.25em] text-primary-foreground shadow-sm transition-all duration-300 hover:bg-primary-hover hover:shadow-md active:scale-[0.98]"
+                  >
+                    {profileStatus === "rejected" ? "Update questionnaire" : "Continue questionnaire"}
+                  </Button>
+                </div>
+              )}
+
+              {profileStatus === "pending_approval" && (
+                <div className="space-y-6 rounded-3xl border border-border bg-card p-6 text-left shadow-lg sm:p-8">
+                  <div>
+                    <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">Profile status</span>
+                    <h2 className="font-serif text-2xl font-light text-foreground">Under review</h2>
+                  </div>
+                  <div className="rounded-2xl border border-dashed border-border bg-secondary p-10 text-center text-sm text-muted-foreground">
+                    Your matchmaker is carefully reviewing your profile. You'll receive a notification once approved and we can start creating your perfect introductions.
+                  </div>
+                </div>
+              )}
+
+              {profileStatus === "approved" && (
+                <section>
+                  <h2 className="text-2xl font-display font-bold mb-6">New Introductions</h2>
+                  <div className="space-y-4">
+                    {/* Combine all matches into a single list for the new design */}
+                    {(() => {
+                      const allMatches = [
+                        ...categorizedMatches.yourTurn,
+                        ...categorizedMatches.theirTurn,
+                        ...categorizedMatches.mutualMatch,
+                        ...categorizedMatches.rejected
+                      ];
+
+                      return allMatches.length > 0 ? (
+                        allMatches.map((match) => (
+                          <button
+                            key={match.id}
+                            onClick={() => handleOpenMatch(match.id)}
+                            className="w-full bg-card p-4 rounded-2xl flex items-center shadow-sm hover:shadow-md transition-all duration-200 text-left"
+                          >
+                            <div className="w-14 h-14 rounded-xl bg-secondary overflow-hidden mr-4">
+                              {match.avatarUrl ? (
+                                <img alt={`${match.name}`} className="w-full h-full object-cover" src={match.avatarUrl} />
+                              ) : (
+                                <div className="w-full h-full bg-secondary flex items-center justify-center text-muted-foreground text-sm font-semibold">
+                                  {match.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-grow">
+                              <h3 className="font-semibold font-body text-foreground">
+                                {match.name}, {match.subtitle ? new Date(match.subtitle).getFullYear() : 'Unknown'}
+                              </h3>
+                              <p className="text-sm font-body text-muted-foreground">
+                                {match.status === 'new' && 'Introduced by mutual values'}
+                                {match.status === 'pending' && 'Waiting for your response'}
+                                {match.status === 'mutual' && 'Mutual connection'}
+                                {match.status === 'inactive' && 'Conversation archived'}
+                              </p>
+                            </div>
+                            <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="bg-card p-6 rounded-2xl text-left shadow-sm">
+                          <div className="rounded-2xl border border-dashed border-border bg-secondary p-10 text-center text-sm text-muted-foreground">
+                            Your matchmaker is curating the perfect introduction. We'll let you know the moment a dossier is ready.
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </section>
+              )}
+            </motion.div>
           </motion.div>
-        </motion.div>
-      </main>
-      <BottomNavigation />
+        </main>
+        <BottomNavigation />
       </div>
     </>
   );

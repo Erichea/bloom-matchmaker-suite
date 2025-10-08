@@ -1,17 +1,20 @@
-import { Home, Bell, User, Settings } from "lucide-react";
+import { Home, Heart, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useCallback, useEffect, useState, useMemo, useRef } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { InteractiveMenu, InteractiveMenuItem } from "@/components/ui/modern-mobile-menu";
+
+interface MenuItem {
+  label: string;
+  icon: React.ElementType<{ className?: string }>;
+  badge?: number;
+}
 
 export const BottomNavigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
-  const [isDarkBackground, setIsDarkBackground] = useState(true);
-  const navRef = useRef<HTMLDivElement>(null);
 
   const fetchUnreadCount = useCallback(async () => {
     if (!user) return;
@@ -52,44 +55,18 @@ export const BottomNavigation = () => {
     };
   }, [user, fetchUnreadCount]);
 
-  // Detect background color and adjust menu styling
-  useEffect(() => {
-    const detectBackgroundColor = () => {
-      if (!navRef.current) return;
-
-      const element = navRef.current.parentElement || document.body;
-      const bgColor = window.getComputedStyle(element).backgroundColor;
-
-      // Parse RGB values
-      const rgb = bgColor.match(/\d+/g);
-      if (rgb && rgb.length >= 3) {
-        const [r, g, b] = rgb.map(Number);
-        // Calculate relative luminance
-        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-        setIsDarkBackground(luminance < 0.5);
-      }
-    };
-
-    detectBackgroundColor();
-
-    // Re-detect on route change
-    const timer = setTimeout(detectBackgroundColor, 100);
-
-    return () => clearTimeout(timer);
-  }, [location.pathname]);
+  // No need to detect background color for the new design
 
   const navPaths = useMemo(() => [
     "/client/dashboard",
     "/client/updates",
     "/client/profile",
-    "/client/settings/notifications",
   ], []);
 
-  const menuItems: InteractiveMenuItem[] = useMemo(() => [
+  const menuItems: MenuItem[] = useMemo(() => [
     { label: "Home", icon: Home },
-    { label: "Updates", icon: Bell, badge: unreadCount },
+    { label: "Updates", icon: Heart, badge: unreadCount },
     { label: "Profile", icon: User },
-    { label: "Settings", icon: Settings },
   ], [unreadCount]);
 
   const activeIndex = useMemo(() => {
@@ -103,17 +80,33 @@ export const BottomNavigation = () => {
 
   return (
     <div
-      ref={navRef}
-      className={`adaptive-bottom-nav fixed bottom-0 left-0 right-0 z-50 ${isDarkBackground ? 'dark-bg' : 'light-bg'}`}
+      className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-transparent"
     >
-      <div className="mx-auto max-w-md">
-        <InteractiveMenu
-          items={menuItems}
-          accentColor={isDarkBackground ? "white" : "black"}
-          activeIndex={activeIndex}
-          onItemClick={handleItemClick}
-        />
-      </div>
+      <nav className="bg-card rounded-full p-2 flex justify-around items-center max-w-xs mx-auto shadow-sm">
+        {menuItems.map((item, index) => {
+          const isActive = index === activeIndex;
+          const IconComponent = item.icon;
+          
+          return (
+            <button
+              key={item.label}
+              onClick={() => handleItemClick(index)}
+              className={`p-3 rounded-full transition-colors ${
+                isActive
+                  ? "text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <IconComponent className="w-5 h-5" />
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-semibold text-destructive-foreground">
+                  {item.badge > 99 ? "99+" : item.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </nav>
     </div>
   );
 };
