@@ -519,19 +519,7 @@ const ClientDashboard = () => {
           )}
         </main>
       </div>
-      <footer className="fixed bottom-0 left-0 right-0 p-4 bg-transparent z-10">
-        <nav className="bg-nav-light dark:bg-nav-dark rounded-full p-2 flex justify-around items-center max-w-xs mx-auto shadow-nav-light dark:shadow-nav-dark">
-          <a className="p-3 text-accent dark:text-accent-dark flex flex-col items-center space-y-1" href="#">
-            <span className="material-symbols-outlined filled">home</span>
-          </a>
-          <a className="p-3 text-subtle-light dark:text-subtle-dark flex flex-col items-center space-y-1" href="#">
-            <span className="material-symbols-outlined">favorite</span>
-          </a>
-          <a className="p-3 text-subtle-light dark:text-subtle-dark flex flex-col items-center space-y-1" href="#">
-            <span className="material-symbols-outlined">person</span>
-          </a>
-        </nav>
-      </footer>
+      <BottomNavigation />
     </>
   );
 };

@@ -1,4 +1,3 @@
-import { Home, Heart, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 interface MenuItem {
   label: string;
-  icon: React.ElementType<{ className?: string }>;
+  icon: string;
   badge?: number;
 }
 
@@ -33,7 +32,6 @@ export const BottomNavigation = () => {
 
     if (!user) return;
 
-    // Subscribe to changes
     const channel = supabase
       .channel("notifications-changes")
       .on(
@@ -55,8 +53,6 @@ export const BottomNavigation = () => {
     };
   }, [user, fetchUnreadCount]);
 
-  // No need to detect background color for the new design
-
   const navPaths = useMemo(() => [
     "/client/dashboard",
     "/client/updates",
@@ -64,13 +60,13 @@ export const BottomNavigation = () => {
   ], []);
 
   const menuItems: MenuItem[] = useMemo(() => [
-    { label: "Home", icon: Home },
-    { label: "Updates", icon: Heart, badge: unreadCount },
-    { label: "Profile", icon: User },
+    { label: "Home", icon: "home" },
+    { label: "Updates", icon: "favorite", badge: unreadCount },
+    { label: "Profile", icon: "person" },
   ], [unreadCount]);
 
   const activeIndex = useMemo(() => {
-    const index = navPaths.findIndex(path => path === location.pathname);
+    const index = navPaths.findIndex(path => location.pathname.startsWith(path));
     return index >= 0 ? index : 0;
   }, [location.pathname, navPaths]);
 
@@ -79,27 +75,20 @@ export const BottomNavigation = () => {
   }, [navigate, navPaths]);
 
   return (
-    <div
-      className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-transparent"
-    >
-      <nav className="bg-card rounded-full p-2 flex justify-around items-center max-w-xs mx-auto shadow-sm">
+    <footer className="fixed bottom-0 left-0 right-0 p-4 bg-transparent z-10">
+      <nav className="bg-nav-light dark:bg-nav-dark rounded-full p-2 flex justify-around items-center max-w-xs mx-auto shadow-nav-light dark:shadow-nav-dark">
         {menuItems.map((item, index) => {
           const isActive = index === activeIndex;
-          const IconComponent = item.icon;
-          
           return (
             <button
               key={item.label}
               onClick={() => handleItemClick(index)}
-              className={`p-3 rounded-full transition-colors ${
-                isActive
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <IconComponent className="w-5 h-5" />
+              className={`relative p-3 flex flex-col items-center space-y-1 ${
+                isActive ? "text-accent dark:text-accent-dark" : "text-subtle-light dark:text-subtle-dark"
+              }`}>
+              <span className={`material-symbols-outlined ${isActive ? 'filled' : ''}`}>{item.icon}</span>
               {item.badge !== undefined && item.badge > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-semibold text-destructive-foreground">
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-semibold text-white">
                   {item.badge > 99 ? "99+" : item.badge}
                 </span>
               )}
@@ -107,6 +96,6 @@ export const BottomNavigation = () => {
           );
         })}
       </nav>
-    </div>
+    </footer>
   );
 };
