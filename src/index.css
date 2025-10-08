@@ -189,7 +189,7 @@ All colors MUST be HSL.
   }
 
   .btn-secondary {
-    @apply bg-secondary text-secondary-foreground font-medium rounded-2xl border border-border transition-all duration-300 hover:bg-muted hover:border-border-hover active:scale-[0.98] px-6 py-3 sm:px-8 sm:py-3.5;
+    @apply bg-secondary text-secondary-foreground font-medium rounded-2xl border border-border transition-all duration-300 hover:bg-muted hover:border-ring active:scale-[0.98] px-6 py-3 sm:px-8 sm:py-3.5;
   }
 
   .btn-accent {
@@ -206,7 +206,7 @@ All colors MUST be HSL.
   }
 
   .card-interactive {
-    @apply bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border-hover cursor-pointer active:scale-[0.99];
+    @apply bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-ring cursor-pointer active:scale-[0.99];
   }
 
   /* Status Badges - Minimal Nordic */
