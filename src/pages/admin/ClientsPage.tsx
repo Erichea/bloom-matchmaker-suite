@@ -252,6 +252,8 @@ const ClientsPage = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
   const [sendingTestNotification, setSendingTestNotification] = useState(false);
+  const [deleteMatchDialogOpen, setDeleteMatchDialogOpen] = useState(false);
+  const [deletingMatchId, setDeletingMatchId] = useState<string | null>(null);
 
   const updateStatusFilter = useCallback((value: StatusFilter) => {
     setStatusFilter(value);
@@ -781,6 +783,50 @@ const ClientsPage = () => {
     } finally {
       setSendingTestNotification(false);
     }
+  };
+
+  const handleDeleteMatch = async () => {
+    if (!deletingMatchId) return;
+
+    try {
+      const { data, error } = await supabase.rpc('delete_match', {
+        p_match_id: deletingMatchId
+      });
+
+      if (error) throw error;
+
+      const result = data as { success: boolean; message?: string; notifications_deleted?: number; interactions_deleted?: number };
+
+      if (result?.success) {
+        toast({
+          title: "Match deleted",
+          description: `Match and ${result.notifications_deleted || 0} notification(s) have been removed`,
+        });
+
+        // Refresh matches
+        if (selectedProfile) {
+          await loadMatches(selectedProfile.id);
+          await loadMatchSuggestions(selectedProfile.id, questionnaireAnswers);
+        }
+
+        // Close dialogs
+        setDeleteMatchDialogOpen(false);
+        setDeletingMatchId(null);
+      } else {
+        throw new Error(result?.message || 'Failed to delete match');
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete match",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const confirmDeleteMatch = (matchId: string) => {
+    setDeletingMatchId(matchId);
+    setDeleteMatchDialogOpen(true);
   };
 
   const stats = useMemo(() => {
@@ -1689,6 +1735,17 @@ const ClientsPage = () => {
                                                 <p className="text-xs text-muted-foreground">{other.profession}</p>
                                               )}
                                             </div>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                              onClick={(event) => {
+                                                event.stopPropagation();
+                                                confirmDeleteMatch(match.match_id);
+                                              }}
+                                            >
+                                              <Trash2 className="h-4 w-4" />
+                                            </Button>
                                           </div>
                                         </CardContent>
                                       </Card>
@@ -1793,6 +1850,17 @@ const ClientsPage = () => {
                                                 <p className="text-xs text-muted-foreground">{other.profession}</p>
                                               )}
                                             </div>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                              onClick={(event) => {
+                                                event.stopPropagation();
+                                                confirmDeleteMatch(suggestion.match_id);
+                                              }}
+                                            >
+                                              <Trash2 className="h-4 w-4" />
+                                            </Button>
                                           </div>
 
                                           {/* Single Compatibility Score */}
@@ -1966,6 +2034,30 @@ const ClientsPage = () => {
           }}
         />
       )}
+
+      {/* Delete Match Confirmation Dialog */}
+      <AlertDialog open={deleteMatchDialogOpen} onOpenChange={setDeleteMatchDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Match?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this match suggestion and all related notifications and interactions.
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeletingMatchId(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteMatch}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Match
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
