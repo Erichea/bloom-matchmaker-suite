@@ -188,11 +188,11 @@ All colors MUST be HSL.
 @layer components {
   /* Modern Button Variants - Clean & minimal */
   .btn-primary {
-    @apply bg-primary text-primary-foreground font-medium rounded-lg shadow-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md active:scale-[0.98] px-6 py-3 sm:px-8 sm:py-3.5;
+    @apply bg-primary text-primary-foreground font-medium rounded-lg shadow-sm transition-all duration-200 hover:opacity-90 hover:shadow-md active:scale-[0.98] px-6 py-3 sm:px-8 sm:py-3.5;
   }
 
   .btn-secondary {
-    @apply bg-secondary text-secondary-foreground font-medium rounded-lg border border-border transition-all duration-200 hover:bg-muted hover:border-border-hover active:scale-[0.98] px-6 py-3 sm:px-8 sm:py-3.5;
+    @apply bg-secondary text-secondary-foreground font-medium rounded-lg border border-border transition-all duration-200 hover:bg-muted hover:border-ring active:scale-[0.98] px-6 py-3 sm:px-8 sm:py-3.5;
   }
 
   .btn-accent {
@@ -209,7 +209,7 @@ All colors MUST be HSL.
   }
 
   .card-interactive {
-    @apply bg-card rounded-xl shadow-sm border border-border/50 overflow-hidden transition-all duration-200 hover:shadow-md hover:border-border-hover cursor-pointer active:scale-[0.99];
+    @apply bg-card rounded-xl shadow-sm border border-border/50 overflow-hidden transition-all duration-200 hover:shadow-md hover:border-ring cursor-pointer active:scale-[0.99];
   }
 
   /* Status Badges - Minimal Nordic */

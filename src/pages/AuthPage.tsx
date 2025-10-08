@@ -197,7 +197,7 @@ const AuthPage = () => {
         </Link>
         <Link
           to="/client"
-          className="hidden rounded-full border border-border bg-transparent px-5 py-2.5 text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground transition hover:border-border-hover hover:text-foreground md:block"
+          className="hidden rounded-full border border-border bg-transparent px-5 py-2.5 text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground transition hover:border-ring hover:text-foreground md:block"
         >
           Invitation access
         </Link>
@@ -221,7 +221,7 @@ const AuthPage = () => {
               <div className="flex flex-col gap-2 text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
                 <Link
                   to="/client"
-                  className="inline-flex items-center justify-center gap-3 self-center rounded-full border border-border bg-secondary px-6 py-2 transition hover:border-border-hover hover:bg-muted md:self-start"
+                  className="inline-flex items-center justify-center gap-3 self-center rounded-full border border-border bg-secondary px-6 py-2 transition hover:border-ring hover:bg-muted md:self-start"
                 >
                   <span className="h-px w-6 bg-border" /> Validate access code first
                 </Link>
