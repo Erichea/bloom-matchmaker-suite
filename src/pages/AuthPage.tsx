@@ -181,10 +181,8 @@ const AuthPage = () => {
 
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-background">
-      
-      {/* Simple gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-surface to-background" />
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
+
 
       <header className="relative z-10 flex items-center justify-between px-6 pb-6 pt-8 md:px-10">
         <Link to="/" className="flex items-center gap-3 text-foreground transition hover:opacity-70">
