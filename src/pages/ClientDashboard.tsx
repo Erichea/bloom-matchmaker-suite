@@ -376,10 +376,10 @@ const ClientDashboard = () => {
 
       <header className="relative z-10 flex items-center justify-between px-6 pb-6 pt-8 md:px-10">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-sm font-semibold text-foreground">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-sm font-semibold uppercase tracking-[0.3em] text-foreground">
             B
           </div>
-          <span className="text-sm font-semibold text-foreground">
+          <span className="text-xs font-semibold uppercase tracking-[0.45em] text-foreground">
             Bloom
           </span>
         </div>
@@ -400,7 +400,7 @@ const ClientDashboard = () => {
             <Button
               variant="ghost"
               onClick={() => navigate("/client/profile/edit")}
-              className="hidden rounded-lg border border-border bg-transparent px-6 py-2 text-sm text-muted-foreground transition hover:border-border-hover hover:bg-secondary hover:text-foreground md:inline-flex"
+              className="hidden rounded-full border border-border bg-transparent px-6 py-2 text-[0.65rem] uppercase tracking-[0.28em] text-muted-foreground transition hover:border-border-hover hover:bg-secondary hover:text-foreground md:inline-flex"
             >
               Update profile
             </Button>
@@ -408,7 +408,7 @@ const ClientDashboard = () => {
           <Button
             variant="ghost"
             onClick={handleSignOut}
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-transparent px-4 py-2 text-sm text-muted-foreground transition hover:border-border-hover hover:bg-secondary hover:text-foreground"
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-transparent px-4 py-2 text-[0.65rem] uppercase tracking-[0.28em] text-muted-foreground transition hover:border-border-hover hover:bg-secondary hover:text-foreground"
           >
             <LogOut className="h-3.5 w-3.5" /> Sign out
           </Button>
@@ -424,13 +424,13 @@ const ClientDashboard = () => {
         >
           {profileStatus === "incomplete" && (
             <div className="flex flex-col gap-4">
-              <span className="self-center text-sm text-muted-foreground md:self-start">
+              <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-muted-foreground md:self-start">
                 Complete your profile
               </span>
-              <h1 className="text-4xl font-semibold leading-tight text-foreground sm:text-5xl md:text-6xl">
+              <h1 className="font-display text-4xl font-light leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-6xl">
                 {profile?.first_name ? `Welcome, ${profile.first_name}.` : "Let's get started."}
               </h1>
-              <p className="text-base leading-relaxed text-muted-foreground md:max-w-xl">
+              <p className="text-sm leading-7 text-muted-foreground md:max-w-xl md:text-base">
                 Complete your questionnaire so we can start curating perfect introductions for you.
               </p>
             </div>
@@ -438,13 +438,13 @@ const ClientDashboard = () => {
 
           {profileStatus === "rejected" && (
             <div className="flex flex-col gap-4">
-              <span className="self-center text-sm text-muted-foreground md:self-start">
+              <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-muted-foreground md:self-start">
                 Profile needs revision
               </span>
-              <h1 className="text-4xl font-semibold leading-tight text-foreground sm:text-5xl md:text-6xl">
+              <h1 className="font-display text-4xl font-light leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-6xl">
                 {profile?.first_name ? `${profile.first_name}, let's refine your profile.` : "Update required"}
               </h1>
-              <p className="text-base leading-relaxed text-muted-foreground md:max-w-xl">
+              <p className="text-sm leading-7 text-muted-foreground md:max-w-xl md:text-base">
                 Your matchmaker has requested some changes to your profile. Please review and resubmit.
               </p>
             </div>
@@ -452,13 +452,13 @@ const ClientDashboard = () => {
 
           {profileStatus === "pending_approval" && (
             <div className="flex flex-col gap-4">
-              <span className="self-center text-sm text-muted-foreground md:self-start">
+              <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-muted-foreground md:self-start">
                 Under review
               </span>
-              <h1 className="text-4xl font-semibold leading-tight text-foreground sm:text-5xl md:text-6xl">
+              <h1 className="font-display text-4xl font-light leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-6xl">
                 {profile?.first_name ? `Thank you, ${profile.first_name}.` : "Profile submitted"}
               </h1>
-              <p className="text-base leading-relaxed text-muted-foreground md:max-w-xl">
+              <p className="text-sm leading-7 text-muted-foreground md:max-w-xl md:text-base">
                 Your profile is being reviewed by your matchmaker. You'll be notified once approved and we start curating introductions.
               </p>
             </div>
@@ -466,20 +466,20 @@ const ClientDashboard = () => {
 
           {profileStatus === "approved" && (
             <div className="flex flex-col gap-4">
-              <span className="self-center text-sm text-muted-foreground md:self-start">
+              <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-muted-foreground md:self-start">
                 Curated introductions
               </span>
-              <h1 className="text-4xl font-semibold leading-tight text-foreground sm:text-5xl md:text-6xl">
+              <h1 className="font-display text-4xl font-light leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-6xl">
                 {profile?.first_name ? `Good to see you, ${profile.first_name}.` : "Your curated matches await."}
               </h1>
-              <p className="text-base leading-relaxed text-muted-foreground md:max-w-xl">
+              <p className="text-sm leading-7 text-muted-foreground md:max-w-xl md:text-base">
                 Explore new introductions as they arrive. Each dossier is prepared intentionally so you can focus on the
                 connections that matter.
               </p>
               <Button
                 variant="ghost"
                 onClick={() => navigate("/client/profile/edit")}
-                className="inline-flex w-full items-center justify-center gap-2 self-center rounded-lg border border-border bg-transparent px-6 py-3 text-sm text-muted-foreground transition hover:border-border-hover hover:bg-secondary hover:text-foreground md:w-auto md:self-start"
+                className="inline-flex w-full items-center justify-center gap-2 self-center rounded-full border border-border bg-transparent px-6 py-3 text-[0.65rem] uppercase tracking-[0.28em] text-muted-foreground transition hover:border-border-hover hover:bg-secondary hover:text-foreground md:w-auto md:self-start"
               >
                 <User className="h-3.5 w-3.5" /> Update profile preferences
               </Button>
@@ -493,7 +493,7 @@ const ClientDashboard = () => {
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
           >
             {(profileStatus === "incomplete" || profileStatus === "rejected") && (
-              <div className="space-y-6 card p-8 text-left">
+              <div className="space-y-6 rounded-3xl border border-border bg-card p-6 text-left shadow-lg sm:p-8">
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">Questionnaire progress</span>
@@ -517,7 +517,7 @@ const ClientDashboard = () => {
                       profileStatus === "rejected" ? "/client/profile/edit" : "/onboarding"
                     )
                   }
-                  className="btn-primary w-full"
+                  className="w-full rounded-2xl bg-primary px-8 py-3 text-sm font-medium uppercase tracking-[0.25em] text-primary-foreground shadow-sm transition-all duration-300 hover:bg-primary-hover hover:shadow-md active:scale-[0.98]"
                 >
                   {profileStatus === "rejected" ? "Update questionnaire" : "Continue questionnaire"}
                 </Button>
@@ -525,7 +525,7 @@ const ClientDashboard = () => {
             )}
 
             {profileStatus === "pending_approval" && (
-              <div className="space-y-6 card p-8 text-left">
+              <div className="space-y-6 rounded-3xl border border-border bg-card p-6 text-left shadow-lg sm:p-8">
                 <div>
                   <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">Profile status</span>
                   <h2 className="font-serif text-2xl font-light text-foreground">Under review</h2>
@@ -540,10 +540,10 @@ const ClientDashboard = () => {
               <div className="space-y-6">
                 {/* Your Turn */}
                 {categorizedMatches.yourTurn.length > 0 && (
-                  <div className="card p-8 text-left">
-                    <div className="mb-6">
-                      <span className="text-sm text-muted-foreground">Your turn</span>
-                      <h2 className="text-xl font-semibold text-foreground">
+                  <div className="rounded-3xl border border-border bg-card p-6 text-left shadow-lg sm:p-8">
+                    <div className="mb-4">
+                      <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">Your turn</span>
+                      <h2 className="font-serif text-2xl font-light text-foreground">
                         {categorizedMatches.yourTurn.length} {categorizedMatches.yourTurn.length === 1 ? "match" : "matches"} waiting
                       </h2>
                     </div>
@@ -553,10 +553,10 @@ const ClientDashboard = () => {
 
                 {/* Mutual Matches */}
                 {categorizedMatches.mutualMatch.length > 0 && (
-                  <div className="card p-8 text-left">
-                    <div className="mb-6">
-                      <span className="text-sm text-muted-foreground">Mutual match</span>
-                      <h2 className="text-xl font-semibold text-foreground">
+                  <div className="rounded-3xl border border-border bg-card p-6 text-left shadow-lg sm:p-8">
+                    <div className="mb-4">
+                      <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">Mutual match</span>
+                      <h2 className="font-serif text-2xl font-light text-foreground">
                         {categorizedMatches.mutualMatch.length} {categorizedMatches.mutualMatch.length === 1 ? "connection" : "connections"}
                       </h2>
                     </div>
@@ -566,10 +566,10 @@ const ClientDashboard = () => {
 
                 {/* Their Turn */}
                 {categorizedMatches.theirTurn.length > 0 && (
-                  <div className="card p-8 text-left">
-                    <div className="mb-6">
-                      <span className="text-sm text-muted-foreground">Their turn</span>
-                      <h2 className="text-xl font-semibold text-foreground">
+                  <div className="rounded-3xl border border-border bg-card p-6 text-left shadow-lg sm:p-8">
+                    <div className="mb-4">
+                      <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">Their turn</span>
+                      <h2 className="font-serif text-2xl font-light text-foreground">
                         Waiting for {categorizedMatches.theirTurn.length} {categorizedMatches.theirTurn.length === 1 ? "response" : "responses"}
                       </h2>
                     </div>
@@ -579,10 +579,10 @@ const ClientDashboard = () => {
 
                 {/* Rejected */}
                 {categorizedMatches.rejected.length > 0 && (
-                  <div className="card p-8 text-left">
-                    <div className="mb-6">
-                      <span className="text-sm text-muted-foreground">Rejected</span>
-                      <h2 className="text-xl font-semibold text-foreground">
+                  <div className="rounded-3xl border border-border bg-card p-6 text-left shadow-lg sm:p-8">
+                    <div className="mb-4">
+                      <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">Rejected</span>
+                      <h2 className="font-serif text-2xl font-light text-foreground">
                         {categorizedMatches.rejected.length} {categorizedMatches.rejected.length === 1 ? "match" : "matches"}
                       </h2>
                     </div>
@@ -595,7 +595,7 @@ const ClientDashboard = () => {
                  categorizedMatches.theirTurn.length === 0 &&
                  categorizedMatches.rejected.length === 0 &&
                  categorizedMatches.mutualMatch.length === 0 && (
-                  <div className="card p-8 text-left">
+                  <div className="rounded-3xl border border-border bg-card p-6 text-left shadow-lg sm:p-8">
                     <div className="rounded-2xl border border-dashed border-border bg-secondary p-10 text-center text-sm text-muted-foreground">
                       Your matchmaker is curating the perfect introduction. We&apos;ll let you know the moment a dossier is ready.
                     </div>

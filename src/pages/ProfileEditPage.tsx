@@ -202,40 +202,40 @@ export default function ProfileEditPage() {
     <>
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ProfileTab)} className="min-h-screen bg-background pb-20">
         <div className="sticky top-0 z-40 border-b border-border bg-background">
-          <div className="flex h-16 items-center justify-between px-6">
+          <div className="flex h-16 items-center justify-between px-4">
             <Button variant="ghost" onClick={() => navigate("/client/dashboard")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
-            <h1 className="text-xl font-semibold">Edit Profile</h1>
+            <h1 className="text-lg font-semibold">Edit Profile</h1>
             <div className="w-16" /> {/* Spacer for alignment */}
           </div>
-          <TabsList className="mx-6 mb-4 grid w-auto grid-cols-2">
-            <TabsTrigger value="questions" className="rounded-md">Questions</TabsTrigger>
-            <TabsTrigger value="photos" className="rounded-md">Photos ({photos.length})</TabsTrigger>
+          <TabsList className="mx-4 mb-2 grid w-auto grid-cols-2">
+            <TabsTrigger value="questions">Questions</TabsTrigger>
+            <TabsTrigger value="photos">Photos ({photos.length})</TabsTrigger>
           </TabsList>
         </div>
 
         <TabsContent value="questions" className="mt-0">
-          <div className="max-w-2xl mx-auto px-6 py-8 space-y-8">
+          <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
             {questionsByCategory.map((category, idx) => (
-              <Card key={idx} className="border-0 shadow-lg">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-lg font-semibold">{category.categoryName}</CardTitle>
+              <Card key={idx}>
+                <CardHeader>
+                  <CardTitle className="text-base">{category.categoryName}</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-1">
                   {category.questions.map((question, qIdx) => (
                     <div
                       key={question.id}
-                      className={`flex items-center justify-between p-4 rounded-lg hover:bg-secondary/50 transition-colors ${
+                      className={`flex items-center justify-between py-3 ${
                         qIdx !== category.questions.length - 1 ? 'border-b border-border' : ''
                       }`}
                     >
                       <div className="flex-1 min-w-0 pr-4">
-                        <div className="text-sm font-semibold text-foreground mb-2">
+                        <div className="text-sm font-medium text-foreground mb-1">
                           {getQuestionSummary(question.id, question.question_text_en)}
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm text-muted-foreground truncate">
                           {formatAnswer(answers[question.id])}
                         </div>
                       </div>
@@ -243,9 +243,9 @@ export default function ProfileEditPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => setEditingQuestionId(question.id)}
-                        className="flex-shrink-0 h-9 px-3"
+                        className="flex-shrink-0"
                       >
-                        <Edit2 className="h-4 w-4 mr-2" />
+                        <Edit2 className="h-4 w-4 mr-1" />
                         Edit
                       </Button>
                     </div>
@@ -257,10 +257,10 @@ export default function ProfileEditPage() {
         </TabsContent>
 
         <TabsContent value="photos" className="mt-0">
-          <div className="max-w-2xl mx-auto px-6 py-8 space-y-6">
-            <Card className="border-0 shadow-lg">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl font-semibold">Your Photos</CardTitle>
+          <div className="max-w-2xl mx-auto px-4 py-8 space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Photos</CardTitle>
               </CardHeader>
               <CardContent>
                 <PhotoUploadGrid

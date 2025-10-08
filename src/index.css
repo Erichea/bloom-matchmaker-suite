@@ -2,91 +2,89 @@
 @tailwind components;
 @tailwind utilities;
 
-/* BLOOM Matchmaker Design System - Modern Minimalist
-Clean whites and light grays with subtle accent colors
-Modern smart home interface inspired design
+/* BLOOM Matchmaker Design System - Nordic Luxe
+Scandinavian minimalism meets luxury - Beige, cream, earth tones
+Inspired by Auro design system
 All colors MUST be HSL.
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 @layer base {
   :root {
-    /* Modern Base - Clean white backgrounds */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 20%;
+    /* Nordic Base - Very light beige/sand backgrounds (Auro-inspired) */
+    --background: 35 15% 96%;
+    --foreground: 30 8% 20%;
 
-    /* Card & Surface Colors - Subtle layering with light grays */
+    /* Card & Surface Colors - Subtle layering */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 20%;
-    --surface: 0 0% 98%;
-    --surface-elevated: 0 0% 99%;
+    --card-foreground: 30 8% 20%;
+    --surface: 35 10% 94%;
+    --surface-elevated: 0 0% 100%;
 
-    /* Brand Palette - Clean, minimal accent */
-    --brand-primary: 220 90% 56%;
+    /* Brand Palette - Warm terracotta/earth accent */
+    --brand-primary: 25 40% 60%;
     --brand-primary-foreground: 0 0% 100%;
-    --brand-secondary: 0 0% 45%;
-    --brand-secondary-foreground: 0 0% 100%;
+    --brand-secondary: 30 8% 20%;
+    --brand-secondary-foreground: 35 15% 96%;
 
     /* Popover Colors */
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 20%;
+    --popover-foreground: 30 8% 20%;
 
-    /* Primary - Modern blue accent */
-    --primary: 220 90% 56%;
+    /* Primary - Warm dark */
+    --primary: 30 8% 20%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 220 90% 50%;
-    --primary-muted: 220 90% 96%;
+    --primary-hover: 30 10% 28%;
+    --primary-muted: 35 10% 92%;
 
-    /* Secondary - Very light gray */
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 20%;
+    /* Secondary - Very soft beige */
+    --secondary: 35 10% 93%;
+    --secondary-foreground: 30 8% 20%;
 
-    /* Muted - Subtle neutral gray */
-    --muted: 0 0% 94%;
-    --muted-foreground: 0 0% 60%;
+    /* Muted - Subtle warm neutral */
+    --muted: 35 8% 90%;
+    --muted-foreground: 30 6% 50%;
 
-    /* Accent - Modern blue */
-    --accent: 220 90% 56%;
+    /* Accent - Warm terracotta */
+    --accent: 25 40% 60%;
     --accent-foreground: 0 0% 100%;
-    --accent-soft: 220 90% 96%;
+    --accent-soft: 25 25% 92%;
 
-    /* Status Colors - Modern, clean tones */
-    --success: 142 76% 36%;
+    /* Status Colors - Muted tones */
+    --success: 140 35% 50%;
     --success-foreground: 0 0% 100%;
-    --success-soft: 142 76% 96%;
+    --success-soft: 140 25% 90%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
-    --warning-soft: 38 92% 96%;
+    --warning: 35 60% 55%;
+    --warning-foreground: 30 8% 20%;
+    --warning-soft: 35 40% 88%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 5 50% 55%;
     --destructive-foreground: 0 0% 100%;
-    --destructive-soft: 0 84% 96%;
+    --destructive-soft: 5 40% 90%;
 
     /* Interactive Elements */
-    --border: 0 0% 92%;
-    --border-hover: 0 0% 86%;
+    --border: 35 8% 88%;
+    --border-hover: 35 10% 75%;
     --input: 0 0% 100%;
-    --ring: 220 90% 56%;
+    --ring: 25 40% 60%;
 
-    /* Shadows - Modern, clean */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    /* Shadows - Softer, warmer */
+    --shadow-sm: 0 1px 2px 0 rgb(30 20 10 / 0.04);
+    --shadow-md: 0 4px 8px -2px rgb(30 20 10 / 0.08);
+    --shadow-lg: 0 12px 24px -6px rgb(30 20 10 / 0.12);
+    --shadow-xl: 0 20px 40px -10px rgb(30 20 10 / 0.16);
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     /* Sidebar */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 20%;
-    --sidebar-primary: 220 90% 56%;
+    --sidebar-foreground: 30 8% 20%;
+    --sidebar-primary: 30 8% 20%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 96%;
-    --sidebar-accent-foreground: 0 0% 20%;
-    --sidebar-border: 0 0% 92%;
-    --sidebar-ring: 220 90% 56%;
+    --sidebar-accent: 35 10% 93%;
+    --sidebar-accent-foreground: 30 8% 20%;
+    --sidebar-border: 35 8% 90%;
+    --sidebar-ring: 25 40% 60%;
     --component-inactive-color: var(--muted-foreground);
     --component-bg: var(--card);
     --component-shadow: var(--border);
@@ -96,41 +94,41 @@ All colors MUST be HSL.
   }
 
   .dark {
-    /* Dark mode - Modern dark grays */
-    --background: 0 0% 8%;
-    --foreground: 0 0% 95%;
-    --card: 0 0% 12%;
-    --card-foreground: 0 0% 95%;
-    --popover: 0 0% 12%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 220 90% 56%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 220 90% 60%;
-    --secondary: 0 0% 18%;
-    --secondary-foreground: 0 0% 95%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
-    --accent: 220 90% 56%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 75% 60%;
-    --destructive-foreground: 0 0% 95%;
-    --border: 0 0% 20%;
-    --border-hover: 0 0% 28%;
-    --input: 0 0% 12%;
-    --ring: 220 90% 56%;
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 220 90% 56%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 18%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 220 90% 56%;
+    /* Dark mode - Deep warm tones */
+    --background: 30 10% 15%;
+    --foreground: 35 15% 90%;
+    --card: 30 12% 18%;
+    --card-foreground: 35 15% 90%;
+    --popover: 30 12% 18%;
+    --popover-foreground: 35 15% 90%;
+    --primary: 35 15% 90%;
+    --primary-foreground: 30 10% 15%;
+    --primary-hover: 35 15% 75%;
+    --secondary: 30 10% 25%;
+    --secondary-foreground: 35 15% 90%;
+    --muted: 30 10% 25%;
+    --muted-foreground: 35 10% 60%;
+    --accent: 25 45% 60%;
+    --accent-foreground: 30 10% 15%;
+    --destructive: 5 50% 50%;
+    --destructive-foreground: 35 15% 90%;
+    --border: 30 10% 28%;
+    --border-hover: 30 12% 38%;
+    --input: 30 12% 20%;
+    --ring: 25 45% 60%;
+    --sidebar-background: 30 10% 15%;
+    --sidebar-foreground: 35 15% 90%;
+    --sidebar-primary: 25 45% 60%;
+    --sidebar-primary-foreground: 30 10% 15%;
+    --sidebar-accent: 30 10% 25%;
+    --sidebar-accent-foreground: 35 15% 90%;
+    --sidebar-border: 30 10% 28%;
+    --sidebar-ring: 25 45% 60%;
 
-    --brand-primary: 220 90% 56%;
-    --brand-primary-foreground: 0 0% 100%;
-    --brand-secondary: 0 0% 85%;
-    --brand-secondary-foreground: 0 0% 8%;
+    --brand-primary: 25 45% 60%;
+    --brand-primary-foreground: 30 10% 15%;
+    --brand-secondary: 35 15% 85%;
+    --brand-secondary-foreground: 30 10% 15%;
     --component-inactive-color: var(--muted-foreground);
     --component-bg: var(--card);
     --component-shadow: var(--border);
@@ -156,14 +154,14 @@ All colors MUST be HSL.
     font-feature-settings: 'liga' 1, 'calt' 1;
   }
 
-  /* Modern Typography - Clean and minimal */
+  /* Nordic Typography - Refined and spacious */
   h1 {
-    @apply text-2xl font-sans font-semibold tracking-tight sm:text-4xl lg:text-5xl;
+    @apply text-2xl font-serif font-light tracking-tight sm:text-4xl lg:text-5xl;
     letter-spacing: -0.02em;
   }
 
   h2 {
-    @apply text-xl font-sans font-semibold tracking-tight sm:text-2xl lg:text-3xl;
+    @apply text-xl font-serif font-light tracking-tight sm:text-2xl lg:text-3xl;
     letter-spacing: -0.01em;
   }
 
@@ -173,43 +171,35 @@ All colors MUST be HSL.
   }
 
   p {
-    @apply leading-relaxed font-sans;
-  }
-
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-feature-settings: 'liga' 1, 'calt' 1;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    @apply leading-relaxed;
   }
 }
 
 @layer components {
-  /* Modern Button Variants - Clean & minimal */
+  /* Nordic Button Variants - Soft & minimal */
   .btn-primary {
-    @apply bg-primary text-primary-foreground font-medium rounded-lg shadow-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md active:scale-[0.98] px-6 py-3 sm:px-8 sm:py-3.5;
+    @apply bg-primary text-primary-foreground font-medium rounded-2xl shadow-sm transition-all duration-300 hover:bg-primary-hover hover:shadow-md active:scale-[0.98] px-6 py-3 sm:px-8 sm:py-3.5;
   }
 
   .btn-secondary {
-    @apply bg-secondary text-secondary-foreground font-medium rounded-lg border border-border transition-all duration-200 hover:bg-muted hover:border-border-hover active:scale-[0.98] px-6 py-3 sm:px-8 sm:py-3.5;
+    @apply bg-secondary text-secondary-foreground font-medium rounded-2xl border border-border transition-all duration-300 hover:bg-muted hover:border-border-hover active:scale-[0.98] px-6 py-3 sm:px-8 sm:py-3.5;
   }
 
   .btn-accent {
-    @apply bg-accent text-accent-foreground font-medium rounded-lg shadow-sm transition-all duration-200 hover:opacity-90 hover:shadow-md active:scale-[0.98] px-6 py-3 sm:px-8 sm:py-3.5;
+    @apply bg-accent text-accent-foreground font-medium rounded-2xl shadow-sm transition-all duration-300 hover:opacity-90 hover:shadow-md active:scale-[0.98] px-6 py-3 sm:px-8 sm:py-3.5;
   }
 
   .btn-ghost {
-    @apply bg-transparent text-foreground font-medium rounded-lg transition-all duration-200 hover:bg-secondary active:scale-[0.98] px-6 py-3 sm:px-8 sm:py-3.5;
+    @apply bg-transparent text-foreground font-medium rounded-2xl transition-all duration-300 hover:bg-secondary/50 active:scale-[0.98] px-6 py-3 sm:px-8 sm:py-3.5;
   }
 
-  /* Modern Card Styles - Clean & contemporary */
+  /* Card Styles - Auro-inspired minimalism */
   .card {
-    @apply bg-card rounded-xl shadow-sm border border-border/50 overflow-hidden transition-all duration-200 hover:shadow-md;
+    @apply bg-card rounded-3xl shadow-sm border border-border/50 overflow-hidden transition-all duration-300 hover:shadow-md;
   }
 
   .card-interactive {
-    @apply bg-card rounded-xl shadow-sm border border-border/50 overflow-hidden transition-all duration-200 hover:shadow-md hover:border-border-hover cursor-pointer active:scale-[0.99];
+    @apply bg-card rounded-3xl shadow-sm border border-border/50 overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border-hover cursor-pointer active:scale-[0.99];
   }
 
   /* Status Badges - Minimal Nordic */
@@ -229,12 +219,12 @@ All colors MUST be HSL.
     @apply bg-muted text-muted-foreground border-0 rounded-full px-3 py-1 text-xs font-medium tracking-wide;
   }
 
-  /* Modern Input Styles - Clean & contemporary */
+  /* Input Styles - Soft & rounded */
   .input {
-    @apply bg-input border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 transition-all duration-200 outline-none w-full;
+    @apply bg-input border border-border rounded-2xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 transition-all duration-300 outline-none w-full;
   }
 
-  /* Modern Container Utilities */
+  /* Container Utilities */
   .container-app {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }

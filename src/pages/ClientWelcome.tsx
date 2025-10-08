@@ -77,16 +77,16 @@ const ClientWelcome = () => {
 
       <header className="relative z-10 flex items-center justify-between px-6 pb-6 pt-8 md:px-10">
         <Link to="/" className="flex items-center gap-3 text-foreground transition hover:opacity-70">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-sm font-semibold">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-sm font-semibold uppercase tracking-[0.3em]">
             B
           </div>
-          <span className="text-sm font-semibold">
+          <span className="text-xs font-semibold uppercase tracking-[0.45em]">
             Bloom
           </span>
         </Link>
         <Link
           to="/auth?mode=signin"
-          className="hidden items-center gap-2 rounded-lg border border-border bg-transparent px-5 py-2.5 text-sm text-muted-foreground transition hover:border-border-hover hover:text-foreground md:inline-flex"
+          className="hidden items-center gap-2 rounded-full border border-border bg-transparent px-5 py-2.5 text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground transition hover:border-border-hover hover:text-foreground md:inline-flex"
         >
           <LogIn className="h-3.5 w-3.5" /> Sign in
         </Link>
@@ -99,10 +99,10 @@ const ClientWelcome = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
-          <span className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2 text-sm text-muted-foreground">
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2 text-[0.65rem] uppercase tracking-[0.28em] text-muted-foreground shadow-sm">
             <Sparkles className="h-4 w-4" /> Invitation only
           </span>
-          <h1 className="text-4xl font-semibold leading-tight text-foreground sm:text-5xl md:text-6xl">
+          <h1 className="font-display text-4xl font-light leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-6xl">
             Enter your Bloom invitation code.
           </h1>
 
@@ -113,22 +113,22 @@ const ClientWelcome = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
           >
-            <div className="space-y-6 card p-8">
+            <div className="space-y-6 rounded-3xl border border-border bg-card p-6 shadow-lg sm:p-8">
               <div className="space-y-3 text-left">
-                <span className="text-sm text-muted-foreground">Invitation code</span>
+                <span className="text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">Invitation code</span>
                 <Input
                   id="accessCode"
                   value={accessCode}
                   onChange={(event) => setAccessCode(event.target.value.toUpperCase())}
                   placeholder="BLOOM-2024"
-                  className="h-14 text-center text-base uppercase tracking-[0.4em]"
+                  className="h-14 rounded-2xl border-border bg-input text-center text-base uppercase tracking-[0.4em] text-foreground"
                   required
                 />
               </div>
               <Button
                 type="submit"
                 disabled={isValidating || !accessCode.trim()}
-                className="btn-primary w-full"
+                className="w-full rounded-2xl bg-primary px-8 py-3.5 text-sm font-medium uppercase tracking-[0.25em] text-primary-foreground shadow-sm transition-all duration-300 hover:bg-primary-hover hover:shadow-md active:scale-[0.98]"
               >
                 {isValidating ? "Verifying..." : "Continue"}
               </Button>

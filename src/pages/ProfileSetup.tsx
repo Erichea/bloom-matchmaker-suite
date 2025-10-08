@@ -124,10 +124,10 @@ const ProfileSetup = () => {
       case 1:
         return (
           <div className="space-y-6">
-            <div className="space-y-3">
-              <span className="text-sm text-muted-foreground">Step 1</span>
-              <h3 className="text-xl font-semibold text-foreground">Basic information</h3>
-              <p className="text-base leading-relaxed text-muted-foreground">
+            <div className="space-y-2">
+              <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Step 1</span>
+              <h3 className="text-lg font-semibold text-foreground">Basic information</h3>
+              <p className="text-sm leading-6 text-muted-foreground">
                 Tell us who you are so your matchmaker can introduce you with intention.
               </p>
             </div>
@@ -345,8 +345,8 @@ const ProfileSetup = () => {
 
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 py-16 lg:flex-row lg:items-start lg:px-12">
         <aside className="flex-1 space-y-10">
-          <div className="card p-8">
-            <h2 className="text-sm font-semibold text-muted-foreground">
+          <div className="rounded-3xl border border-border bg-card p-8">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-muted-foreground">
               Guidance
             </h2>
             <ul className="mt-6 space-y-4 text-sm leading-6 text-muted-foreground">
@@ -357,45 +357,44 @@ const ProfileSetup = () => {
           </div>
         </aside>
 
-        <section className="flex-1 space-y-8 card p-10">
+        <section className="flex-1 space-y-8 rounded-3xl border border-border bg-card p-10 shadow-lg">
           <div className="space-y-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <span className="text-sm text-muted-foreground">Profile setup</span>
-                <h1 className="text-2xl font-semibold text-foreground">
+                <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Profile setup</span>
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                   Craft your introduction
                 </h1>
               </div>
               <div className="text-right">
-                <Progress value={progress} className="h-2 w-40" />
-                <p className="mt-2 text-sm text-muted-foreground">
+                <Progress value={progress} className="h-2 w-40 rounded-full" />
+                <p className="mt-2 text-xs uppercase tracking-[0.3em] text-muted-foreground">
                   Step {currentStep} of 4
                 </p>
               </div>
             </div>
-            <p className="text-base leading-relaxed text-muted-foreground">
+            <p className="text-sm leading-6 text-muted-foreground">
               These details remain private to your matchmaker and are used solely to curate aligned introductions.
             </p>
           </div>
 
           <div className="space-y-8">{renderStep()}</div>
 
-          <div className="flex flex-col gap-4 pt-6 sm:flex-row sm:justify-between">
+          <div className="flex flex-col gap-4 pt-4 sm:flex-row sm:justify-between">
             <Button
               variant="outline"
               onClick={handlePrevious}
               disabled={currentStep === 1}
-              className="btn-secondary"
             >
               Previous
             </Button>
 
             {currentStep < 4 ? (
-              <Button onClick={handleNext} className="btn-primary">
+              <Button onClick={handleNext}>
                 Continue
               </Button>
             ) : (
-              <Button onClick={handleSubmit} disabled={loading} className="btn-primary">
+              <Button onClick={handleSubmit} disabled={loading}>
                 {loading ? "Saving" : "Complete profile"}
                 <CheckCircle className="ml-2 h-4 w-4" />
               </Button>

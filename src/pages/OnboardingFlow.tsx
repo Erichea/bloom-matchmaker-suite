@@ -241,7 +241,7 @@ export default function OnboardingFlow() {
           <OnboardingProgressDots total={questions.length + 2} current={0} />
           
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-semibold mb-3">
+            <h1 className="text-3xl md:text-4xl font-bold mb-3">
               Add your photos
             </h1>
             <p className="text-base text-muted-foreground">
@@ -263,7 +263,7 @@ export default function OnboardingFlow() {
               onClick={handlePhotoComplete}
               disabled={photos.length < 1}
               size="lg"
-              className="btn-primary h-14"
+              className="rounded-full h-14 px-8"
             >
               Continue
               <ArrowRight className="ml-2 h-5 w-5" />
@@ -300,8 +300,8 @@ export default function OnboardingFlow() {
   // Complete screen
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
-      <Card className="max-w-2xl w-full border-0 shadow-lg">
-        <CardContent className="pt-12 pb-8 text-center space-y-8">
+      <Card className="max-w-2xl w-full">
+        <CardContent className="pt-12 pb-8 text-center space-y-6">
           <div className="flex justify-center">
             <div className="h-20 w-20 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
               <CheckCircle2 className="h-12 w-12 text-green-600 dark:text-green-400" />
@@ -309,45 +309,45 @@ export default function OnboardingFlow() {
           </div>
 
           <div>
-            <h1 className="text-3xl font-semibold mb-3">Profile Complete!</h1>
+            <h1 className="text-3xl font-bold mb-3">Profile Complete!</h1>
             <p className="text-muted-foreground text-lg">
               Thank you for completing your profile.
             </p>
           </div>
 
-          <div className="bg-muted/50 rounded-lg p-6 text-left space-y-4">
-             <h2 className="font-semibold text-lg">What happens next?</h2>
-             <ul className="space-y-3 text-sm text-muted-foreground">
-               <li className="flex items-start gap-3">
-                 <span className="text-primary mt-0.5">•</span>
-                 <span>Your profile will be reviewed by our matchmaking team</span>
-               </li>
-               <li className="flex items-start gap-3">
-                 <span className="text-primary mt-0.5">•</span>
-                 <span>Once approved, you'll receive a notification</span>
-               </li>
-               <li className="flex items-start gap-3">
-                 <span className="text-primary mt-0.5">•</span>
-                 <span>You'll start receiving curated match suggestions</span>
-               </li>
-               <li className="flex items-start gap-3">
-                 <span className="text-primary mt-0.5">•</span>
-                 <span>Review usually takes 1-2 business days</span>
-               </li>
-             </ul>
-           </div>
+          <div className="bg-muted/50 rounded-lg p-6 text-left space-y-3">
+            <h2 className="font-semibold text-lg">What happens next?</h2>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-0.5">•</span>
+                <span>Your profile will be reviewed by our matchmaking team</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-0.5">•</span>
+                <span>Once approved, you'll receive a notification</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-0.5">•</span>
+                <span>You'll start receiving curated match suggestions</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-0.5">•</span>
+                <span>Review usually takes 1-2 business days</span>
+              </li>
+            </ul>
+          </div>
 
-           <Button
-             onClick={handleSubmitForReview}
-             size="lg"
-             className="btn-primary w-full"
-           >
-             Submit for Review
-           </Button>
+          <Button
+            onClick={handleSubmitForReview}
+            size="lg"
+            className="w-full"
+          >
+            Submit for Review
+          </Button>
 
-           <p className="text-sm text-muted-foreground">
-             By submitting, you agree to our terms of service and privacy policy
-           </p>
+          <p className="text-xs text-muted-foreground">
+            By submitting, you agree to our terms of service and privacy policy
+          </p>
         </CardContent>
       </Card>
     </div>
