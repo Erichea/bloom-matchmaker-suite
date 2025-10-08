@@ -57,12 +57,14 @@ export const BottomNavigation = () => {
     "/client/dashboard",
     "/client/updates",
     "/client/profile",
+    "/client/settings/notifications",
   ], []);
 
   const menuItems: MenuItem[] = useMemo(() => [
     { label: "Home", icon: "home" },
     { label: "Updates", icon: "favorite", badge: unreadCount },
     { label: "Profile", icon: "person" },
+    { label: "Settings", icon: "settings" },
   ], [unreadCount]);
 
   const activeIndex = useMemo(() => {

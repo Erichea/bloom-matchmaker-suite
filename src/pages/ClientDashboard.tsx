@@ -469,17 +469,7 @@ const ClientDashboard = () => {
                   We curate connections with intention. Forget endless swiping; here, introductions are thoughtful, based on shared values and a deeper understanding of what truly matters.
                 </p>
               </section>
-              <section className="mb-12">
-                <div className="bg-card-light dark:bg-card-dark p-5 rounded-2xl flex justify-between items-center shadow-sm">
-                  <div>
-                    <h2 className="text-lg font-display font-semibold">Your Preferences</h2>
-                    <p className="text-sm font-body text-subtle-light dark:text-subtle-dark">Fine-tune your personal criteria.</p>
-                  </div>
-                  <button className="bg-transparent p-2 rounded-lg">
-                    <span className="material-symbols-outlined text-text-light dark:text-text-dark">tune</span>
-                  </button>
-                </div>
-              </section>
+
               <section>
                 <h2 className="text-2xl font-display font-bold mb-6">New Introductions</h2>
                 <div className="space-y-4">
