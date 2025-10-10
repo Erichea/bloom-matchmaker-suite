@@ -27,8 +27,10 @@ export function NotesEditor({
   });
 
   const handleChange = React.useCallback(
-    ({ value: newValue }: { value: any[] }) => {
-      onChange?.(newValue);
+    (options: { editor: any; value: unknown }) => {
+      if (Array.isArray(options.value)) {
+        onChange?.(options.value);
+      }
     },
     [onChange]
   );
