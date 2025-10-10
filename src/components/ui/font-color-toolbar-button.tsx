@@ -295,7 +295,7 @@ function ColorInput({
       })}
       <input
         {...props}
-        ref={useComposedRef(props.ref, inputRef)}
+        ref={useComposedRef(inputRef)}
         className={cn('size-0 overflow-hidden border-0 p-0', className)}
         value={value}
         type="color"

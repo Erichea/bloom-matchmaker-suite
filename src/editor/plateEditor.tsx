@@ -22,9 +22,6 @@ export const NotionLikeEditor = ({
   return (
     <Plate
       editor={editor}
-      plugins={platePlugins}
-      components={plateUI}
-      initialValue={initialValue}
       onChange={handleOnChange}
     >
       <Editor placeholder={placeholder} />

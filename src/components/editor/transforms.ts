@@ -1,7 +1,7 @@
 import type { PlateEditor } from 'platejs/react';
 
 export const insertBlock = (editor: PlateEditor, value: string) => {
-  editor.tf.toggleBlock({ type: value });
+  editor.tf.toggleBlock(value);
 };
 
 export const getBlockType = (element: any) => {
@@ -9,7 +9,7 @@ export const getBlockType = (element: any) => {
 };
 
 export const setBlockType = (editor: PlateEditor, type: string) => {
-  editor.tf.toggleBlock({ type });
+  editor.tf.toggleBlock(type);
 };
 
 export const insertInlineElement = (editor: PlateEditor, type: string) => {
