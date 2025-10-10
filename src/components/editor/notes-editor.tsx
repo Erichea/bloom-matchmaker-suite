@@ -37,8 +37,12 @@ export function NotesEditor({
 
   return (
     <Plate editor={editor} onChange={handleChange}>
-      <EditorContainer className="h-full">
-        <Editor variant="none" placeholder={placeholder} className="h-full px-0 py-0" />
+      <EditorContainer className="h-full relative">
+        <Editor 
+          variant="none" 
+          placeholder={placeholder} 
+          className="h-full px-4 py-4"
+        />
       </EditorContainer>
     </Plate>
   );

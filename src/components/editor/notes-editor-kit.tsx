@@ -55,12 +55,12 @@ export const NotesEditorKit = [
   // Autoformat (markdown shortcuts)
   ...AutoformatKit,
 
+  // Slash commands - must come before DndKit and BlockSelectionKit
+  ...SlashKit,
+
   // Block selection and drag & drop
   ...BlockSelectionKit,
   ...DndKit,
-
-  // Slash commands
-  ...SlashKit,
 
   // Exit break and trailing block
   ExitBreakPlugin,
