@@ -126,37 +126,52 @@ const AuthPage = () => {
 
   const handleSignUp = async (data: SignUpForm) => {
     setLoading(true);
-    const { error } = await signUp(data.email, data.password, data.firstName, data.lastName);
+    try {
+      const { error } = await signUp(data.email, data.password, data.firstName, data.lastName);
 
-    if (!error) {
-      // Clear access code from session storage after successful signup
-      sessionStorage.removeItem('validAccessCode');
+      if (!error) {
+        // Clear access code from session storage after successful signup
+        sessionStorage.removeItem('validAccessCode');
 
-      // Check if user session was created (email auto-confirmed)
-      const { data: { session } } = await supabase.auth.getSession();
+        // Check if user session was created (email auto-confirmed)
+        const { data: { session } } = await supabase.auth.getSession();
 
-      if (session) {
-        // User is authenticated, redirect to onboarding immediately
-        toast({
-          title: "Welcome to Bloom! 🎉",
-          description: "Your account has been created. Let's get started!",
-          duration: 3000,
-        });
+        console.log('Sign up successful, session:', !!session);
 
-        // Navigate immediately - the session is already set
-        navigate("/onboarding");
-      } else {
-        // Email confirmation required
-        setShowEmailConfirmationMessage(true);
-        setActiveTab("signin");
-        toast({
-          title: "Check your email",
-          description: "We've sent you a verification link. Please verify your email to continue.",
-          duration: 6000,
-        });
+        if (session) {
+          // User is authenticated, redirect to onboarding immediately
+          toast({
+            title: "Welcome to Bloom! 🎉",
+            description: "Your account has been created. Let's get started!",
+            duration: 3000,
+          });
+
+          console.log('Navigating to /onboarding');
+          // Small delay to ensure auth state is fully updated
+          setTimeout(() => {
+            navigate("/onboarding");
+          }, 100);
+        } else {
+          // Email confirmation required
+          setShowEmailConfirmationMessage(true);
+          setActiveTab("signin");
+          toast({
+            title: "Check your email",
+            description: "We've sent you a verification link. Please verify your email to continue.",
+            duration: 6000,
+          });
+        }
       }
+    } catch (err) {
+      console.error('Error during sign up:', err);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleCreateAdminUser = async () => {
