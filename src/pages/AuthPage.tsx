@@ -127,31 +127,43 @@ const AuthPage = () => {
   const handleSignUp = async (data: SignUpForm) => {
     setLoading(true);
     try {
-      const { error } = await signUp(data.email, data.password, data.firstName, data.lastName);
+      console.log('[AuthPage] Starting signup process...');
+      const signUpResult = await signUp(data.email, data.password, data.firstName, data.lastName);
+      console.log('[AuthPage] SignUp result:', {
+        error: signUpResult.error,
+        hasSession: !!(signUpResult as any).session,
+        hasUser: !!(signUpResult as any).user
+      });
 
-      if (!error) {
+      if (!signUpResult.error) {
         // Clear access code from session storage after successful signup
         sessionStorage.removeItem('validAccessCode');
 
-        // Check if user session was created (email auto-confirmed)
-        const { data: { session } } = await supabase.auth.getSession();
-
-        console.log('Sign up successful, session:', !!session);
+        // Use the session directly from signup response
+        const session = (signUpResult as any).session;
+        console.log('[AuthPage] Session from signUp:', {
+          hasSession: !!session,
+          userId: session?.user?.id,
+          userEmail: session?.user?.email,
+          emailConfirmed: session?.user?.email_confirmed_at
+        });
 
         if (session) {
           // User is authenticated, redirect to onboarding immediately
+          console.log('[AuthPage] Session exists, showing toast and navigating...');
           toast({
             title: "Welcome to Bloom! 🎉",
             description: "Your account has been created. Let's get started!",
             duration: 3000,
           });
 
-          console.log('Navigating to /onboarding');
           // Small delay to ensure auth state is fully updated
           setTimeout(() => {
+            console.log('[AuthPage] Executing navigate("/onboarding")');
             navigate("/onboarding");
           }, 100);
         } else {
+          console.log('[AuthPage] No session found, showing email confirmation message');
           // Email confirmation required
           setShowEmailConfirmationMessage(true);
           setActiveTab("signin");
@@ -161,9 +173,11 @@ const AuthPage = () => {
             duration: 6000,
           });
         }
+      } else {
+        console.error('[AuthPage] Signup returned error:', signUpResult.error);
       }
     } catch (err) {
-      console.error('Error during sign up:', err);
+      console.error('[AuthPage] Exception during sign up:', err);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",

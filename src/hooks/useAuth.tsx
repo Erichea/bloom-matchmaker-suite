@@ -154,7 +154,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // This prevents duplicate toasts
       }
 
-      return { error };
+      console.log('[useAuth] Returning from signUp with error:', error, 'and session:', !!data?.session);
+      return { error, session: data?.session, user: data?.user };
     } catch (error: any) {
       toast({
         title: "Sign Up Error",
