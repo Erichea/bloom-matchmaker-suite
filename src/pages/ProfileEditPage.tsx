@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { ArrowLeft, Edit2, X } from "lucide-react";
+import { ArrowLeft, Edit2, X, LogOut } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { questionnaireCategories } from "@/constants/questionnaireCategories";
 
@@ -84,7 +84,7 @@ const getQuestionSummary = (questionId: string, questionText: string): string =>
 
 export default function ProfileEditPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<ProfileTab>("questions");
   const [photos, setPhotos] = useState<any[]>([]);
@@ -173,6 +173,15 @@ export default function ProfileEditPage() {
     });
   };
 
+  const handleLogout = async () => {
+    await signOut();
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out."
+    });
+    navigate("/auth");
+  };
+
   const questionsByCategory = useMemo(() => {
     return questionnaireCategories.map(category => {
       const categoryQuestions = questions.filter(q =>
@@ -253,6 +262,23 @@ export default function ProfileEditPage() {
                 </CardContent>
               </Card>
             ))}
+
+            {/* Account Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Account</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  variant="outline"
+                  onClick={handleLogout}
+                  className="w-full justify-start"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Log out
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 
