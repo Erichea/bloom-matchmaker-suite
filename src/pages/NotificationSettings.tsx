@@ -63,11 +63,12 @@ export default function NotificationSettings() {
 
   const loadPreferences = async () => {
     try {
+      // Use maybeSingle() to handle cases where no row exists yet
       const { data, error } = await supabase
         .from("notification_preferences")
         .select("*")
         .eq("user_id", user!.id)
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== "PGRST116") {
         throw error;
@@ -101,11 +102,17 @@ export default function NotificationSettings() {
   const checkPushStatus = async () => {
     try {
       // Get the user's preference from database
-      const { data } = await supabase
+      // Use maybeSingle() to handle cases where no row exists yet
+      const { data, error } = await supabase
         .from("notification_preferences")
         .select("push_enabled")
         .eq("user_id", user!.id)
-        .single();
+        .maybeSingle();
+
+      // Ignore PGRST116 (no rows) errors
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
 
       // Set toggle based on database preference
       // This reflects what the user chose, not the browser permission state

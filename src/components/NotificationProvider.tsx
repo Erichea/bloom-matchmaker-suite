@@ -20,13 +20,20 @@ function TokenSyncHelper() {
     const syncTokens = async () => {
       try {
         // Check if user has push enabled
-        const { data: prefs } = await supabase
+        // Use maybeSingle() instead of single() to handle cases where no row exists yet
+        const { data: prefs, error } = await supabase
           .from('notification_preferences')
           .select('push_enabled')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
         if (!isMounted) return;
+
+        // If there's an error (not PGRST116 which means no rows), log it
+        if (error && error.code !== 'PGRST116') {
+          console.error('[TokenSyncHelper] ❌ Error fetching preferences:', error);
+          return;
+        }
 
         if (prefs?.push_enabled && Notification.permission === 'granted') {
           console.log('[TokenSyncHelper] User has push enabled, syncing tokens...');
