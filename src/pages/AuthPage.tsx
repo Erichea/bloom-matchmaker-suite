@@ -13,6 +13,7 @@ import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Heart, UserPlus, LogIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Logo } from "@/components/Logo";
 
 const signInSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -185,13 +186,8 @@ const AuthPage = () => {
 
 
       <header className="relative z-10 flex items-center justify-between px-6 pb-6 pt-8 md:px-10">
-        <Link to="/" className="flex items-center gap-3 text-foreground transition hover:opacity-70">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-sm font-semibold uppercase tracking-[0.3em]">
-            B
-          </div>
-          <span className="text-xs font-semibold uppercase tracking-[0.45em]">
-            Bloom
-          </span>
+        <Link to="/" className="text-foreground transition hover:opacity-70">
+          <Logo size="md" />
         </Link>
         <Link
           to="/client"

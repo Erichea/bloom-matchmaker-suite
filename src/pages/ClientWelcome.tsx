@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Sparkles, LogIn } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 const ClientWelcome = () => {
   const [accessCode, setAccessCode] = useState("");
@@ -76,13 +77,8 @@ const ClientWelcome = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-background via-surface to-background" />
 
       <header className="relative z-10 flex items-center justify-between px-6 pb-6 pt-8 md:px-10">
-        <Link to="/" className="flex items-center gap-3 text-foreground transition hover:opacity-70">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-sm font-semibold uppercase tracking-[0.3em]">
-            B
-          </div>
-          <span className="text-xs font-semibold uppercase tracking-[0.45em]">
-            Bloom
-          </span>
+        <Link to="/" className="text-foreground transition hover:opacity-70">
+          <Logo size="md" />
         </Link>
         <Link
           to="/auth?mode=signin"

@@ -21,6 +21,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Logo } from "@/components/Logo";
 
 const adminMenuItems = [
   {
@@ -105,21 +106,14 @@ export function AdminSidebar() {
         {/* Header */}
         <div className="p-4 border-b border-border-soft">
           {!collapsed && (
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center">
-                <Heart className="h-4 w-4 text-white" />
-              </div>
-              <div>
-                <h2 className="font-bold text-lg text-foreground">BLOOM</h2>
-                <p className="text-xs text-muted-foreground">Admin Panel</p>
-              </div>
+            <div className="flex flex-col space-y-1">
+              <Logo size="sm" />
+              <p className="text-xs text-muted-foreground">Admin Panel</p>
             </div>
           )}
           {collapsed && (
             <div className="flex justify-center">
-              <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center">
-                <Heart className="h-4 w-4 text-white" />
-              </div>
+              <Logo size="sm" className="h-6" />
             </div>
           )}
         </div>

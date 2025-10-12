@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { PremiumButton } from "@/components/experience/PremiumButton";
+import { Logo } from "@/components/Logo";
 
 // Simple CSS animation instead of framer-motion for better performance
 const floatAnimation = `
@@ -46,14 +47,7 @@ const Index = () => {
 
 
       <header className="relative z-10 flex items-center px-6 pb-6 pt-8 md:px-10">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-sm font-semibold uppercase tracking-[0.3em] text-foreground">
-            B
-          </div>
-          <span className="text-xs font-semibold uppercase tracking-[0.45em] text-foreground">
-            Bloom
-          </span>
-        </div>
+        <Logo size="md" />
       </header>
 
       <main className="relative z-10 flex flex-1 items-center px-6 pb-16 md:px-10">

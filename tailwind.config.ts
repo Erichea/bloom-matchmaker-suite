@@ -16,8 +16,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Playfair Display", "serif"],
-        body: ["Plus Jakarta Sans", "sans-serif"],
+        display: ["Tiempos Headline", "serif"],
+        body: ["Modern Era", "sans-serif"],
       },
       colors: {
         "background-light": "#F5F3EF",
