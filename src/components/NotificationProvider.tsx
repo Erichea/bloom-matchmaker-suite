@@ -35,6 +35,7 @@ function TokenSyncHelper() {
           return;
         }
 
+        // Only sync if BOTH DB flag is true AND browser permission is granted
         if (prefs?.push_enabled && Notification.permission === 'granted') {
           console.log('[TokenSyncHelper] User has push enabled, syncing tokens...');
           console.log('[TokenSyncHelper] Browser permission:', Notification.permission);
@@ -47,6 +48,20 @@ function TokenSyncHelper() {
           console.log('[TokenSyncHelper] ✅ Push tokens synced successfully');
         } else {
           console.log('[TokenSyncHelper] ⏭️  Skipping sync - push_enabled:', prefs?.push_enabled, 'permission:', Notification.permission);
+
+          // Fix inconsistent state: if DB says enabled but permission not granted, disable in DB
+          if (prefs?.push_enabled && Notification.permission !== 'granted') {
+            console.log('[TokenSyncHelper] ⚠️  Inconsistent state detected: DB enabled but no permission. Fixing...');
+            try {
+              await supabase
+                .from('notification_preferences')
+                .update({ push_enabled: false })
+                .eq('user_id', user.id);
+              console.log('[TokenSyncHelper] ✅ Fixed: Set push_enabled to false in DB');
+            } catch (err) {
+              console.error('[TokenSyncHelper] ❌ Failed to fix inconsistent state:', err);
+            }
+          }
         }
       } catch (error) {
         console.error('[TokenSyncHelper] ❌ Error syncing tokens:', error);

@@ -134,68 +134,60 @@ export default function NotificationSettings() {
     try {
       console.log('Enabling push notifications...');
 
-      // First, trigger NotificationAPI SDK permission flow
-      // This will request permission and register the web push subscription
+      // IMPORTANT: On iOS Safari/PWA, we must explicitly request browser permission FIRST
+      // before calling NotificationAPI SDK's setWebPushOptIn()
+      let permission: NotificationPermission = Notification.permission;
+
+      if (permission === 'default') {
+        console.log('Requesting browser notification permission...');
+        permission = await Notification.requestPermission();
+        console.log('Permission response:', permission);
+      }
+
+      if (permission !== 'granted') {
+        if (permission === 'denied') {
+          toast({
+            title: "Permission denied",
+            description: "Please enable notifications in your browser/system settings",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "No response",
+            description: "Please try again and allow notifications",
+            variant: "destructive"
+          });
+        }
+        return;
+      }
+
+      // Now that browser permission is granted, register with NotificationAPI
+      console.log('Browser permission granted, registering with NotificationAPI...');
       notificationAPI?.setWebPushOptIn(true);
 
-      // Wait for user to respond to permission dialog
-      const checkPermission = () => {
-        return new Promise<NotificationPermission>((resolve) => {
-          const interval = setInterval(() => {
-            if (Notification.permission !== 'default') {
-              clearInterval(interval);
-              resolve(Notification.permission);
-            }
-          }, 100);
+      // Give SDK a moment to register tokens
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-          // Timeout after 30 seconds
-          setTimeout(() => {
-            clearInterval(interval);
-            resolve(Notification.permission);
-          }, 30000);
-        });
-      };
-
-      const permission = await checkPermission();
       console.log('Permission result:', permission);
 
-      if (permission === 'granted') {
-        console.log('Permission granted, updating database...');
+      // Update preferences in database
+      await supabase
+        .from("notification_preferences")
+        .update({
+          push_enabled: true,
+          push_subscribed_at: new Date().toISOString()
+        })
+        .eq("user_id", user!.id);
 
-        // Update preferences in database
-        await supabase
-          .from("notification_preferences")
-          .update({
-            push_enabled: true,
-            push_subscribed_at: new Date().toISOString()
-          })
-          .eq("user_id", user!.id);
+      setPushEnabled(true);
 
-        setPushEnabled(true);
+      toast({
+        title: "Push notifications enabled",
+        description: "You'll now receive push notifications for important updates"
+      });
 
-        // Give SDK a moment to register tokens before showing success
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        toast({
-          title: "Push notifications enabled",
-          description: "You'll now receive push notifications for important updates"
-        });
-
-        await loadPreferences();
-        console.log('Push notifications enabled successfully');
-      } else if (permission === 'denied') {
-        toast({
-          title: "Permission denied",
-          description: "Please enable notifications in your browser settings",
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "No response",
-          description: "Please try again and allow notifications",
-          variant: "destructive"
-        });
-      }
+      await loadPreferences();
+      console.log('Push notifications enabled successfully');
     } catch (error: any) {
       console.error("Error enabling push:", error);
       toast({
