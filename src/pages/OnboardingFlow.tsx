@@ -6,13 +6,18 @@ import { useOnboardingQuestionnaire } from "@/hooks/useOnboardingQuestionnaire";
 import { useToast } from "@/hooks/use-toast";
 import { OnboardingProgressDots } from "@/components/onboarding/OnboardingProgressDots";
 import { QuestionScreen } from "@/components/onboarding/QuestionScreen";
+import { TransitionScreen } from "@/components/onboarding/TransitionScreen";
 import { PhotoUploadGrid } from "@/components/PhotoUploadGrid";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 
-type OnboardingStep = "photos" | "questionnaire" | "complete";
+type OnboardingStep = "photos" | "questionnaire" | "transition" | "complete";
+
+// Question 17 is 'mbti' - the last profile question
+// Question 18 is 'education_importance' - the first preference question
+const PROFILE_SECTION_END_INDEX = 16; // 0-indexed, so question 17
 
 export default function OnboardingFlow() {
   const navigate = useNavigate();
@@ -150,6 +155,13 @@ export default function OnboardingFlow() {
     // Save answer
     await saveAnswer(currentQuestion.id, currentAnswer);
 
+    // Check if we just completed the profile section (question 17 - mbti)
+    if (currentQuestionIndex === PROFILE_SECTION_END_INDEX) {
+      // Show transition screen before preferences
+      setCurrentStep("transition");
+      return;
+    }
+
     // Move to next question or complete
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -158,12 +170,30 @@ export default function OnboardingFlow() {
     }
   };
 
+  const handleTransitionContinue = () => {
+    // Move to first preference question (question 18)
+    setCurrentQuestionIndex(PROFILE_SECTION_END_INDEX + 1);
+    setCurrentStep("questionnaire");
+  };
+
   const handleQuestionBack = () => {
+    // If we're at the first preference question, go back to transition
+    if (currentQuestionIndex === PROFILE_SECTION_END_INDEX + 1) {
+      setCurrentStep("transition");
+      return;
+    }
+
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
     } else {
       setCurrentStep("photos");
     }
+  };
+
+  const handleTransitionBack = () => {
+    // Go back to the last profile question (question 17 - mbti)
+    setCurrentQuestionIndex(PROFILE_SECTION_END_INDEX);
+    setCurrentStep("questionnaire");
   };
 
   const handleSubmitForReview = async () => {
@@ -272,6 +302,10 @@ export default function OnboardingFlow() {
         </div>
       </div>
     );
+  }
+
+  if (currentStep === "transition") {
+    return <TransitionScreen onContinue={handleTransitionContinue} />;
   }
 
   if (currentStep === "questionnaire") {

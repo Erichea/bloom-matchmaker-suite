@@ -115,7 +115,7 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
 
       // Don't save null/undefined answers
       if (answer === null || answer === undefined) {
-        console.warn('Skipping save for null/undefined answer');
+        // This is expected when user hasn't answered yet - no need to log
         return;
       }
 
@@ -180,6 +180,15 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
           'Nonbinary': 'non_binary',
         };
 
+        const educationMap: Record<string, string> = {
+          'No diploma': 'other',
+          'High school (Bac)': 'high_school',
+          "Bachelor's (Licence)": 'bachelor',
+          "Master's": 'master',
+          'Doctorate (Doctorat)': 'phd',
+          'Prefer not to say': 'other',
+        };
+
         if (fields.length === 1) {
           const field = fields[0];
           let value = answer;
@@ -187,6 +196,11 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
           // Apply gender mapping if this is the gender field
           if (field === 'gender' && typeof value === 'string' && genderMap[value]) {
             value = genderMap[value];
+          }
+
+          // Apply education mapping if this is the education field
+          if (field === 'education' && typeof value === 'string' && educationMap[value]) {
+            value = educationMap[value];
           }
 
           updateData[field] = value;

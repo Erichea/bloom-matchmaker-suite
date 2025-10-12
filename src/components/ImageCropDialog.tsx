@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import Cropper, { Area, Point } from "react-easy-crop";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { ZoomIn } from "lucide-react";
@@ -109,6 +109,9 @@ export const ImageCropDialog = ({ open, imageUrl, onCropComplete, onCancel }: Im
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Position your photo</DialogTitle>
+          <DialogDescription>
+            Drag to reposition and use the slider to zoom. Your photo will be cropped to a 3:4 ratio.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -149,10 +152,6 @@ export const ImageCropDialog = ({ open, imageUrl, onCropComplete, onCancel }: Im
               className="w-full"
             />
           </div>
-
-          <p className="text-sm text-muted-foreground">
-            Drag to reposition and use the slider to zoom. Your photo will be cropped to a 3:4 ratio.
-          </p>
         </div>
 
         <DialogFooter className="gap-2">

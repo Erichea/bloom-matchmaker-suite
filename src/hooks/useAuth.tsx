@@ -122,7 +122,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           id: data.user?.id,
           email: data.user?.email,
           email_confirmed_at: data.user?.email_confirmed_at,
-          confirmation_sent_at: data.user?.confirmation_sent_at
+          confirmation_sent_at: data.user?.confirmation_sent_at,
+          session: !!data.session
         });
 
         if (data.user) {
@@ -140,14 +141,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           } else {
             console.log('User role created successfully.');
           }
+
+          // Update local auth state immediately if session was created
+          if (data.session) {
+            console.log('Session created during signup, updating auth state');
+            setSession(data.session);
+            setUser(data.user);
+          }
         }
 
-        toast({
-          title: "Account Created Successfully! 🎉",
-          description: data.user?.email_confirmed_at
-            ? "Welcome! You can now sign in."
-            : `Verification code sent to ${data.user?.email}. Check your email (including spam folder).`,
-        });
+        // Don't show toast here - let the calling component handle it
+        // This prevents duplicate toasts
       }
 
       return { error };

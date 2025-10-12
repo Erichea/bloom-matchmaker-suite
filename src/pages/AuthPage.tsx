@@ -136,17 +136,15 @@ const AuthPage = () => {
       const { data: { session } } = await supabase.auth.getSession();
 
       if (session) {
-        // User is authenticated, redirect to onboarding
+        // User is authenticated, redirect to onboarding immediately
         toast({
           title: "Welcome to Bloom! 🎉",
           description: "Your account has been created. Let's get started!",
-          duration: 4000,
+          duration: 3000,
         });
 
-        // Redirect to onboarding flow after a brief delay
-        setTimeout(() => {
-          navigate("/onboarding");
-        }, 1500);
+        // Navigate immediately - the session is already set
+        navigate("/onboarding");
       } else {
         // Email confirmation required
         setShowEmailConfirmationMessage(true);
