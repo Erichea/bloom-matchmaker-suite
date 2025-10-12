@@ -169,35 +169,37 @@ export const ClientUpdates = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex h-14 items-center justify-between px-4">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 pb-20">
+      <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+        <div className="flex h-16 items-center justify-between px-4 max-w-2xl mx-auto">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate(-1)}
-            className="md:hidden"
+            className="md:hidden hover:bg-accent/50"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-semibold">Updates</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-semibold">Updates</h1>
             {unreadCount > 0 && (
-              <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground">
-                {unreadCount}
-              </span>
+              <div className="flex items-center justify-center h-6 min-w-6 px-2 rounded-full bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20">
+                <span className="text-xs font-bold text-primary-foreground">
+                  {unreadCount}
+                </span>
+              </div>
             )}
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleMarkAllAsRead}
-                className="h-8 px-2 text-xs"
+                className="h-9 px-3 text-xs hover:bg-accent/50"
               >
-                <CheckCheck className="h-3.5 w-3.5 mr-1" />
-                Mark all read
+                <CheckCheck className="h-4 w-4 mr-1.5" />
+                <span className="hidden sm:inline">Mark all read</span>
               </Button>
             )}
             <Button
@@ -205,24 +207,28 @@ export const ClientUpdates = () => {
               size="icon"
               onClick={handleRefresh}
               disabled={refreshing}
+              className="hover:bg-accent/50"
             >
-              <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+              <RefreshCw className={`h-5 w-5 ${refreshing ? "animate-spin" : ""}`} />
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-4 py-4">
+      <main className="mx-auto max-w-2xl px-4 py-6">
         {notifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Bell className="h-16 w-16 text-muted-foreground/40" />
-            <h3 className="mt-4 text-lg font-medium">No updates yet</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full" />
+              <Bell className="relative h-20 w-20 text-muted-foreground/30" />
+            </div>
+            <h3 className="mt-6 text-lg font-semibold">No updates yet</h3>
+            <p className="mt-2 text-sm text-muted-foreground max-w-sm">
               We'll notify you when there's something new
             </p>
           </div>
         ) : (
-          <div className="space-y-1">
+          <div className="space-y-3">
             {notifications.map((notification) => {
               const Icon = getIconByType(notification.icon_type);
 
@@ -230,27 +236,39 @@ export const ClientUpdates = () => {
                 <button
                   key={notification.id}
                   onClick={() => handleNotificationClick(notification)}
-                  className={`w-full rounded-lg border border-border p-2.5 text-left transition-colors hover:bg-accent ${
-                    !notification.is_read ? "bg-accent/50" : "bg-background"
+                  className={`group w-full rounded-2xl border transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] ${
+                    !notification.is_read
+                      ? "bg-gradient-to-br from-primary/5 via-background to-background border-primary/20 shadow-md shadow-primary/5"
+                      : "bg-card/50 backdrop-blur-sm border-border/50 hover:bg-card/80"
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
-                      <Icon className="h-3.5 w-3.5 text-primary" />
+                  <div className="flex items-start gap-4 p-4">
+                    <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-300 ${
+                      !notification.is_read
+                        ? "bg-gradient-to-br from-primary to-primary/70 shadow-lg shadow-primary/25"
+                        : "bg-muted/50 group-hover:bg-primary/10"
+                    }`}>
+                      <Icon className={`h-6 w-6 ${
+                        !notification.is_read ? "text-primary-foreground" : "text-primary"
+                      }`} />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <h3 className="font-medium leading-tight text-sm truncate">{notification.title}</h3>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          {!notification.is_read && (
-                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                          )}
-                          <span className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-                          </span>
-                        </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <div className="flex items-start justify-between gap-3 mb-1">
+                        <h3 className={`font-semibold leading-snug ${
+                          !notification.is_read ? "text-foreground" : "text-foreground/90"
+                        }`}>
+                          {notification.title}
+                        </h3>
+                        {!notification.is_read && (
+                          <div className="h-2 w-2 flex-shrink-0 rounded-full bg-primary mt-1.5 animate-pulse" />
+                        )}
                       </div>
-                      <p className="text-xs text-muted-foreground truncate mt-0.5">{notification.description}</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed mb-2">
+                        {notification.description}
+                      </p>
+                      <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/80">
+                        {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                      </span>
                     </div>
                   </div>
                 </button>
