@@ -157,10 +157,11 @@ const AuthPage = () => {
             duration: 3000,
           });
 
-          // Small delay to ensure auth state is fully updated
+          // Use window.location to force a hard redirect
+          // This ensures the page fully unmounts and remounts with the new auth state
           setTimeout(() => {
-            console.log('[AuthPage] Executing navigate("/onboarding")');
-            navigate("/onboarding");
+            console.log('[AuthPage] Executing window.location.href = "/onboarding"');
+            window.location.href = "/onboarding";
           }, 100);
         } else {
           console.log('[AuthPage] No session found, showing email confirmation message');
