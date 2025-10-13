@@ -8,7 +8,16 @@
       "Bash(git add:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\nfix: resolve push notification delivery issues for all notification types\n\nFixed critical authorization header format issue preventing edge functions from being called by database triggers. The pg_net http_post function required headers as a separate parameter, not nested in params.\n\nChanges:\n- Fixed send_push_notification function to use correct pg_net.http_post signature with separate headers parameter\n- Added detailed logging to all notification edge functions (mutual_match, profile_approval, profile_update) for better debugging\n- Removed conflicting migration files that attempted to use wrong http extension\n- Added service role key configuration via private.config table\n- Created test script for debugging notification delivery\n\nAll notification types now working:\n- new_match: triggers on match creation\n- mutual_match: triggers when both users accept\n- profile_approval: triggers on profile approval\n- profile_update: triggers on profile rejection\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(git push:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git pull:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(psql:*)",
+      "Bash(git restore:*)",
+      "Bash(git stash:*)",
+      "Bash(npm install)"
     ],
     "deny": [],
     "ask": []
