@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "apple-touch-icon-180x180.png", "placeholder.svg"],
+      includeAssets: ["favicon.ico", "favicon.svg", "apple-touch-icon-180x180.png", "bloom-logo.svg"],
       manifest: {
         name: "BLOOM - Premium Matchmaking",
         short_name: "BLOOM",
