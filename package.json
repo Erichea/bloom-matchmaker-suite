@@ -9,7 +9,9 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "test:db": "psql \"postgresql://postgres:postgres@127.0.0.1:54322/postgres\" -f supabase/tests/push_notification_tests.sql",
+    "test:db:remote": "psql \"$DATABASE_URL\" -f supabase/tests/push_notification_tests.sql"
   },
   "dependencies": {
     "@ariakit/react": "^0.4.19",

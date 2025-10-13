@@ -1,0 +1,44 @@
+name: Database Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/tests/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/tests/**'
+
+jobs:
+  test-database:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Supabase CLI
+        run: npm install -g supabase
+
+      - name: Start Supabase local
+        run: npx supabase start
+
+      - name: Run database migrations
+        run: npx supabase db reset --local
+
+      - name: Run push notification tests
+        run: |
+          psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" \
+            -f supabase/tests/push_notification_tests.sql
+
+      - name: Stop Supabase
+        if: always()
+        run: npx supabase stop
