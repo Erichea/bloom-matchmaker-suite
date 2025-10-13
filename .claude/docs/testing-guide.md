@@ -54,12 +54,21 @@ NOTICE:  ========================================
 
 ## CI/CD
 
-Tests run automatically on GitHub Actions when:
-- You push to main
-- You open a PR to main
-- Database files change (`supabase/migrations/**` or `supabase/tests/**`)
+All tests run automatically on GitHub Actions:
 
-**Workflow file:** `.github/workflows/database-tests.yml`
+### Frontend Tests
+- **When:** Every push to main and every PR
+- **What:** Runs `npm test` (Vitest) and `npm run lint`
+- **Speed:** ~30 seconds
+
+### Database Tests
+- **When:** Every push to main and every PR (when database files change)
+- **What:** Runs SQL tests via `npm run test:db`
+- **Speed:** ~2 minutes (includes starting local Supabase)
+
+**Workflow file:** `.github/workflows/tests.yml`
+
+Tests must pass before you can merge a PR to main.
 
 ## Manual Testing
 

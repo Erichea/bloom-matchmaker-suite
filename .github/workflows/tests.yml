@@ -1,0 +1,65 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  frontend-tests:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run frontend tests
+        run: npm test
+
+      - name: Run linter
+        run: npm run lint
+
+  database-tests:
+    name: Database Tests
+    runs-on: ubuntu-latest
+    # Only run if database files changed
+    if: |
+      contains(github.event.head_commit.modified, 'supabase/migrations') ||
+      contains(github.event.head_commit.modified, 'supabase/tests') ||
+      github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Supabase CLI
+        run: npm install -g supabase
+
+      - name: Start Supabase local
+        run: npx supabase start
+
+      - name: Run database migrations
+        run: npx supabase db reset --local
+
+      - name: Run push notification tests
+        run: npm run test:db
+
+      - name: Stop Supabase
+        if: always()
+        run: npx supabase stop
