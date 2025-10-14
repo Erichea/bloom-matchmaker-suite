@@ -1,12 +1,25 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { DndContext, DragEndEvent, DragOverEvent, DragStartEvent, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import {
+  DndContext,
+  DragEndEvent,
+  DragStartEvent,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  MouseSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+  defaultDropAnimationSideEffects
+} from "@dnd-kit/core";
 import { Heart, Home } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import MatchDetailModal from "@/components/MatchDetailModal";
-import KanbanColumn from "@/components/KanbanColumn";
+import ImprovedKanbanColumn from "@/components/ImprovedKanbanColumn";
+import CompactMatchCard from "@/components/CompactMatchCard";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -69,8 +82,22 @@ const MutualMatches = () => {
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  // DnD sensors
+  // Enhanced DnD sensors for better mobile and desktop support
   const sensors = useSensors(
+    // Mouse sensor for desktop
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    // Touch sensor for mobile with long-press to avoid accidental drags
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250, // 250ms long-press before drag starts
+        tolerance: 8, // Allow slight movement during long-press
+      },
+    }),
+    // Pointer sensor as fallback
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
@@ -282,9 +309,15 @@ const MutualMatches = () => {
 
   const currentProfileId = profile?.id ?? null;
 
-  // Drag and drop handlers
+  // Enhanced drag and drop handlers
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string);
+    const { active } = event;
+    setActiveId(active.id as string);
+
+    // Add haptic feedback on supported devices (optional)
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50); // Short vibration for drag start
+    }
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -296,7 +329,12 @@ const MutualMatches = () => {
     const matchId = active.id as string;
     const newStatus = over.id as string;
 
-    // Update local state immediately for responsive UI
+    // Prevent moving to the same status
+    const currentMatch = matchesWithStatus.find(m => m.id === matchId);
+    if (currentMatch?.personalStatus === newStatus) return;
+
+    // Optimistic update - update UI immediately
+    const originalStatus = currentMatch?.personalStatus || 'to_discuss';
     setMatchesWithStatus(prev =>
       prev.map(match =>
         match.id === matchId
@@ -305,7 +343,7 @@ const MutualMatches = () => {
       )
     );
 
-    // Update database
+    // Update database with error handling
     try {
       const { error } = await supabase
         .from("match_status_tracking")
@@ -329,10 +367,17 @@ const MutualMatches = () => {
         setMatchesWithStatus(prev =>
           prev.map(match =>
             match.id === matchId
-              ? { ...match, personalStatus: findOriginalStatus(matchId) }
+              ? { ...match, personalStatus: originalStatus }
               : match
           )
         );
+      } else {
+        // Success feedback
+        toast({
+          title: "Status Updated",
+          description: `Moved to ${KANBAN_STATUSES.find(s => s.id === newStatus)?.title}`,
+          duration: 2000,
+        });
       }
     } catch (error) {
       console.error('Error updating match status:', error);
@@ -341,7 +386,21 @@ const MutualMatches = () => {
         description: "Failed to update match status.",
         variant: "destructive",
       });
+      // Revert on error
+      setMatchesWithStatus(prev =>
+        prev.map(match =>
+          match.id === matchId
+            ? { ...match, personalStatus: originalStatus }
+            : match
+        )
+      );
     }
+  };
+
+  // Get active drag item data for overlay
+  const getActiveDragItem = () => {
+    if (!activeId) return null;
+    return matchesWithStatus.find(match => match.id === activeId);
   };
 
   const findOriginalStatus = (matchId: string): string => {
@@ -445,14 +504,14 @@ const MutualMatches = () => {
       <MatchDetailModal match={selectedMatch} open={modalOpen} onOpenChange={setModalOpen} onMatchResponse={handleMatchResponse} />
       <div className="bg-background text-foreground min-h-screen flex flex-col p-4 pb-32">
         <main className="flex-grow">
-          <header className="flex justify-between items-start mb-8">
+          <header className="flex justify-between items-start mb-6 sm:mb-8">
             <div>
-              <h1 className="text-4xl font-bold mb-2 flex items-center gap-2">
-                <Heart className="w-8 h-8 text-red-500" />
+              <h1 className="text-3xl sm:text-4xl font-bold mb-2 flex items-center gap-2">
+                <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-red-500" />
                 Your Dating Journey
               </h1>
-              <p className="text-lg text-muted-foreground">
-                Organize your mutual matches by relationship stage
+              <p className="text-sm sm:text-base sm:text-lg text-muted-foreground">
+                Drag and drop matches to organize your journey
               </p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-muted overflow-hidden">
@@ -477,27 +536,54 @@ const MutualMatches = () => {
               onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
             >
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* Kanban Board */}
-                <div className="grid gap-6">
+                <div className="grid gap-4 sm:gap-6">
                   {KANBAN_STATUSES.map((status) => (
                     <motion.div
                       key={status.id}
+                      layout
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: KANBAN_STATUSES.indexOf(status) * 0.1 }}
+                      transition={{ duration: 0.3, delay: KANBAN_STATUSES.indexOf(status) * 0.05 }}
                     >
-                      <KanbanColumn
+                      <ImprovedKanbanColumn
                         title={status.title}
                         emoji={status.emoji}
                         status={status.id}
                         matches={matchesByStatus[status.id] || []}
                         onMatchClick={handleOpenMatch}
+                        isDropTarget={activeId !== null}
                       />
                     </motion.div>
                   ))}
                 </div>
               </div>
+
+              {/* Drag Overlay for visual feedback */}
+              <DragOverlay
+                dropAnimation={{
+                  sideEffects: defaultDropAnimationSideEffects({
+                    styles: {
+                      active: {
+                        opacity: '0.5',
+                      },
+                    },
+                  }),
+                }}
+              >
+                {getActiveDragItem() ? (
+                  <div className="rotate-3 scale-110">
+                    <CompactMatchCard
+                      id={getActiveDragItem()!.id}
+                      name={getActiveDragItem()!.name}
+                      photoUrl={getActiveDragItem()!.photoUrl}
+                      initials={getActiveDragItem()!.initials}
+                      isDragging={true}
+                    />
+                  </div>
+                ) : null}
+              </DragOverlay>
             </DndContext>
           ) : (
             <div className="text-center py-16">
