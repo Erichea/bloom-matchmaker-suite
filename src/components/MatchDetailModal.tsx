@@ -58,10 +58,17 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
       if (!otherProfile?.user_id) return;
 
       // Fetch profile answers
-      const { data: answersData } = await supabase
+      const { data: answersData, error: answersError } = await supabase
         .from("profile_answers")
         .select("*")
         .eq("user_id", otherProfile.user_id);
+
+      console.log('Fetching profile_answers for user_id:', otherProfile.user_id);
+      console.log('Current auth user:', user?.id);
+
+      if (answersError) {
+        console.error('Error fetching profile answers:', answersError);
+      }
 
       const answers: Record<string, any> = {};
       answersData?.forEach((item) => {
