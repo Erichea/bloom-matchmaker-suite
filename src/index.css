@@ -423,6 +423,14 @@ All colors MUST be HSL.
   user-drag: none;
 }
 
+/* Prevent scrolling during drag operations */
+body.dragging {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+}
+
 @media (min-width: 641px) {
   .hide-desktop {
     @apply hidden;

@@ -5,6 +5,7 @@ import {
   DndContext,
   DragEndEvent,
   DragStartEvent,
+  DragMoveEvent,
   closestCenter,
   PointerSensor,
   TouchSensor,
@@ -307,6 +308,16 @@ const MutualMatches = () => {
     loadData();
   }, [user, session, authLoading, navigate, fetchProfile, fetchMatches]);
 
+  // Cleanup: restore body scrolling if component unmounts during drag
+  useEffect(() => {
+    return () => {
+      // Restore body scrolling on cleanup
+      document.body.classList.remove('dragging');
+      document.body.style.position = '';
+      document.body.style.top = '';
+    };
+  }, []);
+
   const currentProfileId = profile?.id ?? null;
 
   // Enhanced drag and drop handlers
@@ -314,15 +325,53 @@ const MutualMatches = () => {
     const { active } = event;
     setActiveId(active.id as string);
 
+    // Prevent body scrolling during drag
+    document.body.classList.add('dragging');
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+
     // Add haptic feedback on supported devices (optional)
     if ('vibrate' in navigator) {
       navigator.vibrate(50); // Short vibration for drag start
     }
   };
 
+  const handleDragMove = (event: DragMoveEvent) => {
+    const { active, over } = event;
+
+    // Auto-scroll when dragging near edges
+    if (!over) {
+      const scrollContainer = document.documentElement;
+      const scrollSpeed = 10; // pixels per frame
+      const edgeThreshold = 100; // pixels from edge
+
+      const y = event.activatorEvent.clientY;
+      const viewportHeight = window.innerHeight;
+
+      if (y < edgeThreshold) {
+        // Scroll up when near top
+        scrollContainer.scrollBy(0, -scrollSpeed);
+      } else if (y > viewportHeight - edgeThreshold) {
+        // Scroll down when near bottom
+        scrollContainer.scrollBy(0, scrollSpeed);
+      }
+    }
+  };
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveId(null);
+
+    // Restore body scrolling
+    const scrollY = document.body.style.top;
+    document.body.classList.remove('dragging');
+    document.body.style.position = '';
+    document.body.style.top = '';
+
+    if (scrollY) {
+      window.scrollTo(0, parseInt(scrollY || '0') * -1);
+    }
 
     if (!over) return;
 
@@ -534,6 +583,7 @@ const MutualMatches = () => {
               sensors={sensors}
               collisionDetection={closestCenter}
               onDragStart={handleDragStart}
+              onDragMove={handleDragMove}
               onDragEnd={handleDragEnd}
             >
               <div className="space-y-4 sm:space-y-6">
