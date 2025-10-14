@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -7,6 +7,8 @@ import {
   DragStartEvent,
   DragMoveEvent,
   closestCenter,
+  closestCorners,
+  pointerWithin,
   PointerSensor,
   TouchSensor,
   MouseSensor,
@@ -82,26 +84,28 @@ const MutualMatches = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [autoScrollInterval, setAutoScrollInterval] = useState<NodeJS.Timeout | null>(null);
+  const lastClientY = useRef<number>(0);
 
   // Enhanced DnD sensors for better mobile and desktop support
   const sensors = useSensors(
     // Mouse sensor for desktop
     useSensor(MouseSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 3, // Reduced distance for faster activation
       },
     }),
-    // Touch sensor for mobile with long-press to avoid accidental drags
+    // Touch sensor for mobile with optimized long-press
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 250, // 250ms long-press before drag starts
-        tolerance: 8, // Allow slight movement during long-press
+        delay: 150, // Reduced delay from 250ms to 150ms for more responsive feel
+        tolerance: 15, // Increased tolerance for more natural movement during long-press
       },
     }),
     // Pointer sensor as fallback
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 3,
       },
     })
   );
@@ -315,6 +319,7 @@ const MutualMatches = () => {
       document.body.classList.remove('dragging');
       document.body.style.position = '';
       document.body.style.top = '';
+      stopAutoScroll();
     };
   }, []);
 
@@ -331,37 +336,64 @@ const MutualMatches = () => {
     document.body.style.position = 'fixed';
     document.body.style.top = `-${scrollY}px`;
 
+    // Start smooth auto-scroll
+    startAutoScroll();
+
     // Add haptic feedback on supported devices (optional)
     if ('vibrate' in navigator) {
       navigator.vibrate(50); // Short vibration for drag start
     }
   };
 
+  const startAutoScroll = () => {
+    if (autoScrollInterval) return;
+
+    const interval = setInterval(() => {
+      if (!activeId) {
+        stopAutoScroll();
+        return;
+      }
+
+      const scrollContainer = document.documentElement;
+      const scrollSpeed = 12;
+      const edgeThreshold = 100;
+
+      // Get current mouse/touch position
+      const clientY = lastClientY.current;
+      if (!clientY) return;
+
+      const viewportHeight = window.innerHeight;
+
+      if (clientY < edgeThreshold) {
+        scrollContainer.scrollBy({ top: -scrollSpeed, behavior: 'smooth' });
+      } else if (clientY > viewportHeight - edgeThreshold) {
+        scrollContainer.scrollBy({ top: scrollSpeed, behavior: 'smooth' });
+      }
+    }, 16); // ~60fps for smooth scrolling
+
+    setAutoScrollInterval(interval);
+  };
+
+  const stopAutoScroll = () => {
+    if (autoScrollInterval) {
+      clearInterval(autoScrollInterval);
+      setAutoScrollInterval(null);
+    }
+  };
+
   const handleDragMove = (event: DragMoveEvent) => {
     const { active, over } = event;
 
-    // Auto-scroll when dragging near edges
-    if (!over) {
-      const scrollContainer = document.documentElement;
-      const scrollSpeed = 10; // pixels per frame
-      const edgeThreshold = 100; // pixels from edge
-
-      const y = event.activatorEvent.clientY;
-      const viewportHeight = window.innerHeight;
-
-      if (y < edgeThreshold) {
-        // Scroll up when near top
-        scrollContainer.scrollBy(0, -scrollSpeed);
-      } else if (y > viewportHeight - edgeThreshold) {
-        // Scroll down when near bottom
-        scrollContainer.scrollBy(0, scrollSpeed);
-      }
-    }
+    // Update last touch position for auto-scroll
+    lastClientY.current = event.activatorEvent.clientY;
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveId(null);
+
+    // Stop auto-scroll
+    stopAutoScroll();
 
     // Restore body scrolling
     const scrollY = document.body.style.top;
@@ -581,7 +613,7 @@ const MutualMatches = () => {
           {matchesWithStatus.length > 0 ? (
             <DndContext
               sensors={sensors}
-              collisionDetection={closestCenter}
+              collisionDetection={closestCorners}
               onDragStart={handleDragStart}
               onDragMove={handleDragMove}
               onDragEnd={handleDragEnd}

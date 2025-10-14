@@ -35,12 +35,12 @@ const CompactMatchCard = ({ id, name, photoUrl, initials, onClick, isDragging }:
       style={style}
       {...attributes}
       {...listeners}
-      whileHover={{ scale: 1.05, y: -2 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ scale: 1.03, y: -1 }} // Reduced scale and movement for better performance
+      whileTap={{ scale: 0.97 }} // Reduced scale for better responsiveness
       onClick={onClick}
       className={cn(
         "relative group cursor-pointer touch-manipulation",
-        "select-none no-context-menu" // Prevent text selection and iOS context menu
+        "select-none no-context-menu will-change-transform" // Performance optimizations
       )}
     >
       {/* Instagram story-sized card: compact circular photo + name */}
