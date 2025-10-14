@@ -336,76 +336,177 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
               </Card>
             )}
 
-            {/* Basic Information Card */}
+            {/* Basic Demographics Card */}
             <Card className="bg-white border-0 shadow-sm">
               <CardContent className="p-6 space-y-4">
-                {otherProfile.profession && (
+                {otherProfile.gender && (
                   <div className="flex items-center gap-3">
-                    <Briefcase className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                    <span className="text-base text-foreground">{otherProfile.profession}</span>
+                    <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                    <div>
+                      <span className="text-sm text-muted-foreground">Gender: </span>
+                      <span className="text-base text-foreground capitalize">{otherProfile.gender.replace('_', ' ')}</span>
+                    </div>
+                  </div>
+                )}
+
+                {(otherProfile.city || otherProfile.country) && (
+                  <div className="flex items-center gap-3">
+                    <MapPin className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                    <div>
+                      <span className="text-sm text-muted-foreground">Location: </span>
+                      <span className="text-base text-foreground">
+                        {[otherProfile.city, otherProfile.country].filter(Boolean).join(', ')}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {profileAnswers.dating_preference && (
+                  <div className="flex items-center gap-3">
+                    <Heart className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                    <div>
+                      <span className="text-sm text-muted-foreground">Looking for: </span>
+                      <span className="text-base text-foreground">{formatAnswer(profileAnswers.dating_preference)}</span>
+                    </div>
                   </div>
                 )}
 
                 {otherProfile.education && (
                   <div className="flex items-center gap-3">
                     <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                    <span className="text-base text-foreground capitalize">
-                      {otherProfile.education.replace('_', ' ')}
-                    </span>
+                    <div>
+                      <span className="text-sm text-muted-foreground">Education: </span>
+                      <span className="text-base text-foreground capitalize">
+                        {otherProfile.education.replace('_', ' ')}
+                      </span>
+                    </div>
                   </div>
                 )}
 
                 {otherProfile.height_cm && (
                   <div className="flex items-center gap-3">
                     <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                    <span className="text-base text-foreground">{otherProfile.height_cm} cm</span>
+                    <div>
+                      <span className="text-sm text-muted-foreground">Height: </span>
+                      <span className="text-base text-foreground">{otherProfile.height_cm} cm</span>
+                    </div>
                   </div>
                 )}
 
                 {otherProfile.ethnicity && (
                   <div className="flex items-center gap-3">
                     <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                    <span className="text-base text-foreground">{otherProfile.ethnicity}</span>
+                    <div>
+                      <span className="text-sm text-muted-foreground">Ethnicity: </span>
+                      <span className="text-base text-foreground">{otherProfile.ethnicity}</span>
+                    </div>
                   </div>
                 )}
 
                 {otherProfile.faith && (
                   <div className="flex items-center gap-3">
                     <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                    <span className="text-base text-foreground">{otherProfile.faith}</span>
-                  </div>
-                )}
-
-                {profileAnswers.alcohol && (
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl flex-shrink-0">🍷</span>
-                    <span className="text-base text-foreground">{formatAnswer(profileAnswers.alcohol)}</span>
-                  </div>
-                )}
-
-                {profileAnswers.smoking && (
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl flex-shrink-0">🚬</span>
-                    <span className="text-base text-foreground">{formatAnswer(profileAnswers.smoking)}</span>
-                  </div>
-                )}
-
-                {profileAnswers.mbti && (
-                  <div className="flex items-center gap-3">
-                    <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                    <span className="text-base text-foreground">{formatAnswer(profileAnswers.mbti)}</span>
-                  </div>
-                )}
-
-                {otherProfile.about_me && (
-                  <div className="pt-2 border-t border-border/40">
-                    <p className="text-base text-foreground leading-relaxed">
-                      {otherProfile.about_me}
-                    </p>
+                    <div>
+                      <span className="text-sm text-muted-foreground">Religion: </span>
+                      <span className="text-base text-foreground">{otherProfile.faith}</span>
+                    </div>
                   </div>
                 )}
               </CardContent>
             </Card>
+
+            {/* Lifestyle Card */}
+            {(profileAnswers.alcohol || profileAnswers.smoking) && (
+              <Card className="bg-white border-0 shadow-sm">
+                <CardContent className="p-6 space-y-4">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Lifestyle</h3>
+
+                  {profileAnswers.alcohol && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl flex-shrink-0">🍷</span>
+                      <div>
+                        <span className="text-sm text-muted-foreground">Drinking: </span>
+                        <span className="text-base text-foreground">{formatAnswer(profileAnswers.alcohol)}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {profileAnswers.smoking && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl flex-shrink-0">🚬</span>
+                      <div>
+                        <span className="text-sm text-muted-foreground">Smoking: </span>
+                        <span className="text-base text-foreground">{formatAnswer(profileAnswers.smoking)}</span>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Marriage & Family Planning Card */}
+            {(profileAnswers.marriage || profileAnswers.marriage_timeline) && (
+              <Card className="bg-white border-0 shadow-sm">
+                <CardContent className="p-6 space-y-4">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Family Goals</h3>
+
+                  {profileAnswers.marriage && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl flex-shrink-0">💍</span>
+                      <div>
+                        <span className="text-sm text-muted-foreground">Marriage: </span>
+                        <span className="text-base text-foreground">{formatAnswer(profileAnswers.marriage)}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {profileAnswers.marriage_timeline && (
+                    <div className="flex items-center gap-3">
+                      <Calendar className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                      <div>
+                        <span className="text-sm text-muted-foreground">Timeline: </span>
+                        <span className="text-base text-foreground">{formatAnswer(profileAnswers.marriage_timeline)}</span>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Personality & Other Info Card */}
+            {(profileAnswers.mbti || otherProfile.profession || otherProfile.about_me) && (
+              <Card className="bg-white border-0 shadow-sm">
+                <CardContent className="p-6 space-y-4">
+                  {otherProfile.profession && (
+                    <div className="flex items-center gap-3">
+                      <Briefcase className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                      <div>
+                        <span className="text-sm text-muted-foreground">Profession: </span>
+                        <span className="text-base text-foreground">{otherProfile.profession}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {profileAnswers.mbti && (
+                    <div className="flex items-center gap-3">
+                      <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                      <div>
+                        <span className="text-sm text-muted-foreground">MBTI: </span>
+                        <span className="text-base text-foreground">{formatAnswer(profileAnswers.mbti)}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {otherProfile.about_me && (
+                    <div className="pt-2 border-t border-border/40">
+                      <p className="text-base text-foreground leading-relaxed">
+                        {otherProfile.about_me}
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Compatibility Breakdown */}
             {match.compatibility_score && (

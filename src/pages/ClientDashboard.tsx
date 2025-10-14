@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import MatchDetailModal from "@/components/MatchDetailModal";
+import { MatchList } from "@/components/experience/MatchList";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -276,66 +277,41 @@ const ClientDashboard = () => {
     return "B";
   }, [profile?.first_name, profile?.last_name, user?.email]);
 
-  const categorizedMatches = useMemo(() => {
+  const formattedMatches = useMemo(() => {
     if (!matches.length || !currentProfileId) {
-      return {
-        newIntroductions: [],
-        waitingForResponse: [],
-        mutualConnections: [],
-        archived: [],
-      };
+      return [];
     }
 
-    const categories = {
-      newIntroductions: [] as any[],
-      waitingForResponse: [] as any[],
-      mutualConnections: [] as any[],
-      archived: [] as any[],
-    };
-
-    matches.forEach((match) => {
+    return matches.map((match) => {
       const isProfile1 = match.profile_1_id === currentProfileId;
       const currentUserResponse = isProfile1 ? match.profile_1_response : match.profile_2_response;
       const otherUserResponse = isProfile1 ? match.profile_2_response : match.profile_1_response;
       const other = isProfile1 ? match.profile_2 : match.profile_1;
-      const name = other ? `${other.first_name ?? ""} ${other.last_name ?? ""}`.trim() || "Untitled" : "Match";
+      const name = other ? `${other.first_name ?? ""}`.trim() || "Match" : "Match";
       const avatarUrl = other?.photo_url || (Array.isArray(other?.photos) && other.photos[0]?.photo_url) || undefined;
 
-      const matchSummary = {
-        id: match.id,
-        name: `${other.first_name}, ${other.age_range?.split('-')[0]}`,
-        subtitle: "",
-        match: {
-          ...match,
-          current_profile_id: currentProfileId,
-        },
-        avatarUrl,
-      };
-
+      // Determine status based on responses
+      let status: "pending" | "mutual" | "new" | "inactive" = "new";
       if (match.match_status === "both_accepted") {
-        matchSummary.subtitle = "Mutual connection";
-        categories.mutualConnections.push(matchSummary);
+        status = "mutual";
       } else if (currentUserResponse === "rejected" || otherUserResponse === "rejected") {
-        matchSummary.subtitle = "Conversation archived";
-        categories.archived.push(matchSummary);
+        status = "inactive";
       } else if (currentUserResponse === "accepted") {
-        matchSummary.subtitle = "Waiting for their response";
-        categories.waitingForResponse.push(matchSummary);
-      } else if (!currentUserResponse) {
-        matchSummary.subtitle = "Introduced by mutual values";
-        categories.newIntroductions.push(matchSummary);
+        status = "pending";
       }
-    });
 
-    return categories;
+      return {
+        id: match.id,
+        name,
+        status,
+        compatibility: match.compatibility_score,
+        avatarUrl,
+        matchDate: match.suggested_at,
+        currentUserResponse,
+        otherUserResponse,
+      };
+    });
   }, [matches, currentProfileId]);
-  
-  const allMatches = useMemo(() => [
-    ...categorizedMatches.newIntroductions,
-    ...categorizedMatches.waitingForResponse,
-    ...categorizedMatches.mutualConnections,
-    ...categorizedMatches.archived,
-  ], [categorizedMatches]);
 
 
   if (authLoading || loading) {
@@ -471,39 +447,19 @@ const ClientDashboard = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-display font-bold mb-6">New Introductions</h2>
-                <div className="space-y-4">
-                  {allMatches.length > 0 ? (
-                    allMatches.map((match) => (
-                      <button
-                        key={match.id}
-                        onClick={() => handleOpenMatch(match.id)}
-                        className="w-full bg-card-light dark:bg-card-dark p-4 rounded-2xl flex items-center shadow-sm hover:shadow-md transition-all duration-200 text-left"
-                      >
-                        <div className="w-14 h-14 rounded-xl bg-gray-200 overflow-hidden mr-4">
-                          {match.avatarUrl ? (
-                            <img alt={`Profile picture of ${match.name}`} className="w-full h-full object-cover" src={match.avatarUrl} />
-                          ) : (
-                            <div className="w-full h-full bg-gray-200 flex items-center justify-center text-subtle-light dark:text-subtle-dark text-sm font-semibold">
-                              {match.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-grow">
-                          <h3 className="font-semibold font-body text-text-light dark:text-text-dark">{match.name}</h3>
-                          <p className="text-sm font-body text-subtle-light dark:text-subtle-dark">{match.subtitle}</p>
-                        </div>
-                        <span className="material-symbols-outlined text-subtle-light dark:text-subtle-dark text-lg">arrow_forward_ios</span>
-                      </button>
-                    ))
-                  ) : (
-                    <div className="bg-card-light dark:bg-card-dark p-6 rounded-2xl text-left shadow-sm">
-                      <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-10 text-center text-sm text-subtle-light dark:text-subtle-dark">
-                        Your matchmaker is curating the perfect introduction. We'll let you know the moment a dossier is ready.
-                      </div>
+                {formattedMatches.length > 0 ? (
+                  <MatchList
+                    title="Matches"
+                    matches={formattedMatches}
+                    onSelect={handleOpenMatch}
+                  />
+                ) : (
+                  <div className="bg-card-light dark:bg-card-dark p-6 rounded-2xl text-left shadow-sm">
+                    <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-10 text-center text-sm text-subtle-light dark:text-subtle-dark">
+                      Your matchmaker is curating the perfect introduction. We'll let you know the moment a dossier is ready.
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </section>
             </>
           )}
