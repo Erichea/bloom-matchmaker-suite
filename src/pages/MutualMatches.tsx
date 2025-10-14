@@ -6,6 +6,7 @@ import {
   DragEndEvent,
   DragStartEvent,
   DragMoveEvent,
+  DragCancelEvent,
   closestCenter,
   closestCorners,
   pointerWithin,
@@ -343,6 +344,9 @@ const MutualMatches = () => {
     if ('vibrate' in navigator) {
       navigator.vibrate(50); // Short vibration for drag start
     }
+
+    // Debug: Log drag start
+    console.log('Drag started:', active.id);
   };
 
   const startAutoScroll = () => {
@@ -388,6 +392,23 @@ const MutualMatches = () => {
     lastClientY.current = event.activatorEvent.clientY;
   };
 
+  const handleDragCancel = (event: DragCancelEvent) => {
+    console.log('Drag cancelled');
+    setActiveId(null);
+    stopAutoScroll();
+
+    // Restore body scrolling
+    document.body.classList.remove('dragging');
+    document.body.style.position = '';
+    document.body.style.top = '';
+
+    // Restore scroll position if needed
+    const scrollY = document.body.style.top;
+    if (scrollY) {
+      window.scrollTo(0, parseInt(scrollY || '0') * -1);
+    }
+  };
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveId(null);
@@ -405,17 +426,34 @@ const MutualMatches = () => {
       window.scrollTo(0, parseInt(scrollY || '0') * -1);
     }
 
-    if (!over) return;
+    // Debug: Log drag end
+    console.log('Drag ended. Over:', over?.id, 'Active:', active?.id);
+
+    if (!over) {
+      console.log('No valid drop target found');
+      return;
+    }
 
     const matchId = active.id as string;
     const newStatus = over.id as string;
 
-    // Prevent moving to the same status
+    // Debug: Validate we have a valid match and status
     const currentMatch = matchesWithStatus.find(m => m.id === matchId);
-    if (currentMatch?.personalStatus === newStatus) return;
+    if (!currentMatch) {
+      console.error('Match not found:', matchId);
+      return;
+    }
+
+    console.log('Moving match', matchId, 'from', currentMatch.personalStatus, 'to', newStatus);
+
+    // Prevent moving to the same status
+    if (currentMatch.personalStatus === newStatus) {
+      console.log('Same status, skipping');
+      return;
+    }
 
     // Optimistic update - update UI immediately
-    const originalStatus = currentMatch?.personalStatus || 'to_discuss';
+    const originalStatus = currentMatch.personalStatus || 'to_discuss';
     setMatchesWithStatus(prev =>
       prev.map(match =>
         match.id === matchId
@@ -454,6 +492,7 @@ const MutualMatches = () => {
         );
       } else {
         // Success feedback
+        console.log('Successfully updated match status');
         toast({
           title: "Status Updated",
           description: `Moved to ${KANBAN_STATUSES.find(s => s.id === newStatus)?.title}`,
@@ -616,6 +655,7 @@ const MutualMatches = () => {
               collisionDetection={closestCorners}
               onDragStart={handleDragStart}
               onDragMove={handleDragMove}
+              onDragCancel={handleDragCancel}
               onDragEnd={handleDragEnd}
             >
               <div className="space-y-4 sm:space-y-6">
@@ -642,8 +682,8 @@ const MutualMatches = () => {
                 </div>
               </div>
 
-              {/* Drag Overlay for visual feedback */}
-              <DragOverlay
+              {/* Drag Overlay temporarily disabled for debugging */}
+              {/* <DragOverlay
                 dropAnimation={{
                   sideEffects: defaultDropAnimationSideEffects({
                     styles: {
@@ -665,7 +705,7 @@ const MutualMatches = () => {
                     />
                   </div>
                 ) : null}
-              </DragOverlay>
+              </DragOverlay> */}
             </DndContext>
           ) : (
             <div className="text-center py-16">

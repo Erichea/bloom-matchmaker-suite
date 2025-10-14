@@ -1,5 +1,6 @@
 import { useDroppable } from "@dnd-kit/core";
 import { motion } from "framer-motion";
+import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import CompactMatchCard from "./CompactMatchCard";
 
@@ -28,6 +29,11 @@ const ImprovedKanbanColumn = ({
   const { setNodeRef, isOver } = useDroppable({
     id: status,
   });
+
+  // Debug log for droppable status
+  useEffect(() => {
+    console.log(`Column ${status} isOver:`, isOver);
+  }, [isOver, status]);
 
   return (
     <motion.div
