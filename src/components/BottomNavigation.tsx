@@ -58,7 +58,6 @@ export const BottomNavigation = () => {
     "/client/mutual-matches",
     "/client/updates",
     "/client/profile",
-    "/client/settings/notifications",
   ], []);
 
   const menuItems: MenuItem[] = useMemo(() => [
@@ -66,7 +65,6 @@ export const BottomNavigation = () => {
     { label: "Matches", icon: "favorite" },
     { label: "Updates", icon: "notifications", badge: unreadCount },
     { label: "Profile", icon: "person" },
-    { label: "Settings", icon: "settings" },
   ], [unreadCount]);
 
   const activeIndex = useMemo(() => {
