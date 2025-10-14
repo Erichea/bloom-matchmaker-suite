@@ -40,7 +40,7 @@ const CompactMatchCard = ({ id, name, photoUrl, initials, onClick, isDragging }:
       onClick={onClick}
       className={cn(
         "relative group cursor-pointer touch-manipulation",
-        "select-none" // Prevent text selection during drag
+        "select-none no-context-menu" // Prevent text selection and iOS context menu
       )}
     >
       {/* Instagram story-sized card: compact circular photo + name */}
@@ -48,12 +48,22 @@ const CompactMatchCard = ({ id, name, photoUrl, initials, onClick, isDragging }:
         {/* Circular photo - Instagram story head size */}
         <div className="relative w-14 h-14 sm:w-16 sm:h-16">
           {photoUrl ? (
-            <div className="w-full h-full rounded-full overflow-hidden ring-2 ring-background/10 hover:ring-primary/30 transition-all duration-200">
+            <div
+              className="w-full h-full rounded-full overflow-hidden ring-2 ring-background/10 hover:ring-primary/30 transition-all duration-200"
+              onContextMenu={(e) => e.preventDefault()}
+            >
               <img
                 src={photoUrl}
                 alt={firstName}
-                className="w-full h-full object-cover"
-                draggable={false} // Prevent native browser dragging
+                className="w-full h-full object-cover pointer-events-none"
+                draggable={false}
+                style={{
+                  WebkitUserSelect: 'none',
+                  WebkitUserDrag: 'none',
+                  userSelect: 'none',
+                  userDrag: 'none',
+                  WebkitTapHighlightColor: 'transparent'
+                }}
               />
             </div>
           ) : (
