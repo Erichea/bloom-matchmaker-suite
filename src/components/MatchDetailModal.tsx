@@ -67,7 +67,9 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
       answersData?.forEach((item) => {
         answers[item.question_id] = item.answer;
       });
-      console.log('Profile Answers Loaded:', answers);
+      console.log('Raw answersData from database:', answersData);
+      console.log('Profile Answers Loaded (keyed by question_id):', answers);
+      console.log('Profile Answers Keys:', Object.keys(answers));
       console.log('Other Profile Data:', otherProfile);
       setProfileAnswers(answers);
     };
