@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
 
 interface MatchDetailModalProps {
   match: any;
@@ -33,6 +34,8 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
   const [feedback, setFeedback] = useState("");
   const [responding, setResponding] = useState(false);
   const [profileAnswers, setProfileAnswers] = useState<Record<string, any>>({});
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Fetch profile answers when the modal opens
   useEffect(() => {
@@ -44,13 +47,38 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
 
       if (!otherProfile?.user_id) return;
 
-      // For now, use empty profile answers
-      // TODO: Implement profile answers fetching when RPC function is available
-      setProfileAnswers({});
+      // Fetch profile answers
+      const { data: answersData } = await supabase
+        .from("profile_answers")
+        .select("*")
+        .eq("user_id", otherProfile.user_id);
+
+      const answers: Record<string, any> = {};
+      answersData?.forEach((item) => {
+        answers[item.question_id] = item.answer;
+      });
+      setProfileAnswers(answers);
     };
 
     fetchProfileAnswers();
   }, [match, open]);
+
+  // Reset photo index when modal opens
+  useEffect(() => {
+    if (open) {
+      setCurrentPhotoIndex(0);
+    }
+  }, [open]);
+
+  // Handle scroll for photo gallery
+  const handleScroll = () => {
+    if (!scrollContainerRef.current) return;
+    const container = scrollContainerRef.current;
+    const scrollLeft = container.scrollLeft;
+    const width = container.offsetWidth;
+    const index = Math.round(scrollLeft / width);
+    setCurrentPhotoIndex(index);
+  };
 
   if (!match) return null;
 
@@ -179,312 +207,336 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
-            <Heart className="w-5 h-5 text-primary" />
-            <span>Match Profile</span>
-          </DialogTitle>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Match Profile</DialogTitle>
           <DialogDescription>
             Review this curated match and decide if you'd like to connect
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Profile Header */}
-          <div className="text-center space-y-4">
-            <Avatar className="mx-auto h-24 w-24 border-4 border-primary/20">
-              {otherProfilePhoto ? (
-                <AvatarImage src={otherProfilePhoto} alt={name || "Match"} />
-              ) : (
-                <AvatarFallback className="bg-primary-muted text-2xl text-primary">
-                  {initials}
-                </AvatarFallback>
-              )}
-            </Avatar>
-            
-            <div>
-              <h2 className="text-2xl font-semibold text-foreground">{name}</h2>
-              {age && (
-                <p className="text-muted-foreground">{age} years old</p>
-              )}
-              {location && (
-                <div className="flex items-center justify-center text-muted-foreground mt-2">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  {location}
-                </div>
-              )}
-            </div>
-
-            {otherProfilePhotos.length > 0 && (
-              <div className="space-y-2 text-left">
-                <h3 className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">Gallery</h3>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  {otherProfilePhotos.map((photo: any, index: number) => (
-                    <div
-                      key={photo.id ?? photo.photo_url ?? index}
-                      className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted/40"
-                    >
+        <div className="space-y-0">
+          {/* Horizontal Scrollable Photo Gallery */}
+          <div className="relative w-full">
+            <div
+              ref={scrollContainerRef}
+              onScroll={handleScroll}
+              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {otherProfilePhotos.length > 0 ? (
+                otherProfilePhotos.map((photo: any, index: number) => (
+                  <div
+                    key={photo.id ?? photo.photo_url ?? index}
+                    className="w-full flex-shrink-0 snap-center"
+                  >
+                    <div className="relative aspect-[3/4] w-full bg-muted">
                       <img
                         src={photo.photo_url}
                         alt={`${name || "Match"} photo ${index + 1}`}
                         className="h-full w-full object-cover"
                       />
-                      {index === 0 && (
-                        <span className="absolute left-2 top-2 rounded-full bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground">
-                          Primary
-                        </span>
-                      )}
                     </div>
-                  ))}
+                  </div>
+                ))
+              ) : (
+                <div className="w-full flex-shrink-0 snap-center">
+                  <div className="relative aspect-[3/4] w-full bg-muted flex items-center justify-center">
+                    <Avatar className="h-32 w-32">
+                      <AvatarFallback className="bg-primary-muted text-4xl text-primary">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
                 </div>
+              )}
+            </div>
+
+            {/* Photo Indicators */}
+            {otherProfilePhotos.length > 1 && (
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5">
+                {otherProfilePhotos.map((_: any, index: number) => (
+                  <div
+                    key={index}
+                    className={cn(
+                      "h-1.5 rounded-full transition-all duration-200",
+                      index === currentPhotoIndex
+                        ? "w-6 bg-white"
+                        : "w-1.5 bg-white/50"
+                    )}
+                  />
+                ))}
               </div>
             )}
 
-            <Badge className="bg-primary/10 text-primary border-primary/20">
-              <Star className="w-3 h-3 mr-1" />
-              {match.compatibility_score}% Compatible
-            </Badge>
+            {/* Name and Age Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
+              <div className="flex items-baseline gap-2 text-white">
+                <h2 className="text-3xl font-bold">{name.split(' ')[0]}</h2>
+                {age && <span className="text-2xl">{age}</span>}
+              </div>
+              {location && (
+                <div className="flex items-center gap-1 text-white/90 mt-1">
+                  <MapPin className="w-4 h-4" />
+                  <span className="text-sm">{location}</span>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Basic Information */}
-          <Card>
-            <CardContent className="p-4 space-y-3">
-              <h3 className="font-semibold flex items-center">
-                <User className="w-4 h-4 mr-2" />
-                About
-              </h3>
-
-              {otherProfile.profession && (
-                <div className="flex items-start text-sm">
-                  <Briefcase className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
-                  <div>
-                    <span className="font-medium">Profession: </span>
-                    <span>{otherProfile.profession}</span>
+          {/* Profile Content */}
+          <div className="p-6 space-y-4">{/* Interests Card */}
+            {(otherProfile.interests || profileAnswers.interests) && (
+              <Card className="bg-white border-0 shadow-sm">
+                <CardContent className="p-6 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Star className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-muted-foreground mb-2">Interests</p>
+                      <p className="text-base text-foreground leading-relaxed">
+                        {formatAnswer(otherProfile.interests || profileAnswers.interests)}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
+                </CardContent>
+              </Card>
+            )}
 
-              {otherProfile.education && (
-                <div className="flex items-start text-sm">
-                  <Calendar className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
-                  <div>
-                    <span className="font-medium">Education: </span>
-                    <span className="capitalize">{otherProfile.education.replace('_', ' ')}</span>
+            {/* Free Text Question 1: Relationship Values */}
+            {profileAnswers.relationship_values && (
+              <Card className="bg-white border-0 shadow-sm">
+                <CardContent className="p-6 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Heart className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-muted-foreground mb-2">What I value in a relationship</p>
+                      <p className="text-base text-foreground leading-relaxed">
+                        {formatAnswer(profileAnswers.relationship_values)}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
+                </CardContent>
+              </Card>
+            )}
 
-              {otherProfile.height_cm && (
-                <div className="flex items-start text-sm">
-                  <User className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
-                  <div>
-                    <span className="font-medium">Height: </span>
-                    <span>{otherProfile.height_cm} cm</span>
+            {/* Free Text Question 2: Relationship Keys */}
+            {profileAnswers.relationship_keys && (
+              <Card className="bg-white border-0 shadow-sm">
+                <CardContent className="p-6 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Heart className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-muted-foreground mb-2">Key to a good relationship</p>
+                      <p className="text-base text-foreground leading-relaxed">
+                        {formatAnswer(profileAnswers.relationship_keys)}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
+                </CardContent>
+              </Card>
+            )}
 
-              {otherProfile.ethnicity && (
-                <div className="flex items-start text-sm">
-                  <User className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
-                  <div>
-                    <span className="font-medium">Ethnicity: </span>
-                    <span>{otherProfile.ethnicity}</span>
+            {/* Basic Information Card */}
+            <Card className="bg-white border-0 shadow-sm">
+              <CardContent className="p-6 space-y-4">
+                {otherProfile.profession && (
+                  <div className="flex items-center gap-3">
+                    <Briefcase className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                    <span className="text-base text-foreground">{otherProfile.profession}</span>
                   </div>
-                </div>
-              )}
+                )}
 
-              {otherProfile.faith && (
-                <div className="flex items-start text-sm">
-                  <User className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
-                  <div>
-                    <span className="font-medium">Religion: </span>
-                    <span>{otherProfile.faith}</span>
+                {otherProfile.education && (
+                  <div className="flex items-center gap-3">
+                    <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                    <span className="text-base text-foreground capitalize">
+                      {otherProfile.education.replace('_', ' ')}
+                    </span>
                   </div>
-                </div>
-              )}
+                )}
 
-              {profileAnswers.alcohol && (
-                <div className="flex items-start text-sm">
-                  <User className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
-                  <div>
-                    <span className="font-medium">Drinking: </span>
-                    <span>{formatAnswer(profileAnswers.alcohol)}</span>
+                {otherProfile.height_cm && (
+                  <div className="flex items-center gap-3">
+                    <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                    <span className="text-base text-foreground">{otherProfile.height_cm} cm</span>
                   </div>
-                </div>
-              )}
+                )}
 
-              {profileAnswers.smoking && (
-                <div className="flex items-start text-sm">
-                  <User className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
-                  <div>
-                    <span className="font-medium">Smoking: </span>
-                    <span>{formatAnswer(profileAnswers.smoking)}</span>
+                {otherProfile.ethnicity && (
+                  <div className="flex items-center gap-3">
+                    <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                    <span className="text-base text-foreground">{otherProfile.ethnicity}</span>
                   </div>
-                </div>
-              )}
+                )}
 
-              {(otherProfile.interests || profileAnswers.interests) && (
-                <div className="flex items-start text-sm">
-                  <Star className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
-                  <div>
-                    <span className="font-medium">Interests: </span>
-                    <span>{formatAnswer(otherProfile.interests || profileAnswers.interests)}</span>
+                {otherProfile.faith && (
+                  <div className="flex items-center gap-3">
+                    <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                    <span className="text-base text-foreground">{otherProfile.faith}</span>
                   </div>
-                </div>
-              )}
+                )}
 
-              {profileAnswers.mbti && (
-                <div className="flex items-start text-sm">
-                  <User className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
-                  <div>
-                    <span className="font-medium">MBTI: </span>
-                    <span>{formatAnswer(profileAnswers.mbti)}</span>
+                {profileAnswers.alcohol && (
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl flex-shrink-0">🍷</span>
+                    <span className="text-base text-foreground">{formatAnswer(profileAnswers.alcohol)}</span>
                   </div>
-                </div>
-              )}
+                )}
 
-              {profileAnswers.relationship_keys && (
-                <div className="flex items-start text-sm">
-                  <Heart className="w-4 h-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
-                  <div>
-                    <span className="font-medium">Key elements for a good relationship: </span>
-                    <span>{formatAnswer(profileAnswers.relationship_keys)}</span>
+                {profileAnswers.smoking && (
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl flex-shrink-0">🚬</span>
+                    <span className="text-base text-foreground">{formatAnswer(profileAnswers.smoking)}</span>
                   </div>
-                </div>
-              )}
+                )}
 
-              {otherProfile.about_me && (
-                <div className="mt-3 pt-3 border-t">
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {otherProfile.about_me}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                {profileAnswers.mbti && (
+                  <div className="flex items-center gap-3">
+                    <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                    <span className="text-base text-foreground">{formatAnswer(profileAnswers.mbti)}</span>
+                  </div>
+                )}
 
-          {/* Compatibility Breakdown */}
-          <Card>
-            <CardContent className="p-4">
-              <h3 className="font-semibold mb-3">Why We Matched You</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>Shared Interests</span>
-                  <span className="text-primary font-medium">High</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Location Compatibility</span>
-                  <span className="text-primary font-medium">
-                    {otherProfile.city === currentUserProfile?.city ? 'Same City' : 'Same Country'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Age Preference</span>
-                  <span className="text-primary font-medium">Perfect Match</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Response Section */}
-          {isMutualMatch ? (
-            <Card className="bg-primary/5 border-primary/20">
-              <CardContent className="p-6 text-center space-y-2">
-                <div className="text-4xl">🎉</div>
-                <h3 className="font-semibold text-lg">It's a Match!</h3>
-                <p className="text-sm text-muted-foreground">
-                  Both of you are interested! You can now exchange contact information.
-                </p>
+                {otherProfile.about_me && (
+                  <div className="pt-2 border-t border-border/40">
+                    <p className="text-base text-foreground leading-relaxed">
+                      {otherProfile.about_me}
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
-          ) : userAccepted ? (
-            <div className="space-y-4">
-              <Card className="bg-muted/30">
-                <CardContent className="p-6 text-center space-y-3">
-                  <div className="text-3xl">💌</div>
-                  <h3 className="font-semibold">Waiting for their response</h3>
+
+            {/* Compatibility Breakdown */}
+            {match.compatibility_score && (
+              <Card className="bg-white border-0 shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-foreground">Why We Matched You</h3>
+                    <Badge className="bg-primary/10 text-primary border-primary/20">
+                      <Star className="w-3 h-3 mr-1" />
+                      {match.compatibility_score}%
+                    </Badge>
+                  </div>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Shared Interests</span>
+                      <span className="text-foreground font-medium">High</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Location</span>
+                      <span className="text-foreground font-medium">
+                        {otherProfile.city === currentUserProfile?.city ? 'Same City' : 'Same Country'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Age Preference</span>
+                      <span className="text-foreground font-medium">Perfect Match</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Response Section */}
+            {isMutualMatch ? (
+              <Card className="bg-primary/5 border-primary/20">
+                <CardContent className="p-6 text-center space-y-2">
+                  <div className="text-4xl">🎉</div>
+                  <h3 className="font-semibold text-lg">It's a Match!</h3>
                   <p className="text-sm text-muted-foreground">
-                    You've shown interest. We'll notify you if they feel the same!
+                    Both of you are interested! You can now exchange contact information.
                   </p>
                 </CardContent>
               </Card>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={handleReject}
-                disabled={responding}
-              >
-                <X className="w-4 h-4 mr-2" />
-                Change mind and reject
-              </Button>
-            </div>
-          ) : userRejected ? (
-            <Card className="bg-muted/30">
-              <CardContent className="p-6 text-center space-y-2">
-                <div className="text-3xl">✕</div>
-                <h3 className="font-semibold">You rejected this match</h3>
-                <p className="text-sm text-muted-foreground">
-                  This match has been declined. We'll keep finding better connections for you.
-                </p>
-              </CardContent>
-            </Card>
-          ) : !showFeedbackForm ? (
-            <div className="space-y-4">
-              <h3 className="font-semibold text-center">What do you think?</h3>
-              <div className="flex space-x-3">
+            ) : userAccepted ? (
+              <div className="space-y-4">
+                <Card className="bg-muted/30">
+                  <CardContent className="p-6 text-center space-y-3">
+                    <div className="text-3xl">💌</div>
+                    <h3 className="font-semibold">Waiting for their response</h3>
+                    <p className="text-sm text-muted-foreground">
+                      You've shown interest. We'll notify you if they feel the same!
+                    </p>
+                  </CardContent>
+                </Card>
                 <Button
                   variant="outline"
-                  className="flex-1"
+                  className="w-full"
                   onClick={handleReject}
                   disabled={responding}
                 >
                   <X className="w-4 h-4 mr-2" />
-                  Not for me
-                </Button>
-                <Button
-                  className="flex-1 btn-premium"
-                  onClick={() => handleResponse('accepted')}
-                  disabled={responding}
-                >
-                  <Heart className="w-4 h-4 mr-2" />
-                  I'm Interested
+                  Change mind and reject
                 </Button>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <h3 className="font-semibold">Optional: Help us improve</h3>
-              <p className="text-sm text-muted-foreground">
-                Any feedback on why this match isn't right for you? (Optional)
-              </p>
-              <Textarea
-                placeholder="e.g., Different life goals, not my type, etc."
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
-                rows={3}
-              />
-              <div className="flex space-x-3">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setShowFeedbackForm(false)}
-                  disabled={responding}
-                >
-                  Back
-                </Button>
-                <Button
-                  className="flex-1"
-                  onClick={submitRejection}
-                  disabled={responding}
-                >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  {responding ? "Sending..." : "Submit"}
-                </Button>
+            ) : userRejected ? (
+              <Card className="bg-muted/30">
+                <CardContent className="p-6 text-center space-y-2">
+                  <div className="text-3xl">✕</div>
+                  <h3 className="font-semibold">You rejected this match</h3>
+                  <p className="text-sm text-muted-foreground">
+                    This match has been declined. We'll keep finding better connections for you.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : !showFeedbackForm ? (
+              <div className="space-y-4 sticky bottom-0 bg-background pt-4 pb-2">
+                <div className="flex gap-3">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="flex-1 rounded-full h-14 border-2"
+                    onClick={handleReject}
+                    disabled={responding}
+                  >
+                    <X className="w-5 h-5 mr-2" />
+                    Pass
+                  </Button>
+                  <Button
+                    size="lg"
+                    className="flex-1 rounded-full h-14 bg-[hsl(var(--brand-primary))] hover:bg-[hsl(var(--brand-primary))]/90"
+                    onClick={() => handleResponse('accepted')}
+                    disabled={responding}
+                  >
+                    <Heart className="w-5 h-5 mr-2" />
+                    Like
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="space-y-4">
+                <h3 className="font-semibold">Optional: Help us improve</h3>
+                <p className="text-sm text-muted-foreground">
+                  Any feedback on why this match isn't right for you? (Optional)
+                </p>
+                <Textarea
+                  placeholder="e.g., Different life goals, not my type, etc."
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  rows={3}
+                />
+                <div className="flex space-x-3">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setShowFeedbackForm(false)}
+                    disabled={responding}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    onClick={submitRejection}
+                    disabled={responding}
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    {responding ? "Sending..." : "Submit"}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

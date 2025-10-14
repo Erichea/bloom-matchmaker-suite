@@ -182,6 +182,18 @@ All colors MUST be HSL.
   }
 }
 
+@layer utilities {
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @layer components {
   /* Nordic Button Variants - Soft & minimal */
   .btn-primary {
