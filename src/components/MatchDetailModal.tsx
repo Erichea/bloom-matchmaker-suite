@@ -57,6 +57,8 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
       answersData?.forEach((item) => {
         answers[item.question_id] = item.answer;
       });
+      console.log('Profile Answers Loaded:', answers);
+      console.log('Other Profile Data:', otherProfile);
       setProfileAnswers(answers);
     };
 
@@ -336,9 +338,10 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
               </Card>
             )}
 
-            {/* Basic Demographics Card */}
+            {/* Basic Demographics Card - Always show */}
             <Card className="bg-white border-0 shadow-sm">
               <CardContent className="p-6 space-y-4">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">About</h3>
                 {otherProfile.gender && (
                   <div className="flex items-center gap-3">
                     <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
@@ -508,36 +511,6 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
               </Card>
             )}
 
-            {/* Compatibility Breakdown */}
-            {match.compatibility_score && (
-              <Card className="bg-white border-0 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-foreground">Why We Matched You</h3>
-                    <Badge className="bg-primary/10 text-primary border-primary/20">
-                      <Star className="w-3 h-3 mr-1" />
-                      {match.compatibility_score}%
-                    </Badge>
-                  </div>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground">Shared Interests</span>
-                      <span className="text-foreground font-medium">High</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground">Location</span>
-                      <span className="text-foreground font-medium">
-                        {otherProfile.city === currentUserProfile?.city ? 'Same City' : 'Same Country'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground">Age Preference</span>
-                      <span className="text-foreground font-medium">Perfect Match</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
             {/* Response Section */}
             {isMutualMatch ? (
