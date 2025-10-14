@@ -179,7 +179,34 @@ const ClientDashboard = () => {
       const { data: rpcData, error } = await supabase.rpc("get_matches_for_user" as any, { p_user_id: user.id });
       if (error) throw error;
 
-      const data = rpcData ? (rpcData as any[]).map((row: any) => row.match_data) : [];
+      let data = rpcData ? (rpcData as any[]).map((row: any) => row.match_data) : [];
+
+      // Fetch profile_answers for each match's profile_1 and profile_2
+      if (data && data.length > 0) {
+        const userIds = new Set<string>();
+        data.forEach((match: any) => {
+          if (match.profile_1?.user_id) userIds.add(match.profile_1.user_id);
+          if (match.profile_2?.user_id) userIds.add(match.profile_2.user_id);
+        });
+
+        const { data: answersData } = await supabase
+          .from("profile_answers")
+          .select("*")
+          .in("user_id", Array.from(userIds));
+
+        // Attach answers to the correct profiles
+        data = data.map((match: any) => ({
+          ...match,
+          profile_1: {
+            ...match.profile_1,
+            profile_answers: answersData?.filter((a: any) => a.user_id === match.profile_1?.user_id) || []
+          },
+          profile_2: {
+            ...match.profile_2,
+            profile_answers: answersData?.filter((a: any) => a.user_id === match.profile_2?.user_id) || []
+          }
+        }));
+      }
 
       const { data: userProfileData, error: userProfileError } = await supabase
         .from("profiles")
