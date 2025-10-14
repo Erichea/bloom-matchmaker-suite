@@ -92,7 +92,7 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
     };
 
     fetchProfileAnswers();
-  }, [match, open]);
+  }, [match, open, user?.id]);
 
   // Reset photo index when modal opens
   useEffect(() => {

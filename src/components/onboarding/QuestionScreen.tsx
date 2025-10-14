@@ -151,7 +151,7 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
           />
         );
 
-      case "autocomplete":
+      case "autocomplete": {
         const autocompleteOptions = Array.isArray(question.options) ? question.options : [];
 
         return (
@@ -198,8 +198,9 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
             </PopoverContent>
           </Popover>
         );
+      }
 
-      case "date":
+      case "date": {
         const handleDateFieldChange = (field: 'day' | 'month' | 'year', value: string) => {
           // Only allow numbers
           const numericValue = value.replace(/\D/g, '');
@@ -443,8 +444,9 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
             )}
           </div>
         );
+      }
 
-      case "number":
+      case "number": {
         const { min, max, default: defaultVal } = question.options || {};
         return (
           <div className="space-y-6">
@@ -461,8 +463,9 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
             />
           </div>
         );
+      }
 
-      case "single_choice":
+      case "single_choice": {
         const options = Array.isArray(question.options) ? question.options : [];
         // Ensure value is always a string to avoid controlled/uncontrolled switch
         const radioValue = localAnswer || "";
@@ -608,8 +611,9 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
             })}
           </RadioGroup>
         );
+      }
 
-      case "multiple_choice":
+      case "multiple_choice": {
         const multiOptions = Array.isArray(question.options) ? question.options : [];
         const currentSelections = Array.isArray(localAnswer) ? localAnswer : [];
         const maxSelections = question.validation_rules?.max_selections;
@@ -658,8 +662,9 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
             )}
           </div>
         );
+      }
 
-      case "scale":
+      case "scale": {
         const { min: scaleMin, max: scaleMax, min_label, max_label } = question.options || {};
         const scaleValue = localAnswer || 3;
         
@@ -690,8 +695,9 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
             </div>
           </div>
         );
+      }
 
-      case "textarea":
+      case "textarea": {
         const fieldCount = question.options?.fields || 1;
         const textAnswers = Array.isArray(localAnswer) ? localAnswer : Array(fieldCount).fill("");
         
@@ -727,6 +733,7 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
             autoFocus
           />
         );
+      }
 
       default:
         return null;
