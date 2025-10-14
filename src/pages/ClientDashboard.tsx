@@ -317,10 +317,14 @@ const ClientDashboard = () => {
       const name = other ? `${other.first_name ?? ""}`.trim() || "Match" : "Match";
       const avatarUrl = other?.photo_url || (Array.isArray(other?.photos) && other.photos[0]?.photo_url) || undefined;
 
-      // Determine status based on responses
+      // Determine status based on responses, but exclude mutual matches
       let status: "pending" | "mutual" | "new" | "inactive" = "new";
-      if (match.match_status === "both_accepted") {
-        status = "mutual";
+      const isMutual = match.match_status === "both_accepted" ||
+                       (currentUserResponse === "accepted" && otherUserResponse === "accepted");
+
+      if (isMutual) {
+        // Skip mutual matches on the main dashboard - they have their own page
+        return null;
       } else if (currentUserResponse === "rejected" || otherUserResponse === "rejected") {
         status = "inactive";
       } else if (currentUserResponse === "accepted") {
@@ -337,7 +341,7 @@ const ClientDashboard = () => {
         currentUserResponse,
         otherUserResponse,
       };
-    });
+    }).filter(Boolean); // Remove null entries (mutual matches)
   }, [matches, currentProfileId]);
 
 
@@ -476,7 +480,7 @@ const ClientDashboard = () => {
               <section>
                 {formattedMatches.length > 0 ? (
                   <MatchList
-                    title="Matches"
+                    title="Pending Matches"
                     matches={formattedMatches}
                     onSelect={handleOpenMatch}
                   />
@@ -487,6 +491,19 @@ const ClientDashboard = () => {
                     </div>
                   </div>
                 )}
+
+                <div className="mt-4 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Looking for mutual matches?
+                    <Button
+                      variant="link"
+                      onClick={() => navigate('/client/mutual-matches')}
+                      className="p-0 ml-1 h-auto font-normal"
+                    >
+                      View Mutual Matches
+                    </Button>
+                  </p>
+                </div>
               </section>
             </>
           )}

@@ -24,7 +24,8 @@
       "Bash(npx:*)",
       "Bash(test:*)",
       "Bash(source ~/.bashrc)",
-      "Bash(alias ccg)"
+      "Bash(alias ccg)",
+      "Bash(npm run lint)"
     ],
     "deny": [],
     "ask": []

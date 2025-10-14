@@ -22,6 +22,7 @@ import MatchManagementPage from "./pages/admin/MatchManagementPage";
 import { AdminUpdates } from "./pages/admin/AdminUpdates";
 import { ClientUpdates } from "./pages/ClientUpdates";
 import NotificationSettings from "./pages/NotificationSettings";
+import MutualMatches from "./pages/MutualMatches";
 import { AdminLayout } from "./components/AdminLayout";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -100,6 +101,7 @@ const App = () => (
             <Route path="/notification-debug" element={<NotificationDebug />} />
             <Route path="/client/profile/edit" element={<ProtectedRoute><ProfileEditPage /></ProtectedRoute>} />
             <Route path="/client/dashboard" element={<ProtectedRoute><ClientDashboard /></ProtectedRoute>} />
+            <Route path="/client/mutual-matches" element={<ProtectedRoute><MutualMatches /></ProtectedRoute>} />
             <Route path="/client/updates" element={<ProtectedRoute><ClientUpdates /></ProtectedRoute>} />
             <Route path="/client/profile" element={<ProtectedRoute><ProfileEditPage /></ProtectedRoute>} />
             <Route path="/client/settings/notifications" element={
