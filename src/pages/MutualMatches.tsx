@@ -435,7 +435,17 @@ const MutualMatches = () => {
     }
 
     const matchId = active.id as string;
-    const newStatus = over.id as string;
+    const overId = over.id as string;
+
+    // Check if we're dropping on a column (not a card)
+    const isValidStatus = KANBAN_STATUSES.some(status => status.id === overId);
+
+    if (!isValidStatus) {
+      console.log('Not dropping on a valid column, ignoring. Over ID:', overId);
+      return;
+    }
+
+    const newStatus = overId;
 
     // Debug: Validate we have a valid match and status
     const currentMatch = matchesWithStatus.find(m => m.id === matchId);
@@ -682,8 +692,7 @@ const MutualMatches = () => {
                 </div>
               </div>
 
-              {/* Drag Overlay temporarily disabled for debugging */}
-              {/* <DragOverlay
+              <DragOverlay
                 dropAnimation={{
                   sideEffects: defaultDropAnimationSideEffects({
                     styles: {
@@ -705,7 +714,7 @@ const MutualMatches = () => {
                     />
                   </div>
                 ) : null}
-              </DragOverlay> */}
+              </DragOverlay>
             </DndContext>
           ) : (
             <div className="text-center py-16">
