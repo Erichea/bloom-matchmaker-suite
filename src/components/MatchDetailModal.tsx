@@ -57,17 +57,27 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
 
       if (!otherProfile?.user_id) return;
 
+      // First, let's verify the current session
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('=== RLS DEBUG ===');
+      console.log('Current session user:', session?.user?.id);
+      console.log('Current auth user from hook:', user?.id);
+      console.log('Fetching profile_answers for user_id:', otherProfile.user_id);
+      console.log('Match ID:', match.id);
+      console.log('Match status:', match.match_status);
+
       // Fetch profile answers
       const { data: answersData, error: answersError } = await supabase
         .from("profile_answers")
         .select("*")
         .eq("user_id", otherProfile.user_id);
 
-      console.log('Fetching profile_answers for user_id:', otherProfile.user_id);
-      console.log('Current auth user:', user?.id);
-
       if (answersError) {
         console.error('Error fetching profile answers:', answersError);
+        console.error('Error code:', answersError.code);
+        console.error('Error details:', answersError.details);
+        console.error('Error hint:', answersError.hint);
+        console.error('Error message:', answersError.message);
       }
 
       const answers: Record<string, any> = {};
