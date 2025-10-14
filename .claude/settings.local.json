@@ -18,14 +18,8 @@
       "Bash(git restore:*)",
       "Bash(git stash:*)",
       "Bash(npm install)",
-      "WebFetch(domain:github.com)",
-      "Bash(. $PROFILE)",
-      "Read(//c/Users/EricChea/**)",
-      "Bash(npx:*)",
-      "Bash(test:*)",
-      "Bash(source ~/.bashrc)",
-      "Bash(alias ccg)",
-      "Bash(npm run lint)"
+      "Bash(npm install:*)",
+      "Bash(npx sharp-cli:*)"
     ],
     "deny": [],
     "ask": []

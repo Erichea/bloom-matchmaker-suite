@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { ArrowLeft, Edit2, X, LogOut } from "lucide-react";
+import MatchDetailModal from "@/components/MatchDetailModal";
+import { ArrowLeft, Edit2, X, LogOut, Eye } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { questionnaireCategories } from "@/constants/questionnaireCategories";
 
@@ -90,6 +91,9 @@ export default function ProfileEditPage() {
   const [photos, setPhotos] = useState<any[]>([]);
   const [profileId, setProfileId] = useState<string>("");
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [profileData, setProfileData] = useState<any>(null);
+  const [previewMatch, setPreviewMatch] = useState<any>(null);
 
   const {
     questions,
@@ -122,6 +126,7 @@ export default function ProfileEditPage() {
 
       if (profileData) {
         setProfileId(profileData.id);
+        setProfileData(profileData);
 
         // Load photos
         const { data: photosData } = await supabase
@@ -182,6 +187,31 @@ export default function ProfileEditPage() {
     navigate("/auth");
   };
 
+  const handlePreviewProfile = () => {
+    if (!profileData) return;
+
+    // Build a mock match object that mimics what MatchDetailModal expects
+    const mockMatch = {
+      id: "preview",
+      profile_1_id: profileData.id,
+      profile_2_id: "other",
+      current_profile_id: "other", // Set as "other" so our profile shows as profile_1 (the "other" profile)
+      match_status: "pending",
+      profile_1_response: null,
+      profile_2_response: null,
+      compatibility_score: 85,
+      profile_1: profileData,
+      profile_2: {
+        ...profileData,
+        photos: photos,
+        profile_photos: photos
+      }
+    };
+
+    setPreviewMatch(mockMatch);
+    setShowPreview(true);
+  };
+
   const questionsByCategory = useMemo(() => {
     return questionnaireCategories.map(category => {
       const categoryQuestions = questions.filter(q =>
@@ -217,7 +247,15 @@ export default function ProfileEditPage() {
               Back
             </Button>
             <h1 className="text-lg font-semibold">Edit Profile</h1>
-            <div className="w-16" /> {/* Spacer for alignment */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handlePreviewProfile}
+              disabled={!profileData}
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Preview
+            </Button>
           </div>
           <TabsList className="mx-4 mb-2 grid w-auto grid-cols-2">
             <TabsTrigger value="questions">Questions</TabsTrigger>
@@ -326,6 +364,15 @@ export default function ProfileEditPage() {
             iconComponent={getIconComponent(editingQuestion.icon_name)}
           />
         </div>
+      )}
+
+      {/* Profile Preview Modal */}
+      {previewMatch && (
+        <MatchDetailModal
+          match={previewMatch}
+          open={showPreview}
+          onOpenChange={setShowPreview}
+        />
       )}
     </>
   );
