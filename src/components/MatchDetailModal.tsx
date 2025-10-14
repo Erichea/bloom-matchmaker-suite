@@ -342,28 +342,34 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
             <Card className="bg-white border-0 shadow-sm">
               <CardContent className="p-6 space-y-4">
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">About</h3>
-                {otherProfile.gender && (
+
+                {/* Gender - check both profile and profile_answers */}
+                {(otherProfile.gender || profileAnswers.gender) && (
                   <div className="flex items-center gap-3">
                     <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                     <div>
                       <span className="text-sm text-muted-foreground">Gender: </span>
-                      <span className="text-base text-foreground capitalize">{otherProfile.gender.replace('_', ' ')}</span>
-                    </div>
-                  </div>
-                )}
-
-                {(otherProfile.city || otherProfile.country) && (
-                  <div className="flex items-center gap-3">
-                    <MapPin className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                    <div>
-                      <span className="text-sm text-muted-foreground">Location: </span>
-                      <span className="text-base text-foreground">
-                        {[otherProfile.city, otherProfile.country].filter(Boolean).join(', ')}
+                      <span className="text-base text-foreground capitalize">
+                        {formatAnswer(otherProfile.gender || profileAnswers.gender).replace('_', ' ')}
                       </span>
                     </div>
                   </div>
                 )}
 
+                {/* Location */}
+                {(otherProfile.city || profileAnswers.city) && (
+                  <div className="flex items-center gap-3">
+                    <MapPin className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                    <div>
+                      <span className="text-sm text-muted-foreground">Location: </span>
+                      <span className="text-base text-foreground">
+                        {otherProfile.city || formatAnswer(profileAnswers.city)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Dating Preference */}
                 {profileAnswers.dating_preference && (
                   <div className="flex items-center gap-3">
                     <Heart className="w-5 h-5 text-muted-foreground flex-shrink-0" />
@@ -374,44 +380,67 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
                   </div>
                 )}
 
-                {otherProfile.education && (
+                {/* Education - check both sources */}
+                {(otherProfile.education || profileAnswers.education_level) && (
                   <div className="flex items-center gap-3">
                     <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                     <div>
                       <span className="text-sm text-muted-foreground">Education: </span>
-                      <span className="text-base text-foreground capitalize">
-                        {otherProfile.education.replace('_', ' ')}
+                      <span className="text-base text-foreground">
+                        {formatAnswer(otherProfile.education || profileAnswers.education_level)}
                       </span>
                     </div>
                   </div>
                 )}
 
-                {otherProfile.height_cm && (
+                {/* Height - check both sources */}
+                {(otherProfile.height_cm || profileAnswers.height) && (
                   <div className="flex items-center gap-3">
                     <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                     <div>
                       <span className="text-sm text-muted-foreground">Height: </span>
-                      <span className="text-base text-foreground">{otherProfile.height_cm} cm</span>
+                      <span className="text-base text-foreground">
+                        {otherProfile.height_cm ? `${otherProfile.height_cm} cm` : formatAnswer(profileAnswers.height)}
+                      </span>
                     </div>
                   </div>
                 )}
 
-                {otherProfile.ethnicity && (
+                {/* Ethnicity - check both sources */}
+                {(otherProfile.ethnicity || profileAnswers.ethnicity) && (
                   <div className="flex items-center gap-3">
                     <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                     <div>
                       <span className="text-sm text-muted-foreground">Ethnicity: </span>
-                      <span className="text-base text-foreground">{otherProfile.ethnicity}</span>
+                      <span className="text-base text-foreground">
+                        {formatAnswer(otherProfile.ethnicity || profileAnswers.ethnicity)}
+                      </span>
                     </div>
                   </div>
                 )}
 
-                {otherProfile.faith && (
+                {/* Religion - check both sources */}
+                {(otherProfile.faith || profileAnswers.religion) && (
                   <div className="flex items-center gap-3">
                     <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                     <div>
                       <span className="text-sm text-muted-foreground">Religion: </span>
-                      <span className="text-base text-foreground">{otherProfile.faith}</span>
+                      <span className="text-base text-foreground">
+                        {formatAnswer(otherProfile.faith || profileAnswers.religion)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Profession - check both sources */}
+                {(otherProfile.profession || profileAnswers.profession) && (
+                  <div className="flex items-center gap-3">
+                    <Briefcase className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                    <div>
+                      <span className="text-sm text-muted-foreground">Profession: </span>
+                      <span className="text-base text-foreground">
+                        {formatAnswer(otherProfile.profession || profileAnswers.profession)}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -477,19 +506,9 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
             )}
 
             {/* Personality & Other Info Card */}
-            {(profileAnswers.mbti || otherProfile.profession || otherProfile.about_me) && (
+            {(profileAnswers.mbti || otherProfile.about_me) && (
               <Card className="bg-white border-0 shadow-sm">
                 <CardContent className="p-6 space-y-4">
-                  {otherProfile.profession && (
-                    <div className="flex items-center gap-3">
-                      <Briefcase className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                      <div>
-                        <span className="text-sm text-muted-foreground">Profession: </span>
-                        <span className="text-base text-foreground">{otherProfile.profession}</span>
-                      </div>
-                    </div>
-                  )}
-
                   {profileAnswers.mbti && (
                     <div className="flex items-center gap-3">
                       <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
@@ -501,7 +520,7 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
                   )}
 
                   {otherProfile.about_me && (
-                    <div className="pt-2 border-t border-border/40">
+                    <div className={cn(profileAnswers.mbti && "pt-2 border-t border-border/40")}>
                       <p className="text-base text-foreground leading-relaxed">
                         {otherProfile.about_me}
                       </p>
