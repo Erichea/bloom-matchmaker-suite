@@ -167,61 +167,44 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
         });
       }
 
-      // If this question maps to a profile field, update profile too
+      // If this question maps to essential profile fields, update profiles table
+      // Only update: first_name, last_name, date_of_birth, city, height_cm
+      // Everything else is stored in profile_answers table only
       const question = questions.find((q) => q.id === questionId);
       if (question?.profile_field_mapping) {
         const fields = question.profile_field_mapping.split(",");
         const updateData: any = {};
 
-        // Map display values to database enum values
-        const genderMap: Record<string, string> = {
-          'Man': 'male',
-          'Woman': 'female',
-          'Nonbinary': 'non_binary',
-        };
-
-        const educationMap: Record<string, string> = {
-          'No diploma': 'other',
-          'High school (Bac)': 'high_school',
-          "Bachelor's (Licence)": 'bachelor',
-          "Master's": 'master',
-          'Doctorate (Doctorat)': 'phd',
-          'Prefer not to say': 'other',
-        };
+        // Essential fields that we still store in profiles table
+        const essentialFields = ['first_name', 'last_name', 'date_of_birth', 'city', 'height_cm'];
 
         if (fields.length === 1) {
           const field = fields[0];
-          let value = answer;
-
-          // Apply gender mapping if this is the gender field
-          if (field === 'gender' && typeof value === 'string' && genderMap[value]) {
-            value = genderMap[value];
+          // Only update if it's an essential field
+          if (essentialFields.includes(field)) {
+            updateData[field] = answer;
           }
-
-          // Apply education mapping if this is the education field
-          if (field === 'education' && typeof value === 'string' && educationMap[value]) {
-            value = educationMap[value];
-          }
-
-          updateData[field] = value;
         } else {
-          // Handle multi-field questions (like name)
+          // Handle multi-field questions (like name: first_name, last_name)
           fields.forEach((field, index) => {
-            if (Array.isArray(answer)) {
+            if (essentialFields.includes(field) && Array.isArray(answer)) {
               updateData[field] = answer[index];
             }
           });
         }
 
-        console.log('Updating profile with data:', updateData);
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .update(updateData)
-          .eq("user_id", userId);
+        // Only make the database call if we have essential fields to update
+        if (Object.keys(updateData).length > 0) {
+          console.log('Updating profile with essential fields:', updateData);
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .update(updateData)
+            .eq("user_id", userId);
 
-        if (profileError) {
-          console.error('Error updating profile:', profileError);
-          throw profileError;
+          if (profileError) {
+            console.error('Error updating profile:', profileError);
+            throw profileError;
+          }
         }
       }
     } catch (error) {
