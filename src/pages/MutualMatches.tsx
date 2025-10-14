@@ -137,16 +137,43 @@ const MutualMatches = () => {
     if (!user) return;
 
     try {
-      const { data: rpcData, error } = await supabase.rpc("get_matches_with_personal_status", { p_user_id: user.id });
-      if (error) throw error;
+      // First try to use the original working function
+      const { data: rpcData, error: rpcError } = await supabase.rpc("get_matches_for_user" as any, { p_user_id: user.id });
 
-      const matchesData = rpcData || [];
+      if (rpcError) {
+        console.error("RPC error:", rpcError);
+        setMatchesWithStatus([]);
+        return;
+      }
+
+      let data = rpcData ? (rpcData as any[]).map((row: any) => row.match_data) : [];
+
+      // Filter only mutual matches (both accepted)
+      const userProfileData = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (userProfileData.error) throw userProfileData.error;
+
+      const userProfile = userProfileData.data?.[0];
+      if (!userProfile) return;
+
+      const mutualMatchesData = data.filter((match: any) => {
+        const isProfile1 = match.profile_1_id === userProfile.id;
+        const currentUserResponse = isProfile1 ? match.profile_1_response : match.profile_2_response;
+        const otherUserResponse = isProfile1 ? match.profile_2_response : match.profile_1_response;
+
+        return match.match_status === "both_accepted" ||
+               (currentUserResponse === "accepted" && otherUserResponse === "accepted");
+      });
 
       // Fetch profile_answers for each match's profile_1 and profile_2
-      if (matchesData.length > 0) {
+      if (mutualMatchesData.length > 0) {
         const userIds = new Set<string>();
-        matchesData.forEach((row: any) => {
-          const match = row.match_data;
+        mutualMatchesData.forEach((match: any) => {
           if (match.profile_1?.user_id) userIds.add(match.profile_1.user_id);
           if (match.profile_2?.user_id) userIds.add(match.profile_2.user_id);
         });
@@ -156,10 +183,43 @@ const MutualMatches = () => {
           .select("*")
           .in("user_id", Array.from(userIds));
 
+        // Fetch personal status for each match
+        const matchIds = mutualMatchesData.map((match: any) => match.id);
+        const { data: statusData } = await supabase
+          .from("match_status_tracking")
+          .select("match_id, status")
+          .eq("user_id", user.id)
+          .in("match_id", matchIds);
+
+        // Create a map of match_id -> status for quick lookup
+        const statusMap = new Map();
+        statusData?.forEach((status: any) => {
+          statusMap.set(status.match_id, status.status);
+        });
+
+        // Find matches that don't have personal status and create default entries
+        const matchesWithoutStatus = matchIds.filter(matchId => !statusMap.has(matchId));
+        if (matchesWithoutStatus.length > 0) {
+          await supabase
+            .from("match_status_tracking")
+            .upsert(
+              matchesWithoutStatus.map(matchId => ({
+                user_id: user.id,
+                match_id: matchId,
+                status: 'to_discuss'
+              })),
+              { onConflict: 'user_id,match_id' }
+            );
+
+          // Add default statuses to the map
+          matchesWithoutStatus.forEach(matchId => {
+            statusMap.set(matchId, 'to_discuss');
+          });
+        }
+
         // Process matches with personal status
-        const processedMatches = matchesData.map((row: any) => {
-          const match = row.match_data;
-          const isProfile1 = match.profile_1_id === profile?.id;
+        const processedMatches = mutualMatchesData.map((match: any) => {
+          const isProfile1 = match.profile_1_id === userProfile.id;
           const other = isProfile1 ? match.profile_2 : match.profile_1;
           const name = other ? `${other.first_name ?? ""} ${other.last_name ?? ""}`.trim() : "Match";
           const initials = name.split(" ").map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
@@ -177,7 +237,7 @@ const MutualMatches = () => {
               ...other,
               profile_answers: answersData?.filter((a: any) => a.user_id === other?.user_id) || []
             },
-            personalStatus: row.personal_status,
+            personalStatus: statusMap.get(match.id) || 'to_discuss',
             // Store full match data for modal
             fullMatchData: {
               ...match,
@@ -201,7 +261,7 @@ const MutualMatches = () => {
       console.error("Error fetching matches:", error);
       setMatchesWithStatus([]);
     }
-  }, [user, profile?.id]);
+  }, [user]);
 
   useEffect(() => {
     if (authLoading) {
