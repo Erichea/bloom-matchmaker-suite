@@ -278,15 +278,23 @@ const MutualMatches = () => {
     loadData();
   }, [user, session, authLoading, navigate, fetchProfile, fetchMatches]);
 
-  // Handle status change with arrow buttons
-  const handleStatusChange = async (matchId: string, direction: 'prev' | 'next') => {
+  // Handle status change with arrow buttons or direct dot clicks
+  const handleStatusChange = async (matchId: string, direction: 'prev' | 'next' | number) => {
     const currentMatch = matchesWithStatus.find(m => m.id === matchId);
     if (!currentMatch) return;
 
     const currentIndex = MATCH_STATUSES.findIndex(status => status.id === currentMatch.personalStatus);
-    const newIndex = direction === 'next' ?
-      Math.min(currentIndex + 1, MATCH_STATUSES.length - 1) :
-      Math.max(currentIndex - 1, 0);
+
+    let newIndex: number;
+    if (typeof direction === 'number') {
+      // Direct click on dot
+      newIndex = direction;
+    } else {
+      // Arrow navigation
+      newIndex = direction === 'next' ?
+        Math.min(currentIndex + 1, MATCH_STATUSES.length - 1) :
+        Math.max(currentIndex - 1, 0);
+    }
 
     const newStatus = MATCH_STATUSES[newIndex].id;
 
@@ -329,13 +337,8 @@ const MutualMatches = () => {
               : match
           )
         );
-      } else {
-        toast({
-          title: "Status Updated",
-          description: `Moved to ${MATCH_STATUSES[newIndex].title}`,
-          duration: 2000,
-        });
       }
+      // No success toast - silent update for smooth UX
     } catch (error) {
       console.error('Error updating match status:', error);
       toast({
@@ -407,6 +410,25 @@ const MutualMatches = () => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
+  // Compact date format for top-right corner
+  const formatCompactDate = (dateString?: string) => {
+    if (!dateString) return "now";
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+
+    if (diffDays === 0) {
+      if (diffHours === 0) return "now";
+      return `${diffHours}h ago`;
+    }
+    if (diffDays < 30) return `${diffDays}d ago`;
+    const diffMonths = Math.floor(diffDays / 30);
+    if (diffMonths < 12) return `${diffMonths}mo ago`;
+    return `${Math.floor(diffMonths / 12)}y ago`;
+  };
+
   const userInitials = useMemo(() => {
     const name = `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim();
     if (name) {
@@ -432,7 +454,7 @@ const MutualMatches = () => {
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold mb-2 flex items-center gap-2">
                 <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-red-500" />
-                Match List
+                Mutual Matches
               </h1>
               <p className="text-sm sm:text-base sm:text-lg text-muted-foreground">
                 View and manage your matches
@@ -491,7 +513,7 @@ const MutualMatches = () => {
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold mb-2 flex items-center gap-2">
                 <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-red-500" />
-                Match List
+                Mutual Matches
               </h1>
               <p className="text-sm sm:text-base sm:text-lg text-muted-foreground">
                 View and manage your matches
@@ -547,113 +569,144 @@ const MutualMatches = () => {
 
           {/* Match List */}
           <div className="space-y-4">
-            {filteredAndSortedMatches.map((match, index) => (
-              <motion.div
-                key={match.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{
-                  duration: 0.2,
-                  delay: index * 0.03 // Reduced stagger delay
-                }}
-                className="bg-card border rounded-2xl p-4 hover:shadow-lg transition-all duration-200 cursor-pointer"
-                onClick={() => handleOpenMatch(match.id)}
-              >
-                <div className="flex items-center justify-between">
-                  {/* Left Section - Match Info */}
-                  <div className="flex items-center space-x-4 flex-1">
-                    <div className="w-12 h-12 rounded-full bg-muted overflow-hidden flex-shrink-0">
-                      {match.photoUrl ? (
-                        <img
-                          src={match.photoUrl}
-                          alt={match.firstName}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-sm font-semibold text-muted-foreground">
-                            {match.initials}
-                          </span>
-                        </div>
-                      )}
-                    </div>
+            {filteredAndSortedMatches.map((match, index) => {
+              const currentStatusIndex = MATCH_STATUSES.findIndex(s => s.id === match.personalStatus);
+              const currentStatus = MATCH_STATUSES[currentStatusIndex];
 
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-lg text-foreground truncate">
-                        {match.firstName}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Matched on {formatMatchDate(match.matchDate)}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Right Section - Stage Progression */}
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleStatusChange(match.id, 'prev');
-                      }}
-                      disabled={MATCH_STATUSES.findIndex(s => s.id === match.personalStatus) === 0}
-                      className="h-8 w-8 p-0"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </Button>
-
-                    <div className="flex items-center space-x-1">
-                      {MATCH_STATUSES.map((status, index) => {
-                        const currentIndex = MATCH_STATUSES.findIndex(s => s.id === match.personalStatus);
-                        const isActive = status.id === match.personalStatus;
-                        const isCompleted = index < currentIndex;
-
-                        return (
-                          <div key={status.id} className="flex items-center">
-                            <div className={`w-3 h-3 rounded-full border-2 transition-all duration-300 ${
-                              isActive
-                                ? 'border-primary bg-primary'
-                                : isCompleted
-                                  ? 'border-primary bg-primary/50'
-                                  : 'border-muted bg-background'
-                            }`} />
-
-                            {index < MATCH_STATUSES.length - 1 && (
-                              <div className={`w-8 h-0.5 transition-all duration-300 ${
-                                index < currentIndex
-                                  ? 'bg-primary'
-                                  : 'bg-muted'
-                              }`} />
-                            )}
+              return (
+                <motion.div
+                  key={match.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.4,
+                    delay: index * 0.05,
+                    ease: [0.25, 0.46, 0.45, 0.94]
+                  }}
+                  whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
+                  className="bg-card border rounded-2xl p-5 hover:shadow-xl hover:border-primary/20 transition-all duration-300 cursor-pointer group"
+                  onClick={() => handleOpenMatch(match.id)}
+                >
+                  {/* Top Section - Avatar, Name, and Date */}
+                  <div className="flex items-start justify-between mb-5">
+                    <div className="flex items-center space-x-4 flex-1">
+                      <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 overflow-hidden flex-shrink-0 ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all duration-300">
+                        {match.photoUrl ? (
+                          <img
+                            src={match.photoUrl}
+                            alt={match.firstName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <span className="text-base font-semibold text-primary">
+                              {match.initials}
+                            </span>
                           </div>
-                        );
-                      })}
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-xl text-foreground truncate mb-0.5">
+                          {match.firstName}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {match.compatibility}% compatibility
+                        </p>
+                      </div>
                     </div>
 
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleStatusChange(match.id, 'next');
-                      }}
-                      disabled={MATCH_STATUSES.findIndex(s => s.id === match.personalStatus) === MATCH_STATUSES.length - 1}
-                      className="h-8 w-8 p-0"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
+                    {/* Compact Date in Top Right */}
+                    <div className="text-xs font-medium text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full">
+                      {formatCompactDate(match.matchDate)}
+                    </div>
                   </div>
-                </div>
 
-                {/* Current Status Display */}
-                <div className="mt-3 flex items-center justify-center">
-                  <span className="text-sm font-medium text-primary">
-                    {MATCH_STATUSES.find(s => s.id === match.personalStatus)?.emoji} {MATCH_STATUSES.find(s => s.id === match.personalStatus)?.title}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
+                  {/* Timeline Section - Centered Below */}
+                  <div className="flex flex-col items-center space-y-4 pt-4 border-t border-border/50">
+                    {/* Timeline with Navigation and Clickable Dots */}
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStatusChange(match.id, 'prev');
+                        }}
+                        disabled={currentStatusIndex === 0}
+                        className="h-8 w-8 p-0 hover:bg-primary/10 disabled:opacity-30 transition-all duration-200"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
+
+                      <div className="flex items-center space-x-1.5">
+                        {MATCH_STATUSES.map((status, index) => {
+                          const isActive = status.id === match.personalStatus;
+                          const isCompleted = index < currentStatusIndex;
+
+                          return (
+                            <div key={status.id} className="flex items-center">
+                              <motion.button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (status.id !== match.personalStatus) {
+                                    handleStatusChange(match.id, index);
+                                  }
+                                }}
+                                whileHover={{ scale: 1.3 }}
+                                whileTap={{ scale: 0.9 }}
+                                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                                  isActive
+                                    ? 'bg-primary ring-4 ring-primary/20 shadow-lg shadow-primary/50'
+                                    : isCompleted
+                                      ? 'bg-primary/60 hover:bg-primary/80'
+                                      : 'bg-muted hover:bg-muted-foreground/30 border-2 border-muted-foreground/20'
+                                }`}
+                              />
+
+                              {index < MATCH_STATUSES.length - 1 && (
+                                <div className={`w-8 h-0.5 transition-all duration-500 ${
+                                  index < currentStatusIndex
+                                    ? 'bg-gradient-to-r from-primary to-primary/60'
+                                    : 'bg-muted'
+                                }`} />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStatusChange(match.id, 'next');
+                        }}
+                        disabled={currentStatusIndex === MATCH_STATUSES.length - 1}
+                        className="h-8 w-8 p-0 hover:bg-primary/10 disabled:opacity-30 transition-all duration-200"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+
+                    {/* Current Status Display */}
+                    <motion.div
+                      key={match.personalStatus}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="flex items-center justify-center"
+                    >
+                      <span className="text-sm font-medium text-primary bg-primary/5 px-4 py-1.5 rounded-full">
+                        {currentStatus?.emoji} {currentStatus?.title}
+                      </span>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              );
+            })}
 
             {/* Empty State */}
             {filteredAndSortedMatches.length === 0 && (

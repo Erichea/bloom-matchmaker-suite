@@ -121,6 +121,7 @@ interface QuestionnaireQuestion {
   icon_name: string | null;
   question_type: string;
   options: any;
+  question_order: number;
 }
 
 type StatusFilter = "all" | "pending_approval" | "approved" | "rejected" | "incomplete";
@@ -450,7 +451,7 @@ const ClientsPage = () => {
         // Fetch questionnaire questions
         const { data: questionsData, error: questionsError } = await supabase
           .from("questionnaire_questions")
-          .select("id, question_text_en, subtitle_en, icon_name, question_type, options")
+          .select("id, question_text_en, subtitle_en, icon_name, question_type, options, question_order")
           .eq("version", 1)
           .order("question_order");
 
@@ -1526,7 +1527,7 @@ const ClientsPage = () => {
                             <AccordionContent className="px-4 pb-4">
                               <div className="space-y-4">
                                 {questionnaireQuestions
-                                  .filter(q => q.question_order >= 1 && q.question_order <= 17)
+                                  .filter(q => q.question_order >= 1 && q.question_order <= 18)
                                   .sort((a, b) => a.question_order - b.question_order)
                                   .map((question) => {
                                     const answer = questionnaireAnswers[question.id];
@@ -1561,7 +1562,7 @@ const ClientsPage = () => {
                             <AccordionContent className="px-4 pb-4">
                               <div className="space-y-4">
                                 {questionnaireQuestions
-                                  .filter(q => q.question_order >= 18 && q.question_order <= 24)
+                                  .filter(q => q.question_order >= 19 && q.question_order <= 25)
                                   .sort((a, b) => a.question_order - b.question_order)
                                   .map((question) => {
                                     const answer = questionnaireAnswers[question.id];
