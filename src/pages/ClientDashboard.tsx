@@ -255,7 +255,7 @@ const ClientDashboard = () => {
     };
 
     loadData();
-  }, [user, session, authLoading, navigate, fetchProfile, fetchMatches]);
+  }, [user?.id, session?.access_token, authLoading, navigate, fetchProfile, fetchMatches]);
 
   const handleSignOut = async () => {
     await signOut();

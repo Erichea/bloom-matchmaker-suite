@@ -78,8 +78,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (isMounted) {
           setSession(session);
           setUser(session?.user ?? null);
-
-
+          // Ensure loading is set to false after auth state changes
+          setLoading(false);
         }
       }
     );
