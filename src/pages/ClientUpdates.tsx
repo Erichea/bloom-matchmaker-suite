@@ -169,36 +169,34 @@ export const ClientUpdates = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 pb-20">
-      <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="flex h-16 items-center justify-between px-4 max-w-2xl mx-auto">
+    <div className="min-h-screen bg-background pb-20">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
+        <div className="flex h-14 items-center justify-between px-4 max-w-2xl mx-auto">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate(-1)}
-            className="md:hidden hover:bg-accent/50"
+            className="md:hidden hover:bg-accent/50 h-9 w-9"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold">Updates</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-medium">Updates</h1>
             {unreadCount > 0 && (
-              <div className="flex items-center justify-center h-6 min-w-6 px-2 rounded-full bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20">
-                <span className="text-xs font-bold text-primary-foreground">
-                  {unreadCount}
-                </span>
-              </div>
+              <span className="flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full bg-primary text-xs font-medium text-primary-foreground">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleMarkAllAsRead}
-                className="h-9 px-3 text-xs hover:bg-accent/50"
+                className="h-8 px-2 text-xs hover:bg-accent/50 gap-1"
               >
-                <CheckCheck className="h-4 w-4 mr-1.5" />
+                <CheckCheck className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Mark all read</span>
               </Button>
             )}
@@ -207,69 +205,67 @@ export const ClientUpdates = () => {
               size="icon"
               onClick={handleRefresh}
               disabled={refreshing}
-              className="hover:bg-accent/50"
+              className="hover:bg-accent/50 h-8 w-8"
             >
-              <RefreshCw className={`h-5 w-5 ${refreshing ? "animate-spin" : ""}`} />
+              <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-4 py-6">
+      <main className="mx-auto max-w-2xl px-4 py-4">
         {notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="relative">
               <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full" />
-              <Bell className="relative h-20 w-20 text-muted-foreground/30" />
+              <Bell className="relative h-16 w-16 text-muted-foreground/30" />
             </div>
-            <h3 className="mt-6 text-lg font-semibold">No updates yet</h3>
+            <h3 className="mt-6 text-lg font-medium">No updates yet</h3>
             <p className="mt-2 text-sm text-muted-foreground max-w-sm">
               We'll notify you when there's something new
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {notifications.map((notification) => {
+          <div className="bg-card rounded-2xl border border-border/50 shadow-sm overflow-hidden">
+            {notifications.map((notification, index) => {
               const Icon = getIconByType(notification.icon_type);
 
               return (
                 <button
                   key={notification.id}
                   onClick={() => handleNotificationClick(notification)}
-                  className={`group w-full rounded-2xl border transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] ${
-                    !notification.is_read
-                      ? "bg-gradient-to-br from-primary/5 via-background to-background border-primary/20 shadow-md shadow-primary/5"
-                      : "bg-card/50 backdrop-blur-sm border-border/50 hover:bg-card/80"
-                  }`}
+                  className={`group w-full text-left transition-all duration-200 hover:bg-accent/30 ${
+                    !notification.is_read ? "bg-primary/5" : ""
+                  } ${index !== notifications.length - 1 ? "border-b border-border/30" : ""}`}
                 >
-                  <div className="flex items-start gap-4 p-4">
-                    <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-300 ${
+                  <div className="flex items-center gap-4 p-4">
+                    <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${
                       !notification.is_read
-                        ? "bg-gradient-to-br from-primary to-primary/70 shadow-lg shadow-primary/25"
-                        : "bg-muted/50 group-hover:bg-primary/10"
+                        ? "bg-primary shadow-sm"
+                        : "bg-muted/70"
                     }`}>
-                      <Icon className={`h-6 w-6 ${
-                        !notification.is_read ? "text-primary-foreground" : "text-primary"
+                      <Icon className={`h-5 w-5 ${
+                        !notification.is_read ? "text-primary-foreground" : "text-muted-foreground"
                       }`} />
                     </div>
-                    <div className="flex-1 min-w-0 text-left">
-                      <div className="flex items-start justify-between gap-3 mb-1">
-                        <h3 className={`font-semibold leading-snug ${
-                          !notification.is_read ? "text-foreground" : "text-foreground/90"
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-3 mb-1">
+                        <h3 className={`font-medium text-sm ${
+                          !notification.is_read ? "text-foreground font-semibold" : "text-foreground/80"
                         }`}>
                           {notification.title}
                         </h3>
-                        {!notification.is_read && (
-                          <div className="h-2 w-2 flex-shrink-0 rounded-full bg-primary mt-1.5 animate-pulse" />
-                        )}
+                        <span className="text-xs text-muted-foreground/60 flex-shrink-0">
+                          {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                        </span>
                       </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed mb-2">
+                      <p className="text-sm text-muted-foreground/80 leading-relaxed line-clamp-2">
                         {notification.description}
                       </p>
-                      <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/80">
-                        {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-                      </span>
                     </div>
+                    {!notification.is_read && (
+                      <div className="h-2 w-2 flex-shrink-0 rounded-full bg-primary" />
+                    )}
                   </div>
                 </button>
               );
