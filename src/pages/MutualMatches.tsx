@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Heart, Home, Search, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -546,133 +546,123 @@ const MutualMatches = () => {
           </div>
 
           {/* Match List */}
-          <AnimatePresence mode="wait">
-            {filteredAndSortedMatches.length > 0 ? (
+          <div className="space-y-4">
+            {filteredAndSortedMatches.map((match, index) => (
               <motion.div
-                key="match-list"
-                className="space-y-4"
-                layout
+                key={match.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{
+                  duration: 0.2,
+                  delay: index * 0.03 // Reduced stagger delay
+                }}
+                className="bg-card border rounded-2xl p-4 hover:shadow-lg transition-all duration-200 cursor-pointer"
+                onClick={() => handleOpenMatch(match.id)}
               >
-                {filteredAndSortedMatches.map((match, index) => (
-                  <motion.div
-                    key={match.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{
-                      duration: 0.3,
-                      delay: index * 0.05 // Stagger animations by 50ms
-                    }}
-                    className="bg-card border rounded-2xl p-4 hover:shadow-lg transition-all duration-200 cursor-pointer"
-                    onClick={() => handleOpenMatch(match.id)}
-                  >
-                    <div className="flex items-center justify-between">
-                      {/* Left Section - Match Info */}
-                      <div className="flex items-center space-x-4 flex-1">
-                        <div className="w-12 h-12 rounded-full bg-muted overflow-hidden flex-shrink-0">
-                          {match.photoUrl ? (
-                            <img
-                              src={match.photoUrl}
-                              alt={match.firstName}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <span className="text-sm font-semibold text-muted-foreground">
-                                {match.initials}
-                              </span>
-                            </div>
-                          )}
+                <div className="flex items-center justify-between">
+                  {/* Left Section - Match Info */}
+                  <div className="flex items-center space-x-4 flex-1">
+                    <div className="w-12 h-12 rounded-full bg-muted overflow-hidden flex-shrink-0">
+                      {match.photoUrl ? (
+                        <img
+                          src={match.photoUrl}
+                          alt={match.firstName}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-sm font-semibold text-muted-foreground">
+                            {match.initials}
+                          </span>
                         </div>
-
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-lg text-foreground truncate">
-                            {match.firstName}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            Matched on {formatMatchDate(match.matchDate)}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Right Section - Stage Progression */}
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStatusChange(match.id, 'prev');
-                          }}
-                          disabled={MATCH_STATUSES.findIndex(s => s.id === match.personalStatus) === 0}
-                          className="h-8 w-8 p-0"
-                        >
-                          <ChevronLeft className="w-4 h-4" />
-                        </Button>
-
-                        <div className="flex items-center space-x-1">
-                          {MATCH_STATUSES.map((status, index) => {
-                            const currentIndex = MATCH_STATUSES.findIndex(s => s.id === match.personalStatus);
-                            const isActive = status.id === match.personalStatus;
-                            const isCompleted = index < currentIndex;
-
-                            return (
-                              <div key={status.id} className="flex items-center">
-                                <div className={`w-3 h-3 rounded-full border-2 transition-all duration-300 ${
-                                  isActive
-                                    ? 'border-primary bg-primary'
-                                    : isCompleted
-                                      ? 'border-primary bg-primary/50'
-                                      : 'border-muted bg-background'
-                                }`} />
-
-                                {index < MATCH_STATUSES.length - 1 && (
-                                  <div className={`w-8 h-0.5 transition-all duration-300 ${
-                                    index < currentIndex
-                                      ? 'bg-primary'
-                                      : 'bg-muted'
-                                  }`} />
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStatusChange(match.id, 'next');
-                          }}
-                          disabled={MATCH_STATUSES.findIndex(s => s.id === match.personalStatus) === MATCH_STATUSES.length - 1}
-                          className="h-8 w-8 p-0"
-                        >
-                          <ChevronRight className="w-4 h-4" />
-                        </Button>
-                      </div>
+                      )}
                     </div>
 
-                    {/* Current Status Display */}
-                    <div className="mt-3 flex items-center justify-center">
-                      <span className="text-sm font-medium text-primary">
-                        {MATCH_STATUSES.find(s => s.id === match.personalStatus)?.emoji} {MATCH_STATUSES.find(s => s.id === match.personalStatus)?.title}
-                      </span>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-lg text-foreground truncate">
+                        {match.firstName}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Matched on {formatMatchDate(match.matchDate)}
+                      </p>
                     </div>
-                  </motion.div>
-                ))}
+                  </div>
+
+                  {/* Right Section - Stage Progression */}
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(match.id, 'prev');
+                      }}
+                      disabled={MATCH_STATUSES.findIndex(s => s.id === match.personalStatus) === 0}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+
+                    <div className="flex items-center space-x-1">
+                      {MATCH_STATUSES.map((status, index) => {
+                        const currentIndex = MATCH_STATUSES.findIndex(s => s.id === match.personalStatus);
+                        const isActive = status.id === match.personalStatus;
+                        const isCompleted = index < currentIndex;
+
+                        return (
+                          <div key={status.id} className="flex items-center">
+                            <div className={`w-3 h-3 rounded-full border-2 transition-all duration-300 ${
+                              isActive
+                                ? 'border-primary bg-primary'
+                                : isCompleted
+                                  ? 'border-primary bg-primary/50'
+                                  : 'border-muted bg-background'
+                            }`} />
+
+                            {index < MATCH_STATUSES.length - 1 && (
+                              <div className={`w-8 h-0.5 transition-all duration-300 ${
+                                index < currentIndex
+                                  ? 'bg-primary'
+                                  : 'bg-muted'
+                              }`} />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(match.id, 'next');
+                      }}
+                      disabled={MATCH_STATUSES.findIndex(s => s.id === match.personalStatus) === MATCH_STATUSES.length - 1}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Current Status Display */}
+                <div className="mt-3 flex items-center justify-center">
+                  <span className="text-sm font-medium text-primary">
+                    {MATCH_STATUSES.find(s => s.id === match.personalStatus)?.emoji} {MATCH_STATUSES.find(s => s.id === match.personalStatus)?.title}
+                  </span>
+                </div>
               </motion.div>
-            ) : (
+            ))}
+
+            {/* Empty State */}
+            {filteredAndSortedMatches.length === 0 && (
               <motion.div
                 key="empty-state"
-                className="text-center py-16"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
+                className="text-center py-16"
               >
                 <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
                   <Heart className="w-12 h-12 text-muted-foreground" />
@@ -695,7 +685,7 @@ const MutualMatches = () => {
                 </Button>
               </motion.div>
             )}
-          </AnimatePresence>
+          </div>
         </main>
       </div>
       <BottomNavigation />
