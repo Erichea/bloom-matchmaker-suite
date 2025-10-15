@@ -91,10 +91,8 @@ const MBTIGrid: React.FC<MBTIGridProps> = ({ value, onChange }) => {
                     "bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800"
                   )}
                 >
-                  {/* SVG Character - Wrapped to isolate SVG IDs */}
-                  <div className="w-12 h-12 md:w-14 md:h-14" data-mbti={mbtiType.type}>
-                    <mbtiType.icon className="w-full h-full object-contain" />
-                  </div>
+                  {/* SVG Character */}
+                  <mbtiType.icon className="w-12 h-12 md:w-14 md:h-14 object-contain" />
                 </div>
 
                 {/* Match indicator on hover */}
