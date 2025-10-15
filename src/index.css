@@ -240,7 +240,7 @@ All colors MUST be HSL.
 
   /* Input Styles - Soft & rounded */
   .input {
-    @apply bg-input border border-border rounded-2xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 transition-all duration-300 outline-none w-full;
+    @apply bg-background border border-border rounded-2xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 transition-all duration-300 outline-none w-full;
   }
 
   /* Container Utilities */
