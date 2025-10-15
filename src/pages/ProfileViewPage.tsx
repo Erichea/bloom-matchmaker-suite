@@ -17,7 +17,10 @@ import {
   Briefcase,
   GraduationCap,
   Heart,
-  Camera
+  Camera,
+  Pen,
+  Eye,
+  LogOut
 } from "lucide-react";
 import { questionnaireCategories } from "@/constants/questionnaireCategories";
 
@@ -259,19 +262,8 @@ export default function ProfileViewPage() {
       <div className="min-h-screen bg-background pb-20">
         {/* Header */}
         <header className="sticky top-0 z-40 border-b border-border bg-background">
-          <div className="flex h-16 items-center justify-between px-4">
-            <Button variant="ghost" onClick={() => navigate("/client/dashboard")}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Button>
+          <div className="flex h-16 items-center justify-center px-4">
             <h1 className="text-lg font-semibold">Profile</h1>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/client/settings/notifications")}
-            >
-              <Settings className="h-5 w-5" />
-            </Button>
           </div>
         </header>
 
@@ -279,30 +271,41 @@ export default function ProfileViewPage() {
           {/* Profile Picture Section */}
           <Card>
             <CardContent className="pt-6">
-              <div className="flex flex-col items-center space-y-4">
-                <div className="relative">
-                  <div className="h-32 w-32 rounded-full overflow-hidden bg-gray-100">
-                    {primaryPhotoUrl ? (
-                      <img
-                        alt="Profile"
-                        className="h-full w-full object-cover"
-                        src={primaryPhotoUrl}
-                      />
-                    ) : (
-                      <div className="h-full w-full bg-gray-200 flex items-center justify-center">
-                        <User className="h-16 w-16 text-gray-400" />
-                      </div>
-                    )}
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-0 right-0 z-10"
+                  onClick={handlePreviewProfile}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+                <div className="flex flex-col items-center space-y-4 pt-8">
+                  <div className="relative">
+                    <div className="h-32 w-32 rounded-full overflow-hidden bg-gray-100">
+                      {primaryPhotoUrl ? (
+                        <img
+                          alt="Profile"
+                          className="h-full w-full object-cover"
+                          src={primaryPhotoUrl}
+                        />
+                      ) : (
+                        <div className="h-full w-full bg-gray-200 flex items-center justify-center">
+                          <User className="h-16 w-16 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="absolute bottom-0 right-0 rounded-full"
+                      onClick={() => navigate("/client/profile/edit")}
+                    >
+                      <Pen className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="absolute bottom-0 right-0 rounded-full"
-                    onClick={() => navigate("/client/profile/edit")}
-                  >
-                    <Camera className="h-4 w-4" />
-                  </Button>
                 </div>
+              </div>
 
                 <div className="text-center">
                   <h2 className="text-2xl font-semibold">{profileSummary.name}</h2>
@@ -325,64 +328,24 @@ export default function ProfileViewPage() {
             </CardContent>
           </Card>
 
-          {/* Profile Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                About Me
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid grid-cols-1 gap-3">
-                {profileSummary.gender !== "Not added" && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Gender:</span>
-                    <span>{profileSummary.gender}</span>
-                  </div>
-                )}
-                {profileSummary.education_level !== "Not added" && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Education:</span>
-                    <span>{profileSummary.education_level}</span>
-                  </div>
-                )}
-                {profileSummary.ethnicity !== "Not added" && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Ethnicity:</span>
-                    <span>{profileSummary.ethnicity}</span>
-                  </div>
-                )}
-                {profileSummary.religion !== "Not added" && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Religion:</span>
-                    <span>{profileSummary.religion}</span>
-                  </div>
-                )}
-                {profileSummary.alcohol !== "Not added" && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Drinking:</span>
-                    <span>{profileSummary.alcohol}</span>
-                  </div>
-                )}
-                {profileSummary.smoking !== "Not added" && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Smoking:</span>
-                    <span>{profileSummary.smoking}</span>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
+  
           {/* Preferences Summary */}
           {preferenceQuestions.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Heart className="h-5 w-5" />
-                  Dating Preferences
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Heart className="h-5 w-5" />
+                    Dating Preferences
+                  </CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigate("/client/profile/preferences")}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="space-y-3">
                 {preferenceQuestions.map((pref) => (
@@ -397,34 +360,16 @@ export default function ProfileViewPage() {
             </Card>
           )}
 
-          {/* Action Buttons */}
-          <div className="space-y-3">
+          {/* Logout Button */}
+          <div className="pt-6">
             <Button
-              onClick={() => navigate("/client/profile/edit")}
-              className="w-full rounded-xl"
-              size="lg"
-            >
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Profile
-            </Button>
-
-            <Button
-              onClick={() => navigate("/client/profile/preferences")}
+              onClick={() => navigate("/logout")}
               variant="outline"
               className="w-full rounded-xl"
               size="lg"
             >
-              <Heart className="mr-2 h-4 w-4" />
-              Edit Preferences
-            </Button>
-
-            <Button
-              onClick={handlePreviewProfile}
-              variant="ghost"
-              className="w-full rounded-xl"
-              size="lg"
-            >
-              Preview My Profile
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
             </Button>
           </div>
         </main>

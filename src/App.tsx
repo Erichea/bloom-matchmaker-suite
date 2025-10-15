@@ -25,6 +25,7 @@ import NotificationSettings from "./pages/NotificationSettings";
 import MutualMatches from "./pages/MutualMatches";
 import ProfileViewPage from "./pages/ProfileViewPage";
 import PreferencesEditPage from "./pages/PreferencesEditPage";
+import LogoutPage from "./pages/LogoutPage";
 import { AdminLayout } from "./components/AdminLayout";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -112,6 +113,7 @@ const App = () => (
                 <NotificationSettings />
               </ProtectedRoute>
             } />
+            <Route path="/logout" element={<LogoutPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
