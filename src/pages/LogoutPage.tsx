@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const LogoutPage = () => {
   const { signOut } = useAuth();
@@ -9,8 +10,32 @@ const LogoutPage = () => {
 
   useEffect(() => {
     const performLogout = async () => {
-      await signOut();
-      navigate('/', { replace: true });
+      try {
+        console.log('Starting logout process...');
+
+        // First try to use the auth context signOut
+        await signOut();
+
+        // Double-check by calling supabase directly
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+          console.error('Direct signOut error:', error);
+        }
+
+        console.log('Logout completed, navigating to home...');
+
+        // Use a small delay to ensure session cleanup
+        setTimeout(() => {
+          navigate('/', { replace: true });
+        }, 100);
+
+      } catch (error) {
+        console.error('Logout error:', error);
+        // Still navigate even if there's an error
+        setTimeout(() => {
+          navigate('/', { replace: true });
+        }, 100);
+      }
     };
 
     performLogout();

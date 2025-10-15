@@ -205,20 +205,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
+      console.log('Attempting to sign out...');
+
+      // Clear local state first for immediate UI feedback
+      setUser(null);
+      setSession(null);
+      setLoading(false);
+
+      // Then attempt Supabase sign out
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+
       if (error) {
+        console.error('Supabase signOut error:', error);
+        // Don't show toast for "Auth session missing" as it's expected in some cases
+        if (!error.message.includes('Auth session missing')) {
+          toast({
+            title: "Sign Out Error",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
+      } else {
+        console.log('Successfully signed out');
+      }
+    } catch (error: any) {
+      console.error('SignOut exception:', error);
+      // Don't show toast for session errors as they're expected during logout
+      if (!error.message?.includes('Auth session missing')) {
         toast({
           title: "Sign Out Error",
           description: error.message,
           variant: "destructive",
         });
       }
-    } catch (error: any) {
-      toast({
-        title: "Sign Out Error",
-        description: error.message,
-        variant: "destructive",
-      });
     }
   };
 
