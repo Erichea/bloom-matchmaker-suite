@@ -79,6 +79,7 @@ const getQuestionSummary = (questionId: string, questionText: string): string =>
     "interests": "Interests",
     "relationship_values": "Relationship values",
     "mbti": "Personality type",
+    "instagram_contact": "Instagram",
   };
 
   return summaries[questionId] || questionText.split("?")[0];
@@ -327,7 +328,33 @@ export default function ProfileViewPage() {
             </CardContent>
           </Card>
 
-  
+          {/* Contact Information */}
+          {answers.instagram_contact && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Contact Information
+                  </CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigate("/client/profile/edit")}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Instagram:</span>
+                  <span className="text-right max-w-[60%]">{formatAnswer(answers.instagram_contact)}</span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Preferences Summary */}
           {preferenceQuestions.length > 0 && (
             <Card>

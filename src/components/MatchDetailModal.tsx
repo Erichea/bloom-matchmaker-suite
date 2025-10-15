@@ -23,7 +23,8 @@ import {
   Church,
   Wine,
   Cigarette,
-  Baby
+  Baby,
+  Instagram
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -544,6 +545,24 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
               </Card>
             )}
 
+            {/* Section 7: Contact Information (Only for mutual matches) */}
+            {isMutualMatch && profileAnswers.instagram_contact && (
+              <Card className="bg-primary/5 border-primary/20">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <MessageSquare className="w-5 h-5 text-primary" />
+                    <h3 className="font-serif text-lg font-medium">Contact Information</h3>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Instagram className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <div className="flex-1">
+                      <span className="text-sm text-muted-foreground">Instagram</span>
+                      <p className="text-base font-medium">{formatAnswer(profileAnswers.instagram_contact)}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Response Section */}
             {isMutualMatch ? (
