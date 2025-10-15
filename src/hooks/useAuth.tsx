@@ -34,6 +34,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const initializeAuth = async () => {
       console.log('Initializing auth...');
       try {
+        // Check if user has explicitly logged out
+        const hasLoggedOut = localStorage.getItem('bloom_user_logged_out') === 'true' ||
+                           sessionStorage.getItem('bloom_user_logged_out') === 'true';
+
+        console.log('Logout state check:', { hasLoggedOut });
+
+        if (hasLoggedOut) {
+          console.log('User previously logged out, keeping logged out state');
+          // Clear any remaining Supabase auth data that might have been restored
+          try {
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+              const key = localStorage.key(i);
+              if (key && key.includes('supabase.auth')) {
+                keysToRemove.push(key);
+              }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            console.log('Cleaned up restored Supabase auth keys:', keysToRemove.length);
+          } catch (e) {
+            console.error('Error cleaning restored auth data:', e);
+          }
+
+          if (isMounted) {
+            setSession(null);
+            setUser(null);
+            setLoading(false);
+          }
+          return;
+        }
+
         // Get initial session first
         const { data: { session }, error } = await supabase.auth.getSession();
 
@@ -74,6 +105,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, !!session);
+
+        // Clear logout flag on successful login
+        if (event === 'SIGNED_IN' && session) {
+          localStorage.removeItem('bloom_user_logged_out');
+          sessionStorage.removeItem('bloom_user_logged_out');
+          console.log('Cleared logout flag on successful login');
+        }
 
         if (isMounted) {
           setSession(session);
@@ -211,6 +249,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(null);
       setSession(null);
       setLoading(false);
+
+      // Set logout flag to persist across app restarts
+      localStorage.setItem('bloom_user_logged_out', 'true');
+      sessionStorage.setItem('bloom_user_logged_out', 'true');
 
       // Force clear all Supabase auth data from localStorage
       try {
