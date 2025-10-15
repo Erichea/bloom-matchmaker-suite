@@ -75,14 +75,6 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
         savedAnswers[item.question_id] = item.answer;
       });
 
-      // Pre-fill name from profile if not already answered
-      if (!savedAnswers['name'] && profileData) {
-        savedAnswers['name'] = [
-          profileData.first_name || '',
-          profileData.last_name || ''
-        ];
-      }
-
       setAnswers(savedAnswers);
 
       // Determine current question index based on progress
@@ -184,13 +176,6 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
           if (essentialFields.includes(field)) {
             updateData[field] = answer;
           }
-        } else {
-          // Handle multi-field questions (like name: first_name, last_name)
-          fields.forEach((field, index) => {
-            if (essentialFields.includes(field) && Array.isArray(answer)) {
-              updateData[field] = answer[index];
-            }
-          });
         }
 
         // Only make the database call if we have essential fields to update

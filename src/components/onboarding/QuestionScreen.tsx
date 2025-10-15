@@ -11,6 +11,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import type { QuestionnaireQuestion } from "@/hooks/useOnboardingQuestionnaire";
+import MBTIGrid from "./MBTIGrid";
 
 interface QuestionScreenProps {
   question: QuestionnaireQuestion;
@@ -74,16 +75,7 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
 
   useEffect(() => {
     // Validate answer
-    if (question.id === "name" && question.options?.fields) {
-      // For name question, both first and last name are required
-      setIsValid(
-        Array.isArray(localAnswer) &&
-        localAnswer[0] &&
-        localAnswer[0].trim().length > 0 &&
-        localAnswer[1] &&
-        localAnswer[1].trim().length > 0
-      );
-    } else if (question.question_type === "multiple_choice") {
+    if (question.question_type === "multiple_choice") {
       const maxSelections = question.validation_rules?.max_selections;
       setIsValid(
         Array.isArray(localAnswer) &&
@@ -111,36 +103,6 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
   const renderInput = () => {
     switch (question.question_type) {
       case "text":
-        // Special handling for name question with two fields
-        if (question.id === "name" && question.options?.fields) {
-          const names = Array.isArray(localAnswer) ? localAnswer : ["", ""];
-          return (
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="first_name" className="text-base mb-2 block">First name *</Label>
-                <Input
-                  id="first_name"
-                  value={names[0] || ""}
-                  onChange={(e) => setLocalAnswer([e.target.value, names[1] || ""])}
-                  className="text-lg"
-                  placeholder="Your first name"
-                  autoFocus
-                />
-              </div>
-              <div>
-                <Label htmlFor="last_name" className="text-base mb-2 block">Last name *</Label>
-                <Input
-                  id="last_name"
-                  value={names[1] || ""}
-                  onChange={(e) => setLocalAnswer([names[0] || "", e.target.value])}
-                  className="text-lg"
-                  placeholder="Your last name"
-                />
-              </div>
-            </div>
-          );
-        }
-
         return (
           <Input
             value={localAnswer || ""}
@@ -400,8 +362,8 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
               </div>
             </div>
 
-            {/* Hidden inputs for actual data entry */}
-            <div className="sr-only">
+            {/* Hidden inputs for actual data entry - completely hidden to prevent cursor */}
+            <div className="absolute -left-[9999px] -top-[9999px] opacity-0 pointer-events-none">
               <Input
                 ref={dayRef}
                 type="text"
@@ -472,117 +434,32 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
 
         // Special handling for MBTI question
         if (question.id === "mbti") {
-          const mbtiGroups = [
-            {
-              name: "Analysts",
-              emoji: "🔮",
-              types: [
-                { code: "INTJ", name: "Architect" },
-                { code: "INTP", name: "Logician" },
-                { code: "ENTJ", name: "Commander" },
-                { code: "ENTP", name: "Debater" },
-              ],
-            },
-            {
-              name: "Diplomats",
-              emoji: "💚",
-              types: [
-                { code: "INFJ", name: "Advocate" },
-                { code: "INFP", name: "Mediator" },
-                { code: "ENFJ", name: "Protagonist" },
-                { code: "ENFP", name: "Campaigner" },
-              ],
-            },
-            {
-              name: "Sentinels",
-              emoji: "🛡️",
-              types: [
-                { code: "ISTJ", name: "Logistician" },
-                { code: "ISFJ", name: "Defender" },
-                { code: "ESTJ", name: "Executive" },
-                { code: "ESFJ", name: "Consul" },
-              ],
-            },
-            {
-              name: "Explorers",
-              emoji: "🗺️",
-              types: [
-                { code: "ISTP", name: "Virtuoso" },
-                { code: "ISFP", name: "Adventurer" },
-                { code: "ESTP", name: "Entrepreneur" },
-                { code: "ESFP", name: "Entertainer" },
-              ],
-            },
-          ];
-
           return (
             <div className="space-y-6">
-              <RadioGroup value={radioValue} onValueChange={setLocalAnswer}>
-                {mbtiGroups.map((group) => (
-                  <div key={group.name} className="space-y-3">
-                    <h3 className="font-semibold text-lg flex items-center gap-2">
-                      <span>{group.emoji}</span>
-                      <span>{group.name}</span>
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {group.types.map((type) => {
-                        const isSelected = localAnswer === type.code;
-                        return (
-                          <div
-                            key={type.code}
-                            className={cn(
-                              "flex items-center space-x-3 rounded-lg border p-4 cursor-pointer",
-                              isSelected ? "border-primary" : "border-border hover:border-muted-foreground/50"
-                            )}
-                            onClick={() => setLocalAnswer(type.code)}
-                          >
-                            <RadioGroupItem value={type.code} id={type.code} className="pointer-events-none" />
-                            <Label htmlFor={type.code} className="flex-1 cursor-pointer pointer-events-none">
-                              <div className="font-medium">{type.code}</div>
-                              <div className="text-sm text-muted-foreground">{type.name}</div>
-                            </Label>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
+              <MBTIGrid value={localAnswer || ""} onChange={setLocalAnswer} />
 
-                {/* Don't know option */}
-                <div className="mt-6">
-                  {options
-                    .filter((opt) => opt.includes("Don't know") || opt.includes("Prefer not"))
-                    .map((option) => {
-                      const isSelected = localAnswer === option;
-                      return (
-                        <div
-                          key={option}
-                          className={cn(
-                            "flex items-center space-x-3 rounded-lg border p-4 cursor-pointer",
-                            isSelected ? "border-primary" : "border-border hover:border-muted-foreground/50"
-                          )}
-                          onClick={() => setLocalAnswer(option)}
-                        >
-                          <RadioGroupItem value={option} id={option} className="pointer-events-none" />
-                          <Label htmlFor={option} className="flex-1 cursor-pointer text-base pointer-events-none">
-                            {option}
-                          </Label>
-                        </div>
-                      );
-                    })}
-                </div>
-              </RadioGroup>
-
-              {/* Link to take the test */}
-              <div className="mt-6 text-center">
-                <a
-                  href="https://www.16personalities.com/free-personality-test"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline font-medium"
-                >
-                  Take the test on 16personalities.com →
-                </a>
+              {/* Don't know option */}
+              <div className="mt-6">
+                {options
+                  .filter((opt) => opt.includes("Don't know") || opt.includes("Prefer not"))
+                  .map((option) => {
+                    const isSelected = localAnswer === option;
+                    return (
+                      <div
+                        key={option}
+                        className={cn(
+                          "flex items-center space-x-3 rounded-lg border p-4 cursor-pointer",
+                          isSelected ? "border-primary" : "border-border hover:border-muted-foreground/50"
+                        )}
+                        onClick={() => setLocalAnswer(option)}
+                      >
+                        <RadioGroupItem value={option} id={option} className="pointer-events-none" />
+                        <Label htmlFor={option} className="flex-1 cursor-pointer text-base pointer-events-none">
+                          {option}
+                        </Label>
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           );
@@ -742,7 +619,7 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <div className="flex-1 flex flex-col max-w-2xl mx-auto w-full px-6 py-8">
+      <div className="flex-1 flex flex-col max-w-2xl mx-auto w-full px-6 py-8 pb-24">
         {/* Icon */}
         <div className="mb-6">{iconComponent}</div>
 
@@ -758,37 +635,55 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
           )}
           {question.help_text_en && (
             <p className="text-sm text-muted-foreground mt-2">
-              {question.help_text_en}
+              {question.id === "mbti" ? (
+                <>
+                  Don't know your type?{" "}
+                  <a
+                    href="https://www.16personalities.com/free-personality-test"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline font-medium"
+                  >
+                    Take the test
+                  </a>
+                </>
+              ) : (
+                question.help_text_en
+              )}
             </p>
           )}
         </div>
 
         {/* Answer Input */}
-        <div className="flex-1">{renderInput()}</div>
+        <div className="flex-1 min-h-0">{renderInput()}</div>
+      </div>
 
-        {/* Navigation */}
-        <div className="flex items-center justify-between mt-8 pt-6 border-t">
-          {canGoBack ? (
+      {/* Fixed Navigation Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t">
+        <div className="max-w-2xl mx-auto w-full px-6 py-4">
+          <div className="flex items-center justify-between">
+            {canGoBack ? (
+              <Button
+                variant="ghost"
+                onClick={onBack}
+                className="text-base"
+              >
+                <ArrowLeft className="mr-2 h-5 w-5" />
+                Back
+              </Button>
+            ) : (
+              <div />
+            )}
+
             <Button
-              variant="ghost"
-              onClick={onBack}
-              className="text-base"
+              onClick={handleNext}
+              disabled={!isValid}
+              size="lg"
+              className="rounded-full h-14 w-14 p-0"
             >
-              <ArrowLeft className="mr-2 h-5 w-5" />
-              Back
+              <ArrowRight className="h-6 w-6" />
             </Button>
-          ) : (
-            <div />
-          )}
-
-          <Button
-            onClick={handleNext}
-            disabled={!isValid}
-            size="lg"
-            className="rounded-full h-14 w-14 p-0"
-          >
-            <ArrowRight className="h-6 w-6" />
-          </Button>
+          </div>
         </div>
       </div>
     </div>

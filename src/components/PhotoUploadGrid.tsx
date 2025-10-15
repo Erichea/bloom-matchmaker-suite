@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Camera, GripVertical, Plus, Trash2, X } from "lucide-react";
+import { Camera, GripVertical, Plus, Trash2, X, Image } from "lucide-react";
 import imageCompression from "browser-image-compression";
 import {
   DndContext,
@@ -115,15 +115,7 @@ const SortableSlot = ({ id, index, photo, uploading, onOpenSheet, onDelete }: So
                   <X className="h-4 w-4" />
                 </button>
               </div>
-              <div className="flex items-center justify-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-                <div className="rounded-full bg-black/60 p-2 text-white">
-                  <GripVertical className="h-4 w-4" />
                 </div>
-                <span className="rounded-full bg-black/60 px-3 py-1 text-xs uppercase tracking-[0.2em] text-white">
-                  Drag to reorder
-                </span>
-              </div>
-            </div>
           </>
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-muted-foreground">
@@ -144,6 +136,7 @@ const SortableSlot = ({ id, index, photo, uploading, onOpenSheet, onDelete }: So
 export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: PhotoUploadGridProps) => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const [uploading, setUploading] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -198,6 +191,9 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
     setSheetContext(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
+    }
+    if (cameraInputRef.current) {
+      cameraInputRef.current.value = "";
     }
   };
 
@@ -275,13 +271,24 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
     const file = event.target.files?.[0];
     if (!file || !sheetContext) return;
 
+    await processFile(file, event.target);
+  };
+
+  const handleCameraCapture = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !sheetContext) return;
+
+    await processFile(file, event.target);
+  };
+
+  const processFile = async (file: File, inputElement: HTMLInputElement) => {
     if (file.size > MAX_FILE_SIZE_BYTES) {
       toast({
         title: "File too large",
         description: "Choose a photo that is 10MB or smaller before compression.",
         variant: "destructive",
       });
-      event.target.value = "";
+      inputElement.value = "";
       return;
     }
 
@@ -390,6 +397,9 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
+      if (cameraInputRef.current) {
+        cameraInputRef.current.value = "";
+      }
       if (imageToCrop) {
         URL.revokeObjectURL(imageToCrop);
         setImageToCrop(null);
@@ -407,6 +417,9 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
     }
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
+    }
+    if (cameraInputRef.current) {
+      cameraInputRef.current.value = "";
     }
     // Clear sheet context on cancel
     setSheetContext(null);
@@ -459,6 +472,20 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
     fileInputRef.current?.click();
   };
 
+  const handleCamera = () => {
+    if (uploading) return;
+    if (!sheetContext || (!sheetContext.photo && sortedPhotos.length >= MAX_PHOTOS)) {
+      toast({
+        title: "All slots filled",
+        description: "Remove a photo before uploading a new one.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    cameraInputRef.current?.click();
+  };
+
   const filledCount = sortedPhotos.length;
   const currentSheetPhoto = sheetContext?.photo;
 
@@ -488,7 +515,7 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
       </DndContext>
 
       <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>Tap to edit, drag to reorder</span>
+        <span>Tap to edit</span>
         <span>
           {filledCount} of {MAX_PHOTOS}
         </span>
@@ -500,6 +527,15 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
         accept="image/*,.heic,.HEIC,.heif,.HEIF"
         className="hidden"
         onChange={handleFileSelect}
+      />
+
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*,.heic,.HEIC,.heif,.HEIF"
+        capture="environment"
+        className="hidden"
+        onChange={handleCameraCapture}
       />
 
       <Sheet
@@ -523,9 +559,14 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
           </SheetHeader>
 
           <div className="mt-6 space-y-3">
+            <Button onClick={handleCamera} className="h-12 w-full justify-between" disabled={uploading}>
+              <span>{uploading ? "Uploading…" : "Take Photo"}</span>
+              <Camera className="h-4 w-4" />
+            </Button>
+
             <Button onClick={handleCameraRoll} className="h-12 w-full justify-between" disabled={uploading}>
-              <span>{uploading ? "Uploading…" : "Camera Roll"}</span>
-              <Plus className="h-4 w-4" />
+              <span>{uploading ? "Uploading…" : "Choose from Gallery"}</span>
+              <Image className="h-4 w-4" />
             </Button>
 
             {currentSheetPhoto && (
