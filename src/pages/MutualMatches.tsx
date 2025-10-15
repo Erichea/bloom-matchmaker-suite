@@ -65,6 +65,7 @@ const MutualMatches = () => {
   const [profile, setProfile] = useState<any>(null);
   const [matchesWithStatus, setMatchesWithStatus] = useState<MatchWithStatus[]>([]);
   const [loading, setLoading] = useState(true);
+  const [matchesLoading, setMatchesLoading] = useState(true);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
@@ -122,7 +123,7 @@ const MutualMatches = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      // Only set profile loading to false, let matches loading handle its own state
     }
   }, [user, toast]);
 
@@ -130,6 +131,7 @@ const MutualMatches = () => {
     if (!user) return;
 
     try {
+      setMatchesLoading(true);
       // First try to use the original working function
       const { data: rpcData, error: rpcError } = await supabase.rpc("get_matches_for_user" as any, { p_user_id: user.id });
 
@@ -253,6 +255,9 @@ const MutualMatches = () => {
     } catch (error: any) {
       console.error("Error fetching matches:", error);
       setMatchesWithStatus([]);
+    } finally {
+      setMatchesLoading(false);
+      setLoading(false); // Set main loading to false only after both profile and matches are loaded
     }
   }, [user]);
 
@@ -419,14 +424,56 @@ const MutualMatches = () => {
     return "B";
   }, [profile?.first_name, profile?.last_name, user?.email]);
 
-  if (authLoading || loading) {
+  if (authLoading || loading || matchesLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <motion.div
-          className="h-24 w-24 rounded-full border-[3px] border-border/20 border-t-primary"
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
-        />
+      <div className="bg-background text-foreground min-h-screen flex flex-col p-4 pb-32">
+        <main className="flex-grow">
+          <header className="flex justify-between items-start mb-6 sm:mb-8">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold mb-2 flex items-center gap-2">
+                <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-red-500" />
+                Match List
+              </h1>
+              <p className="text-sm sm:text-base sm:text-lg text-muted-foreground">
+                View and manage your matches
+              </p>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-muted animate-pulse" />
+          </header>
+
+          {/* Search and Sort Controls Skeleton */}
+          <div className="mb-6 space-y-4">
+            <div className="h-10 bg-muted rounded-lg animate-pulse" />
+            <div className="h-10 bg-muted rounded-lg w-48 animate-pulse" />
+          </div>
+
+          {/* Match List Skeleton */}
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-card border rounded-2xl p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4 flex-1">
+                    <div className="w-12 h-12 rounded-full bg-muted animate-pulse flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="h-6 bg-muted rounded animate-pulse mb-2 w-32" />
+                      <div className="h-4 bg-muted rounded animate-pulse w-24" />
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="h-8 w-8 bg-muted rounded animate-pulse" />
+                    <div className="flex items-center space-x-1">
+                      {[1, 2, 3, 4, 5].map((j) => (
+                        <div key={j} className="w-3 h-3 bg-muted rounded-full animate-pulse" />
+                      ))}
+                    </div>
+                    <div className="h-8 w-8 bg-muted rounded animate-pulse" />
+                  </div>
+                </div>
+                <div className="mt-3 h-4 bg-muted rounded animate-pulse w-32 mx-auto" />
+              </div>
+            ))}
+          </div>
+        </main>
       </div>
     );
   }
