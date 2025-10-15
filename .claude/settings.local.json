@@ -20,7 +20,8 @@
       "Bash(npm install)",
       "Bash(npm install:*)",
       "Bash(npx sharp-cli:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(npx svgo:*)"
     ],
     "deny": [],
     "ask": []
