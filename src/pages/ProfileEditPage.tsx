@@ -11,77 +11,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import MatchDetailModal from "@/components/MatchDetailModal";
-import { ArrowLeft, Edit2, X, LogOut, Eye } from "lucide-react";
+import { QuestionnaireDisplay } from "@/components/questionnaire";
+import { ArrowLeft, X, LogOut, Eye } from "lucide-react";
 import * as LucideIcons from "lucide-react";
-import { questionnaireCategories } from "@/constants/questionnaireCategories";
 
 type ProfileTab = "questions" | "photos";
-
-const formatAnswer = (answer: any): string => {
-  if (answer === null || answer === undefined || answer === "") {
-    return "Not answered";
-  }
-  if (Array.isArray(answer)) {
-    return answer.length ? answer.join(", ") : "Not answered";
-  }
-  if (typeof answer === "object") {
-    // Check if it's a date string
-    try {
-      const date = new Date(answer);
-      if (!isNaN(date.getTime())) {
-        return date.toLocaleDateString();
-      }
-    } catch (e) {
-      // Not a date
-    }
-    return JSON.stringify(answer);
-  }
-
-  // Check if it's a date string
-  const str = String(answer);
-  try {
-    const date = new Date(str);
-    if (!isNaN(date.getTime()) && str.includes('-')) {
-      return date.toLocaleDateString();
-    }
-  } catch (e) {
-    // Not a date
-  }
-
-  return str;
-};
-
-const getQuestionSummary = (questionId: string, questionText: string): string => {
-  // Create short summaries for common questions
-  const summaries: Record<string, string> = {
-    "name": "Name",
-    "date_of_birth": "Age",
-    "gender": "Gender",
-    "city": "Location",
-    "dating_preference": "Looking for",
-    "education_level": "Education",
-    "education_importance": "Education importance",
-    "height": "Height",
-    "height_preference": "Height preference",
-    "ethnicity": "Ethnicity",
-    "ethnicity_importance": "Ethnicity importance",
-    "appearance_importance": "Looks importance",
-    "religion": "Religion",
-    "religion_importance": "Religion importance",
-    "alcohol": "Drinking",
-    "smoking": "Smoking",
-    "marriage": "Marriage plans",
-    "marriage_timeline": "Marriage timeline",
-    "age_importance": "Age importance",
-    "income_importance": "Income importance",
-    "interests": "Interests",
-    "relationship_values": "Relationship values",
-    "relationship_keys": "Key elements",
-    "mbti": "Personality type",
-  };
-
-  return summaries[questionId] || questionText.split("?")[0];
-};
 
 export default function ProfileEditPage() {
   const navigate = useNavigate();
@@ -212,17 +146,7 @@ export default function ProfileEditPage() {
     setShowPreview(true);
   };
 
-  const questionsByCategory = useMemo(() => {
-    return questionnaireCategories.map(category => {
-      const categoryQuestions = questions.filter(q =>
-        category.questionIds.includes(q.id as string)
-      );
-      return {
-        categoryName: category.name,
-        questions: categoryQuestions
-      };
-    }).filter(cat => cat.questions.length > 0);
-  }, [questions]);
+  // No need for hard-coded category logic anymore - handled by QuestionnaireDisplay component
 
   const editingQuestion = useMemo(() => {
     if (!editingQuestionId) return null;
@@ -265,41 +189,16 @@ export default function ProfileEditPage() {
 
         <TabsContent value="questions" className="mt-0">
           <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-            {questionsByCategory.map((category, idx) => (
-              <Card key={idx}>
-                <CardHeader>
-                  <CardTitle className="text-base">{category.categoryName}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-1">
-                  {category.questions.map((question, qIdx) => (
-                    <div
-                      key={question.id}
-                      className={`flex items-center justify-between py-3 ${
-                        qIdx !== category.questions.length - 1 ? 'border-b border-border' : ''
-                      }`}
-                    >
-                      <div className="flex-1 min-w-0 pr-4">
-                        <div className="text-sm font-medium text-foreground mb-1">
-                          {getQuestionSummary(question.id, question.question_text_en)}
-                        </div>
-                        <div className="text-sm text-muted-foreground truncate">
-                          {formatAnswer(answers[question.id])}
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setEditingQuestionId(question.id)}
-                        className="flex-shrink-0"
-                      >
-                        <Edit2 className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            ))}
+            {/* Dynamic questionnaire display - automatically respects question order from database */}
+            <QuestionnaireDisplay
+              questions={questions}
+              answers={answers}
+              onEdit={setEditingQuestionId}
+              profile={profileData}
+              editable={true}
+              showProfile={true}
+              showPreferences={false} // Only show profile questions on this page
+            />
 
             {/* Account Section */}
             <Card>

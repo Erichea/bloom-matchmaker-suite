@@ -35,7 +35,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { questionnaireCategories } from "@/constants/questionnaireCategories";
+import { getProfileQuestions, getPreferenceQuestions, formatAnswer as formatQuestionnaireAnswer } from "@/config/questionnaireConfig";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -1519,17 +1519,14 @@ const ClientsPage = () => {
                     <TabsContent value="profile" className="m-0 h-full px-6 py-6 overflow-auto">
                       <div className="space-y-4">
                         <Accordion type="multiple" className="space-y-3" defaultValue={["personal", "preferences", "admin"]}>
-                          {/* Personal Information Section - Questions 1-17 in order */}
+                          {/* Personal Information Section - Dynamically filtered profile questions */}
                           <AccordionItem value="personal" className="rounded-md border border-border">
                             <AccordionTrigger className="px-4 py-3 text-sm font-semibold">
                               Personal Information
                             </AccordionTrigger>
                             <AccordionContent className="px-4 pb-4">
                               <div className="space-y-4">
-                                {questionnaireQuestions
-                                  .filter(q => q.question_order >= 1 && q.question_order <= 18)
-                                  .sort((a, b) => a.question_order - b.question_order)
-                                  .map((question) => {
+                                {getProfileQuestions(questionnaireQuestions).map((question) => {
                                     const answer = questionnaireAnswers[question.id];
                                     return (
                                       <div
@@ -1545,7 +1542,7 @@ const ClientsPage = () => {
                                           </p>
                                         )}
                                         <p className="whitespace-pre-line text-muted-foreground">
-                                          {formatAnswer(answer)}
+                                          {formatQuestionnaireAnswer(answer)}
                                         </p>
                                       </div>
                                     );
@@ -1554,17 +1551,14 @@ const ClientsPage = () => {
                             </AccordionContent>
                           </AccordionItem>
 
-                          {/* Preferences Section - Questions 18-24 in order */}
+                          {/* Preferences Section - Dynamically filtered preference questions */}
                           <AccordionItem value="preferences" className="rounded-md border border-border">
                             <AccordionTrigger className="px-4 py-3 text-sm font-semibold">
                               Preferences
                             </AccordionTrigger>
                             <AccordionContent className="px-4 pb-4">
                               <div className="space-y-4">
-                                {questionnaireQuestions
-                                  .filter(q => q.question_order >= 19 && q.question_order <= 25)
-                                  .sort((a, b) => a.question_order - b.question_order)
-                                  .map((question) => {
+                                {getPreferenceQuestions(questionnaireQuestions).map((question) => {
                                     const answer = questionnaireAnswers[question.id];
                                     return (
                                       <div
@@ -1580,7 +1574,7 @@ const ClientsPage = () => {
                                           </p>
                                         )}
                                         <p className="whitespace-pre-line text-muted-foreground">
-                                          {formatAnswer(answer)}
+                                          {formatQuestionnaireAnswer(answer)}
                                         </p>
                                       </div>
                                     );

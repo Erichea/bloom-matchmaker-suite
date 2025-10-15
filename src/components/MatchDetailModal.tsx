@@ -11,12 +11,9 @@ import {
   MapPin,
   Briefcase,
   Calendar,
-  Star,
   User,
   MessageSquare,
   Sparkles,
-  Target,
-  Home,
   GraduationCap,
   Ruler,
   Users,
@@ -30,6 +27,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { formatAnswer, calculateAge } from "@/config/questionnaireConfig";
 
 interface MatchDetailModalProps {
   match: any;
@@ -114,17 +112,6 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
 
   if (!match) return null;
 
-  const calculateAge = (dateOfBirth: string) => {
-    const today = new Date();
-    const birthDate = new Date(dateOfBirth);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age;
-  };
-
   const getProfilePhoto = (profile: any): string | null => {
     if (!profile) return null;
     if (profile.photo_url) return profile.photo_url;
@@ -137,19 +124,6 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
       return a.is_primary ? -1 : 1;
     });
     return sorted[0]?.photo_url ?? null;
-  };
-
-  const formatAnswer = (answer: any): string => {
-    if (answer === null || answer === undefined || answer === "") {
-      return "";
-    }
-    if (Array.isArray(answer)) {
-      return answer.length ? answer.join(", ") : "";
-    }
-    if (typeof answer === "object") {
-      return JSON.stringify(answer);
-    }
-    return String(answer);
   };
 
   const handleResponse = async (response: 'accepted' | 'rejected') => {

@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Check, X } from "lucide-react";
 import type { ProfileAnswers } from "@/utils/compatibilityCalculator";
+import { formatAnswer } from "@/config/questionnaireConfig";
 
 interface Profile {
   id: string;
@@ -62,10 +63,8 @@ export default function MatchDetailsModal({
     .slice(0, 2);
 
   const formatValue = (value: any): string => {
-    if (value === null || value === undefined || value === "") return "—";
-    if (Array.isArray(value)) return value.length ? value.join(", ") : "—";
-    if (typeof value === "object") return JSON.stringify(value);
-    return String(value);
+    const formatted = formatAnswer(value);
+    return formatted === "Not answered" ? "—" : formatted;
   };
 
   // Get important questions to compare

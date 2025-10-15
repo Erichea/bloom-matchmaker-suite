@@ -8,20 +8,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import MatchDetailModal from "@/components/MatchDetailModal";
 import {
-  ArrowLeft,
   Settings,
   Edit,
   User,
   MapPin,
-  Calendar,
-  Briefcase,
-  GraduationCap,
   Heart,
-  Camera,
   Pen,
   Eye,
   LogOut
 } from "lucide-react";
+import { formatAnswer, calculateAge, QUESTION_SUMMARIES } from "@/config/questionnaireConfig";
 import { questionnaireCategories } from "@/constants/questionnaireCategories";
 
 // Preference questions that should be in the "Edit Preferences" page
@@ -30,70 +26,13 @@ const PREFERENCE_CATEGORIES = [
   "Compatibility Preferences"
 ];
 
-const formatAnswer = (answer: any): string => {
-  if (answer === null || answer === undefined || answer === "") {
-    return "Not added";
-  }
-  if (Array.isArray(answer)) {
-    return answer.length ? answer.join(", ") : "Not added";
-  }
-  if (typeof answer === "object") {
-    try {
-      const date = new Date(answer);
-      if (!isNaN(date.getTime())) {
-        return date.toLocaleDateString();
-      }
-    } catch (e) {
-      // Not a date
-    }
-    return JSON.stringify(answer);
-  }
-
-  const str = String(answer);
-  try {
-    const date = new Date(str);
-    if (!isNaN(date.getTime()) && str.includes('-')) {
-      return date.toLocaleDateString();
-    }
-  } catch (e) {
-    // Not a date
-  }
-
-  return str;
-};
-
 const getQuestionSummary = (questionId: string, questionText: string): string => {
-  const summaries: Record<string, string> = {
-    "name": "Name",
-    "date_of_birth": "Age",
-    "gender": "Gender",
-    "city": "Location",
-    "dating_preference": "Looking for",
-    "education_level": "Education",
-    "height": "Height",
-    "ethnicity": "Ethnicity",
-    "religion": "Religion",
-    "alcohol": "Drinking",
-    "smoking": "Smoking",
-    "marriage": "Marriage plans",
-    "interests": "Interests",
-    "relationship_values": "Relationship values",
-    "mbti": "Personality type",
-    "instagram_contact": "Instagram",
-  };
-
-  return summaries[questionId] || questionText.split("?")[0];
+  return QUESTION_SUMMARIES[questionId] || questionText.split("?")[0];
 };
 
 const getAgeFromDateOfBirth = (dateOfBirth: string): string => {
-  const today = new Date();
-  const birthDate = new Date(dateOfBirth);
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    age--;
-  }
-  return `${age} years old`;
+  const age = calculateAge(dateOfBirth);
+  return age ? `${age} years old` : 'Not added';
 };
 
 export default function ProfileViewPage() {
