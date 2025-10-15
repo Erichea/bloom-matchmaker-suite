@@ -92,11 +92,7 @@ const MBTIGrid: React.FC<MBTIGridProps> = ({ value, onChange }) => {
                   )}
                 >
                   {/* SVG Character */}
-                  <img
-                    src={`/images/mbti/${mbtiType.type}.svg`}
-                    alt={mbtiType.type}
-                    className="w-12 h-12 md:w-14 md:h-14 object-contain"
-                  />
+                  <mbtiType.icon className="w-12 h-12 md:w-14 md:h-14 object-contain" />
                 </div>
 
                 {/* Match indicator on hover */}
