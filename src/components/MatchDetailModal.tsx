@@ -284,14 +284,17 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
               )}
             </div>
 
+            {/* Bottom Shadow Gradient for Text Visibility */}
+            <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/70 via-black/40 to-transparent pointer-events-none" />
+
             {/* Photo Indicators */}
             {otherProfilePhotos.length > 1 && (
-              <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5">
+              <div className="absolute bottom-24 left-0 right-0 flex justify-center gap-1.5 z-10">
                 {otherProfilePhotos.map((_: any, index: number) => (
                   <div
                     key={index}
                     className={cn(
-                      "h-1.5 rounded-full transition-all duration-200",
+                      "h-1.5 rounded-full transition-all duration-200 drop-shadow-md",
                       index === currentPhotoIndex
                         ? "w-6 bg-white"
                         : "w-1.5 bg-white/50"
@@ -302,13 +305,13 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
             )}
 
             {/* Name and Age Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
+            <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
               <div className="flex items-baseline gap-2 text-white">
-                <h2 className="text-3xl font-bold">{name.split(' ')[0]}</h2>
-                {age && <span className="text-2xl">{age}</span>}
+                <h2 className="text-3xl font-bold drop-shadow-lg">{name.split(' ')[0]}</h2>
+                {age && <span className="text-2xl drop-shadow-lg">{age}</span>}
               </div>
               {location && (
-                <div className="flex items-center gap-1 text-white/90 mt-1">
+                <div className="flex items-center gap-1 text-white/90 mt-1 drop-shadow-md">
                   <MapPin className="w-4 h-4" />
                   <span className="text-sm">{location}</span>
                 </div>
@@ -318,43 +321,46 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
 
           {/* Profile Content */}
           <div className="p-6 space-y-5">
-            {/* Section 1: Interests & Passions */}
-            {profileAnswers.interests && (
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                    <h3 className="font-serif text-lg font-medium">Interests & Passions</h3>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {formatAnswer(profileAnswers.interests).split(', ').map((interest: string, idx: number) => (
-                      <Badge key={idx} variant="secondary" className="px-3 py-1.5 text-sm font-normal">
-                        {interest}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Section 2: Relationship Philosophy */}
-            {(profileAnswers.relationship_values || profileAnswers.relationship_keys) && (
+            {/* Section 1: Dating & Relationship Goals */}
+            {(profileAnswers.relationship_values || profileAnswers.relationship_keys || profileAnswers.dating_preference ||
+              profileAnswers.marriage || profileAnswers.marriage_timeline) && (
               <Card>
                 <CardContent className="p-6 space-y-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Heart className="w-5 h-5 text-primary" />
-                    <h3 className="font-serif text-lg font-medium">Relationship Philosophy</h3>
+                    <h3 className="font-serif text-lg font-medium">Dating & Relationship Goals</h3>
                   </div>
-                  
-                  {profileAnswers.relationship_values && (
+
+                  {profileAnswers.dating_preference && (
                     <div>
+                      <p className="text-sm font-medium text-muted-foreground mb-2">Looking for</p>
+                      <p className="text-base leading-relaxed">{formatAnswer(profileAnswers.dating_preference)}</p>
+                    </div>
+                  )}
+
+                  {profileAnswers.marriage && (
+                    <div className={cn((profileAnswers.dating_preference) && "pt-4 border-t")}>
+                      <p className="text-sm font-medium text-muted-foreground mb-2">Marriage</p>
+                      <p className="text-base leading-relaxed">{formatAnswer(profileAnswers.marriage)}</p>
+                    </div>
+                  )}
+
+                  {profileAnswers.marriage_timeline && (
+                    <div className={cn((profileAnswers.dating_preference || profileAnswers.marriage) && "pt-4 border-t")}>
+                      <p className="text-sm font-medium text-muted-foreground mb-2">Marriage Timeline</p>
+                      <p className="text-base leading-relaxed">{formatAnswer(profileAnswers.marriage_timeline)}</p>
+                    </div>
+                  )}
+
+                  {profileAnswers.relationship_values && (
+                    <div className={cn((profileAnswers.dating_preference || profileAnswers.marriage || profileAnswers.marriage_timeline) && "pt-4 border-t")}>
                       <p className="text-sm font-medium text-muted-foreground mb-2">What I value in a relationship</p>
                       <p className="text-base leading-relaxed">{formatAnswer(profileAnswers.relationship_values)}</p>
                     </div>
                   )}
 
                   {profileAnswers.relationship_keys && (
-                    <div className={cn(profileAnswers.relationship_values && "pt-4 border-t")}>
+                    <div className={cn((profileAnswers.dating_preference || profileAnswers.marriage || profileAnswers.marriage_timeline || profileAnswers.relationship_values) && "pt-4 border-t")}>
                       <p className="text-sm font-medium text-muted-foreground mb-2">Key to a good relationship</p>
                       <p className="text-base leading-relaxed">{formatAnswer(profileAnswers.relationship_keys)}</p>
                     </div>
@@ -363,69 +369,38 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
               </Card>
             )}
 
-            {/* Section 3: Personal Details */}
-            {(profileAnswers.gender || profileAnswers.city || otherProfile.city || profileAnswers.education_level || 
-              profileAnswers.height || otherProfile.height_cm || profileAnswers.ethnicity || profileAnswers.religion || 
-              profileAnswers.profession) && (
+            {/* Section 2: Physical & Appearance */}
+            {(otherProfile.height_cm || profileAnswers.height) && (
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <User className="w-5 h-5 text-primary" />
-                    <h3 className="font-serif text-lg font-medium">Personal Details</h3>
+                    <Ruler className="w-5 h-5 text-primary" />
+                    <h3 className="font-serif text-lg font-medium">Physical & Appearance</h3>
                   </div>
                   <div className="grid gap-3">
-                    {profileAnswers.gender && (
-                      <div className="flex items-center gap-3">
-                        <Users className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <div className="flex-1">
-                          <span className="text-sm text-muted-foreground">Gender</span>
-                          <p className="text-base capitalize">{formatAnswer(profileAnswers.gender)}</p>
-                        </div>
+                    <div className="flex items-center gap-3">
+                      <Ruler className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1">
+                        <span className="text-sm text-muted-foreground">Height</span>
+                        <p className="text-base">
+                          {otherProfile.height_cm ? `${otherProfile.height_cm} cm` : `${formatAnswer(profileAnswers.height)} cm`}
+                        </p>
                       </div>
-                    )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-                    {(otherProfile.city || profileAnswers.city) && (
-                      <div className="flex items-center gap-3">
-                        <Home className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <div className="flex-1">
-                          <span className="text-sm text-muted-foreground">Location</span>
-                          <p className="text-base">{otherProfile.city || formatAnswer(profileAnswers.city)}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {profileAnswers.profession && (
-                      <div className="flex items-center gap-3">
-                        <Briefcase className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <div className="flex-1">
-                          <span className="text-sm text-muted-foreground">Profession</span>
-                          <p className="text-base">{formatAnswer(profileAnswers.profession)}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {profileAnswers.education_level && (
-                      <div className="flex items-center gap-3">
-                        <GraduationCap className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <div className="flex-1">
-                          <span className="text-sm text-muted-foreground">Education</span>
-                          <p className="text-base">{formatAnswer(profileAnswers.education_level)}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {(otherProfile.height_cm || profileAnswers.height) && (
-                      <div className="flex items-center gap-3">
-                        <Ruler className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <div className="flex-1">
-                          <span className="text-sm text-muted-foreground">Height</span>
-                          <p className="text-base">
-                            {otherProfile.height_cm ? `${otherProfile.height_cm} cm` : `${formatAnswer(profileAnswers.height)} cm`}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
+            {/* Section 3: Background & Culture */}
+            {(profileAnswers.ethnicity || profileAnswers.religion) && (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Users className="w-5 h-5 text-primary" />
+                    <h3 className="font-serif text-lg font-medium">Background & Culture</h3>
+                  </div>
+                  <div className="grid gap-3">
                     {profileAnswers.ethnicity && (
                       <div className="flex items-center gap-3">
                         <Users className="w-4 h-4 text-muted-foreground flex-shrink-0" />
@@ -450,8 +425,41 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
               </Card>
             )}
 
-            {/* Section 4: Lifestyle */}
-            {(profileAnswers.alcohol || profileAnswers.smoking) && (
+            {/* Section 4: Education & Career */}
+            {(profileAnswers.education_level || profileAnswers.profession) && (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <GraduationCap className="w-5 h-5 text-primary" />
+                    <h3 className="font-serif text-lg font-medium">Education & Career</h3>
+                  </div>
+                  <div className="grid gap-3">
+                    {profileAnswers.education_level && (
+                      <div className="flex items-center gap-3">
+                        <GraduationCap className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <div className="flex-1">
+                          <span className="text-sm text-muted-foreground">Education</span>
+                          <p className="text-base">{formatAnswer(profileAnswers.education_level)}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {profileAnswers.profession && (
+                      <div className="flex items-center gap-3">
+                        <Briefcase className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <div className="flex-1">
+                          <span className="text-sm text-muted-foreground">Profession</span>
+                          <p className="text-base">{formatAnswer(profileAnswers.profession)}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Section 5: Lifestyle */}
+            {(profileAnswers.alcohol || profileAnswers.smoking || profileAnswers.interests) && (
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-4">
@@ -478,46 +486,16 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
                         </div>
                       </div>
                     )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
-            {/* Section 5: Future Goals */}
-            {(profileAnswers.marriage || profileAnswers.marriage_timeline || profileAnswers.dating_preference) && (
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Target className="w-5 h-5 text-primary" />
-                    <h3 className="font-serif text-lg font-medium">Future Goals</h3>
-                  </div>
-                  <div className="grid gap-3">
-                    {profileAnswers.dating_preference && (
-                      <div className="flex items-center gap-3">
-                        <Heart className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <div className="flex-1">
-                          <span className="text-sm text-muted-foreground">Looking for</span>
-                          <p className="text-base">{formatAnswer(profileAnswers.dating_preference)}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {profileAnswers.marriage && (
-                      <div className="flex items-center gap-3">
-                        <Baby className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <div className="flex-1">
-                          <span className="text-sm text-muted-foreground">Marriage</span>
-                          <p className="text-base">{formatAnswer(profileAnswers.marriage)}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {profileAnswers.marriage_timeline && (
-                      <div className="flex items-center gap-3">
-                        <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <div className="flex-1">
-                          <span className="text-sm text-muted-foreground">Timeline</span>
-                          <p className="text-base">{formatAnswer(profileAnswers.marriage_timeline)}</p>
+                    {profileAnswers.interests && (
+                      <div className={cn((profileAnswers.alcohol || profileAnswers.smoking) && "pt-4 border-t")}>
+                        <p className="text-sm font-medium text-muted-foreground mb-3">Interests & Passions</p>
+                        <div className="flex flex-wrap gap-2">
+                          {formatAnswer(profileAnswers.interests).split(', ').map((interest: string, idx: number) => (
+                            <Badge key={idx} variant="secondary" className="px-3 py-1.5 text-sm font-normal">
+                              {interest}
+                            </Badge>
+                          ))}
                         </div>
                       </div>
                     )}
@@ -526,7 +504,7 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
               </Card>
             )}
 
-            {/* Section 6: Personality (Optional) */}
+            {/* Section 6: Personality */}
             {profileAnswers.mbti && (
               <Card>
                 <CardContent className="p-6">
