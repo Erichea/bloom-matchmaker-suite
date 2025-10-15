@@ -212,7 +212,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(null);
       setLoading(false);
 
-      // Then attempt Supabase sign out
+      // Force clear all Supabase auth data from localStorage
+      try {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.includes('supabase.auth')) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        console.log('Cleared', keysToRemove.length, 'Supabase auth keys from localStorage');
+      } catch (e) {
+        console.error('Error clearing localStorage:', e);
+      }
+
+      // Clear sessionStorage as well
+      try {
+        const sessionKeysToRemove = [];
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i);
+          if (key && key.includes('supabase.auth')) {
+            sessionKeysToRemove.push(key);
+          }
+        }
+        sessionKeysToRemove.forEach(key => sessionStorage.removeItem(key));
+        console.log('Cleared', sessionKeysToRemove.length, 'Supabase auth keys from sessionStorage');
+      } catch (e) {
+        console.error('Error clearing sessionStorage:', e);
+      }
+
+      // Then attempt Supabase sign out with global scope
       const { error } = await supabase.auth.signOut({ scope: 'global' });
 
       if (error) {
@@ -228,6 +258,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         console.log('Successfully signed out');
       }
+
+      // Clear any cached data that might persist
+      try {
+        // Clear any app-specific storage
+        const appKeys = ['user_preferences', 'app_settings', 'cached_profile'];
+        appKeys.forEach(key => {
+          localStorage.removeItem(key);
+          sessionStorage.removeItem(key);
+        });
+      } catch (e) {
+        console.error('Error clearing app cache:', e);
+      }
+
     } catch (error: any) {
       console.error('SignOut exception:', error);
       // Don't show toast for session errors as they're expected during logout

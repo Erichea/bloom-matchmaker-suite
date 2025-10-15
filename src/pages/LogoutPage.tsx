@@ -22,19 +22,45 @@ const LogoutPage = () => {
           console.error('Direct signOut error:', error);
         }
 
+        // Clear service worker caches if available
+        if ('caches' in window) {
+          try {
+            const cacheNames = await caches.keys();
+            await Promise.all(
+              cacheNames.map(cacheName => caches.delete(cacheName))
+            );
+            console.log('Cleared', cacheNames.length, 'service worker caches');
+          } catch (e) {
+            console.error('Error clearing service worker caches:', e);
+          }
+        }
+
+        // Clear any IndexedDB data
+        if ('indexedDB' in window) {
+          try {
+            const databases = await indexedDB.databases();
+            await Promise.all(
+              databases.map(db => indexedDB.deleteDatabase(db.name))
+            );
+            console.log('Cleared', databases.length, 'IndexedDB databases');
+          } catch (e) {
+            console.error('Error clearing IndexedDB:', e);
+          }
+        }
+
         console.log('Logout completed, navigating to home...');
 
-        // Use a small delay to ensure session cleanup
+        // Use a slightly longer delay to ensure complete cleanup
         setTimeout(() => {
           navigate('/', { replace: true });
-        }, 100);
+        }, 300);
 
       } catch (error) {
         console.error('Logout error:', error);
         // Still navigate even if there's an error
         setTimeout(() => {
           navigate('/', { replace: true });
-        }, 100);
+        }, 300);
       }
     };
 
@@ -45,7 +71,7 @@ const LogoutPage = () => {
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-        <p className="text-lg text-muted-foreground">Signing out...</p>
+        <p className="text-lg text-muted-foreground">Signing out and clearing data...</p>
       </div>
     </div>
   );
