@@ -448,18 +448,18 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
 
   return (
     <div className="flex flex-col h-full max-h-full">
-      {/* Sticky Header */}
-      <div className="flex flex-col gap-4 w-full p-4 bg-background/95 backdrop-blur-sm border-b">
-        {/* Title and Description */}
-        <div>
-          <h4 className="text-2xl font-medium mb-2">
-            {question.question_text_en}
-          </h4>
-          <p className="text-sm text-muted-foreground">
-            {question.subtitle_en || `Add at least ${minSelections} interests to your profile to connect with like-minded individuals.`}
-          </p>
-        </div>
+      {/* Title and Description - Only show at top */}
+      <div className="flex flex-col gap-2 w-full p-4 pb-2">
+        <h4 className="text-2xl font-medium mb-2">
+          {question.question_text_en}
+        </h4>
+        <p className="text-sm text-muted-foreground">
+          {question.subtitle_en || `Add at least ${minSelections} interests to your profile to connect with like-minded individuals.`}
+        </p>
+      </div>
 
+      {/* Sticky Header with Search, Selected, and Categories */}
+      <div className="sticky top-0 z-10 flex flex-col gap-3 w-full p-4 pt-2 bg-background/95 backdrop-blur-sm border-b">
         {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -473,19 +473,19 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
 
         {/* Selected Interests */}
         {selectedInterests.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 max-h-20 overflow-y-auto">
             {Array.isArray(selectedInterests) && selectedInterests.map(interestId => {
               const interest = allInterests.find(i => i.id === interestId);
               if (!interest) return null;
               return (
                 <div
                   key={interestId}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-sm font-medium"
+                  className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
                 >
-                  <span>#{interest.name}</span>
+                  <span className="text-sm font-medium">{interest.name}</span>
                   <button
                     onClick={() => handleRemoveSelected(interestId)}
-                    className="ml-1 hover:bg-primary-foreground/20 rounded-full p-0.5 transition-colors"
+                    className="ml-1 text-muted-foreground hover:text-foreground transition-colors rounded-sm p-0.5 hover:bg-muted-foreground/10"
                   >
                     <X className="h-3 w-3" />
                   </button>
