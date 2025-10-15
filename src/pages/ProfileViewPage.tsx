@@ -307,22 +307,21 @@ export default function ProfileViewPage() {
                 </div>
               </div>
 
-                <div className="text-center">
-                  <h2 className="text-2xl font-semibold">{profileSummary.name}</h2>
-                  <div className="flex items-center justify-center text-muted-foreground mt-1">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    {profileSummary.city}
-                  </div>
-                  <div className="text-muted-foreground text-sm mt-1">
-                    {profileSummary.age}
-                  </div>
+              <div className="text-center">
+                <h2 className="text-2xl font-semibold">{profileSummary.name}</h2>
+                <div className="flex items-center justify-center text-muted-foreground mt-1">
+                  <MapPin className="h-4 w-4 mr-1" />
+                  {profileSummary.city}
                 </div>
+                <div className="text-muted-foreground text-sm mt-1">
+                  {profileSummary.age}
+                </div>
+              </div>
 
-                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                  <div className="flex items-center">
-                    <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
-                    Profile completion: {completionPercentage}%
-                  </div>
+              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                <div className="flex items-center">
+                  <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
+                  Profile completion: {completionPercentage}%
                 </div>
               </div>
             </CardContent>
