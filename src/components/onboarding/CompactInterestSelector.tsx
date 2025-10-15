@@ -578,44 +578,45 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
               // Skip empty categories
               if (categoryInterests.length === 0) return null;
 
-            return (
-              <div key={category.id} id={`category-${category.id}`} className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-primary" />
+              return (
+                <div key={category.id} id={`category-${category.id}`} className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-primary" />
+                    </div>
+                    <h3 className="font-medium">{category.name}</h3>
                   </div>
-                  <h3 className="font-medium">{category.name}</h3>
-                </div>
 
-                <div className="flex flex-wrap gap-2">
-                  {Array.isArray(categoryInterests) && categoryInterests.map(interest => {
-                    const isSelected = selectedInterests.includes(interest.id);
-                    const isDisabled = !isSelected && maxSelections && selectedInterests.length >= maxSelections;
+                  <div className="flex flex-wrap gap-2">
+                    {Array.isArray(categoryInterests) && categoryInterests.map(interest => {
+                      const isSelected = selectedInterests.includes(interest.id);
+                      const isDisabled = !isSelected && maxSelections && selectedInterests.length >= maxSelections;
 
-                    return (
-                      <button
-                        key={interest.id}
-                        onClick={() => handleInterestClick(interest.id)}
-                        disabled={isDisabled}
-                        className={cn(
-                          "px-2.5 py-1.5 text-xs leading-3 rounded-3xl transition-all duration-500",
-                          "hover:scale-105 active:scale-95",
-                          isSelected
-                            ? "bg-primary text-primary-foreground shadow-md"
-                            : isDisabled
-                              ? "bg-muted text-muted-foreground/50 cursor-not-allowed"
-                              : "bg-muted text-muted-foreground hover:bg-accent hover:text-black hover:shadow-sm cursor-pointer"
-                        )}
-                      >
-                        #{interest.name}
-                      </button>
-                    );
-                  })}
+                      return (
+                        <button
+                          key={interest.id}
+                          onClick={() => handleInterestClick(interest.id)}
+                          disabled={isDisabled}
+                          className={cn(
+                            "px-2.5 py-1.5 text-xs leading-3 rounded-3xl transition-all duration-500",
+                            "hover:scale-105 active:scale-95",
+                            isSelected
+                              ? "bg-primary text-primary-foreground shadow-md"
+                              : isDisabled
+                                ? "bg-muted text-muted-foreground/50 cursor-not-allowed"
+                                : "bg-muted text-muted-foreground hover:bg-accent hover:text-black hover:shadow-sm cursor-pointer"
+                          )}
+                        >
+                          #{interest.name}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         {filteredInterests.length === 0 && (
           <div className="text-center py-12">
