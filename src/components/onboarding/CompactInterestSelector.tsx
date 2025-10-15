@@ -403,7 +403,7 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
     return <div>Error: Invalid categories data</div>;
   }
 
-  // Filter interests by category and search term
+  // Filter interests by search term only
   const filteredInterests = useMemo(() => {
     // Double-check that allInterests is an array
     if (!Array.isArray(allInterests)) {
@@ -413,12 +413,7 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
 
     let filtered = allInterests;
 
-    // Filter by category
-    if (selectedCategory !== "Popular" && question.id !== "relationship_values") {
-      filtered = filtered.filter(interest => interest.category === selectedCategory);
-    }
-
-    // Filter by search term
+    // Only filter by search term
     if (searchTerm) {
       filtered = filtered.filter(interest =>
         interest.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -426,7 +421,7 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
     }
 
     return filtered;
-  }, [selectedCategory, searchTerm, allInterests, question.id]);
+  }, [searchTerm, allInterests]);
 
   const selectedInterests = Array.isArray(value) ? value : [];
 
@@ -505,7 +500,14 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
           {Array.isArray(categories) && categories.map(category => (
             <button
               key={category.id}
-              onClick={() => setSelectedCategory(category.id)}
+              onClick={() => {
+                setSelectedCategory(category.id);
+                // Smooth scroll to category
+                const element = document.getElementById(`category-${category.id}`);
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
               className={cn(
                 "px-4 py-2.5 min-w-max rounded-3xl text-sm font-medium transition-all duration-500 whitespace-nowrap",
                 selectedCategory === category.id
@@ -539,29 +541,51 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
               <Search className="h-4 w-4" />
               Search Results ({filteredInterests.length})
             </h3>
+            <div className="flex flex-wrap gap-2">
+              {Array.isArray(filteredInterests) && filteredInterests.map(interest => {
+                const isSelected = selectedInterests.includes(interest.id);
+                const isDisabled = !isSelected && maxSelections && selectedInterests.length >= maxSelections;
+
+                return (
+                  <button
+                    key={interest.id}
+                    onClick={() => handleInterestClick(interest.id)}
+                    disabled={isDisabled}
+                    className={cn(
+                      "px-2.5 py-1.5 text-xs leading-3 rounded-3xl transition-all duration-500",
+                      "hover:scale-105 active:scale-95",
+                      isSelected
+                        ? "bg-primary text-primary-foreground shadow-md"
+                        : isDisabled
+                          ? "bg-muted text-muted-foreground/50 cursor-not-allowed"
+                          : "bg-muted text-muted-foreground hover:bg-accent hover:text-black hover:shadow-sm cursor-pointer"
+                    )}
+                  >
+                    #{interest.name}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
-        <div className="space-y-6">
-          {Array.isArray(categories) && categories.map(category => {
-            const categoryInterests = searchTerm
-              ? filteredInterests.filter(i => i.category === category.id)
-              : selectedCategory === category.id || (question.id === "relationship_values" && selectedCategory === category.name)
-                ? filteredInterests
-                : [];
+        {!searchTerm && (
+          <div className="space-y-6">
+            {Array.isArray(categories) && categories.map(category => {
+              // Get interests for this category
+              const categoryInterests = filteredInterests.filter(i => i.category === category.id);
 
-            if (categoryInterests.length === 0) return null;
+              // Skip empty categories
+              if (categoryInterests.length === 0) return null;
 
             return (
-              <div key={category.id} className="space-y-3">
-                {!searchTerm && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-primary" />
-                    </div>
-                    <h3 className="font-medium">{category.name}</h3>
+              <div key={category.id} id={`category-${category.id}`} className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-primary" />
                   </div>
-                )}
+                  <h3 className="font-medium">{category.name}</h3>
+                </div>
 
                 <div className="flex flex-wrap gap-2">
                   {Array.isArray(categoryInterests) && categoryInterests.map(interest => {
