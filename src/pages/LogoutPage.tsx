@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { logoutAwareStorage } from '@/integrations/supabase/storage';
 
 const LogoutPage = () => {
   const { signOut } = useAuth();
@@ -13,14 +14,17 @@ const LogoutPage = () => {
       try {
         console.log('Starting logout process...');
 
-        // First try to use the auth context signOut
+        // Use the auth context signOut (which now uses storage adapter)
         await signOut();
 
-        // Double-check by calling supabase directly
+        // Double-check by calling supabase directly and ensure logout flag is set
         const { error } = await supabase.auth.signOut();
         if (error) {
           console.error('Direct signOut error:', error);
         }
+
+        // Ensure logout flag is set (belt-and-suspenders approach)
+        logoutAwareStorage.markLoggedOut();
 
         // Clear service worker caches if available
         if ('caches' in window) {
@@ -40,7 +44,12 @@ const LogoutPage = () => {
           try {
             const databases = await indexedDB.databases();
             await Promise.all(
-              databases.map(db => indexedDB.deleteDatabase(db.name))
+              databases.map(db => {
+                if (db.name) {
+                  return indexedDB.deleteDatabase(db.name);
+                }
+                return Promise.resolve();
+              })
             );
             console.log('Cleared', databases.length, 'IndexedDB databases');
           } catch (e) {

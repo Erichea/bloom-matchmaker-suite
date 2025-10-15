@@ -7,5 +7,6 @@ WHERE id = 'ethnicity' AND version = 1;
 
 -- Migrate existing single answers to arrays for compatibility with multiple choice
 UPDATE public.profile_answers
-SET answer = ARRAY[answer]
-WHERE question_id = 'ethnicity' AND NOT jsonb_typeof(answer) = 'array';
+SET answer = jsonb_build_array(answer)
+WHERE question_id = 'ethnicity'
+  AND jsonb_typeof(answer) != 'array';

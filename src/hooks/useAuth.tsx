@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { logoutAwareStorage } from '@/integrations/supabase/storage';
 import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
@@ -33,39 +34,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const initializeAuth = async () => {
       console.log('Initializing auth...');
+      console.log('Logout flag check:', { hasLoggedOut: logoutAwareStorage.hasLoggedOut() });
+
       try {
-        // Check if user has explicitly logged out
-        const hasLoggedOut = localStorage.getItem('bloom_user_logged_out') === 'true' ||
-                           sessionStorage.getItem('bloom_user_logged_out') === 'true';
-
-        console.log('Logout state check:', { hasLoggedOut });
-
-        if (hasLoggedOut) {
-          console.log('User previously logged out, keeping logged out state');
-          // Clear any remaining Supabase auth data that might have been restored
-          try {
-            const keysToRemove = [];
-            for (let i = 0; i < localStorage.length; i++) {
-              const key = localStorage.key(i);
-              if (key && key.includes('supabase.auth')) {
-                keysToRemove.push(key);
-              }
-            }
-            keysToRemove.forEach(key => localStorage.removeItem(key));
-            console.log('Cleaned up restored Supabase auth keys:', keysToRemove.length);
-          } catch (e) {
-            console.error('Error cleaning restored auth data:', e);
-          }
-
-          if (isMounted) {
-            setSession(null);
-            setUser(null);
-            setLoading(false);
-          }
-          return;
-        }
-
-        // Get initial session first
+        // Get initial session - the storage adapter will prevent restoration if user logged out
         const { data: { session }, error } = await supabase.auth.getSession();
 
         console.log('Initial session check:', {
@@ -108,8 +80,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         // Clear logout flag on successful login
         if (event === 'SIGNED_IN' && session) {
-          localStorage.removeItem('bloom_user_logged_out');
-          sessionStorage.removeItem('bloom_user_logged_out');
+          logoutAwareStorage.clearLogoutFlag();
           console.log('Cleared logout flag on successful login');
         }
 
@@ -250,39 +221,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(null);
       setLoading(false);
 
-      // Set logout flag to persist across app restarts
-      localStorage.setItem('bloom_user_logged_out', 'true');
-      sessionStorage.setItem('bloom_user_logged_out', 'true');
+      // Set logout flag using storage adapter - this will prevent session restoration
+      logoutAwareStorage.markLoggedOut();
 
-      // Force clear all Supabase auth data from localStorage
-      try {
-        const keysToRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && key.includes('supabase.auth')) {
-            keysToRemove.push(key);
-          }
-        }
-        keysToRemove.forEach(key => localStorage.removeItem(key));
-        console.log('Cleared', keysToRemove.length, 'Supabase auth keys from localStorage');
-      } catch (e) {
-        console.error('Error clearing localStorage:', e);
-      }
-
-      // Clear sessionStorage as well
-      try {
-        const sessionKeysToRemove = [];
-        for (let i = 0; i < sessionStorage.length; i++) {
-          const key = sessionStorage.key(i);
-          if (key && key.includes('supabase.auth')) {
-            sessionKeysToRemove.push(key);
-          }
-        }
-        sessionKeysToRemove.forEach(key => sessionStorage.removeItem(key));
-        console.log('Cleared', sessionKeysToRemove.length, 'Supabase auth keys from sessionStorage');
-      } catch (e) {
-        console.error('Error clearing sessionStorage:', e);
-      }
+      // Clear all Supabase auth data using storage adapter
+      logoutAwareStorage.clearAllAuthData();
 
       // Then attempt Supabase sign out with global scope
       const { error } = await supabase.auth.signOut({ scope: 'global' });
