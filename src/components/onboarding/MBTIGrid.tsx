@@ -74,8 +74,8 @@ const MBTIGrid: React.FC<MBTIGridProps> = ({ value, onChange }) => {
                 "flex flex-col items-center cursor-pointer transition-all duration-300 p-4 rounded-2xl",
                 "hover:scale-105 active:scale-95",
                 isSelected
-                  ? "bg-gradient-to-br from-primary/20 to-primary/10 border-2 border-primary shadow-lg"
-                  : "bg-gradient-to-br from-muted/30 to-muted/10 border-2 border-border hover:border-primary/50"
+                  ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg"
+                  : "bg-gradient-to-br from-muted/30 to-muted/10"
               )}
             >
               {/* MBTI Type Label */}
@@ -113,7 +113,7 @@ const MBTIGrid: React.FC<MBTIGridProps> = ({ value, onChange }) => {
                 >
                   {isSelected && (
                     <svg
-                      className="w-2.5 h-2.5"
+                      className="w-2.5 h-2.5 text-primary"
                       fill="currentColor"
                       viewBox="0 0 24 24"
                     >

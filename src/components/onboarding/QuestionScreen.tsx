@@ -445,26 +445,35 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
 
               {/* Don't know option */}
               {dontKnowOptions.length > 0 && (
-                <RadioGroup value={radioValue} onValueChange={setLocalAnswer} className="mt-6">
+                <div className="mt-6 space-y-3">
                   {dontKnowOptions.map((option) => {
                     const isSelected = localAnswer === option;
                     return (
                       <div
                         key={option}
                         className={cn(
-                          "flex items-center space-x-3 rounded-lg border p-4 cursor-pointer",
-                          isSelected ? "border-primary" : "border-border hover:border-muted-foreground/50"
+                          "flex items-center space-x-3 rounded-lg border p-4 cursor-pointer transition-colors",
+                          isSelected ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/50"
                         )}
                         onClick={() => setLocalAnswer(option)}
                       >
-                        <RadioGroupItem value={option} id={option} className="pointer-events-none" />
+                        <div
+                          className={cn(
+                            "w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all",
+                            isSelected ? "border-primary" : "border-muted-foreground"
+                          )}
+                        >
+                          {isSelected && (
+                            <div className="w-2 h-2 rounded-full bg-primary" />
+                          )}
+                        </div>
                         <Label htmlFor={option} className="flex-1 cursor-pointer text-base pointer-events-none">
                           {option}
                         </Label>
                       </div>
                     );
                   })}
-                </RadioGroup>
+                </div>
               )}
             </div>
           );

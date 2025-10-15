@@ -457,39 +457,6 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
         </p>
       </div>
 
-      {/* Sticky Header with Search and Categories */}
-      <div className="sticky top-0 z-10 flex flex-col gap-3 w-full p-4 pt-2 bg-background/95 backdrop-blur-sm border-b">
-        {/* Search Bar */}
-        <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Search interests..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 h-12 rounded-full bg-muted border-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-
-        {/* Category Navigation */}
-        <div className="flex gap-3 w-full overflow-x-auto pb-2 -mx-2 px-2">
-          {Array.isArray(categories) && categories.map(category => (
-            <button
-              key={category.id}
-              onClick={() => {
-                // Smooth scroll to category
-                const element = document.getElementById(`category-${category.id}`);
-                if (element) {
-                  element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-              }}
-              className="px-4 py-2.5 min-w-max rounded-3xl text-sm font-medium transition-all duration-500 whitespace-nowrap bg-muted text-muted-foreground hover:bg-primary/20"
-            >
-              {category.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Sticky Header with Search, Categories, and Selected */}
       <div className="sticky top-0 z-10 flex flex-col gap-3 w-full p-4 pt-2 bg-background/95 backdrop-blur-sm border-b">
         {/* Search Bar */}
