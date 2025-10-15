@@ -634,8 +634,9 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
     }
   };
 
-  // For interests and relationship values, use a different layout
-  if (question.id === "interests" || question.id === "relationship_values") {
+  // For interests and relationship values questions, use a different layout
+  // Make sure to only apply this to multiple_choice questions to avoid conflicts with single_choice questions like MBTI
+  if ((question.id === "interests" || question.id === "relationship_values") && question.question_type === "multiple_choice") {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         {/* Compact selector takes full height */}
