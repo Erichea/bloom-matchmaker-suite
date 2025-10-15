@@ -366,7 +366,6 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
   onChange,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Popular");
 
   // Ensure question is valid
   if (!question || !question.id) {
@@ -458,7 +457,7 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
         </p>
       </div>
 
-      {/* Sticky Header with Search, Selected, and Categories */}
+      {/* Sticky Header with Search and Categories */}
       <div className="sticky top-0 z-10 flex flex-col gap-3 w-full p-4 pt-2 bg-background/95 backdrop-blur-sm border-b">
         {/* Search Bar */}
         <div className="relative">
@@ -471,21 +470,42 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
           />
         </div>
 
-        {/* Selected Interests */}
-        {selectedInterests.length > 0 && (
-          <div className="flex flex-wrap gap-2 max-h-20 overflow-y-auto">
+        {/* Category Navigation */}
+        <div className="flex gap-3 w-full overflow-x-auto pb-2 -mx-2 px-2">
+          {Array.isArray(categories) && categories.map(category => (
+            <button
+              key={category.id}
+              onClick={() => {
+                // Smooth scroll to category
+                const element = document.getElementById(`category-${category.id}`);
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
+              className="px-4 py-2.5 min-w-max rounded-3xl text-sm font-medium transition-all duration-500 whitespace-nowrap bg-muted text-muted-foreground hover:bg-primary/20"
+            >
+              {category.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Selected Interests - Below categories */}
+      {selectedInterests.length > 0 && (
+        <div className="bg-primary/5 border-y border-primary/20 p-4">
+          <div className="flex flex-wrap gap-2">
             {Array.isArray(selectedInterests) && selectedInterests.map(interestId => {
               const interest = allInterests.find(i => i.id === interestId);
               if (!interest) return null;
               return (
                 <div
                   key={interestId}
-                  className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors"
                 >
                   <span className="text-sm font-medium">{interest.name}</span>
                   <button
                     onClick={() => handleRemoveSelected(interestId)}
-                    className="ml-1 text-muted-foreground hover:text-foreground transition-colors rounded-sm p-0.5 hover:bg-muted-foreground/10"
+                    className="ml-1 text-primary-foreground/80 hover:text-primary-foreground transition-colors rounded-sm p-0.5 hover:bg-primary-foreground/20"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -493,45 +513,8 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
               );
             })}
           </div>
-        )}
-
-        {/* Category Navigation */}
-        <div className="flex gap-3 w-full overflow-x-auto pb-2 -mx-2 px-2">
-          {Array.isArray(categories) && categories.map(category => (
-            <button
-              key={category.id}
-              onClick={() => {
-                setSelectedCategory(category.id);
-                // Smooth scroll to category
-                const element = document.getElementById(`category-${category.id}`);
-                if (element) {
-                  element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-              }}
-              className={cn(
-                "px-4 py-2.5 min-w-max rounded-3xl text-sm font-medium transition-all duration-500 whitespace-nowrap",
-                selectedCategory === category.id
-                  ? "bg-primary text-primary-foreground shadow-md"
-                  : "bg-muted text-muted-foreground hover:bg-primary/20"
-              )}
-            >
-              {category.name}
-            </button>
-          ))}
         </div>
-
-        {/* Selection Counter */}
-        {maxSelections && (
-          <div className="text-sm text-muted-foreground text-center">
-            {selectedInterests.length} / {maxSelections} selected
-            {selectedInterests.length < minSelections && (
-              <span className="text-destructive ml-2">
-                (minimum {minSelections})
-              </span>
-            )}
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Scrollable Interests Area */}
       <div className="flex-1 overflow-y-auto p-4">
