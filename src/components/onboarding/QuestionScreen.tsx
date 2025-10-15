@@ -129,9 +129,9 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                 <Check className={cn("ml-2 h-5 w-5 shrink-0 opacity-50", localAnswer && "opacity-100")} />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-full p-0" align="start">
+            <PopoverContent className="w-full p-0" align="start" side="bottom">
               <Command>
-                <CommandInput placeholder="Search city..." className="h-12" />
+                <CommandInput placeholder="Search city..." className="h-12" autoFocus={false} />
                 <CommandList>
                   <CommandEmpty>No city found.</CommandEmpty>
                   <CommandGroup>
