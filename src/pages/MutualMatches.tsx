@@ -1,29 +1,12 @@
-import { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import {
-  DndContext,
-  DragEndEvent,
-  DragStartEvent,
-  DragMoveEvent,
-  DragCancelEvent,
-  closestCenter,
-  closestCorners,
-  pointerWithin,
-  PointerSensor,
-  TouchSensor,
-  MouseSensor,
-  useSensor,
-  useSensors,
-  DragOverlay,
-  defaultDropAnimationSideEffects
-} from "@dnd-kit/core";
-import { Heart, Home } from "lucide-react";
+import { Heart, Home, Search, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import MatchDetailModal from "@/components/MatchDetailModal";
-import ImprovedKanbanColumn from "@/components/ImprovedKanbanColumn";
-import CompactMatchCard from "@/components/CompactMatchCard";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -55,6 +38,7 @@ interface MatchWithStatus {
   matchDate: string;
   profile: any;
   personalStatus: string;
+  fullMatchData?: any;
 }
 
 interface ProfilePhoto {
@@ -64,8 +48,8 @@ interface ProfilePhoto {
   created_at?: string | null;
 }
 
-// Kanban status definitions
-const KANBAN_STATUSES = [
+// Match status definitions for stage progression
+const MATCH_STATUSES = [
   { id: 'to_discuss', title: 'To Discuss', emoji: '🗨️' },
   { id: 'chatting', title: 'Chatting', emoji: '💬' },
   { id: 'date_planned', title: 'Date Planned', emoji: '📅' },
@@ -84,32 +68,8 @@ const MutualMatches = () => {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [autoScrollInterval, setAutoScrollInterval] = useState<NodeJS.Timeout | null>(null);
-  const lastClientY = useRef<number>(0);
-
-  // Enhanced DnD sensors for better mobile and desktop support
-  const sensors = useSensors(
-    // Mouse sensor for desktop
-    useSensor(MouseSensor, {
-      activationConstraint: {
-        distance: 3, // Reduced distance for faster activation
-      },
-    }),
-    // Touch sensor for mobile with optimized long-press
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 150, // Reduced delay from 250ms to 150ms for more responsive feel
-        tolerance: 15, // Increased tolerance for more natural movement during long-press
-      },
-    }),
-    // Pointer sensor as fallback
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 3,
-      },
-    })
-  );
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"recent" | "alphabetical">("recent");
 
   const fetchProfile = useCallback(async () => {
     if (!user) return;
@@ -313,157 +273,22 @@ const MutualMatches = () => {
     loadData();
   }, [user, session, authLoading, navigate, fetchProfile, fetchMatches]);
 
-  // Cleanup: restore body scrolling if component unmounts during drag
-  useEffect(() => {
-    return () => {
-      // Restore body scrolling on cleanup
-      document.body.classList.remove('dragging');
-      document.body.style.position = '';
-      document.body.style.top = '';
-      stopAutoScroll();
-    };
-  }, []);
-
-  const currentProfileId = profile?.id ?? null;
-
-  // Enhanced drag and drop handlers
-  const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event;
-    setActiveId(active.id as string);
-
-    // Prevent body scrolling during drag
-    document.body.classList.add('dragging');
-    const scrollY = window.scrollY;
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-
-    // Start smooth auto-scroll
-    startAutoScroll();
-
-    // Add haptic feedback on supported devices (optional)
-    if ('vibrate' in navigator) {
-      navigator.vibrate(50); // Short vibration for drag start
-    }
-
-    // Debug: Log drag start
-    console.log('Drag started:', active.id);
-  };
-
-  const startAutoScroll = () => {
-    if (autoScrollInterval) return;
-
-    const interval = setInterval(() => {
-      if (!activeId) {
-        stopAutoScroll();
-        return;
-      }
-
-      const scrollContainer = document.documentElement;
-      const scrollSpeed = 12;
-      const edgeThreshold = 100;
-
-      // Get current mouse/touch position
-      const clientY = lastClientY.current;
-      if (!clientY) return;
-
-      const viewportHeight = window.innerHeight;
-
-      if (clientY < edgeThreshold) {
-        scrollContainer.scrollBy({ top: -scrollSpeed, behavior: 'smooth' });
-      } else if (clientY > viewportHeight - edgeThreshold) {
-        scrollContainer.scrollBy({ top: scrollSpeed, behavior: 'smooth' });
-      }
-    }, 16); // ~60fps for smooth scrolling
-
-    setAutoScrollInterval(interval);
-  };
-
-  const stopAutoScroll = () => {
-    if (autoScrollInterval) {
-      clearInterval(autoScrollInterval);
-      setAutoScrollInterval(null);
-    }
-  };
-
-  const handleDragMove = (event: DragMoveEvent) => {
-    const { active, over } = event;
-
-    // Update last touch position for auto-scroll
-    lastClientY.current = event.activatorEvent.clientY;
-  };
-
-  const handleDragCancel = (event: DragCancelEvent) => {
-    console.log('Drag cancelled');
-    setActiveId(null);
-    stopAutoScroll();
-
-    // Restore body scrolling
-    document.body.classList.remove('dragging');
-    document.body.style.position = '';
-    document.body.style.top = '';
-
-    // Restore scroll position if needed
-    const scrollY = document.body.style.top;
-    if (scrollY) {
-      window.scrollTo(0, parseInt(scrollY || '0') * -1);
-    }
-  };
-
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveId(null);
-
-    // Stop auto-scroll
-    stopAutoScroll();
-
-    // Restore body scrolling
-    const scrollY = document.body.style.top;
-    document.body.classList.remove('dragging');
-    document.body.style.position = '';
-    document.body.style.top = '';
-
-    if (scrollY) {
-      window.scrollTo(0, parseInt(scrollY || '0') * -1);
-    }
-
-    // Debug: Log drag end
-    console.log('Drag ended. Over:', over?.id, 'Active:', active?.id);
-
-    if (!over) {
-      console.log('No valid drop target found');
-      return;
-    }
-
-    const matchId = active.id as string;
-    const overId = over.id as string;
-
-    // Check if we're dropping on a column (not a card)
-    const isValidStatus = KANBAN_STATUSES.some(status => status.id === overId);
-
-    if (!isValidStatus) {
-      console.log('Not dropping on a valid column, ignoring. Over ID:', overId);
-      return;
-    }
-
-    const newStatus = overId;
-
-    // Debug: Validate we have a valid match and status
+  // Handle status change with arrow buttons
+  const handleStatusChange = async (matchId: string, direction: 'prev' | 'next') => {
     const currentMatch = matchesWithStatus.find(m => m.id === matchId);
-    if (!currentMatch) {
-      console.error('Match not found:', matchId);
-      return;
-    }
+    if (!currentMatch) return;
 
-    console.log('Moving match', matchId, 'from', currentMatch.personalStatus, 'to', newStatus);
+    const currentIndex = MATCH_STATUSES.findIndex(status => status.id === currentMatch.personalStatus);
+    const newIndex = direction === 'next' ?
+      Math.min(currentIndex + 1, MATCH_STATUSES.length - 1) :
+      Math.max(currentIndex - 1, 0);
 
-    // Prevent moving to the same status
-    if (currentMatch.personalStatus === newStatus) {
-      console.log('Same status, skipping');
-      return;
-    }
+    const newStatus = MATCH_STATUSES[newIndex].id;
 
-    // Optimistic update - update UI immediately
-    const originalStatus = currentMatch.personalStatus || 'to_discuss';
+    if (newStatus === currentMatch.personalStatus) return;
+
+    // Optimistic update
+    const originalStatus = currentMatch.personalStatus;
     setMatchesWithStatus(prev =>
       prev.map(match =>
         match.id === matchId
@@ -472,7 +297,6 @@ const MutualMatches = () => {
       )
     );
 
-    // Update database with error handling
     try {
       const { error } = await supabase
         .from("match_status_tracking")
@@ -501,11 +325,9 @@ const MutualMatches = () => {
           )
         );
       } else {
-        // Success feedback
-        console.log('Successfully updated match status');
         toast({
           title: "Status Updated",
-          description: `Moved to ${KANBAN_STATUSES.find(s => s.id === newStatus)?.title}`,
+          description: `Moved to ${MATCH_STATUSES[newIndex].title}`,
           duration: 2000,
         });
       }
@@ -527,17 +349,6 @@ const MutualMatches = () => {
     }
   };
 
-  // Get active drag item data for overlay
-  const getActiveDragItem = () => {
-    if (!activeId) return null;
-    return matchesWithStatus.find(match => match.id === activeId);
-  };
-
-  const findOriginalStatus = (matchId: string): string => {
-    const match = matchesWithStatus.find(m => m.id === matchId);
-    return match?.personalStatus || 'to_discuss';
-  };
-
   const handleOpenMatch = useCallback((matchId: string) => {
     const matchWithStatus = matchesWithStatus.find((item) => item.id === matchId);
     if (matchWithStatus?.fullMatchData) {
@@ -553,35 +364,30 @@ const MutualMatches = () => {
     fetchMatches();
   };
 
-  // Organize matches by status for Kanban columns
-  const matchesByStatus = useMemo(() => {
-    const organized: Record<string, MatchWithStatus[]> = {};
+  // Filter and sort matches
+  const filteredAndSortedMatches = useMemo(() => {
+    let filtered = matchesWithStatus;
 
-    // Initialize all statuses with empty arrays
-    KANBAN_STATUSES.forEach(status => {
-      organized[status.id] = [];
-    });
-
-    // Group matches by their personal status
-    matchesWithStatus.forEach(match => {
-      organized[match.personalStatus]?.push(match);
-    });
-
-    return organized;
-  }, [matchesWithStatus]);
-
-  const formatAnswer = (answer: any): string => {
-    if (answer === null || answer === undefined || answer === "") {
-      return "";
+    // Apply search filter
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(match =>
+        match.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     }
-    if (Array.isArray(answer)) {
-      return answer.length ? answer.join(", ") : "";
+
+    // Apply sorting
+    if (sortBy === "recent") {
+      filtered = [...filtered].sort((a, b) =>
+        new Date(b.matchDate).getTime() - new Date(a.matchDate).getTime()
+      );
+    } else if (sortBy === "alphabetical") {
+      filtered = [...filtered].sort((a, b) =>
+        a.name.localeCompare(b.name)
+      );
     }
-    if (typeof answer === "object") {
-      return JSON.stringify(answer);
-    }
-    return String(answer);
-  };
+
+    return filtered;
+  }, [matchesWithStatus, searchQuery, sortBy]);
 
   const formatMatchDate = (dateString?: string) => {
     if (!dateString) return "Recently";
@@ -638,10 +444,10 @@ const MutualMatches = () => {
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold mb-2 flex items-center gap-2">
                 <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-red-500" />
-                Your Dating Journey
+                Match List
               </h1>
               <p className="text-sm sm:text-base sm:text-lg text-muted-foreground">
-                Drag and drop matches to organize your journey
+                View and manage your matches
               </p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-muted overflow-hidden">
@@ -659,71 +465,160 @@ const MutualMatches = () => {
             </div>
           </header>
 
-          {matchesWithStatus.length > 0 ? (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCorners}
-              onDragStart={handleDragStart}
-              onDragMove={handleDragMove}
-              onDragCancel={handleDragCancel}
-              onDragEnd={handleDragEnd}
-            >
-              <div className="space-y-4 sm:space-y-6">
-                {/* Kanban Board */}
-                <div className="grid gap-4 sm:gap-6">
-                  {KANBAN_STATUSES.map((status) => (
-                    <motion.div
-                      key={status.id}
-                      layout
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: KANBAN_STATUSES.indexOf(status) * 0.05 }}
-                    >
-                      <ImprovedKanbanColumn
-                        title={status.title}
-                        emoji={status.emoji}
-                        status={status.id}
-                        matches={matchesByStatus[status.id] || []}
-                        onMatchClick={handleOpenMatch}
-                        isDropTarget={activeId !== null}
-                      />
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
+          {/* Search and Sort Controls */}
+          <div className="mb-6 space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder="Search matches..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-10"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                >
+                  ×
+                </Button>
+              )}
+            </div>
 
-              <DragOverlay
-                dropAnimation={{
-                  sideEffects: defaultDropAnimationSideEffects({
-                    styles: {
-                      active: {
-                        opacity: '0.5',
-                      },
-                    },
-                  }),
-                }}
-              >
-                {getActiveDragItem() ? (
-                  <div className="rotate-3 scale-110">
-                    <CompactMatchCard
-                      id={getActiveDragItem()!.id}
-                      name={getActiveDragItem()!.name}
-                      photoUrl={getActiveDragItem()!.photoUrl}
-                      initials={getActiveDragItem()!.initials}
-                      isDragging={true}
-                    />
+            <Select value={sortBy} onValueChange={(value: "recent" | "alphabetical") => setSortBy(value)}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent">Most Recent</SelectItem>
+                <SelectItem value="alphabetical">Alphabetical</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Match List */}
+          {filteredAndSortedMatches.length > 0 ? (
+            <div className="space-y-4">
+              {filteredAndSortedMatches.map((match) => (
+                <motion.div
+                  key={match.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-card border rounded-2xl p-4 hover:shadow-lg transition-all duration-200 cursor-pointer"
+                  onClick={() => handleOpenMatch(match.id)}
+                >
+                  <div className="flex items-center justify-between">
+                    {/* Left Section - Match Info */}
+                    <div className="flex items-center space-x-4 flex-1">
+                      <div className="w-12 h-12 rounded-full bg-muted overflow-hidden flex-shrink-0">
+                        {match.photoUrl ? (
+                          <img
+                            src={match.photoUrl}
+                            alt={match.firstName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <span className="text-sm font-semibold text-muted-foreground">
+                              {match.initials}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-lg text-foreground truncate">
+                          {match.firstName}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Matched on {formatMatchDate(match.matchDate)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Right Section - Stage Progression */}
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStatusChange(match.id, 'prev');
+                        }}
+                        disabled={MATCH_STATUSES.findIndex(s => s.id === match.personalStatus) === 0}
+                        className="h-8 w-8 p-0"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
+
+                      <div className="flex items-center space-x-1">
+                        {MATCH_STATUSES.map((status, index) => {
+                          const currentIndex = MATCH_STATUSES.findIndex(s => s.id === match.personalStatus);
+                          const isActive = status.id === match.personalStatus;
+                          const isCompleted = index < currentIndex;
+
+                          return (
+                            <div key={status.id} className="flex items-center">
+                              <div className={`w-3 h-3 rounded-full border-2 transition-all duration-300 ${
+                                isActive
+                                  ? 'border-primary bg-primary'
+                                  : isCompleted
+                                    ? 'border-primary bg-primary/50'
+                                    : 'border-muted bg-background'
+                              }`} />
+
+                              {index < MATCH_STATUSES.length - 1 && (
+                                <div className={`w-8 h-0.5 transition-all duration-300 ${
+                                  index < currentIndex
+                                    ? 'bg-primary'
+                                    : 'bg-muted'
+                                }`} />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStatusChange(match.id, 'next');
+                        }}
+                        disabled={MATCH_STATUSES.findIndex(s => s.id === match.personalStatus) === MATCH_STATUSES.length - 1}
+                        className="h-8 w-8 p-0"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                ) : null}
-              </DragOverlay>
-            </DndContext>
+
+                  {/* Current Status Display */}
+                  <div className="mt-3 flex items-center justify-center">
+                    <span className="text-sm font-medium text-primary">
+                      {MATCH_STATUSES.find(s => s.id === match.personalStatus)?.emoji} {MATCH_STATUSES.find(s => s.id === match.personalStatus)?.title}
+                    </span>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           ) : (
             <div className="text-center py-16">
               <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
                 <Heart className="w-12 h-12 text-muted-foreground" />
               </div>
-              <h2 className="text-2xl font-bold mb-3">No mutual matches yet</h2>
+              <h2 className="text-2xl font-bold mb-3">
+                {searchQuery ? "No matches found" : "No mutual matches yet"}
+              </h2>
               <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                When both you and someone else express interest in each other, they'll appear on your personal board.
+                {searchQuery
+                  ? "Try adjusting your search terms to find more matches."
+                  : "When both you and someone else express interest in each other, they'll appear here."
+                }
               </p>
               <Button
                 onClick={() => navigate('/client/dashboard')}
