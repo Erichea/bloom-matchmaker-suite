@@ -10,14 +10,10 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { BottomNavigation } from "@/components/BottomNavigation";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import {
   ArrowLeft,
   Bell,
-  Heart,
-  UserCheck,
-  MessageSquare,
-  Settings as SettingsIcon,
-  Share,
   AlertCircle,
   CheckCircle2,
   Smartphone
@@ -33,12 +29,20 @@ export default function NotificationSettings() {
   const [pushEnabled, setPushEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [subscribing, setSubscribing] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+  const [showPWAPrompt, setShowPWAPrompt] = useState(true);
 
   useEffect(() => {
     if (!user) {
       navigate("/auth");
       return;
     }
+
+    // Check if running as PWA
+    const standalone = window.matchMedia('(display-mode: standalone)').matches ||
+                      (window.navigator as any).standalone ||
+                      document.referrer.includes('android-app://');
+    setIsStandalone(standalone);
 
     const init = async () => {
       await loadPreferences();
@@ -278,27 +282,6 @@ export default function NotificationSettings() {
     }
   };
 
-  const handlePreferenceToggle = async (key: string, value: boolean) => {
-    try {
-      await supabase
-        .from("notification_preferences")
-        .update({ [key]: value })
-        .eq("user_id", user!.id);
-
-      setPreferences({ ...preferences, [key]: value });
-      toast({
-        title: "Preference updated",
-        description: "Your notification preferences have been saved"
-      });
-    } catch (error) {
-      console.error("Error updating preference:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update preference",
-        variant: "destructive"
-      });
-    }
-  };
 
   if (loading || !preferences) {
     return (
@@ -325,25 +308,30 @@ export default function NotificationSettings() {
       </header>
 
       <main className="mx-auto max-w-2xl px-4 py-6 space-y-6">
-        {/* Push Notifications Section */}
+        {/* PWA Installation Prompt - Only show if not installed */}
+        {!isStandalone && showPWAPrompt && (
+          <PWAInstallPrompt onDismiss={() => setShowPWAPrompt(false)} />
+        )}
+
+        {/* Single Notification Toggle */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5" />
-              Push Notifications
+              Notifications
             </CardTitle>
             <CardDescription>
-              Receive real-time notifications on this device
+              Enable or disable all notifications
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Enable/Disable Push */}
+            {/* Enable/Disable All Notifications */}
             <div className="flex items-center justify-between">
               <Label htmlFor="push-enabled" className="flex-1">
                 <div>
-                  <p className="font-medium">Enable push notifications</p>
+                  <p className="font-medium">Enable notifications</p>
                   <p className="text-sm text-muted-foreground">
-                    {pushEnabled ? "Notifications are enabled" : "Get notified instantly"}
+                    {pushEnabled ? "You'll receive all notifications" : "Turn on to stay updated"}
                   </p>
                 </div>
               </Label>
@@ -372,134 +360,18 @@ export default function NotificationSettings() {
                 Send Test Notification
               </Button>
             )}
+
+            {/* Status Info */}
+            {pushEnabled && (
+              <Alert>
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertDescription>
+                  Notifications are enabled. You'll receive updates for matches, profile changes, and messages.
+                </AlertDescription>
+              </Alert>
+            )}
           </CardContent>
         </Card>
-
-        {/* Email Notifications */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Email Notifications</CardTitle>
-            <CardDescription>
-              Receive updates via email
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="email-enabled" className="flex-1">
-                <div>
-                  <p className="font-medium">Enable email notifications</p>
-                  <p className="text-sm text-muted-foreground">
-                    Get important updates via email
-                  </p>
-                </div>
-              </Label>
-              <Switch
-                id="email-enabled"
-                checked={preferences.email_enabled}
-                onCheckedChange={(checked) =>
-                  handlePreferenceToggle("email_enabled", checked)
-                }
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Notification Types */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Notification Types</CardTitle>
-            <CardDescription>
-              Choose which notifications you want to receive
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="match-notifications" className="flex items-center gap-2">
-                <Heart className="h-4 w-4 text-primary" />
-                <div>
-                  <p className="font-medium">Match notifications</p>
-                  <p className="text-sm text-muted-foreground">
-                    New matches and match updates
-                  </p>
-                </div>
-              </Label>
-              <Switch
-                id="match-notifications"
-                checked={preferences.match_notifications}
-                onCheckedChange={(checked) =>
-                  handlePreferenceToggle("match_notifications", checked)
-                }
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <Label htmlFor="profile-notifications" className="flex items-center gap-2">
-                <UserCheck className="h-4 w-4 text-primary" />
-                <div>
-                  <p className="font-medium">Profile notifications</p>
-                  <p className="text-sm text-muted-foreground">
-                    Profile approvals and updates
-                  </p>
-                </div>
-              </Label>
-              <Switch
-                id="profile-notifications"
-                checked={preferences.profile_notifications}
-                onCheckedChange={(checked) =>
-                  handlePreferenceToggle("profile_notifications", checked)
-                }
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <Label htmlFor="message-notifications" className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-primary" />
-                <div>
-                  <p className="font-medium">Message notifications</p>
-                  <p className="text-sm text-muted-foreground">
-                    New messages and replies
-                  </p>
-                </div>
-              </Label>
-              <Switch
-                id="message-notifications"
-                checked={preferences.message_notifications}
-                onCheckedChange={(checked) =>
-                  handlePreferenceToggle("message_notifications", checked)
-                }
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <Label htmlFor="system-notifications" className="flex items-center gap-2">
-                <SettingsIcon className="h-4 w-4 text-primary" />
-                <div>
-                  <p className="font-medium">System notifications</p>
-                  <p className="text-sm text-muted-foreground">
-                    Account and system updates
-                  </p>
-                </div>
-              </Label>
-              <Switch
-                id="system-notifications"
-                checked={preferences.system_notifications}
-                onCheckedChange={(checked) =>
-                  handlePreferenceToggle("system_notifications", checked)
-                }
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Status Info */}
-        {pushEnabled && (
-          <Alert>
-            <CheckCircle2 className="h-4 w-4" />
-            <AlertDescription>
-              Push notifications are enabled on this device. You'll receive notifications even when the app is closed.
-            </AlertDescription>
-          </Alert>
-        )}
       </main>
 
       <BottomNavigation />
