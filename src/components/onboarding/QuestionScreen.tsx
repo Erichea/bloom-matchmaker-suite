@@ -434,15 +434,16 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
 
         // Special handling for MBTI question
         if (question.id === "mbti") {
+          const dontKnowOptions = options.filter((opt) => opt.includes("Don't know") || opt.includes("Prefer not"));
+
           return (
             <div className="space-y-6">
               <MBTIGrid value={localAnswer || ""} onChange={setLocalAnswer} />
 
               {/* Don't know option */}
-              <div className="mt-6">
-                {options
-                  .filter((opt) => opt.includes("Don't know") || opt.includes("Prefer not"))
-                  .map((option) => {
+              {dontKnowOptions.length > 0 && (
+                <RadioGroup value={radioValue} onValueChange={setLocalAnswer} className="mt-6">
+                  {dontKnowOptions.map((option) => {
                     const isSelected = localAnswer === option;
                     return (
                       <div
@@ -460,7 +461,8 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                       </div>
                     );
                   })}
-              </div>
+                </RadioGroup>
+              )}
             </div>
           );
         }
