@@ -1517,122 +1517,111 @@ const ClientsPage = () => {
                   <div className="flex-1 overflow-hidden min-h-0">
                     <TabsContent value="profile" className="m-0 h-full px-6 py-6 overflow-auto">
                       <div className="space-y-4">
-                          <Accordion type="multiple" className="space-y-3">
-                            <AccordionItem value="personal" className="rounded-md border border-border">
-                              <AccordionTrigger className="px-4 py-3 text-sm font-semibold">
-                                Personal information
-                              </AccordionTrigger>
-                              <AccordionContent className="px-4 pb-4">
-                                <div className="grid gap-4 sm:grid-cols-2">
-                                  {renderInfoField("First name", selectedProfile.first_name)}
-                                  {renderInfoField("Last name", selectedProfile.last_name)}
-                                  {renderInfoField("Email", selectedProfile.email)}
-                                  {renderInfoField("Phone", selectedProfile.phone)}
-                                  {renderInfoField(
-                                    "Location",
-                                    [selectedProfile.city, selectedProfile.country].filter(Boolean).join(", ") ||
-                                      "Location not set",
-                                  )}
-                                  {renderInfoField(
-                                    "Date of birth",
-                                    selectedProfile.date_of_birth ? formatDate(selectedProfile.date_of_birth) : "Not provided",
-                                  )}
-                                  {renderInfoField("Profession", selectedProfile.profession)}
-                                  {renderInfoField("Status", statusLabel)}
-                                </div>
-                              </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="lifestyle" className="rounded-md border border-border">
-                              <AccordionTrigger className="px-4 py-3 text-sm font-semibold">
-                                Lifestyle & interests
-                              </AccordionTrigger>
-                              <AccordionContent className="px-4 pb-4">
-                                <div className="grid gap-4 sm:grid-cols-2">
-                                  {renderInfoField(
-                                    "Interests",
-                                    selectedProfile.interests?.length
-                                      ? selectedProfile.interests.join(", ")
-                                      : "Not provided",
-                                  )}
-                                  {renderInfoField(
-                                    "Lifestyle",
-                                    selectedProfile.lifestyle?.length
-                                      ? selectedProfile.lifestyle.join(", ")
-                                      : "Not provided",
-                                  )}
-                                  {renderInfoField("About", selectedProfile.about_me)}
-                                  {renderInfoField("Admin notes", adminNotesPreview)}
-                                </div>
-                              </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="questionnaire" className="rounded-md border border-border">
-                              <AccordionTrigger className="px-4 py-3 text-sm font-semibold">
-                                Questionnaire responses
-                              </AccordionTrigger>
-                              <AccordionContent className="px-4 pb-4">
-                                {Object.keys(questionnaireAnswers).length === 0 ? (
-                                  <Card className="border-warning/50 bg-warning/5">
-                                    <CardContent className="p-4 text-sm text-warning">
-                                      No questionnaire responses have been saved for this client yet.
-                                    </CardContent>
-                                  </Card>
-                                ) : (
-                                  <Accordion type="multiple" className="space-y-2">
-                                    {questionnaireCategories.map((category) => {
-                                      const categoryQuestions = questionnaireQuestions.filter(
-                                        (question) => category.questionIds.includes(question.id as string),
-                                      );
-                                      const answeredCount = categoryQuestions.filter(
-                                        (question) => questionnaireAnswers[question.id],
-                                      ).length;
+                        <Accordion type="multiple" className="space-y-3" defaultValue={["personal", "preferences", "admin"]}>
+                          {/* Personal Information Section - Questions 1-17 in order */}
+                          <AccordionItem value="personal" className="rounded-md border border-border">
+                            <AccordionTrigger className="px-4 py-3 text-sm font-semibold">
+                              Personal Information
+                            </AccordionTrigger>
+                            <AccordionContent className="px-4 pb-4">
+                              <div className="space-y-4">
+                                {questionnaireQuestions
+                                  .filter(q => q.question_order >= 1 && q.question_order <= 17)
+                                  .sort((a, b) => a.question_order - b.question_order)
+                                  .map((question) => {
+                                    const answer = questionnaireAnswers[question.id];
+                                    return (
+                                      <div
+                                        key={question.id}
+                                        className="rounded-md border border-border p-3 text-sm"
+                                      >
+                                        <div className="mb-2 flex items-center gap-2 font-medium">
+                                          <span>{question.question_text_en}</span>
+                                        </div>
+                                        {question.subtitle_en && (
+                                          <p className="mb-2 text-xs text-muted-foreground">
+                                            {question.subtitle_en}
+                                          </p>
+                                        )}
+                                        <p className="whitespace-pre-line text-muted-foreground">
+                                          {formatAnswer(answer)}
+                                        </p>
+                                      </div>
+                                    );
+                                  })}
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
 
-                                      return (
-                                        <AccordionItem
-                                          key={category.name}
-                                          value={category.name}
-                                          className="rounded-md border border-border"
-                                        >
-                                          <AccordionTrigger className="px-3 py-2 text-sm font-medium">
-                                            <div className="flex w-full items-center justify-between gap-2">
-                                              <span>{category.name}</span>
-                                              <span className="text-xs font-normal text-muted-foreground">
-                                                {answeredCount} of {categoryQuestions.length} answered
-                                              </span>
-                                            </div>
-                                          </AccordionTrigger>
-                                          <AccordionContent className="px-3 pb-3">
-                                            <div className="space-y-2">
-                                              {categoryQuestions.map((question) => {
-                                                const answer = questionnaireAnswers[question.id];
-                                                return (
-                                                  <div
-                                                    key={question.id}
-                                                    className="rounded-md border border-border p-3 text-sm"
-                                                  >
-                                                    <div className="mb-2 flex items-center gap-2 font-medium">
-                                                      <span>{question.question_text_en}</span>
-                                                    </div>
-                                                    {question.subtitle_en && (
-                                                      <p className="mb-2 text-xs text-muted-foreground">
-                                                        {question.subtitle_en}
-                                                      </p>
-                                                    )}
-                                                    <p className="whitespace-pre-line text-muted-foreground">
-                                                      {formatAnswer(answer)}
-                                                    </p>
-                                                  </div>
-                                                );
-                                              })}
-                                            </div>
-                                          </AccordionContent>
-                                        </AccordionItem>
-                                      );
-                                    })}
-                                  </Accordion>
+                          {/* Preferences Section - Questions 18-24 in order */}
+                          <AccordionItem value="preferences" className="rounded-md border border-border">
+                            <AccordionTrigger className="px-4 py-3 text-sm font-semibold">
+                              Preferences
+                            </AccordionTrigger>
+                            <AccordionContent className="px-4 pb-4">
+                              <div className="space-y-4">
+                                {questionnaireQuestions
+                                  .filter(q => q.question_order >= 18 && q.question_order <= 24)
+                                  .sort((a, b) => a.question_order - b.question_order)
+                                  .map((question) => {
+                                    const answer = questionnaireAnswers[question.id];
+                                    return (
+                                      <div
+                                        key={question.id}
+                                        className="rounded-md border border-border p-3 text-sm"
+                                      >
+                                        <div className="mb-2 flex items-center gap-2 font-medium">
+                                          <span>{question.question_text_en}</span>
+                                        </div>
+                                        {question.subtitle_en && (
+                                          <p className="mb-2 text-xs text-muted-foreground">
+                                            {question.subtitle_en}
+                                          </p>
+                                        )}
+                                        <p className="whitespace-pre-line text-muted-foreground">
+                                          {formatAnswer(answer)}
+                                        </p>
+                                      </div>
+                                    );
+                                  })}
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+
+                          {/* Admin Information Section */}
+                          <AccordionItem value="admin" className="rounded-md border border-border">
+                            <AccordionTrigger className="px-4 py-3 text-sm font-semibold">
+                              Admin Information
+                            </AccordionTrigger>
+                            <AccordionContent className="px-4 pb-4">
+                              <div className="grid gap-4 sm:grid-cols-2">
+                                {renderInfoField("First name", selectedProfile.first_name)}
+                                {renderInfoField("Last name", selectedProfile.last_name)}
+                                {renderInfoField("Email", selectedProfile.email)}
+                                {renderInfoField("Phone", selectedProfile.phone)}
+                                {renderInfoField(
+                                  "Location",
+                                  [selectedProfile.city, selectedProfile.country].filter(Boolean).join(", ") ||
+                                    "Location not set",
                                 )}
-                              </AccordionContent>
-                            </AccordionItem>
-                          </Accordion>
+                                {renderInfoField(
+                                  "Date of birth",
+                                  selectedProfile.date_of_birth ? formatDate(selectedProfile.date_of_birth) : "Not provided",
+                                )}
+                                {renderInfoField("Profession", selectedProfile.profession)}
+                                {renderInfoField("Status", statusLabel)}
+                                {renderInfoField("Profile completion", `${completionPercentage}%`)}
+                                {selectedProfile.about_me && renderInfoField("About", selectedProfile.about_me)}
+                                {adminNotesPreview && renderInfoField("Admin notes", adminNotesPreview)}
+                                {selectedProfile.created_at && renderInfoField("Created", formatDate(selectedProfile.created_at))}
+                                {selectedProfile.submitted_for_review_at && renderInfoField("Submitted for review", formatDate(selectedProfile.submitted_for_review_at))}
+                                {selectedProfile.approved_at && renderInfoField("Approved", formatDate(selectedProfile.approved_at))}
+                                {selectedProfile.rejected_at && renderInfoField("Rejected", formatDate(selectedProfile.rejected_at))}
+                                {selectedProfile.deleted_at && renderInfoField("Deleted", formatDate(selectedProfile.deleted_at, true))}
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        </Accordion>
                       </div>
                     </TabsContent>
                     <TabsContent value="matches" className="m-0 h-full overflow-hidden">
