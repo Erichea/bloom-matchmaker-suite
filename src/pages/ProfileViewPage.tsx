@@ -263,8 +263,16 @@ export default function ProfileViewPage() {
       <div className="min-h-screen bg-background pb-20">
         {/* Header */}
         <header className="sticky top-0 z-40 border-b border-border bg-background">
-          <div className="flex h-16 items-center justify-center px-4">
+          <div className="flex h-16 items-center justify-between px-4">
+            <div className="w-9"></div>
             <h1 className="text-lg font-semibold">Profile</h1>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/client/settings/notifications")}
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
           </div>
         </header>
 
