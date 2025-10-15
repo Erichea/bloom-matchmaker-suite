@@ -367,16 +367,16 @@ const ClientDashboard = () => {
   return (
     <>
       <MatchDetailModal match={selectedMatch} open={modalOpen} onOpenChange={setModalOpen} onMatchResponse={handleMatchResponse} />
-      <div className="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark min-h-screen flex flex-col p-6 pb-32">
-        <main className="flex-grow">
-          <header className="flex justify-between items-start mb-16">
+      <div className="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark min-h-screen flex flex-col px-4 py-6 pb-24">
+        <main className="flex-grow max-w-4xl mx-auto w-full">
+          <header className="flex justify-between items-center mb-8">
             <div>
-              <p className="font-body text-base text-subtle-light dark:text-subtle-dark">
-                Hello, {profile?.first_name || user?.user_metadata?.first_name || 'there'}
+              <p className="text-sm text-subtle-light dark:text-subtle-dark mb-1">
+                Welcome back,
               </p>
-              <h1 className="text-4xl font-display font-bold">Your Next Chapter</h1>
+              <h1 className="text-2xl font-display font-semibold">{profile?.first_name || user?.user_metadata?.first_name || 'there'}</h1>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-gray-200 overflow-hidden">
+            <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
               {profilePhotoUrl ? (
                 <img
                   alt="User profile picture"
@@ -384,7 +384,7 @@ const ClientDashboard = () => {
                   src={profilePhotoUrl}
                 />
               ) : (
-                <div className="w-full h-full bg-gray-200 flex items-center justify-center text-subtle-light dark:text-subtle-dark text-sm font-semibold">
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center text-subtle-light dark:text-subtle-dark text-xs font-medium">
                   {userInitials}
                 </div>
               )}
@@ -392,63 +392,63 @@ const ClientDashboard = () => {
           </header>
 
           {profileStatus !== 'approved' && (
-            <section className="mb-12">
-              <div className="bg-card-light dark:bg-card-dark p-5 rounded-2xl shadow-sm">
+            <section className="mb-8">
+              <div className="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
                 {profileStatus === "incomplete" && (
-                  <div className="flex flex-col gap-4">
-                     <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-subtle-light dark:text-subtle-dark md:self-start">
+                  <div className="flex flex-col gap-3">
+                    <span className="text-xs uppercase tracking-[0.2em] text-subtle-light dark:text-subtle-dark">
                       Complete your profile
                     </span>
-                    <h1 className="font-display text-4xl font-light leading-[1.05] tracking-tight text-text-light dark:text-text-dark sm:text-5xl md:text-6xl">
-                      {profile?.first_name ? `Welcome, ${profile.first_name}.` : "Let's get started."}
-                    </h1>
-                    <p className="text-sm leading-7 text-subtle-light dark:text-subtle-dark md:max-w-xl md:text-base">
+                    <h2 className="text-lg font-display font-medium text-text-light dark:text-text-dark">
+                      {profile?.first_name ? `Welcome, ${profile.first_name}` : "Let's get started"}
+                    </h2>
+                    <p className="text-sm text-subtle-light dark:text-subtle-dark">
                       Complete your questionnaire so we can start curating perfect introductions for you.
                     </p>
                   </div>
                 )}
                 {profileStatus === "rejected" && (
-                  <div className="flex flex-col gap-4">
-                    <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-subtle-light dark:text-subtle-dark md:self-start">
+                  <div className="flex flex-col gap-3">
+                    <span className="text-xs uppercase tracking-[0.2em] text-subtle-light dark:text-subtle-dark">
                       Profile needs revision
                     </span>
-                    <h1 className="font-display text-4xl font-light leading-[1.05] tracking-tight text-text-light dark:text-text-dark sm:text-5xl md:text-6xl">
-                      {profile?.first_name ? `${profile.first_name}, let's refine your profile.` : "Update required"}
-                    </h1>
-                    <p className="text-sm leading-7 text-subtle-light dark:text-subtle-dark md:max-w-xl md:text-base">
+                    <h2 className="text-lg font-display font-medium text-text-light dark:text-text-dark">
+                      {profile?.first_name ? `${profile.first_name}, let's refine your profile` : "Update required"}
+                    </h2>
+                    <p className="text-sm text-subtle-light dark:text-subtle-dark">
                       Your matchmaker has requested some changes to your profile. Please review and resubmit.
                     </p>
                   </div>
                 )}
                 {profileStatus === "pending_approval" && (
-                  <div className="flex flex-col gap-4">
-                    <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-subtle-light dark:text-subtle-dark md:self-start">
+                  <div className="flex flex-col gap-3">
+                    <span className="text-xs uppercase tracking-[0.2em] text-subtle-light dark:text-subtle-dark">
                       Under review
                     </span>
-                    <h1 className="font-display text-4xl font-light leading-[1.05] tracking-tight text-text-light dark:text-text-dark sm:text-5xl md:text-6xl">
-                      {profile?.first_name ? `Thank you, ${profile.first_name}.` : "Profile submitted"}
-                    </h1>
-                    <p className="text-sm leading-7 text-subtle-light dark:text-subtle-dark md:max-w-xl md:text-base">
+                    <h2 className="text-lg font-display font-medium text-text-light dark:text-text-dark">
+                      {profile?.first_name ? `Thank you, ${profile.first_name}` : "Profile submitted"}
+                    </h2>
+                    <p className="text-sm text-subtle-light dark:text-subtle-dark">
                       Your profile is being reviewed by your matchmaker. You'll be notified once approved and we start curating introductions.
                     </p>
                   </div>
                 )}
-                
+
                 {(profileStatus === "incomplete" || profileStatus === "rejected") && (
-                  <div className="mt-6 space-y-6 rounded-3xl border border-gray-200 dark:border-gray-700 bg-card-light dark:bg-card-dark p-6 text-left shadow-lg sm:p-8">
+                  <div className="mt-4 space-y-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-[0.65rem] uppercase tracking-[0.3em] text-subtle-light dark:text-subtle-dark">Questionnaire progress</span>
-                        <span className="font-serif text-2xl font-light text-text-light dark:text-text-dark">{completionPercentage}%</span>
+                        <span className="text-xs uppercase tracking-[0.2em] text-subtle-light dark:text-subtle-dark">Questionnaire progress</span>
+                        <span className="text-lg font-medium text-text-light dark:text-text-dark">{completionPercentage}%</span>
                       </div>
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-600">
                         <div
                           className="h-full bg-accent dark:bg-accent-dark transition-all duration-500"
                           style={{ width: `${completionPercentage}%` }}
                         />
                       </div>
                     </div>
-                    <p className="text-sm text-subtle-light dark:text-subtle-dark">
+                    <p className="text-xs text-subtle-light dark:text-subtle-dark">
                       {profileStatus === "rejected"
                         ? "Please update your profile and resubmit for review."
                         : "Complete your profile questionnaire to submit for matchmaker review."}
@@ -459,7 +459,7 @@ const ClientDashboard = () => {
                           profileStatus === "rejected" ? "/client/profile/edit" : "/onboarding"
                         )
                       }
-                      className="w-full rounded-2xl bg-accent dark:bg-accent-dark px-8 py-3 text-sm font-medium uppercase tracking-[0.25em] text-white dark:text-black shadow-sm transition-all duration-300 hover:shadow-md active:scale-[0.98]"
+                      className="w-full rounded-lg bg-accent dark:bg-accent-dark px-4 py-2 text-xs font-medium uppercase tracking-[0.2em] text-white dark:text-black transition-all duration-300 hover:opacity-90"
                     >
                       {profileStatus === "rejected" ? "Update questionnaire" : "Continue questionnaire"}
                     </Button>
@@ -471,9 +471,9 @@ const ClientDashboard = () => {
 
           {profileStatus === 'approved' && (
             <>
-              <section className="mb-12">
-                <p className="font-body text-base leading-relaxed max-w-prose">
-                  We curate connections with intention. Forget endless swiping; here, introductions are thoughtful, based on shared values and a deeper understanding of what truly matters.
+              <section className="mb-8">
+                <p className="text-sm text-subtle-light dark:text-subtle-dark leading-relaxed">
+                  We curate connections with intention. Introductions are thoughtful, based on shared values and what truly matters.
                 </p>
               </section>
 
@@ -485,20 +485,20 @@ const ClientDashboard = () => {
                     onSelect={handleOpenMatch}
                   />
                 ) : (
-                  <div className="bg-card-light dark:bg-card-dark p-6 rounded-2xl text-left shadow-sm">
-                    <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-10 text-center text-sm text-subtle-light dark:text-subtle-dark">
+                  <div className="bg-card-light dark:bg-card-dark p-6 rounded-xl text-left shadow-sm border border-gray-100 dark:border-gray-800">
+                    <div className="rounded-lg border border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-8 text-center text-sm text-subtle-light dark:text-subtle-dark">
                       Your matchmaker is curating the perfect introduction. We'll let you know the moment a dossier is ready.
                     </div>
                   </div>
                 )}
 
-                <div className="mt-4 text-center">
-                  <p className="text-sm text-muted-foreground">
+                <div className="mt-6 text-center">
+                  <p className="text-xs text-subtle-light dark:text-subtle-dark">
                     Looking for mutual matches?
                     <Button
                       variant="link"
                       onClick={() => navigate('/client/mutual-matches')}
-                      className="p-0 ml-1 h-auto font-normal"
+                      className="p-0 ml-1 h-auto font-normal text-xs"
                     >
                       View Mutual Matches
                     </Button>

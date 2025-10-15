@@ -86,25 +86,25 @@ export function MatchList({ title, matches, highlightNew, className, onSelect }:
     return (
       <div
         key={match.id}
-        className="flex w-full items-center justify-between gap-3 py-3 border-b border-border/40 last:border-0"
+        className="flex w-full items-center justify-between gap-2 py-2 border-b border-gray-100 dark:border-gray-800 last:border-0"
       >
         <button
           type="button"
-          className="flex items-center gap-3 flex-1 text-left"
+          className="flex items-center gap-2 flex-1 text-left"
           onClick={() => onSelect?.(match.id)}
         >
-          <Avatar className="h-14 w-14 ring-1 ring-border/20">
+          <Avatar className="h-10 w-10">
             {match.avatarUrl ? (
               <AvatarImage src={match.avatarUrl} alt={match.name} />
             ) : (
-              <AvatarFallback className="bg-[hsl(var(--brand-secondary))] text-[hsl(var(--brand-secondary-foreground))]">
+              <AvatarFallback className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs">
                 {initials}
               </AvatarFallback>
             )}
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-base font-semibold text-foreground truncate">{match.name}</p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm font-medium text-foreground truncate">{match.name}</p>
+            <p className="text-xs text-subtle-light dark:text-subtle-dark">
               {formatMatchDate(match.matchDate)}
             </p>
           </div>
@@ -113,21 +113,16 @@ export function MatchList({ title, matches, highlightNew, className, onSelect }:
           <Button
             size="sm"
             variant="default"
-            className="rounded-full px-6 bg-[hsl(var(--brand-primary))] hover:bg-[hsl(var(--brand-primary))]/90"
+            className="rounded-md px-3 h-7 text-xs bg-accent dark:bg-accent-dark hover:opacity-90"
             onClick={() => onSelect?.(match.id)}
           >
             View
           </Button>
         )}
         {category === "their_turn" && (
-          <Button
-            size="sm"
-            variant="outline"
-            className="rounded-full px-4"
-            disabled
-          >
+          <div className="text-xs text-subtle-light dark:text-subtle-dark px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800">
             Waiting
-          </Button>
+          </div>
         )}
       </div>
     );
@@ -140,18 +135,18 @@ export function MatchList({ title, matches, highlightNew, className, onSelect }:
     if (count === 0) return null;
 
     return (
-      <div key={category} className="space-y-2">
+      <div key={category} className="space-y-1">
         <button
           type="button"
-          className="flex items-center justify-between w-full text-left py-2"
+          className="flex items-center justify-between w-full text-left py-1"
           onClick={() => toggleSection(category)}
         >
-          <h3 className="text-base font-bold text-foreground">
+          <h3 className="text-sm font-medium text-foreground">
             {title} ({count})
           </h3>
           <ChevronDown
             className={cn(
-              "h-5 w-5 text-muted-foreground transition-transform duration-200",
+              "h-4 w-4 text-subtle-light dark:text-subtle-dark transition-transform duration-200",
               isExpanded && "rotate-180"
             )}
           />
@@ -166,9 +161,9 @@ export function MatchList({ title, matches, highlightNew, className, onSelect }:
   };
 
   return (
-    <div className={cn("space-y-6", className)}>
-      {title ? <h2 className="text-3xl font-bold text-foreground mb-4">{title}</h2> : null}
-      <div className="space-y-4">
+    <div className={cn("space-y-4", className)}>
+      {title ? <h2 className="text-lg font-medium text-foreground mb-3">{title}</h2> : null}
+      <div className="space-y-3">
         {renderSection("your_turn", "Your turn", categorizedMatches.your_turn.length)}
         {renderSection("their_turn", "Their turn", categorizedMatches.their_turn.length)}
         {renderSection("mutual", "Mutual Matches", categorizedMatches.mutual.length)}
