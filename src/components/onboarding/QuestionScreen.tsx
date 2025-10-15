@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import type { QuestionnaireQuestion } from "@/hooks/useOnboardingQuestionnaire";
 import MBTIGrid from "./MBTIGrid";
+import { CompactInterestSelector } from "./CompactInterestSelector";
 
 interface QuestionScreenProps {
   question: QuestionnaireQuestion;
@@ -493,6 +494,20 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
       }
 
       case "multiple_choice": {
+        // Use compact selector for interests and relationship_values questions
+        if (question.id === "interests" || question.id === "relationship_values") {
+          return (
+            <div className="h-full max-h-[600px]">
+              <CompactInterestSelector
+                question={question}
+                value={localAnswer || []}
+                onChange={setLocalAnswer}
+              />
+            </div>
+          );
+        }
+
+        // Default multiple choice rendering for other questions
         const multiOptions = Array.isArray(question.options) ? question.options : [];
         const currentSelections = Array.isArray(localAnswer) ? localAnswer : [];
         const maxSelections = question.validation_rules?.max_selections;
@@ -619,6 +634,61 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
     }
   };
 
+  // For interests and relationship values, use a different layout
+  if (question.id === "interests" || question.id === "relationship_values") {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        {/* Compact selector takes full height */}
+        <div className="flex-1 max-w-4xl mx-auto w-full">
+          {renderInput()}
+        </div>
+
+        {/* Fixed Navigation Bar */}
+        <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t z-50">
+          <div className="max-w-4xl mx-auto w-full px-6 py-4">
+            <div className="flex items-center justify-between">
+              {canGoBack ? (
+                <Button
+                  variant="ghost"
+                  onClick={onBack}
+                  className="text-base"
+                >
+                  <ArrowLeft className="mr-2 h-5 w-5" />
+                  Back
+                </Button>
+              ) : (
+                <div />
+              )}
+
+              <div className="flex items-center gap-4">
+                <span className={cn(
+                  "text-sm font-medium",
+                  isValid ? "text-green-600" : "text-destructive"
+                )}>
+                  {Array.isArray(localAnswer) ? localAnswer.length : 0} selected
+                  {question.validation_rules?.min_selections && (
+                    <span className="ml-1">
+                      (min {question.validation_rules.min_selections})
+                    </span>
+                  )}
+                </span>
+                <Button
+                  onClick={handleNext}
+                  disabled={!isValid}
+                  size="lg"
+                  className="rounded-full h-14 w-14 p-0"
+                >
+                  <ArrowRight className="h-6 w-6" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Default layout for other questions
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="flex-1 flex flex-col max-w-2xl mx-auto w-full px-6 py-8 pb-24">

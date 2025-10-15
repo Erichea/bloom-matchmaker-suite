@@ -31,22 +31,22 @@ interface MBTIType {
 }
 
 const mbtiData: MBTIType[] = [
-  { type: 'ESFJ', label: 'Ambassadeur', color: '#10b981', description: 'Warm, conscientious, dedicated', icon: ESFJ },
-  { type: 'ESFP', label: 'Amuseur', color: '#10b981', description: 'Spontaneous, energetic, enthusiastic', icon: ESFP },
-  { type: 'ESTP', label: 'Rebelle', color: '#10b981', description: 'Smart, energetic, perceptive', icon: ESTP },
-  { type: 'ENTJ', label: 'Commandant', color: '#60a5fa', description: 'Bold, strategic, leader', icon: ENTJ },
-  { type: 'ENFJ', label: 'Héros', color: '#60a5fa', description: 'Charismatic, inspiring, leader', icon: ENFJ },
-  { type: 'ENFP', label: 'Aventurier', color: '#60a5fa', description: 'Enthusiastic, creative, sociable', icon: ENFP },
-  { type: 'ISFP', label: 'Artiste', color: '#60a5fa', description: 'Exploratory, artistic, sensitive', icon: ISFP },
-  { type: 'ESTJ', label: 'Directeur', color: '#60a5fa', description: 'Dedicated, organized, decisive', icon: ESTJ },
-  { type: 'ISTJ', label: 'Réaliste', color: '#fb923c', description: 'Practical, fact-minded, reliable', icon: ISTJ },
+  { type: 'ESFJ', label: 'Ambassador', color: '#10b981', description: 'Warm, conscientious, dedicated', icon: ESFJ },
+  { type: 'ESFP', label: 'Performer', color: '#10b981', description: 'Spontaneous, energetic, enthusiastic', icon: ESFP },
+  { type: 'ESTP', label: 'Rebel', color: '#10b981', description: 'Smart, energetic, perceptive', icon: ESTP },
+  { type: 'ENTJ', label: 'Commander', color: '#60a5fa', description: 'Bold, strategic, leader', icon: ENTJ },
+  { type: 'ENFJ', label: 'Hero', color: '#60a5fa', description: 'Charismatic, inspiring, leader', icon: ENFJ },
+  { type: 'ENFP', label: 'Crusader', color: '#60a5fa', description: 'Enthusiastic, creative, sociable', icon: ENFP },
+  { type: 'ISFP', label: 'Artist', color: '#60a5fa', description: 'Exploratory, artistic, sensitive', icon: ISFP },
+  { type: 'ESTJ', label: 'Executive', color: '#60a5fa', description: 'Dedicated, organized, decisive', icon: ESTJ },
+  { type: 'ISTJ', label: 'Realist', color: '#fb923c', description: 'Practical, fact-minded, reliable', icon: ISTJ },
   { type: 'ISTP', label: 'Artisan', color: '#fb923c', description: 'Bold, practical, experimenter', icon: ISTP },
-  { type: 'INFJ', label: 'Gardien', color: '#fb923c', description: 'Insightful, principled, passionate', icon: INFJ },
-  { type: 'INTJ', label: 'Architecte', color: '#fb923c', description: 'Imaginative, strategic, planner', icon: INTJ },
+  { type: 'INFJ', label: 'Guardian', color: '#fb923c', description: 'Insightful, principled, passionate', icon: INFJ },
+  { type: 'INTJ', label: 'Mastermind', color: '#fb923c', description: 'Imaginative, strategic, planner', icon: INTJ },
   { type: 'ENTP', label: 'Challenger', color: '#fb923c', description: 'Smart, curious, witty', icon: ENTP },
-  { type: 'INFP', label: 'Pacifiste', color: '#fb923c', description: 'Poetic, kind, altruistic', icon: INFP },
-  { type: 'INTP', label: 'Inventeur', color: '#fb923c', description: 'Innovative, logical, abstract', icon: INTP },
-  { type: 'ISFJ', label: 'Défenseur', color: '#fb923c', description: 'Warm, conscientious, dedicated', icon: ISFJ }
+  { type: 'INFP', label: 'Peacemaker', color: '#fb923c', description: 'Poetic, kind, altruistic', icon: INFP },
+  { type: 'INTP', label: 'Genius', color: '#fb923c', description: 'Innovative, logical, abstract', icon: INTP },
+  { type: 'ISFJ', label: 'Protector', color: '#fb923c', description: 'Warm, conscientious, dedicated', icon: ISFJ }
 ];
 
 const MBTIGrid: React.FC<MBTIGridProps> = ({ value, onChange }) => {
@@ -94,13 +94,6 @@ const MBTIGrid: React.FC<MBTIGridProps> = ({ value, onChange }) => {
                   {/* SVG Character */}
                   <mbtiType.icon className="w-12 h-12 md:w-14 md:h-14 object-contain" />
                 </div>
-
-                {/* Match indicator on hover */}
-                {isHovered && (
-                  <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                    NEW
-                  </div>
-                )}
               </div>
 
               {/* Type Tag */}
@@ -141,16 +134,6 @@ const MBTIGrid: React.FC<MBTIGridProps> = ({ value, onChange }) => {
           );
         })}
       </div>
-
-      {/* Selected Type Display */}
-      {value && (
-        <div className="text-center p-4 bg-muted/30 rounded-xl">
-          <p className="text-sm text-muted-foreground mb-1">Selected type:</p>
-          <p className="text-lg font-semibold text-primary">
-            {mbtiData.find(t => t.type === value)?.label} ({value})
-          </p>
-        </div>
-      )}
     </div>
   );
 };
