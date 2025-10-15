@@ -1,21 +1,21 @@
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-import ENFJ from "@/images/mbti/ENFJ.svg";
-import ENFP from "@/images/mbti/ENFP.svg";
-import ENTJ from "@/images/mbti/ENTJ.svg";
-import ENTP from "@/images/mbti/ENTP.svg";
-import ESFJ from "@/images/mbti/ESFJ.svg";
-import ESFP from "@/images/mbti/ESFP.svg";
-import ESTJ from "@/images/mbti/ESTJ.svg";
-import ESTP from "@/images/mbti/ESTP.svg";
-import INFJ from "@/images/mbti/INFJ.svg";
-import INFP from "@/images/mbti/INFP.svg";
-import INTJ from "@/images/mbti/INTJ.svg";
-import INTP from "@/images/mbti/INTP.svg";
-import ISFJ from "@/images/mbti/ISFJ.svg";
-import ISFP from "@/images/mbti/ISFP.svg";
-import ISTJ from "@/images/mbti/ISTJ.svg";
-import ISTP from "@/images/mbti/ISTP.svg";
+import ENFJ from "@/images/mbti/ENFJ.svg?react";
+import ENFP from "@/images/mbti/ENFP.svg?react";
+import ENTJ from "@/images/mbti/ENTJ.svg?react";
+import ENTP from "@/images/mbti/ENTP.svg?react";
+import ESFJ from "@/images/mbti/ESFJ.svg?react";
+import ESFP from "@/images/mbti/ESFP.svg?react";
+import ESTJ from "@/images/mbti/ESTJ.svg?react";
+import ESTP from "@/images/mbti/ESTP.svg?react";
+import INFJ from "@/images/mbti/INFJ.svg?react";
+import INFP from "@/images/mbti/INFP.svg?react";
+import INTJ from "@/images/mbti/INTJ.svg?react";
+import INTP from "@/images/mbti/INTP.svg?react";
+import ISFJ from "@/images/mbti/ISFJ.svg?react";
+import ISFP from "@/images/mbti/ISFP.svg?react";
+import ISTJ from "@/images/mbti/ISTJ.svg?react";
+import ISTP from "@/images/mbti/ISTP.svg?react";
 
 interface MBTIGridProps {
   value: string;
