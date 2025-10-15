@@ -368,18 +368,49 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Popular");
 
+  // Ensure question is valid
+  if (!question || !question.id) {
+    console.error('CompactInterestSelector: Invalid question object', question);
+    return <div>Error: Invalid question data</div>;
+  }
+
   // Get appropriate data based on question ID
   const allInterests = question.id === "relationship_values"
     ? RELATIONSHIP_VALUES_DATA
     : INTERESTS_DATA;
 
+  // Ensure allInterests is an array
+  if (!Array.isArray(allInterests)) {
+    console.error('CompactInterestSelector: allInterests is not an array', allInterests);
+    return <div>Error: Invalid interests data</div>;
+  }
+
   // Get categories based on question type
-  const categories = question.id === "relationship_values"
-    ? Array.from(new Set(allInterests.map(i => i.category))).map(cat => ({ id: cat, name: cat, icon: cat.toLowerCase() }))
-    : CATEGORIES;
+  const categories = useMemo(() => {
+    if (question.id === "relationship_values") {
+      if (!Array.isArray(allInterests)) {
+        console.error('CompactInterestSelector: allInterests is not an array when generating categories', allInterests);
+        return [];
+      }
+      return Array.from(new Set(allInterests.map(i => i.category))).map(cat => ({ id: cat, name: cat, icon: cat.toLowerCase() }));
+    }
+    return CATEGORIES;
+  }, [question.id, allInterests]);
+
+  // Ensure categories is an array
+  if (!Array.isArray(categories)) {
+    console.error('CompactInterestSelector: categories is not an array', categories);
+    return <div>Error: Invalid categories data</div>;
+  }
 
   // Filter interests by category and search term
   const filteredInterests = useMemo(() => {
+    // Double-check that allInterests is an array
+    if (!Array.isArray(allInterests)) {
+      console.error('CompactInterestSelector: allInterests is not an array in filteredInterests', allInterests);
+      return [];
+    }
+
     let filtered = allInterests;
 
     // Filter by category
@@ -397,7 +428,7 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
     return filtered;
   }, [selectedCategory, searchTerm, allInterests, question.id]);
 
-  const selectedInterests = value || [];
+  const selectedInterests = Array.isArray(value) ? value : [];
 
   const handleInterestClick = (interestId: string) => {
     const isSelected = selectedInterests.includes(interestId);
@@ -448,7 +479,7 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
         {/* Selected Interests */}
         {selectedInterests.length > 0 && (
           <div className="flex flex-wrap gap-2">
-            {selectedInterests.map(interestId => {
+            {Array.isArray(selectedInterests) && selectedInterests.map(interestId => {
               const interest = allInterests.find(i => i.id === interestId);
               if (!interest) return null;
               return (
@@ -471,7 +502,7 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
 
         {/* Category Navigation */}
         <div className="flex gap-3 w-full overflow-x-auto pb-2 -mx-2 px-2">
-          {categories.map(category => (
+          {Array.isArray(categories) && categories.map(category => (
             <button
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
@@ -512,7 +543,7 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
         )}
 
         <div className="space-y-6">
-          {categories.map(category => {
+          {Array.isArray(categories) && categories.map(category => {
             const categoryInterests = searchTerm
               ? filteredInterests.filter(i => i.category === category.id)
               : selectedCategory === category.id || (question.id === "relationship_values" && selectedCategory === category.name)
@@ -533,7 +564,7 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
                 )}
 
                 <div className="flex flex-wrap gap-2">
-                  {categoryInterests.map(interest => {
+                  {Array.isArray(categoryInterests) && categoryInterests.map(interest => {
                     const isSelected = selectedInterests.includes(interest.id);
                     const isDisabled = !isSelected && maxSelections && selectedInterests.length >= maxSelections;
 

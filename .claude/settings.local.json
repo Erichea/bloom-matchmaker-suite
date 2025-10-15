@@ -21,7 +21,8 @@
       "Bash(npm install:*)",
       "Bash(npx sharp-cli:*)",
       "Bash(npm uninstall:*)",
-      "Bash(npx svgo:*)"
+      "Bash(npx svgo:*)",
+      "WebFetch(domain:boo.world)"
     ],
     "deny": [],
     "ask": []

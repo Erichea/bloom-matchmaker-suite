@@ -52,9 +52,23 @@ const mbtiData: MBTIType[] = [
 const MBTIGrid: React.FC<MBTIGridProps> = ({ value, onChange }) => {
   const [hoveredType, setHoveredType] = useState<string | null>(null);
 
+  // Debug logging to track issues
+  console.log('MBTIGrid Debug:', {
+    value,
+    onChange,
+    mbtiData: mbtiData,
+    mbtiDataIsArray: Array.isArray(mbtiData)
+  });
+
   const handleTypeClick = (type: string) => {
     onChange(type);
   };
+
+  // Ensure mbtiData is an array
+  if (!Array.isArray(mbtiData)) {
+    console.error('MBTIGrid: mbtiData is not an array', mbtiData);
+    return <div>Error: Invalid MBTI data</div>;
+  }
 
   return (
     <div className="space-y-6">

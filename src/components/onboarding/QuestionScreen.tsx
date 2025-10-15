@@ -435,7 +435,17 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
 
         // Special handling for MBTI question
         if (question.id === "mbti") {
-          const dontKnowOptions = options.filter((opt) => opt.includes("Don't know") || opt.includes("Prefer not"));
+          // Add extra logging for debugging
+          console.log('MBTI Question Debug:', {
+            question,
+            options,
+            localAnswer,
+            optionsIsArray: Array.isArray(options)
+          });
+
+          const dontKnowOptions = Array.isArray(options)
+            ? options.filter((opt) => opt.includes("Don't know") || opt.includes("Prefer not"))
+            : [];
 
           return (
             <div className="space-y-6">
