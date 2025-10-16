@@ -385,78 +385,72 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
             )}
 
             {/* Dynamic Profile Questions - Rendered in Questionnaire Order */}
-            {getProfileQuestions(questionnaireQuestions).map((question) => {
-              // Skip questions that should not be displayed
-              if (!shouldDisplayQuestion(question, { isMutualMatch })) {
-                return null;
-              }
-
-              // Skip if no answer
-              const answer = profileAnswers[question.id];
-              if (!answer && !otherProfile[question.profile_field_mapping || '']) {
-                return null;
-              }
-
-              // Get the display value
-              let displayValue = answer ? formatAnswer(answer) : '';
-
-              // Special handling for height - check both profile field and answer
-              if (question.id === 'height') {
-                if (otherProfile.height_cm) {
-                  displayValue = `${otherProfile.height_cm} cm`;
-                } else if (answer) {
-                  displayValue = `${formatAnswer(answer)} cm`;
-                } else {
+            <div className="space-y-0 divide-y divide-border/30">
+              {getProfileQuestions(questionnaireQuestions).map((question) => {
+                // Skip questions that should not be displayed
+                if (!shouldDisplayQuestion(question, { isMutualMatch })) {
                   return null;
                 }
-              }
 
-              const Icon = getQuestionIcon(question.id);
-              const label = getQuestionLabel(question);
+                // Skip if no answer
+                const answer = profileAnswers[question.id];
+                if (!answer && !otherProfile[question.profile_field_mapping || '']) {
+                  return null;
+                }
 
-              // Special rendering for interests (with badges)
-              if (question.id === 'interests' && displayValue) {
-                return (
-                  <Card key={question.id}>
-                    <CardContent className="p-5">
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <Icon className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">{label}</span>
+                // Get the display value
+                let displayValue = answer ? formatAnswer(answer) : '';
+
+                // Special handling for height - check both profile field and answer
+                if (question.id === 'height') {
+                  if (otherProfile.height_cm) {
+                    displayValue = `${otherProfile.height_cm} cm`;
+                  } else if (answer) {
+                    displayValue = `${formatAnswer(answer)} cm`;
+                  } else {
+                    return null;
+                  }
+                }
+
+                const Icon = getQuestionIcon(question.id);
+                const label = getQuestionLabel(question);
+
+                // Special rendering for interests (with badges)
+                if (question.id === 'interests' && displayValue) {
+                  return (
+                    <div key={question.id} className="py-4 first:pt-0">
+                      <div className="flex gap-3">
+                        <Icon className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap gap-2 mt-0.5">
+                            {displayValue.split(', ').map((interest: string, idx: number) => (
+                              <Badge key={idx} variant="secondary" className="px-3 py-1 text-sm font-normal">
+                                {interest}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                          {displayValue.split(', ').map((interest: string, idx: number) => (
-                            <Badge key={idx} variant="secondary" className="px-3 py-1.5 text-sm font-normal">
-                              {interest}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              }
-
-              // Standard rendering for all other questions
-              return (
-                <Card key={question.id}>
-                  <CardContent className="p-5">
-                    <div className="flex items-center gap-3">
-                      <Icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                      <div className="flex-1">
-                        <span className="text-sm text-muted-foreground">{label}</span>
-                        <p className={cn(
-                          "text-base leading-relaxed",
-                          question.id === 'mbti' && "font-medium"
-                        )}>
-                          {displayValue}
-                        </p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                  );
+                }
+
+                // Standard rendering for all other questions
+                return (
+                  <div key={question.id} className="py-4 first:pt-0">
+                    <div className="flex items-start gap-3">
+                      <Icon className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                      <p className={cn(
+                        "flex-1 text-base leading-relaxed",
+                        question.id === 'mbti' && "font-medium"
+                      )}>
+                        {displayValue}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
 
             {/* Response Section */}
             {!isMutualMatch && userAccepted ? (

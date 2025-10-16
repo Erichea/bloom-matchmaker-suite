@@ -280,10 +280,7 @@ export default function ProfileViewPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Contact Information
-                  </CardTitle>
+                  <CardTitle className="text-base">Contact Information</CardTitle>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -293,10 +290,14 @@ export default function ProfileViewPage() {
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Instagram:</span>
-                  <span className="text-right max-w-[60%]">{formatAnswer(answers.instagram_contact)}</span>
+              <CardContent>
+                <div className="space-y-0 divide-y divide-border/30">
+                  <div className="py-3">
+                    <div className="flex items-center gap-3">
+                      <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                      <span className="flex-1 text-base">{formatAnswer(answers.instagram_contact)}</span>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -307,10 +308,7 @@ export default function ProfileViewPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <Heart className="h-5 w-5" />
-                    Dating Preferences
-                  </CardTitle>
+                  <CardTitle className="text-base">Dating Preferences</CardTitle>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -320,15 +318,17 @@ export default function ProfileViewPage() {
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {preferenceQuestions.map((pref) => (
-                  <div key={pref.id} className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      {getQuestionSummary(pref.id, pref.category)}:
-                    </span>
-                    <span className="text-right max-w-[60%]">{pref.answer}</span>
-                  </div>
-                ))}
+              <CardContent>
+                <div className="space-y-0 divide-y divide-border/30">
+                  {preferenceQuestions.map((pref) => (
+                    <div key={pref.id} className="py-3 first:pt-0">
+                      <div className="flex items-start gap-3">
+                        <Heart className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                        <p className="flex-1 text-base leading-relaxed">{pref.answer}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           )}
