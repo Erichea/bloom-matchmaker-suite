@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { Bell, CheckCircle2, Heart, UserCheck, AlertCircle, RefreshCw, ArrowLeft, CheckCheck } from "lucide-react";
+import { Bell, CheckCircle2, Heart, UserCheck, AlertCircle, RefreshCw, ArrowLeft, CheckCheck, Settings } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -115,6 +115,10 @@ export const ClientUpdates = () => {
     fetchNotifications();
   };
 
+  const handleNotificationSettings = () => {
+    navigate('/client/settings/notifications');
+  };
+
   const handleMarkAllAsRead = async () => {
     if (!user || notifications.length === 0) return;
 
@@ -203,11 +207,11 @@ export const ClientUpdates = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={handleRefresh}
-              disabled={refreshing}
+              onClick={handleNotificationSettings}
               className="hover:bg-accent/50 h-8 w-8"
+              title="Notification Settings"
             >
-              <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+              <Settings className="h-4 w-4" />
             </Button>
           </div>
         </div>

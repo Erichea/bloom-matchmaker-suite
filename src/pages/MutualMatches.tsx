@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Heart, Home, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, Home, Search, ChevronLeft, ChevronRight, Instagram } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -446,6 +446,20 @@ const MutualMatches = () => {
     return "B";
   }, [profile?.first_name, profile?.last_name, user?.email]);
 
+  // Extract Instagram handle from profile answers
+  const getInstagramHandle = (profileAnswers: any[]) => {
+    const instagramAnswer = profileAnswers.find(answer => answer.question_id === 'instagram_contact');
+    if (instagramAnswer?.answer) {
+      let handle = instagramAnswer.answer;
+      // Remove @ if present
+      if (handle.startsWith('@')) {
+        handle = handle.substring(1);
+      }
+      return handle;
+    }
+    return null;
+  };
+
   if (authLoading || loading || matchesLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -511,6 +525,7 @@ const MutualMatches = () => {
             {filteredAndSortedMatches.map((match, index) => {
               const currentStatusIndex = MATCH_STATUSES.findIndex(s => s.id === match.personalStatus);
               const currentStatus = MATCH_STATUSES[currentStatusIndex];
+              const instagramHandle = getInstagramHandle(match.profile.profile_answers || []);
 
               return (
                 <motion.div
@@ -549,9 +564,16 @@ const MutualMatches = () => {
                         <h3 className="font-semibold text-xl text-foreground truncate mb-0.5">
                           {match.firstName}
                         </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {match.compatibility}% compatibility
-                        </p>
+                        {instagramHandle ? (
+                          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                            <Instagram className="w-3.5 h-3.5" />
+                            <span className="font-medium">@{instagramHandle}</span>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">
+                            No Instagram
+                          </p>
+                        )}
                       </div>
                     </div>
 

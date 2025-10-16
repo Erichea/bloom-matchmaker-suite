@@ -376,7 +376,11 @@ const ClientDashboard = () => {
               </p>
               <h1 className="text-2xl font-display font-semibold">{profile?.first_name || user?.user_metadata?.first_name || 'there'}</h1>
             </div>
-            <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+            <button
+              onClick={() => navigate('/client/profile')}
+              className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden cursor-pointer hover:ring-2 hover:ring-accent dark:hover:ring-accent-dark transition-all"
+              aria-label="View profile"
+            >
               {profilePhotoUrl ? (
                 <img
                   alt="User profile picture"
@@ -388,7 +392,7 @@ const ClientDashboard = () => {
                   {userInitials}
                 </div>
               )}
-            </div>
+            </button>
           </header>
 
           {profileStatus !== 'approved' && (
