@@ -26,32 +26,32 @@ export const PROFILE_CATEGORIES: QuestionCategory[] = [
   {
     name: "Basic Identity",
     description: "Essential personal information",
-    orderRange: { min: 1, max: 5 } // name, date_of_birth, gender, city, instagram_contact
+    orderRange: { min: 1, max: 5 } // name (1), date_of_birth (2), gender (3), city (4), instagram_contact (5)
   },
   {
     name: "Dating Preferences",
     description: "Who you're looking for",
-    orderRange: { min: 6, max: 6 } // dating_preference
+    orderRange: { min: 6, max: 6 } // dating_preference (6)
   },
   {
     name: "Personal Background",
     description: "Education, appearance, and cultural background",
-    orderRange: { min: 7, max: 10 } // education_level, height, ethnicity, religion
+    orderRange: { min: 7, max: 10 } // education_level (7), height (8), ethnicity (9), religion (10)
   },
   {
     name: "Lifestyle",
     description: "Daily habits and choices",
-    orderRange: { min: 11, max: 12 } // alcohol, smoking
+    orderRange: { min: 11, max: 12 } // alcohol (11), smoking (12)
   },
   {
     name: "Relationship Goals",
     description: "What you're looking for in a relationship",
-    orderRange: { min: 13, max: 17 } // marriage, marriage_timeline, interests, relationship_values, relationship_keys
+    orderRange: { min: 13, max: 17 } // marriage (13), marriage_timeline (14), interests (15), relationship_values (16), relationship_keys (17)
   },
   {
     name: "Personality",
     description: "Your personality type",
-    orderRange: { min: 18, max: 18 } // mbti
+    orderRange: { min: 18, max: 18 } // mbti (18)
   }
 ];
 

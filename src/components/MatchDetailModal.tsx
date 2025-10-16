@@ -27,7 +27,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { formatAnswer, calculateAge } from "@/config/questionnaireConfig";
+import { formatAnswer, calculateAge, getProfileQuestions, shouldDisplayQuestion } from "@/config/questionnaireConfig";
+import { QuestionnaireQuestion } from "@/hooks/useOnboardingQuestionnaire";
 
 interface MatchDetailModalProps {
   match: any;
@@ -45,6 +46,28 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
   const [profileAnswers, setProfileAnswers] = useState<Record<string, any>>({});
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [questionnaireQuestions, setQuestionnaireQuestions] = useState<QuestionnaireQuestion[]>([]);
+
+  // Fetch questionnaire questions on mount
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      const { data: questionsData, error } = await supabase
+        .from("questionnaire_questions")
+        .select("*")
+        .order("question_order", { ascending: true });
+
+      if (error) {
+        console.error('Error fetching questionnaire questions:', error);
+        return;
+      }
+
+      if (questionsData) {
+        setQuestionnaireQuestions(questionsData as QuestionnaireQuestion[]);
+      }
+    };
+
+    fetchQuestions();
+  }, []);
 
   // Fetch profile answers when the modal opens
   useEffect(() => {
@@ -108,6 +131,50 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
     const width = container.offsetWidth;
     const index = Math.round(scrollLeft / width);
     setCurrentPhotoIndex(index);
+  };
+
+  // Get icon component for a question
+  const getQuestionIcon = (questionId: string) => {
+    const iconMap: Record<string, any> = {
+      instagram_contact: Instagram,
+      dating_preference: Heart,
+      education_level: GraduationCap,
+      height: Ruler,
+      ethnicity: Users,
+      religion: Church,
+      alcohol: Wine,
+      smoking: Cigarette,
+      marriage: Baby,
+      marriage_timeline: Calendar,
+      interests: Sparkles,
+      relationship_values: Heart,
+      relationship_keys: Heart,
+      mbti: User,
+      profession: Briefcase,
+    };
+    return iconMap[questionId] || User;
+  };
+
+  // Get display label for a question
+  const getQuestionLabel = (question: QuestionnaireQuestion) => {
+    const labelMap: Record<string, string> = {
+      instagram_contact: "Instagram",
+      dating_preference: "Looking for",
+      education_level: "Education",
+      height: "Height",
+      ethnicity: "Ethnicity",
+      religion: "Religion",
+      alcohol: "Drinking",
+      smoking: "Smoking",
+      marriage: "Marriage",
+      marriage_timeline: "Marriage Timeline",
+      interests: "Interests & Passions",
+      relationship_values: "What I value in a relationship",
+      relationship_keys: "Key to a good relationship",
+      mbti: "MBTI Type",
+      profession: "Profession",
+    };
+    return labelMap[question.id] || question.question_text_en.replace('?', '');
   };
 
   if (!match) return null;
@@ -317,223 +384,79 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
               </Card>
             )}
 
-            {/* Dating Preference */}
-            {profileAnswers.dating_preference && (
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-3">
-                    <Heart className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-1">
-                      <span className="text-sm text-muted-foreground">Looking for</span>
-                      <p className="text-base leading-relaxed">{formatAnswer(profileAnswers.dating_preference)}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {/* Dynamic Profile Questions - Rendered in Questionnaire Order */}
+            {getProfileQuestions(questionnaireQuestions).map((question) => {
+              // Skip questions that should not be displayed
+              if (!shouldDisplayQuestion(question, { isMutualMatch })) {
+                return null;
+              }
 
-            {/* Marriage */}
-            {profileAnswers.marriage && (
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-3">
-                    <Baby className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-1">
-                      <span className="text-sm text-muted-foreground">Marriage</span>
-                      <p className="text-base leading-relaxed">{formatAnswer(profileAnswers.marriage)}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+              // Skip if no answer
+              const answer = profileAnswers[question.id];
+              if (!answer && !otherProfile[question.profile_field_mapping || '']) {
+                return null;
+              }
 
-            {/* Marriage Timeline */}
-            {profileAnswers.marriage_timeline && (
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-3">
-                    <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-1">
-                      <span className="text-sm text-muted-foreground">Marriage Timeline</span>
-                      <p className="text-base leading-relaxed">{formatAnswer(profileAnswers.marriage_timeline)}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+              // Get the display value
+              let displayValue = answer ? formatAnswer(answer) : '';
 
-            {/* Relationship Values */}
-            {profileAnswers.relationship_values && (
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-3">
-                    <Heart className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-1">
-                      <span className="text-sm text-muted-foreground">What I value in a relationship</span>
-                      <p className="text-base leading-relaxed">{formatAnswer(profileAnswers.relationship_values)}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+              // Special handling for height - check both profile field and answer
+              if (question.id === 'height') {
+                if (otherProfile.height_cm) {
+                  displayValue = `${otherProfile.height_cm} cm`;
+                } else if (answer) {
+                  displayValue = `${formatAnswer(answer)} cm`;
+                } else {
+                  return null;
+                }
+              }
 
-            {/* Relationship Keys */}
-            {profileAnswers.relationship_keys && (
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-3">
-                    <Heart className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-1">
-                      <span className="text-sm text-muted-foreground">Key to a good relationship</span>
-                      <p className="text-base leading-relaxed">{formatAnswer(profileAnswers.relationship_keys)}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+              const Icon = getQuestionIcon(question.id);
+              const label = getQuestionLabel(question);
 
-            {/* Height */}
-            {(otherProfile.height_cm || profileAnswers.height) && (
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-3">
-                    <Ruler className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-1">
-                      <span className="text-sm text-muted-foreground">Height</span>
-                      <p className="text-base">
-                        {otherProfile.height_cm ? `${otherProfile.height_cm} cm` : `${formatAnswer(profileAnswers.height)} cm`}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+              // Special rendering for interests (with badges)
+              if (question.id === 'interests' && displayValue) {
+                return (
+                  <Card key={question.id}>
+                    <CardContent className="p-5">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Icon className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">{label}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {displayValue.split(', ').map((interest: string, idx: number) => (
+                            <Badge key={idx} variant="secondary" className="px-3 py-1.5 text-sm font-normal">
+                              {interest}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              }
 
-            {/* Ethnicity */}
-            {profileAnswers.ethnicity && (
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-3">
-                    <Users className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-1">
-                      <span className="text-sm text-muted-foreground">Ethnicity</span>
-                      <p className="text-base">{formatAnswer(profileAnswers.ethnicity)}</p>
+              // Standard rendering for all other questions
+              return (
+                <Card key={question.id}>
+                  <CardContent className="p-5">
+                    <div className="flex items-center gap-3">
+                      <Icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1">
+                        <span className="text-sm text-muted-foreground">{label}</span>
+                        <p className={cn(
+                          "text-base leading-relaxed",
+                          question.id === 'mbti' && "font-medium"
+                        )}>
+                          {displayValue}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Religion */}
-            {profileAnswers.religion && (
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-3">
-                    <Church className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-1">
-                      <span className="text-sm text-muted-foreground">Religion</span>
-                      <p className="text-base">{formatAnswer(profileAnswers.religion)}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Education Level */}
-            {profileAnswers.education_level && (
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-3">
-                    <GraduationCap className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-1">
-                      <span className="text-sm text-muted-foreground">Education</span>
-                      <p className="text-base">{formatAnswer(profileAnswers.education_level)}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Profession */}
-            {profileAnswers.profession && (
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-3">
-                    <Briefcase className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-1">
-                      <span className="text-sm text-muted-foreground">Profession</span>
-                      <p className="text-base">{formatAnswer(profileAnswers.profession)}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Alcohol */}
-            {profileAnswers.alcohol && (
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-3">
-                    <Wine className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-1">
-                      <span className="text-sm text-muted-foreground">Drinking</span>
-                      <p className="text-base">{formatAnswer(profileAnswers.alcohol)}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Smoking */}
-            {profileAnswers.smoking && (
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-3">
-                    <Cigarette className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-1">
-                      <span className="text-sm text-muted-foreground">Smoking</span>
-                      <p className="text-base">{formatAnswer(profileAnswers.smoking)}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Interests */}
-            {profileAnswers.interests && (
-              <Card>
-                <CardContent className="p-5">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">Interests & Passions</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {formatAnswer(profileAnswers.interests).split(', ').map((interest: string, idx: number) => (
-                        <Badge key={idx} variant="secondary" className="px-3 py-1.5 text-sm font-normal">
-                          {interest}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* MBTI */}
-            {profileAnswers.mbti && (
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-3">
-                    <User className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-1">
-                      <span className="text-sm text-muted-foreground">MBTI Type</span>
-                      <p className="text-base font-medium">{formatAnswer(profileAnswers.mbti)}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                  </CardContent>
+                </Card>
+              );
+            })}
 
             {/* Response Section */}
             {!isMutualMatch && userAccepted ? (
