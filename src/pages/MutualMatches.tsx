@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { BottomNavigation } from "@/components/BottomNavigation";
+import { Logo } from "@/components/Logo";
 
 interface Match {
   id: string;
@@ -448,54 +449,14 @@ const MutualMatches = () => {
 
   if (authLoading || loading || matchesLoading) {
     return (
-      <div className="bg-background text-foreground min-h-screen flex flex-col p-4 pb-32">
-        <main className="flex-grow">
-          <header className="flex justify-between items-start mb-6 sm:mb-8">
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold mb-2 flex items-center gap-2">
-                <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-red-500" />
-                Mutual Matches
-              </h1>
-              <p className="text-sm sm:text-base sm:text-lg text-muted-foreground">
-                View and manage your matches
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-muted animate-pulse" />
-          </header>
-
-          {/* Search and Sort Controls Skeleton */}
-          <div className="mb-6 space-y-4">
-            <div className="h-10 bg-muted rounded-lg animate-pulse" />
-            <div className="h-10 bg-muted rounded-lg w-48 animate-pulse" />
-          </div>
-
-          {/* Match List Skeleton */}
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-card border rounded-2xl p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4 flex-1">
-                    <div className="w-12 h-12 rounded-full bg-muted animate-pulse flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="h-6 bg-muted rounded animate-pulse mb-2 w-32" />
-                      <div className="h-4 bg-muted rounded animate-pulse w-24" />
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="h-8 w-8 bg-muted rounded animate-pulse" />
-                    <div className="flex items-center space-x-1">
-                      {[1, 2, 3, 4, 5].map((j) => (
-                        <div key={j} className="w-3 h-3 bg-muted rounded-full animate-pulse" />
-                      ))}
-                    </div>
-                    <div className="h-8 w-8 bg-muted rounded animate-pulse" />
-                  </div>
-                </div>
-                <div className="mt-3 h-4 bg-muted rounded animate-pulse w-32 mx-auto" />
-              </div>
-            ))}
-          </div>
-        </main>
+      <div className="relative flex min-h-screen flex-col overflow-hidden bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
+        <div className="flex min-h-screen items-center justify-center">
+          <motion.div
+            className="h-24 w-24 rounded-full border-[3px] border-[hsl(var(--brand-secondary))]/20 border-t-[hsl(var(--brand-primary))]"
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
+          />
+        </div>
       </div>
     );
   }
@@ -504,35 +465,45 @@ const MutualMatches = () => {
     return null;
   }
 
+  const currentYear = new Date().getFullYear();
+
   return (
     <>
       <MatchDetailModal match={selectedMatch} open={modalOpen} onOpenChange={setModalOpen} onMatchResponse={handleMatchResponse} />
-      <div className="bg-background text-foreground min-h-screen flex flex-col p-4 pb-32">
-        <main className="flex-grow">
-          <header className="flex justify-between items-start mb-6 sm:mb-8">
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold mb-2 flex items-center gap-2">
+      <div className="relative flex min-h-screen flex-col overflow-hidden bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark pb-32">
+        <header className="relative z-10 flex items-center justify-between px-6 pb-6 pt-8 md:px-10">
+          <Logo size="md" />
+          <div className="w-12 h-12 rounded-xl bg-muted overflow-hidden">
+            {profilePhotoUrl ? (
+              <img
+                alt="User profile picture"
+                className="w-full h-full object-cover"
+                src={profilePhotoUrl}
+              />
+            ) : (
+              <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-sm font-semibold">
+                {userInitials}
+              </div>
+            )}
+          </div>
+        </header>
+
+        <main className="relative z-10 flex-1 px-6 md:px-10">
+          <motion.div
+            className="mx-auto w-full max-w-2xl"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+          >
+            <div className="mb-6 sm:mb-8">
+              <h1 className="text-3xl sm:text-4xl font-light mb-2 flex items-center gap-2">
                 <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-red-500" />
                 Mutual Matches
               </h1>
-              <p className="text-sm sm:text-base sm:text-lg text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 View and manage your matches
               </p>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-muted overflow-hidden">
-              {profilePhotoUrl ? (
-                <img
-                  alt="User profile picture"
-                  className="w-full h-full object-cover"
-                  src={profilePhotoUrl}
-                />
-              ) : (
-                <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-sm font-semibold">
-                  {userInitials}
-                </div>
-              )}
-            </div>
-          </header>
 
           {/* Search and Sort Controls */}
           <div className="mb-6 space-y-4">
@@ -739,7 +710,12 @@ const MutualMatches = () => {
               </motion.div>
             )}
           </div>
+          </motion.div>
         </main>
+
+        <footer className="relative z-10 flex justify-center px-6 pb-8 text-[0.6rem] uppercase tracking-[0.4em] text-muted-foreground md:px-10">
+          © {currentYear} Bloom
+        </footer>
       </div>
       <BottomNavigation />
     </>
