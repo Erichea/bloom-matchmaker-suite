@@ -79,6 +79,163 @@ export const DISPLAY_RULES: DisplayRule[] = [
   // Add more special rules as needed
 ];
 
+/**
+ * CLIENT VIEW CONFIGURATION
+ * Defines the 4-card layout for client-facing profile views
+ */
+
+export type ViewContext = 'client' | 'admin';
+
+export interface ProfileCardConfig {
+  id: string;
+  title: string;
+  questionIds: string[];
+  renderStyle?: 'default' | 'tags' | 'separated'; // How to render the content
+  hideInContext?: ViewContext[]; // Hide this card in specific contexts
+}
+
+// Card 1: Basic Identity & Background
+// Card 2: Family & Marriage
+// Card 3: Interests (with tag design)
+// Card 4: Relationship Keys (3 main elements in separated spaces)
+export const CLIENT_PROFILE_CARDS: ProfileCardConfig[] = [
+  {
+    id: 'identity_background',
+    title: 'About',
+    questionIds: [
+      'education_level',  // Degree
+      'height',           // Height
+      'ethnicity',        // Origin
+      'religion',         // Religion
+      'alcohol',          // Drinking
+      'smoking',          // Smoking
+      'mbti',             // MBTI
+    ],
+    renderStyle: 'default',
+  },
+  {
+    id: 'family_marriage',
+    title: 'Family & Future',
+    questionIds: [
+      'children',         // Has Children (note: might need to add this question)
+      'marriage',         // Marriage plans
+      'marriage_timeline', // When
+    ],
+    renderStyle: 'default',
+  },
+  {
+    id: 'interests',
+    title: 'Interests & Passions',
+    questionIds: [
+      'interests',        // Interests with tag design
+    ],
+    renderStyle: 'tags',
+  },
+  {
+    id: 'relationship_keys',
+    title: 'What Makes a Great Relationship',
+    questionIds: [
+      'relationship_keys', // 3 main elements
+    ],
+    renderStyle: 'separated',
+  },
+];
+
+/**
+ * ADMIN VIEW CONFIGURATION
+ * Defines comprehensive view for admin pages
+ */
+
+export interface AdminViewSection {
+  id: string;
+  title: string;
+  questionIds: string[];
+  alwaysShow?: boolean; // Show even if no answers
+}
+
+export const ADMIN_VIEW_SECTIONS: AdminViewSection[] = [
+  {
+    id: 'basic_info',
+    title: 'Basic Information',
+    questionIds: ['name', 'date_of_birth', 'gender', 'city', 'instagram_contact'],
+    alwaysShow: true,
+  },
+  {
+    id: 'dating_relationship',
+    title: 'Dating & Relationship Goals',
+    questionIds: ['dating_preference', 'marriage', 'marriage_timeline', 'children', 'relationship_values', 'relationship_keys'],
+  },
+  {
+    id: 'physical_appearance',
+    title: 'Physical & Appearance',
+    questionIds: ['height', 'height_preference', 'appearance_importance'],
+  },
+  {
+    id: 'background_culture',
+    title: 'Background & Culture',
+    questionIds: ['ethnicity', 'ethnicity_importance', 'religion', 'religion_importance'],
+  },
+  {
+    id: 'education_income',
+    title: 'Education & Income',
+    questionIds: ['education_level', 'education_importance', 'income_importance'],
+  },
+  {
+    id: 'lifestyle',
+    title: 'Lifestyle',
+    questionIds: ['alcohol', 'smoking', 'interests'],
+  },
+  {
+    id: 'personality',
+    title: 'Personality & Compatibility',
+    questionIds: ['mbti', 'age_importance'],
+  },
+];
+
+/**
+ * QUESTION CONFIGURATION
+ * Central place to configure each question's behavior
+ */
+
+export interface QuestionConfig {
+  id: string;
+  label: string; // Display label
+  icon?: string; // Icon name (from lucide-react)
+  showInClient: boolean; // Show in client views
+  showInAdmin: boolean; // Show in admin views
+  renderHint?: 'tags' | 'separated' | 'default'; // Rendering hint for special display
+}
+
+export const QUESTION_CONFIGS: Record<string, QuestionConfig> = {
+  name: { id: 'name', label: 'Name', icon: 'User', showInClient: false, showInAdmin: true },
+  date_of_birth: { id: 'date_of_birth', label: 'Age', icon: 'Calendar', showInClient: false, showInAdmin: true },
+  gender: { id: 'gender', label: 'Gender', icon: 'User', showInClient: false, showInAdmin: true },
+  city: { id: 'city', label: 'Location', icon: 'MapPin', showInClient: false, showInAdmin: true },
+  instagram_contact: { id: 'instagram_contact', label: 'Instagram', icon: 'Instagram', showInClient: true, showInAdmin: true },
+  dating_preference: { id: 'dating_preference', label: 'Looking for', icon: 'Heart', showInClient: true, showInAdmin: true },
+  education_level: { id: 'education_level', label: 'Education', icon: 'GraduationCap', showInClient: true, showInAdmin: true },
+  height: { id: 'height', label: 'Height', icon: 'Ruler', showInClient: true, showInAdmin: true },
+  ethnicity: { id: 'ethnicity', label: 'Origin', icon: 'Users', showInClient: true, showInAdmin: true },
+  religion: { id: 'religion', label: 'Religion', icon: 'Church', showInClient: true, showInAdmin: true },
+  alcohol: { id: 'alcohol', label: 'Drinking', icon: 'Wine', showInClient: true, showInAdmin: true },
+  smoking: { id: 'smoking', label: 'Smoking', icon: 'Cigarette', showInClient: true, showInAdmin: true },
+  marriage: { id: 'marriage', label: 'Marriage', icon: 'Heart', showInClient: true, showInAdmin: true },
+  marriage_timeline: { id: 'marriage_timeline', label: 'Timeline', icon: 'Calendar', showInClient: true, showInAdmin: true },
+  children: { id: 'children', label: 'Children', icon: 'Baby', showInClient: true, showInAdmin: true },
+  interests: { id: 'interests', label: 'Interests', icon: 'Sparkles', showInClient: true, showInAdmin: true, renderHint: 'tags' },
+  relationship_values: { id: 'relationship_values', label: 'Relationship Values', icon: 'Heart', showInClient: false, showInAdmin: true },
+  relationship_keys: { id: 'relationship_keys', label: 'Key Elements', icon: 'Key', showInClient: true, showInAdmin: true, renderHint: 'separated' },
+  mbti: { id: 'mbti', label: 'MBTI', icon: 'User', showInClient: true, showInAdmin: true },
+  // Preference questions (importance ratings)
+  education_importance: { id: 'education_importance', label: 'Education Importance', icon: 'Star', showInClient: false, showInAdmin: true },
+  height_preference: { id: 'height_preference', label: 'Height Preference', icon: 'Ruler', showInClient: false, showInAdmin: true },
+  ethnicity_importance: { id: 'ethnicity_importance', label: 'Ethnicity Importance', icon: 'Star', showInClient: false, showInAdmin: true },
+  religion_importance: { id: 'religion_importance', label: 'Religion Importance', icon: 'Star', showInClient: false, showInAdmin: true },
+  appearance_importance: { id: 'appearance_importance', label: 'Looks Importance', icon: 'Star', showInClient: false, showInAdmin: true },
+  age_importance: { id: 'age_importance', label: 'Age Importance', icon: 'Star', showInClient: false, showInAdmin: true },
+  income_importance: { id: 'income_importance', label: 'Income Importance', icon: 'Star', showInClient: false, showInAdmin: true },
+};
+
 // Question summaries for compact display
 // Maps question IDs to short, user-friendly labels
 export const QUESTION_SUMMARIES: Record<string, string> = {
@@ -281,4 +438,87 @@ export function getDisplayValue(
   }
 
   return formatAnswer(answer, question);
+}
+
+/**
+ * CARD-BASED CONFIGURATION HELPERS
+ */
+
+/**
+ * Gets the configuration for a specific question
+ */
+export function getQuestionConfig(questionId: string): QuestionConfig | undefined {
+  return QUESTION_CONFIGS[questionId];
+}
+
+/**
+ * Checks if a question should be displayed in a specific context
+ */
+export function shouldShowInContext(questionId: string, context: ViewContext): boolean {
+  const config = QUESTION_CONFIGS[questionId];
+  if (!config) return false;
+
+  return context === 'client' ? config.showInClient : config.showInAdmin;
+}
+
+/**
+ * Gets profile cards for client view, filtered by visibility
+ */
+export function getClientProfileCards(
+  allQuestions: QuestionnaireQuestion[],
+  profileAnswers: Record<string, any>,
+  context: { isMutualMatch?: boolean } = {}
+): Array<{ card: ProfileCardConfig; questions: Array<{ question: QuestionnaireQuestion; answer: any }> }> {
+  return CLIENT_PROFILE_CARDS.map(card => {
+    const questions = card.questionIds
+      .map(qId => {
+        const question = allQuestions.find(q => q.id === qId);
+        if (!question) return null;
+
+        // Check display rules
+        if (!shouldDisplayQuestion(question, context)) return null;
+
+        // Check if question should be shown in client context
+        if (!shouldShowInContext(qId, 'client')) return null;
+
+        const answer = profileAnswers[qId];
+
+        // Only include if there's an answer (unless it's a special case)
+        if (!answer && answer !== 0 && answer !== false) return null;
+
+        return { question, answer };
+      })
+      .filter((item): item is { question: QuestionnaireQuestion; answer: any } => item !== null);
+
+    return { card, questions };
+  }).filter(item => item.questions.length > 0);
+}
+
+/**
+ * Gets admin view sections with all questions
+ */
+export function getAdminViewSections(
+  allQuestions: QuestionnaireQuestion[],
+  profileAnswers: Record<string, any>
+): Array<{ section: AdminViewSection; questions: Array<{ question: QuestionnaireQuestion; answer: any }> }> {
+  return ADMIN_VIEW_SECTIONS.map(section => {
+    const questions = section.questionIds
+      .map(qId => {
+        const question = allQuestions.find(q => q.id === qId);
+        if (!question) return null;
+
+        // Check if question should be shown in admin context
+        if (!shouldShowInContext(qId, 'admin')) return null;
+
+        const answer = profileAnswers[qId];
+
+        // Include even without answer if alwaysShow is true
+        if (!answer && answer !== 0 && answer !== false && !section.alwaysShow) return null;
+
+        return { question, answer };
+      })
+      .filter((item): item is { question: QuestionnaireQuestion; answer: any } => item !== null);
+
+    return { section, questions };
+  }).filter(item => item.questions.length > 0);
 }

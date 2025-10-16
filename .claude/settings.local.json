@@ -23,7 +23,9 @@
       "Bash(npm uninstall:*)",
       "Bash(npx svgo:*)",
       "WebFetch(domain:boo.world)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(claude-code --version)",
+      "Bash(claude update)"
     ],
     "deny": [],
     "ask": []

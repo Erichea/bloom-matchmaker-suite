@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,26 +8,16 @@ import {
   Heart,
   X,
   MapPin,
-  Briefcase,
-  Calendar,
-  User,
   MessageSquare,
-  Sparkles,
-  GraduationCap,
-  Ruler,
-  Users,
-  Church,
-  Wine,
-  Cigarette,
-  Baby,
   Instagram
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { formatAnswer, calculateAge, getProfileQuestions, shouldDisplayQuestion } from "@/config/questionnaireConfig";
+import { formatAnswer, calculateAge } from "@/config/questionnaireConfig";
 import { QuestionnaireQuestion } from "@/hooks/useOnboardingQuestionnaire";
+import { ProfileCardGroup } from "@/components/profile";
 
 interface MatchDetailModalProps {
   match: any;
@@ -131,50 +120,6 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
     const width = container.offsetWidth;
     const index = Math.round(scrollLeft / width);
     setCurrentPhotoIndex(index);
-  };
-
-  // Get icon component for a question
-  const getQuestionIcon = (questionId: string) => {
-    const iconMap: Record<string, any> = {
-      instagram_contact: Instagram,
-      dating_preference: Heart,
-      education_level: GraduationCap,
-      height: Ruler,
-      ethnicity: Users,
-      religion: Church,
-      alcohol: Wine,
-      smoking: Cigarette,
-      marriage: Baby,
-      marriage_timeline: Calendar,
-      interests: Sparkles,
-      relationship_values: Heart,
-      relationship_keys: Heart,
-      mbti: User,
-      profession: Briefcase,
-    };
-    return iconMap[questionId] || User;
-  };
-
-  // Get display label for a question
-  const getQuestionLabel = (question: QuestionnaireQuestion) => {
-    const labelMap: Record<string, string> = {
-      instagram_contact: "Instagram",
-      dating_preference: "Looking for",
-      education_level: "Education",
-      height: "Height",
-      ethnicity: "Ethnicity",
-      religion: "Religion",
-      alcohol: "Drinking",
-      smoking: "Smoking",
-      marriage: "Marriage",
-      marriage_timeline: "Marriage Timeline",
-      interests: "Interests & Passions",
-      relationship_values: "What I value in a relationship",
-      relationship_keys: "Key to a good relationship",
-      mbti: "MBTI Type",
-      profession: "Profession",
-    };
-    return labelMap[question.id] || question.question_text_en.replace('?', '');
   };
 
   if (!match) return null;
@@ -384,73 +329,13 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
               </Card>
             )}
 
-            {/* Dynamic Profile Questions - Rendered in Questionnaire Order */}
-            <div className="space-y-0 divide-y divide-border/30">
-              {getProfileQuestions(questionnaireQuestions).map((question) => {
-                // Skip questions that should not be displayed
-                if (!shouldDisplayQuestion(question, { isMutualMatch })) {
-                  return null;
-                }
-
-                // Skip if no answer
-                const answer = profileAnswers[question.id];
-                if (!answer && !otherProfile[question.profile_field_mapping || '']) {
-                  return null;
-                }
-
-                // Get the display value
-                let displayValue = answer ? formatAnswer(answer) : '';
-
-                // Special handling for height - check both profile field and answer
-                if (question.id === 'height') {
-                  if (otherProfile.height_cm) {
-                    displayValue = `${otherProfile.height_cm} cm`;
-                  } else if (answer) {
-                    displayValue = `${formatAnswer(answer)} cm`;
-                  } else {
-                    return null;
-                  }
-                }
-
-                const Icon = getQuestionIcon(question.id);
-                const label = getQuestionLabel(question);
-
-                // Special rendering for interests (with badges)
-                if (question.id === 'interests' && displayValue) {
-                  return (
-                    <div key={question.id} className="py-4 first:pt-0">
-                      <div className="flex gap-3">
-                        <Icon className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-wrap gap-2 mt-0.5">
-                            {displayValue.split(', ').map((interest: string, idx: number) => (
-                              <Badge key={idx} variant="secondary" className="px-3 py-1 text-sm font-normal">
-                                {interest}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-
-                // Standard rendering for all other questions
-                return (
-                  <div key={question.id} className="py-4 first:pt-0">
-                    <div className="flex items-start gap-3">
-                      <Icon className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                      <p className={cn(
-                        "flex-1 text-base leading-relaxed",
-                        question.id === 'mbti' && "font-medium"
-                      )}>
-                        {displayValue}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            {/* Profile Information - 4 Card Layout */}
+            <ProfileCardGroup
+              allQuestions={questionnaireQuestions}
+              profileAnswers={profileAnswers}
+              profile={otherProfile}
+              isMutualMatch={isMutualMatch}
+            />
 
             {/* Response Section */}
             {!isMutualMatch && userAccepted ? (
