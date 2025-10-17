@@ -181,7 +181,7 @@ const MutualMatches = () => {
         // Fetch personal status for each match
         const matchIds = mutualMatchesData.map((match: any) => match.id);
         const { data: statusData } = await supabase
-          .from("match_status_tracking")
+          .from("match_status_tracking" as any)
           .select("match_id, status")
           .eq("user_id", user.id)
           .in("match_id", matchIds);
@@ -196,7 +196,7 @@ const MutualMatches = () => {
         const matchesWithoutStatus = matchIds.filter(matchId => !statusMap.has(matchId));
         if (matchesWithoutStatus.length > 0) {
           await supabase
-            .from("match_status_tracking")
+            .from("match_status_tracking" as any)
             .upsert(
               matchesWithoutStatus.map(matchId => ({
                 user_id: user.id,
@@ -312,7 +312,7 @@ const MutualMatches = () => {
 
     try {
       const { error } = await supabase
-        .from("match_status_tracking")
+        .from("match_status_tracking" as any)
         .upsert({
           user_id: user!.id,
           match_id: matchId,
