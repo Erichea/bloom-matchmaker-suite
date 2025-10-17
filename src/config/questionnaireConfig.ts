@@ -420,6 +420,28 @@ export function calculateAge(dateOfBirth: string | Date): number | null {
 }
 
 /**
+ * Gets the label for a scale value (1-5)
+ * Returns a descriptive label based on the value
+ */
+export function getScaleLabel(value: number): string {
+  const labels: Record<number, string> = {
+    1: "Not important",
+    2: "Slightly important",
+    3: "Moderately important",
+    4: "Very important",
+    5: "Essential"
+  };
+  return labels[value] || String(value);
+}
+
+/**
+ * Checks if a question is a scale/importance question
+ */
+export function isScaleQuestion(questionId: string): boolean {
+  return questionId.includes('_importance') || questionId === 'height_preference';
+}
+
+/**
  * Gets the display value for a specific question's answer
  * Handles special cases like age calculation, formatting, etc.
  */
@@ -440,6 +462,14 @@ export function getDisplayValue(
     const lastName = profile.last_name || "";
     if (firstName || lastName) {
       return `${firstName} ${lastName}`.trim();
+    }
+  }
+
+  // Special case: scale questions (importance ratings) should show descriptive labels
+  if (isScaleQuestion(question.id)) {
+    const numValue = typeof answer === 'string' ? parseInt(answer, 10) : answer;
+    if (typeof numValue === 'number' && !isNaN(numValue) && numValue >= 1 && numValue <= 5) {
+      return `${numValue} - ${getScaleLabel(numValue)}`;
     }
   }
 
