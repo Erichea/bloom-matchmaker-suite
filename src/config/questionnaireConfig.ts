@@ -10,8 +10,8 @@ import { QuestionnaireQuestion } from "@/hooks/useOnboardingQuestionnaire";
 
 // Define question groups
 export const QUESTION_GROUPS = {
-  PROFILE: { minOrder: 1, maxOrder: 18 },
-  PREFERENCES: { minOrder: 19, maxOrder: 25 }
+  PROFILE: { minOrder: 1, maxOrder: 20 },
+  PREFERENCES: { minOrder: 21, maxOrder: 27 }
 } as const;
 
 // Define display categories for profile questions
@@ -36,22 +36,22 @@ export const PROFILE_CATEGORIES: QuestionCategory[] = [
   {
     name: "Personal Background",
     description: "Education, appearance, and cultural background",
-    orderRange: { min: 7, max: 10 } // education_level (7), height (8), ethnicity (9), religion (10)
+    orderRange: { min: 7, max: 12 } // education_level (7), school (8), profession (9), height (10), ethnicity (11), religion (12)
   },
   {
     name: "Lifestyle",
     description: "Daily habits and choices",
-    orderRange: { min: 11, max: 12 } // alcohol (11), smoking (12)
+    orderRange: { min: 13, max: 14 } // alcohol (13), smoking (14)
   },
   {
     name: "Relationship Goals",
     description: "What you're looking for in a relationship",
-    orderRange: { min: 13, max: 17 } // marriage (13), marriage_timeline (14), interests (15), relationship_values (16), relationship_keys (17)
+    orderRange: { min: 15, max: 19 } // marriage (15), marriage_timeline (16), interests (17), relationship_values (18), relationship_keys (19)
   },
   {
     name: "Personality",
     description: "Your personality type",
-    orderRange: { min: 18, max: 18 } // mbti (18)
+    orderRange: { min: 20, max: 20 } // mbti (20)
   }
 ];
 
@@ -59,7 +59,7 @@ export const PREFERENCE_CATEGORIES: QuestionCategory[] = [
   {
     name: "Compatibility Preferences",
     description: "What matters most to you in a match",
-    orderRange: { min: 19, max: 25 } // All preference importance questions
+    orderRange: { min: 21, max: 27 } // All preference importance questions
   }
 ];
 
@@ -104,6 +104,8 @@ export const CLIENT_PROFILE_CARDS: ProfileCardConfig[] = [
     title: 'About',
     questionIds: [
       'education_level',  // Degree
+      'school',           // School
+      'profession',       // Profession
       'height',           // Height
       'ethnicity',        // Origin
       'religion',         // Religion
@@ -177,8 +179,8 @@ export const ADMIN_VIEW_SECTIONS: AdminViewSection[] = [
   },
   {
     id: 'education_income',
-    title: 'Education & Income',
-    questionIds: ['education_level', 'education_importance', 'income_importance'],
+    title: 'Education & Career',
+    questionIds: ['education_level', 'school', 'profession', 'education_importance', 'income_importance'],
   },
   {
     id: 'lifestyle',
@@ -214,6 +216,8 @@ export const QUESTION_CONFIGS: Record<string, QuestionConfig> = {
   instagram_contact: { id: 'instagram_contact', label: 'Instagram', icon: 'Instagram', showInClient: true, showInAdmin: true },
   dating_preference: { id: 'dating_preference', label: 'Looking for', icon: 'Heart', showInClient: true, showInAdmin: true },
   education_level: { id: 'education_level', label: 'Education', icon: 'GraduationCap', showInClient: true, showInAdmin: true },
+  school: { id: 'school', label: 'School', icon: 'School', showInClient: true, showInAdmin: true },
+  profession: { id: 'profession', label: 'Profession', icon: 'Briefcase', showInClient: true, showInAdmin: true },
   height: { id: 'height', label: 'Height', icon: 'Ruler', showInClient: true, showInAdmin: true },
   ethnicity: { id: 'ethnicity', label: 'Origin', icon: 'Users', showInClient: true, showInAdmin: true },
   religion: { id: 'religion', label: 'Religion', icon: 'Church', showInClient: true, showInAdmin: true },
@@ -246,6 +250,8 @@ export const QUESTION_SUMMARIES: Record<string, string> = {
   instagram_contact: "Instagram",
   dating_preference: "Looking for",
   education_level: "Education",
+  school: "School",
+  profession: "Profession",
   education_importance: "Education importance",
   height: "Height",
   height_preference: "Height preference",
