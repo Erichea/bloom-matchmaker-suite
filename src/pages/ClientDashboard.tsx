@@ -179,7 +179,7 @@ const ClientDashboard = () => {
       const { data: rpcData, error } = await supabase.rpc("get_matches_for_user" as any, { p_user_id: user.id });
       if (error) throw error;
 
-      let data = rpcData ? (rpcData as any[]).map((row: any) => row.match_data) : [];
+      const data = rpcData ? (rpcData as any[]).map((row: any) => row.match_data) : [];
 
       // Fetch profile_answers for each match's profile_1 and profile_2
       if (data && data.length > 0) {

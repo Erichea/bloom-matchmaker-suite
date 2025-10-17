@@ -141,7 +141,7 @@ const MutualMatches = () => {
         return;
       }
 
-      let data = rpcData ? (rpcData as any[]).map((row: any) => row.match_data) : [];
+      const data = rpcData ? (rpcData as any[]).map((row: any) => row.match_data) : [];
 
       // Filter only mutual matches (both accepted)
       const userProfileData = await supabase
@@ -475,9 +475,9 @@ const MutualMatches = () => {
   return (
     <>
       <MatchDetailModal match={selectedMatch} open={modalOpen} onOpenChange={setModalOpen} onMatchResponse={handleMatchResponse} />
-      <div className="min-h-screen bg-background pb-20">
+      <div className="min-h-screen bg-background-light dark:bg-background-dark pb-20">
         {/* Header */}
-        <header className="sticky top-0 z-40 border-b border-border bg-background">
+        <header className="sticky top-0 z-40 border-b border-border bg-background-light dark:bg-background-dark">
           <div className="flex h-16 items-center justify-between px-4">
             <div className="w-9"></div>
             <h1 className="text-lg font-semibold">Mutual Matches</h1>

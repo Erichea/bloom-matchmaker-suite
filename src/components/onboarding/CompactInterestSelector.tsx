@@ -367,26 +367,14 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Ensure question is valid
-  if (!question || !question.id) {
-    console.error('CompactInterestSelector: Invalid question object', question);
-    return <div>Error: Invalid question data</div>;
-  }
-
   // Get appropriate data based on question ID
-  const allInterests = question.id === "relationship_values"
+  const allInterests = question?.id === "relationship_values"
     ? RELATIONSHIP_VALUES_DATA
     : INTERESTS_DATA;
 
-  // Ensure allInterests is an array
-  if (!Array.isArray(allInterests)) {
-    console.error('CompactInterestSelector: allInterests is not an array', allInterests);
-    return <div>Error: Invalid interests data</div>;
-  }
-
   // Get categories based on question type
   const categories = useMemo(() => {
-    if (question.id === "relationship_values") {
+    if (question?.id === "relationship_values") {
       if (!Array.isArray(allInterests)) {
         console.error('CompactInterestSelector: allInterests is not an array when generating categories', allInterests);
         return [];
@@ -394,13 +382,7 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
       return Array.from(new Set(allInterests.map(i => i.category))).map(cat => ({ id: cat, name: cat, icon: cat.toLowerCase() }));
     }
     return CATEGORIES;
-  }, [question.id, allInterests]);
-
-  // Ensure categories is an array
-  if (!Array.isArray(categories)) {
-    console.error('CompactInterestSelector: categories is not an array', categories);
-    return <div>Error: Invalid categories data</div>;
-  }
+  }, [question?.id, allInterests]);
 
   // Filter interests by search term only
   const filteredInterests = useMemo(() => {
@@ -423,6 +405,22 @@ export const CompactInterestSelector: React.FC<CompactInterestSelectorProps> = (
   }, [searchTerm, allInterests]);
 
   const selectedInterests = Array.isArray(value) ? value : [];
+
+  // Validation checks after all hooks
+  if (!question || !question.id) {
+    console.error('CompactInterestSelector: Invalid question object', question);
+    return <div>Error: Invalid question data</div>;
+  }
+
+  if (!Array.isArray(allInterests)) {
+    console.error('CompactInterestSelector: allInterests is not an array', allInterests);
+    return <div>Error: Invalid interests data</div>;
+  }
+
+  if (!Array.isArray(categories)) {
+    console.error('CompactInterestSelector: categories is not an array', categories);
+    return <div>Error: Invalid categories data</div>;
+  }
 
   const handleInterestClick = (interestId: string) => {
     const isSelected = selectedInterests.includes(interestId);
