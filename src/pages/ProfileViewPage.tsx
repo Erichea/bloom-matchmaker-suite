@@ -25,7 +25,7 @@ import {
   DollarSign,
   Star
 } from "lucide-react";
-import { formatAnswer, calculateAge, QUESTION_SUMMARIES, QUESTION_GROUPS } from "@/config/questionnaireConfig";
+import { formatAnswer, calculateAge, QUESTION_SUMMARIES, QUESTION_GROUPS, getDisplayValue } from "@/config/questionnaireConfig";
 import { questionnaireCategories } from "@/constants/questionnaireCategories";
 
 const getQuestionSummary = (questionId: string, questionText: string): string => {
@@ -160,10 +160,12 @@ export default function ProfileViewPage() {
 
     preferenceQuestionIds.forEach(questionId => {
       if (answers[questionId] !== undefined && answers[questionId] !== null && answers[questionId] !== '') {
+        // Create a mock question object for getDisplayValue
+        const mockQuestion = { id: questionId, question_text_en: '' };
         preferenceQuestionsList.push({
           id: questionId,
           summary: QUESTION_SUMMARIES[questionId] || questionId,
-          answer: formatAnswer(answers[questionId])
+          answer: getDisplayValue(mockQuestion as any, answers[questionId])
         });
       }
     });
