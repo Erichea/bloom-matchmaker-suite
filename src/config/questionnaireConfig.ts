@@ -11,7 +11,7 @@ import { QuestionnaireQuestion } from "@/hooks/useOnboardingQuestionnaire";
 // Define question groups
 export const QUESTION_GROUPS = {
   PROFILE: { minOrder: 1, maxOrder: 20 },
-  PREFERENCES: { minOrder: 21, maxOrder: 27 }
+  PREFERENCES: { minOrder: 21, maxOrder: 28 }
 } as const;
 
 // Define display categories for profile questions
@@ -59,7 +59,7 @@ export const PREFERENCE_CATEGORIES: QuestionCategory[] = [
   {
     name: "Compatibility Preferences",
     description: "What matters most to you in a match",
-    orderRange: { min: 21, max: 27 } // All preference importance questions
+    orderRange: { min: 21, max: 28 } // All preference importance questions + mbti_preference
   }
 ];
 
@@ -190,7 +190,7 @@ export const ADMIN_VIEW_SECTIONS: AdminViewSection[] = [
   {
     id: 'personality',
     title: 'Personality & Compatibility',
-    questionIds: ['mbti', 'age_importance'],
+    questionIds: ['mbti', 'mbti_preference', 'age_importance'],
   },
 ];
 
@@ -238,6 +238,7 @@ export const QUESTION_CONFIGS: Record<string, QuestionConfig> = {
   appearance_importance: { id: 'appearance_importance', label: 'Looks Importance', icon: 'Star', showInClient: false, showInAdmin: true },
   age_importance: { id: 'age_importance', label: 'Age Importance', icon: 'Star', showInClient: false, showInAdmin: true },
   income_importance: { id: 'income_importance', label: 'Income Importance', icon: 'Star', showInClient: false, showInAdmin: true },
+  mbti_preference: { id: 'mbti_preference', label: 'MBTI Preferences', icon: 'Brain', showInClient: false, showInAdmin: true },
 };
 
 // Question summaries for compact display
@@ -270,6 +271,7 @@ export const QUESTION_SUMMARIES: Record<string, string> = {
   relationship_values: "Relationship values",
   relationship_keys: "Key elements",
   mbti: "Personality type",
+  mbti_preference: "MBTI preferences",
 };
 
 /**

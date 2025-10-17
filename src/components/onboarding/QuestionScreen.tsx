@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import type { QuestionnaireQuestion } from "@/hooks/useOnboardingQuestionnaire";
 import MBTIGrid from "./MBTIGrid";
+import MBTIPreferenceSelector from "./MBTIPreferenceSelector";
 import { CompactInterestSelector } from "./CompactInterestSelector";
 
 interface QuestionScreenProps {
@@ -22,6 +23,7 @@ interface QuestionScreenProps {
   onBack: () => void;
   canGoBack: boolean;
   iconComponent: React.ReactNode;
+  allAnswers?: Record<string, any>; // All answers from questionnaire (used to get user's MBTI)
 }
 
 export const QuestionScreen: React.FC<QuestionScreenProps> = ({
@@ -32,6 +34,7 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
   onBack,
   canGoBack,
   iconComponent,
+  allAnswers,
 }) => {
   const [localAnswer, setLocalAnswer] = useState<any>(answer);
   const [isValid, setIsValid] = useState(false);
@@ -505,6 +508,20 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
       }
 
       case "multiple_choice": {
+        // Special handling for MBTI preference question
+        if (question.id === "mbti_preference") {
+          // Get user's own MBTI type from their profile answers
+          const userMBTI = allAnswers?.['mbti'] || undefined;
+
+          return (
+            <MBTIPreferenceSelector
+              value={localAnswer || []}
+              onChange={setLocalAnswer}
+              userMBTI={userMBTI}
+            />
+          );
+        }
+
         // Use compact selector for interests and relationship_values questions
         if (question.id === "interests" || question.id === "relationship_values") {
           return (

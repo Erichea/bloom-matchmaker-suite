@@ -326,6 +326,7 @@ export default function OnboardingFlow() {
           onBack={handleQuestionBack}
           canGoBack={currentQuestionIndex > 0 || true}
           iconComponent={getIconComponent(currentQuestion.icon_name)}
+          allAnswers={answers}
         />
       </div>
     );
