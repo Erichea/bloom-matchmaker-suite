@@ -15,16 +15,18 @@ import {
   Heart,
   Pen,
   Eye,
-  LogOut
+  LogOut,
+  GraduationCap,
+  Ruler,
+  Users,
+  Church,
+  Sparkles,
+  Calendar,
+  DollarSign,
+  Star
 } from "lucide-react";
-import { formatAnswer, calculateAge, QUESTION_SUMMARIES } from "@/config/questionnaireConfig";
+import { formatAnswer, calculateAge, QUESTION_SUMMARIES, QUESTION_GROUPS } from "@/config/questionnaireConfig";
 import { questionnaireCategories } from "@/constants/questionnaireCategories";
-
-// Preference questions that should be in the "Edit Preferences" page
-const PREFERENCE_CATEGORIES = [
-  "Dating & Relationship Goals",
-  "Compatibility Preferences"
-];
 
 const getQuestionSummary = (questionId: string, questionText: string): string => {
   return QUESTION_SUMMARIES[questionId] || questionText.split("?")[0];
@@ -142,26 +144,46 @@ export default function ProfileViewPage() {
     return summary;
   }, [profileData, answers]);
 
+  // Get all preference questions (order 21-27) - these are the importance ratings
   const preferenceQuestions = useMemo(() => {
+    const preferenceQuestionIds = [
+      'education_importance',
+      'height_preference',
+      'ethnicity_importance',
+      'religion_importance',
+      'appearance_importance',
+      'age_importance',
+      'income_importance'
+    ];
+
     const preferenceQuestionsList: any[] = [];
 
-    PREFERENCE_CATEGORIES.forEach(categoryName => {
-      const category = questionnaireCategories.find(cat => cat.name === categoryName);
-      if (category) {
-        category.questionIds.forEach(questionId => {
-          if (answers[questionId] !== undefined) {
-            preferenceQuestionsList.push({
-              id: questionId,
-              category: categoryName,
-              answer: formatAnswer(answers[questionId])
-            });
-          }
+    preferenceQuestionIds.forEach(questionId => {
+      if (answers[questionId] !== undefined && answers[questionId] !== null && answers[questionId] !== '') {
+        preferenceQuestionsList.push({
+          id: questionId,
+          summary: QUESTION_SUMMARIES[questionId] || questionId,
+          answer: formatAnswer(answers[questionId])
         });
       }
     });
 
     return preferenceQuestionsList;
   }, [answers]);
+
+  // Get icon for each preference question
+  const getPreferenceIcon = (questionId: string) => {
+    const iconMap: Record<string, any> = {
+      education_importance: GraduationCap,
+      height_preference: Ruler,
+      ethnicity_importance: Users,
+      religion_importance: Church,
+      appearance_importance: Sparkles,
+      age_importance: Calendar,
+      income_importance: DollarSign
+    };
+    return iconMap[questionId] || Star;
+  };
 
   const handlePreviewProfile = () => {
     if (!profileData) return;
@@ -199,9 +221,9 @@ export default function ProfileViewPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-background pb-20">
+      <div className="min-h-screen bg-background-light dark:bg-background-dark pb-20">
         {/* Header */}
-        <header className="sticky top-0 z-40 border-b border-border bg-background">
+        <header className="sticky top-0 z-40 border-b border-border bg-background-light dark:bg-background-dark">
           <div className="flex h-16 items-center justify-between px-4">
             <div className="w-9"></div>
             <h1 className="text-lg font-semibold">Profile</h1>
@@ -320,14 +342,20 @@ export default function ProfileViewPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-0 divide-y divide-border/30">
-                  {preferenceQuestions.map((pref) => (
-                    <div key={pref.id} className="py-3 first:pt-0">
-                      <div className="flex items-start gap-3">
-                        <Heart className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                        <p className="flex-1 text-base leading-relaxed">{pref.answer}</p>
+                  {preferenceQuestions.map((pref) => {
+                    const IconComponent = getPreferenceIcon(pref.id);
+                    return (
+                      <div key={pref.id} className="py-3 first:pt-0">
+                        <div className="flex items-start gap-3">
+                          <IconComponent className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-sm text-muted-foreground">{pref.summary}</p>
+                            <p className="text-base leading-relaxed">{pref.answer}</p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
