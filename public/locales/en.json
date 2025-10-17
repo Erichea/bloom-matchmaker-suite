@@ -1,0 +1,122 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "search": "Search",
+    "filter": "Filter",
+    "language": "Language",
+    "logout": "Logout",
+    "settings": "Settings"
+  },
+  "nav": {
+    "home": "Home",
+    "matches": "Matches",
+    "profile": "Profile",
+    "dashboard": "Dashboard",
+    "admin": "Admin",
+    "clients": "Clients",
+    "updates": "Updates"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "loginTitle": "Welcome Back",
+    "loginSubtitle": "Sign in to your account",
+    "signUpTitle": "Create Account",
+    "signUpSubtitle": "Join BLOOM today"
+  },
+  "profile": {
+    "title": "My Profile",
+    "editProfile": "Edit Profile",
+    "viewProfile": "View Profile",
+    "personalInfo": "Personal Information",
+    "preferences": "Preferences",
+    "photos": "Photos",
+    "uploadPhoto": "Upload Photo",
+    "deletePhoto": "Delete Photo",
+    "setPrimary": "Set as Primary",
+    "about": "About Me",
+    "interests": "Interests",
+    "lifestyle": "Lifestyle",
+    "education": "Education",
+    "profession": "Profession",
+    "height": "Height",
+    "age": "Age"
+  },
+  "matches": {
+    "title": "Your Matches",
+    "newMatch": "New Match!",
+    "mutualMatches": "Mutual Matches",
+    "compatibility": "Compatibility",
+    "viewProfile": "View Profile",
+    "noMatches": "No matches yet",
+    "noMatchesDesc": "Check back soon for new matches!",
+    "accepted": "Accepted",
+    "declined": "Declined",
+    "pending": "Pending"
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "recentActivity": "Recent Activity",
+    "statistics": "Statistics",
+    "totalMatches": "Total Matches",
+    "activeMatches": "Active Matches",
+    "profileViews": "Profile Views"
+  },
+  "admin": {
+    "dashboard": "Admin Dashboard",
+    "clients": "Clients",
+    "matches": "Matches",
+    "accessCodes": "Access Codes",
+    "analytics": "Analytics",
+    "manageUsers": "Manage Users",
+    "viewDetails": "View Details",
+    "approveProfile": "Approve Profile",
+    "rejectProfile": "Reject Profile",
+    "createMatch": "Create Match",
+    "editMatch": "Edit Match",
+    "deleteMatch": "Delete Match",
+    "translations": "Manage Translations"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "newMatch": "You have a new match!",
+    "profileApproved": "Your profile has been approved",
+    "messageReceived": "New message received",
+    "noNotifications": "No new notifications"
+  },
+  "errors": {
+    "generic": "Something went wrong",
+    "networkError": "Network error. Please check your connection",
+    "unauthorized": "You are not authorized to perform this action",
+    "notFound": "Page not found",
+    "validation": "Please check your input",
+    "required": "This field is required"
+  },
+  "success": {
+    "saved": "Saved successfully",
+    "updated": "Updated successfully",
+    "deleted": "Deleted successfully",
+    "sent": "Sent successfully"
+  },
+  "languageSwitcher": {
+    "title": "Select Language",
+    "description": "Choose your preferred language",
+    "en": "English",
+    "fr": "Français"
+  }
+}

@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 interface MenuItem {
   label: string;
@@ -77,8 +78,12 @@ export const BottomNavigation = () => {
   }, [navigate, navPaths]);
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 p-4 bg-transparent z-10">
-      <nav className="bg-nav-light dark:bg-nav-dark rounded-full p-2 flex justify-around items-center max-w-xs mx-auto shadow-nav-light dark:shadow-nav-dark">
+    <>
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
+      <footer className="fixed bottom-0 left-0 right-0 p-4 bg-transparent z-10">
+        <nav className="bg-nav-light dark:bg-nav-dark rounded-full p-2 flex justify-around items-center max-w-xs mx-auto shadow-nav-light dark:shadow-nav-dark">
         {menuItems.map((item, index) => {
           const isActive = index === activeIndex;
           return (
@@ -99,5 +104,6 @@ export const BottomNavigation = () => {
         })}
       </nav>
     </footer>
+    </>
   );
 };

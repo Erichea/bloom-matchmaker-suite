@@ -26,6 +26,7 @@ import MutualMatches from "./pages/MutualMatches";
 import ProfileViewPage from "./pages/ProfileViewPage";
 import PreferencesEditPage from "./pages/PreferencesEditPage";
 import LogoutPage from "./pages/LogoutPage";
+import TranslationEditor from "./pages/admin/TranslationEditor";
 import { AdminLayout } from "./components/AdminLayout";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -91,6 +92,13 @@ const App = () => (
             <Route path="/admin/updates" element={
               <ProtectedRoute requireAdmin={true}>
                 <AdminUpdates />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/translations" element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminLayout>
+                  <TranslationEditor />
+                </AdminLayout>
               </ProtectedRoute>
             } />
             <Route path="/client" element={<ClientWelcome />} />

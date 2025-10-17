@@ -1,21 +1,5 @@
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-import ENFJ from "@/images/mbti/ENFJ.svg?react";
-import ENFP from "@/images/mbti/ENFP.svg?react";
-import ENTJ from "@/images/mbti/ENTJ.svg?react";
-import ENTP from "@/images/mbti/ENTP.svg?react";
-import ESFJ from "@/images/mbti/ESFJ.svg?react";
-import ESFP from "@/images/mbti/ESFP.svg?react";
-import ESTJ from "@/images/mbti/ESTJ.svg?react";
-import ESTP from "@/images/mbti/ESTP.svg?react";
-import INFJ from "@/images/mbti/INFJ.svg?react";
-import INFP from "@/images/mbti/INFP.svg?react";
-import INTJ from "@/images/mbti/INTJ.svg?react";
-import INTP from "@/images/mbti/INTP.svg?react";
-import ISFJ from "@/images/mbti/ISFJ.svg?react";
-import ISFP from "@/images/mbti/ISFP.svg?react";
-import ISTJ from "@/images/mbti/ISTJ.svg?react";
-import ISTP from "@/images/mbti/ISTP.svg?react";
 
 interface MBTIGridProps {
   value: string;
@@ -27,26 +11,25 @@ interface MBTIType {
   label: string;
   color: string;
   description: string;
-  icon: React.ComponentType<any>;
 }
 
 const mbtiData: MBTIType[] = [
-  { type: 'ESFJ', label: 'Ambassador', color: '#10b981', description: 'Warm, conscientious, dedicated', icon: ESFJ },
-  { type: 'ESFP', label: 'Performer', color: '#10b981', description: 'Spontaneous, energetic, enthusiastic', icon: ESFP },
-  { type: 'ESTP', label: 'Rebel', color: '#10b981', description: 'Smart, energetic, perceptive', icon: ESTP },
-  { type: 'ENTJ', label: 'Commander', color: '#60a5fa', description: 'Bold, strategic, leader', icon: ENTJ },
-  { type: 'ENFJ', label: 'Hero', color: '#60a5fa', description: 'Charismatic, inspiring, leader', icon: ENFJ },
-  { type: 'ENFP', label: 'Crusader', color: '#60a5fa', description: 'Enthusiastic, creative, sociable', icon: ENFP },
-  { type: 'ISFP', label: 'Artist', color: '#60a5fa', description: 'Exploratory, artistic, sensitive', icon: ISFP },
-  { type: 'ESTJ', label: 'Executive', color: '#60a5fa', description: 'Dedicated, organized, decisive', icon: ESTJ },
-  { type: 'ISTJ', label: 'Realist', color: '#fb923c', description: 'Practical, fact-minded, reliable', icon: ISTJ },
-  { type: 'ISTP', label: 'Artisan', color: '#fb923c', description: 'Bold, practical, experimenter', icon: ISTP },
-  { type: 'INFJ', label: 'Guardian', color: '#fb923c', description: 'Insightful, principled, passionate', icon: INFJ },
-  { type: 'INTJ', label: 'Mastermind', color: '#fb923c', description: 'Imaginative, strategic, planner', icon: INTJ },
-  { type: 'ENTP', label: 'Challenger', color: '#fb923c', description: 'Smart, curious, witty', icon: ENTP },
-  { type: 'INFP', label: 'Peacemaker', color: '#fb923c', description: 'Poetic, kind, altruistic', icon: INFP },
-  { type: 'INTP', label: 'Genius', color: '#fb923c', description: 'Innovative, logical, abstract', icon: INTP },
-  { type: 'ISFJ', label: 'Protector', color: '#fb923c', description: 'Warm, conscientious, dedicated', icon: ISFJ }
+  { type: 'ESFJ', label: 'Ambassador', color: '#10b981', description: 'Warm, conscientious, dedicated' },
+  { type: 'ESFP', label: 'Performer', color: '#10b981', description: 'Spontaneous, energetic, enthusiastic' },
+  { type: 'ESTP', label: 'Rebel', color: '#10b981', description: 'Smart, energetic, perceptive' },
+  { type: 'ENTJ', label: 'Commander', color: '#60a5fa', description: 'Bold, strategic, leader' },
+  { type: 'ENFJ', label: 'Hero', color: '#60a5fa', description: 'Charismatic, inspiring, leader' },
+  { type: 'ENFP', label: 'Crusader', color: '#60a5fa', description: 'Enthusiastic, creative, sociable' },
+  { type: 'ISFP', label: 'Artist', color: '#60a5fa', description: 'Exploratory, artistic, sensitive' },
+  { type: 'ESTJ', label: 'Executive', color: '#60a5fa', description: 'Dedicated, organized, decisive' },
+  { type: 'ISTJ', label: 'Realist', color: '#fb923c', description: 'Practical, fact-minded, reliable' },
+  { type: 'ISTP', label: 'Artisan', color: '#fb923c', description: 'Bold, practical, experimenter' },
+  { type: 'INFJ', label: 'Guardian', color: '#fb923c', description: 'Insightful, principled, passionate' },
+  { type: 'INTJ', label: 'Mastermind', color: '#fb923c', description: 'Imaginative, strategic, planner' },
+  { type: 'ENTP', label: 'Challenger', color: '#fb923c', description: 'Smart, curious, witty' },
+  { type: 'INFP', label: 'Peacemaker', color: '#fb923c', description: 'Poetic, kind, altruistic' },
+  { type: 'INTP', label: 'Genius', color: '#fb923c', description: 'Innovative, logical, abstract' },
+  { type: 'ISFJ', label: 'Protector', color: '#fb923c', description: 'Warm, conscientious, dedicated' }
 ];
 
 const MBTIGrid: React.FC<MBTIGridProps> = ({ value, onChange }) => {
@@ -91,8 +74,8 @@ const MBTIGrid: React.FC<MBTIGridProps> = ({ value, onChange }) => {
                     "bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800"
                   )}
                 >
-                  {/* SVG Character */}
-                  <mbtiType.icon className="w-12 h-12 md:w-14 md:h-14 object-contain" />
+                  {/* Character placeholder */}
+                  <div className="text-2xl font-bold">{mbtiType.type.charAt(0)}</div>
                 </div>
               </div>
 
