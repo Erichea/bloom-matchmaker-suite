@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { mbtiToAxes, calculateMBTIMatch, axisDescriptions, type MBTIAxes } from "@/lib/mbtiUtils";
 import { Slider } from "@/components/ui/slider";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 import ENFJ from "@/images/mbti/ENFJ.svg?react";
 import ENFP from "@/images/mbti/ENFP.svg?react";
 import ENTJ from "@/images/mbti/ENTJ.svg?react";
@@ -152,7 +153,22 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
           {/* E/I Axis */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-xs font-medium text-foreground">I ↔ E</span>
+              <div className="flex items-center gap-1">
+                <span className="text-xs font-medium text-foreground">I ↔ E</span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-3 h-3 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <p className="font-semibold mb-1">Introversion vs Extraversion</p>
+                      <p className="text-xs mb-2">Where do you get your energy?</p>
+                      <p className="text-xs mb-2"><strong>Introvert (I):</strong> Recharged by alone time, prefer deep one-on-one conversations, think before speaking.</p>
+                      <p className="text-xs"><strong>Extravert (E):</strong> Energized by social interaction, enjoy group activities, think while speaking.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <span className="text-xs text-muted-foreground font-mono">{Math.round(axes.ei)}%</span>
             </div>
             <Slider
@@ -168,7 +184,22 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
           {/* S/N Axis */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-xs font-medium text-foreground">S ↔ N</span>
+              <div className="flex items-center gap-1">
+                <span className="text-xs font-medium text-foreground">S ↔ N</span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-3 h-3 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <p className="font-semibold mb-1">Sensing vs Intuition</p>
+                      <p className="text-xs mb-2">How do you process information?</p>
+                      <p className="text-xs mb-2"><strong>Sensing (S):</strong> Focus on facts and details, trust experience, live in the present, practical and realistic.</p>
+                      <p className="text-xs"><strong>Intuition (N):</strong> See patterns and possibilities, trust gut feelings, think about the future, imaginative and abstract.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <span className="text-xs text-muted-foreground font-mono">{Math.round(axes.sn)}%</span>
             </div>
             <Slider
@@ -184,7 +215,22 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
           {/* T/F Axis */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-xs font-medium text-foreground">T ↔ F</span>
+              <div className="flex items-center gap-1">
+                <span className="text-xs font-medium text-foreground">T ↔ F</span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-3 h-3 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <p className="font-semibold mb-1">Thinking vs Feeling</p>
+                      <p className="text-xs mb-2">How do you make decisions?</p>
+                      <p className="text-xs mb-2"><strong>Thinking (T):</strong> Make decisions based on logic and objective analysis, value fairness and consistency, focus on truth.</p>
+                      <p className="text-xs"><strong>Feeling (F):</strong> Consider impact on people and values, seek harmony, empathize with others' emotions, focus on compassion.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <span className="text-xs text-muted-foreground font-mono">{Math.round(axes.tf)}%</span>
             </div>
             <Slider
@@ -200,7 +246,22 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
           {/* J/P Axis */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-xs font-medium text-foreground">J ↔ P</span>
+              <div className="flex items-center gap-1">
+                <span className="text-xs font-medium text-foreground">J ↔ P</span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-3 h-3 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <p className="font-semibold mb-1">Judging vs Perceiving</p>
+                      <p className="text-xs mb-2">How do you approach life?</p>
+                      <p className="text-xs mb-2"><strong>Judging (J):</strong> Prefer structure and planning, like to have things decided, organized and scheduled, work before play.</p>
+                      <p className="text-xs"><strong>Perceiving (P):</strong> Flexible and spontaneous, keep options open, adaptable to change, comfortable with last-minute decisions.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <span className="text-xs text-muted-foreground font-mono">{Math.round(axes.jp)}%</span>
             </div>
             <Slider
