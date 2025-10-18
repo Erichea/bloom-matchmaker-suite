@@ -179,12 +179,12 @@ const ClientDashboard = () => {
       const { data: rpcData, error } = await supabase.rpc("get_matches_for_user" as any, { p_user_id: user.id });
       if (error) throw error;
 
-      const data = rpcData ? (rpcData as any[]).map((row: any) => row.match_data) : [];
+      let processedData = rpcData ? (rpcData as any[]).map((row: any) => row.match_data) : [];
 
       // Fetch profile_answers for each match's profile_1 and profile_2
-      if (data && data.length > 0) {
+      if (processedData && processedData.length > 0) {
         const userIds = new Set<string>();
-        data.forEach((match: any) => {
+        processedData.forEach((match: any) => {
           if (match.profile_1?.user_id) userIds.add(match.profile_1.user_id);
           if (match.profile_2?.user_id) userIds.add(match.profile_2.user_id);
         });
@@ -195,7 +195,7 @@ const ClientDashboard = () => {
           .in("user_id", Array.from(userIds));
 
         // Attach answers to the correct profiles
-        data = data.map((match: any) => ({
+        processedData = processedData.map((match: any) => ({
           ...match,
           profile_1: {
             ...match.profile_1,
@@ -220,8 +220,8 @@ const ClientDashboard = () => {
       const userProfile = userProfileData?.[0];
       if (!userProfile) return;
 
-      setMatches(data || []);
-      const unviewedMatches = (data || []).filter((match: Match) => {
+      setMatches(processedData || []);
+      const unviewedMatches = (processedData || []).filter((match: Match) => {
         const isProfile1 = match.profile_1_id === userProfile.id;
         return isProfile1 ? !match.viewed_by_profile_1 : !match.viewed_by_profile_2;
       });

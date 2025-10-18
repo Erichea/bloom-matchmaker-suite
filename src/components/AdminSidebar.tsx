@@ -65,6 +65,11 @@ const adminMenuItems = [
 
 const systemMenuItems = [
   {
+    title: "Translations",
+    url: "/admin/translations",
+    icon: Settings,
+  },
+  {
     title: "Settings",
     url: "/admin/settings",
     icon: Settings,

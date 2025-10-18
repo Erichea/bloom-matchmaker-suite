@@ -116,12 +116,22 @@ type QuestionnaireAnswers = Record<string, any>;
 
 interface QuestionnaireQuestion {
   id: string;
-  question_text_en: string;
-  subtitle_en: string | null;
-  icon_name: string | null;
-  question_type: string;
-  options: any;
+  version: number;
   question_order: number;
+  question_type: string;
+  question_text_en: string;
+  question_text_fr: string | null;
+  subtitle_en: string | null;
+  subtitle_fr: string | null;
+  help_text_en: string | null;
+  help_text_fr: string | null;
+  icon_name: string | null;
+  options: any;
+  validation_rules: any;
+  is_required: boolean;
+  conditional_on: string | null;
+  conditional_value: string | null;
+  profile_field_mapping: string | null;
 }
 
 type StatusFilter = "all" | "pending_approval" | "approved" | "rejected" | "incomplete";
@@ -451,7 +461,7 @@ const ClientsPage = () => {
         // Fetch questionnaire questions
         const { data: questionsData, error: questionsError } = await supabase
           .from("questionnaire_questions")
-          .select("id, question_text_en, subtitle_en, icon_name, question_type, options, question_order")
+          .select("*")
           .eq("version", 1)
           .order("question_order");
 
