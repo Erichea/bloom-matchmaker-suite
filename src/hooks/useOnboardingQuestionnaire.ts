@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -29,6 +30,7 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (userId) {
@@ -83,8 +85,8 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
     } catch (error) {
       console.error("Error loading questionnaire:", error);
       toast({
-        title: "Error loading questionnaire",
-        description: "Please try again later",
+        title: t('questionnaire.loadingError'),
+        description: t('questionnaire.tryAgainLater'),
         variant: "destructive",
       });
     } finally {
@@ -98,8 +100,8 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
       if (!userId) {
         console.error('Cannot save answer: userId is not available');
         toast({
-          title: "Authentication Error",
-          description: "Please sign in again to continue",
+          title: t('auth.authenticationError'),
+          description: t('auth.signInAgainMessage'),
           variant: "destructive",
         });
         return;
@@ -195,8 +197,8 @@ export const useOnboardingQuestionnaire = (userId: string | undefined) => {
     } catch (error) {
       console.error("Error saving answer:", error);
       toast({
-        title: "Error saving answer",
-        description: "Please try again",
+        title: t('questionnaire.saveError'),
+        description: t('questionnaire.tryAgain'),
         variant: "destructive",
       });
     }
