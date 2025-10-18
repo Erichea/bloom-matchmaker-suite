@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,6 +17,7 @@ const floatAnimation = `
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     // If user is authenticated and auth is not loading, redirect to dashboard
@@ -63,7 +65,7 @@ const Index = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Private introductions. Human-first.
+            {t('landing.privateIntroductions')}
           </motion.span>
           <motion.h1
             className="font-display text-5xl font-light leading-[1.05] tracking-tight text-foreground sm:text-6xl md:text-7xl"
@@ -71,7 +73,7 @@ const Index = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            Bloom.
+            {t('landing.bloom')}
           </motion.h1>
 
           <motion.div
@@ -82,12 +84,12 @@ const Index = () => {
           >
             <Link to="/client" className="w-full sm:w-auto">
               <button className="w-full rounded-full bg-primary px-10 py-3.5 text-sm font-medium uppercase tracking-[0.25em] text-primary-foreground shadow-sm transition-all duration-300 hover:bg-primary-hover hover:shadow-md active:scale-[0.98] sm:w-auto">
-                Get started
+                {t('landing.getStarted')}
               </button>
             </Link>
             <Link to="/auth?mode=signin" className="w-full sm:w-auto">
               <button className="w-full rounded-full border border-border bg-transparent px-10 py-3.5 text-sm font-medium uppercase tracking-[0.25em] text-foreground transition-all duration-300 hover:border-border-hover hover:bg-secondary active:scale-[0.98] sm:w-auto">
-                I already have an account
+                {t('landing.alreadyHaveAccount')}
               </button>
             </Link>
           </motion.div>
@@ -96,7 +98,7 @@ const Index = () => {
       </main>
 
       <footer className="relative z-10 flex justify-center px-6 pb-8 text-[0.6rem] uppercase tracking-[0.4em] text-muted-foreground md:px-10">
-        © {currentYear} Bloom
+        {t('landing.copyright', { year: currentYear })}
       </footer>
       </div>
     </>

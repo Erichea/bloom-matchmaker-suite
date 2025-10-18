@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,7 @@ const AdminLoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const from = location.state?.from?.pathname || "/admin";
 
@@ -80,9 +82,9 @@ const AdminLoginPage = () => {
             </div>
           </div>
           <div className="space-y-2">
-            <CardTitle className="text-2xl font-bold text-white">Admin Portal</CardTitle>
+            <CardTitle className="text-2xl font-bold text-white">{t('admin.adminPortal')}</CardTitle>
             <CardDescription className="text-slate-400">
-              Sign in with your administrator credentials
+              {t('admin.signInWithAdminCredentials')}
             </CardDescription>
           </div>
         </CardHeader>
@@ -94,7 +96,7 @@ const AdminLoginPage = () => {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-slate-200">Email</FormLabel>
+                    <FormLabel className="text-slate-200">{t('auth.email')}</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="admin@bloom.com"
@@ -111,11 +113,11 @@ const AdminLoginPage = () => {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-slate-200">Password</FormLabel>
+                    <FormLabel className="text-slate-200">{t('auth.password')}</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="Enter your password"
+                        placeholder={t('auth.passwordPlaceholder')}
                         className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500"
                         {...field}
                       />
@@ -132,12 +134,12 @@ const AdminLoginPage = () => {
                 {loading ? (
                   <div className="flex items-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                    Signing in...
+                    {t('common.loading')}
                   </div>
                 ) : (
                   <div className="flex items-center justify-center">
                     <Lock className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
-                    Sign In to Admin Portal
+                    {t('admin.signInToAdminPortal')}
                   </div>
                 )}
               </Button>
@@ -162,7 +164,7 @@ const AdminLoginPage = () => {
           {/* Development hint */}
           <div className="mt-4 p-3 bg-slate-900/50 border border-slate-700 rounded-lg">
             <p className="text-xs text-slate-400 text-center">
-              <span className="font-semibold text-slate-300">Development:</span> Default admin credentials are admin@bloom.com / admin123
+              <span className="font-semibold text-slate-300">{t('admin.development')}</span> {t('admin.defaultAdminCredentials')}
             </p>
           </div>
         </CardContent>

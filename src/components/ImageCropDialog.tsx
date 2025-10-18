@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import Cropper, { Area, Point } from "react-easy-crop";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -56,6 +57,7 @@ const getCroppedImg = async (imageSrc: string, pixelCrop: Area): Promise<Blob> =
 };
 
 export const ImageCropDialog = ({ open, imageUrl, onCropComplete, onCancel }: ImageCropDialogProps) => {
+  const { t } = useTranslation();
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
@@ -108,9 +110,9 @@ export const ImageCropDialog = ({ open, imageUrl, onCropComplete, onCancel }: Im
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Position your photo</DialogTitle>
+          <DialogTitle>{t('crop.positionPhoto')}</DialogTitle>
           <DialogDescription>
-            Drag to reposition and use the slider to zoom. Your photo will be cropped to a 3:4 ratio.
+            {t('crop.dragToRepositionInfo')}
           </DialogDescription>
         </DialogHeader>
 
@@ -139,7 +141,7 @@ export const ImageCropDialog = ({ open, imageUrl, onCropComplete, onCancel }: Im
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 text-sm font-medium">
                 <ZoomIn className="h-4 w-4" />
-                Zoom
+                {t('crop.zoom')}
               </label>
               <span className="text-sm text-muted-foreground">{Math.round(zoom * 100)}%</span>
             </div>
@@ -156,10 +158,10 @@ export const ImageCropDialog = ({ open, imageUrl, onCropComplete, onCancel }: Im
 
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={onCancel} disabled={processing}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button onClick={handleSave} disabled={processing || !croppedAreaPixels}>
-            {processing ? "Processing..." : "Save Photo"}
+            {processing ? t('crop.processing') : t('crop.savePhoto')}
           </Button>
         </DialogFooter>
       </DialogContent>

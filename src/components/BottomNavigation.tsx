@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCallback, useEffect, useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -11,6 +12,7 @@ interface MenuItem {
 }
 
 export const BottomNavigation = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
@@ -62,11 +64,11 @@ export const BottomNavigation = () => {
   ], []);
 
   const menuItems: MenuItem[] = useMemo(() => [
-    { label: "Home", icon: "home" },
-    { label: "Matches", icon: "favorite" },
-    { label: "Updates", icon: "notifications", badge: unreadCount },
-    { label: "Profile", icon: "person" },
-  ], [unreadCount]);
+    { label: t('nav.home'), icon: "home" },
+    { label: t('nav.matches'), icon: "favorite" },
+    { label: t('nav.updates'), icon: "notifications", badge: unreadCount },
+    { label: t('nav.profile'), icon: "person" },
+  ], [unreadCount, t]);
 
   const activeIndex = useMemo(() => {
     const index = navPaths.findIndex(path => location.pathname.startsWith(path));

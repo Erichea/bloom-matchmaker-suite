@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -16,6 +17,7 @@ interface PWAInstallPromptProps {
 }
 
 export function PWAInstallPrompt({ onDismiss }: PWAInstallPromptProps) {
+  const { t } = useTranslation();
   const [isStandalone, setIsStandalone] = useState(false);
   const [platform, setPlatform] = useState<'ios' | 'android' | 'desktop' | 'unknown'>('unknown');
   const [showInstructions, setShowInstructions] = useState(false);
@@ -48,56 +50,56 @@ export function PWAInstallPrompt({ onDismiss }: PWAInstallPromptProps) {
     switch (platform) {
       case 'ios':
         return {
-          title: "Install Bloom on iOS",
+          title: t('pwa.installBloomIos'),
           steps: [
             {
               icon: <Share className="h-5 w-5" />,
-              text: "Tap the Share button at the bottom of Safari"
+              text: t('pwa.tapShareButton')
             },
             {
               icon: <Home className="h-5 w-5" />,
-              text: "Scroll down and tap 'Add to Home Screen'"
+              text: t('pwa.addToHomeScreen')
             },
             {
               icon: <Smartphone className="h-5 w-5" />,
-              text: "Tap 'Add' in the top right corner"
+              text: t('pwa.tapAdd')
             }
           ],
-          note: "Make sure you're using Safari browser for iOS installation"
+          note: t('pwa.useSafariIos')
         };
       case 'android':
         return {
-          title: "Install Bloom on Android",
+          title: t('pwa.installBloomAndroid'),
           steps: [
             {
               icon: <MoreVertical className="h-5 w-5" />,
-              text: "Tap the menu (three dots) at the top right of Chrome"
+              text: t('pwa.tapMenu')
             },
             {
               icon: <Home className="h-5 w-5" />,
-              text: "Tap 'Add to Home screen' or 'Install app'"
+              text: t('pwa.addToHomeScreenAndroid')
             },
             {
               icon: <Smartphone className="h-5 w-5" />,
-              text: "Tap 'Install' or 'Add' to confirm"
+              text: t('pwa.confirmInstall')
             }
           ],
-          note: "Make sure you're using Chrome browser for Android installation"
+          note: t('pwa.useChromeAndroid')
         };
       case 'desktop':
         return {
-          title: "Install Bloom on Desktop",
+          title: t('pwa.installBloomDesktop'),
           steps: [
             {
               icon: <MoreVertical className="h-5 w-5" />,
-              text: "Click the install icon in your browser's address bar"
+              text: t('pwa.clickInstallIcon')
             },
             {
               icon: <Smartphone className="h-5 w-5" />,
-              text: "Or look for 'Install Bloom' in your browser menu"
+              text: t('pwa.browserMenu')
             }
           ],
-          note: "Works with Chrome, Edge, and other Chromium-based browsers"
+          note: t('pwa.chromiumBrowsers')
         };
       default:
         return null;
@@ -116,7 +118,7 @@ export function PWAInstallPrompt({ onDismiss }: PWAInstallPromptProps) {
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
             <Smartphone className="h-5 w-5 text-primary" />
-            <CardTitle>Install Bloom App</CardTitle>
+            <CardTitle>{t('pwa.installBloomApp')}</CardTitle>
           </div>
           {onDismiss && (
             <Button
@@ -130,7 +132,7 @@ export function PWAInstallPrompt({ onDismiss }: PWAInstallPromptProps) {
           )}
         </div>
         <CardDescription>
-          Get the best experience with push notifications by installing our app
+          {t('pwa.bestExperienceDesc')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -140,7 +142,7 @@ export function PWAInstallPrompt({ onDismiss }: PWAInstallPromptProps) {
             onClick={() => setShowInstructions(true)}
           >
             <Smartphone className="mr-2 h-4 w-4" />
-            Show Installation Guide
+            {t('pwa.showGuide')}
           </Button>
         ) : (
           <div className="space-y-4">
@@ -168,7 +170,7 @@ export function PWAInstallPrompt({ onDismiss }: PWAInstallPromptProps) {
               onClick={() => setShowInstructions(false)}
             >
               <ChevronDown className="mr-2 h-4 w-4" />
-              Hide Instructions
+              {t('pwa.hideInstructions')}
             </Button>
           </div>
         )}

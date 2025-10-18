@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Camera, GripVertical, Plus, Trash2, X, Image } from "lucide-react";
 import imageCompression from "browser-image-compression";
 import {
@@ -62,6 +63,7 @@ const getStoragePath = (url: string) => {
 };
 
 const SortableSlot = ({ id, index, photo, uploading, onOpenSheet, onDelete }: SortableSlotProps) => {
+  const { t } = useTranslation();
   const {
     attributes,
     listeners,
@@ -123,8 +125,8 @@ const SortableSlot = ({ id, index, photo, uploading, onOpenSheet, onDelete }: So
               <Camera className="h-6 w-6" />
             </div>
             <div className="text-center text-sm">
-              <p className="font-medium">Add photo</p>
-              <p className="text-xs text-muted-foreground">Tap to upload</p>
+              <p className="font-medium">{t('photos.addPhoto')}</p>
+              <p className="text-xs text-muted-foreground">{t('photos.tapToUpload')}</p>
             </div>
           </div>
         )}
@@ -134,6 +136,7 @@ const SortableSlot = ({ id, index, photo, uploading, onOpenSheet, onDelete }: So
 };
 
 export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: PhotoUploadGridProps) => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -175,8 +178,8 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
   const openSheet = (slotIndex: number, photo?: Photo) => {
     if (!photo && sortedPhotos.length >= MAX_PHOTOS) {
       toast({
-        title: "All slots filled",
-        description: "Remove a photo before uploading a new one.",
+        title: t('photos.slotsFilled'),
+        description: t('photos.removeBeforeUpload'),
         variant: "destructive",
       });
       return;
@@ -233,14 +236,14 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
           await persistOrdering(remaining);
         }
 
-        toast({ title: "Photo deleted", description: "Photo removed successfully." });
+        toast({ title: t('photos.photoDeleted'), description: t('photos.photoRemovedSuccess') });
         closeSheet();
         onPhotosUpdate();
       } catch (error: any) {
         console.error("Delete failed", error);
         toast({
-          title: "Delete failed",
-          description: error?.message ?? "Unable to delete the photo.",
+          title: t('photos.deleteFailed'),
+          description: error?.message ?? t('photos.unableDelete'),
           variant: "destructive",
         });
       }
@@ -284,8 +287,8 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
   const processFile = async (file: File, inputElement: HTMLInputElement) => {
     if (file.size > MAX_FILE_SIZE_BYTES) {
       toast({
-        title: "File too large",
-        description: "Choose a photo that is 10MB or smaller before compression.",
+        title: t('photos.fileTooLarge'),
+        description: t('photos.fileSizeLimitInfo'),
         variant: "destructive",
       });
       inputElement.value = "";
@@ -354,7 +357,7 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
         }
 
         console.log("Photo updated successfully");
-        toast({ title: "Photo updated", description: "The photo has been replaced." });
+        toast({ title: t('photos.photoUpdated'), description: t('photos.photoReplacedSuccess') });
       } else {
         const insertIndex = Math.min(sheetContext.slotIndex, sortedPhotos.length);
         console.log("Inserting new photo at index:", insertIndex);
@@ -388,8 +391,8 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
     } catch (error: any) {
       console.error("Upload error", error);
       toast({
-        title: "Upload failed",
-        description: error?.message ?? "We couldn't upload that photo. Please try again.",
+        title: t('photos.uploadFailed'),
+        description: error?.message ?? t('photos.uploadError'),
         variant: "destructive",
       });
     } finally {
@@ -449,8 +452,8 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
       } catch (error) {
         console.error("Reorder failed", error);
         toast({
-          title: "Reorder failed",
-          description: "We couldn't reorder the photos. Please try again.",
+          title: t('photos.reorderFailed'),
+          description: t('photos.reorderError'),
           variant: "destructive",
         });
       }
@@ -462,8 +465,8 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
     if (uploading) return;
     if (!sheetContext || (!sheetContext.photo && sortedPhotos.length >= MAX_PHOTOS)) {
       toast({
-        title: "All slots filled",
-        description: "Remove a photo before uploading a new one.",
+        title: t('photos.slotsFilled'),
+        description: t('photos.removeBeforeUpload'),
         variant: "destructive",
       });
       return;
@@ -476,8 +479,8 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
     if (uploading) return;
     if (!sheetContext || (!sheetContext.photo && sortedPhotos.length >= MAX_PHOTOS)) {
       toast({
-        title: "All slots filled",
-        description: "Remove a photo before uploading a new one.",
+        title: t('photos.slotsFilled'),
+        description: t('photos.removeBeforeUpload'),
         variant: "destructive",
       });
       return;
@@ -492,8 +495,8 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="mb-2 text-lg font-semibold">Pick your videos and photos</h3>
-        <p className="text-sm text-muted-foreground">Upload up to six photos to introduce yourself.</p>
+        <h3 className="mb-2 text-lg font-semibold">{t('photos.pickVideosPhotos')}</h3>
+        <p className="text-sm text-muted-foreground">{t('photos.uploadSixPhotosInfo')}</p>
       </div>
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -515,7 +518,7 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
       </DndContext>
 
       <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>Tap to edit</span>
+        <span>{t('photos.tapToEdit')}</span>
         <span>
           {filledCount} of {MAX_PHOTOS}
         </span>
@@ -550,22 +553,22 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
       >
         <SheetContent side="bottom" className="h-auto pb-8">
           <SheetHeader>
-            <SheetTitle>{currentSheetPhoto ? "Edit photo" : "Add a new photo"}</SheetTitle>
+            <SheetTitle>{currentSheetPhoto ? t('photos.editPhoto') : t('photos.addNewPhoto')}</SheetTitle>
             <SheetDescription>
               {currentSheetPhoto
-                ? "Replace or remove this photo to refresh your gallery."
-                : "Choose where to pull your next photo from."}
+                ? t('photos.replaceRemoveInfo')
+                : t('photos.choosePhotoSource')}
             </SheetDescription>
           </SheetHeader>
 
           <div className="mt-6 space-y-3">
             <Button onClick={handleCamera} className="h-12 w-full justify-between" disabled={uploading}>
-              <span>{uploading ? "Uploading…" : "Take Photo"}</span>
+              <span>{uploading ? t('photos.uploading') : t('photos.takePhoto')}</span>
               <Camera className="h-4 w-4" />
             </Button>
 
             <Button onClick={handleCameraRoll} className="h-12 w-full justify-between" disabled={uploading}>
-              <span>{uploading ? "Uploading…" : "Choose from Gallery"}</span>
+              <span>{uploading ? t('photos.uploading') : t('photos.chooseFromGallery')}</span>
               <Image className="h-4 w-4" />
             </Button>
 
@@ -575,13 +578,13 @@ export const PhotoUploadGrid = ({ userId, profileId, photos, onPhotosUpdate }: P
                 onClick={() => handleDelete(currentSheetPhoto)}
                 className="h-12 w-full justify-between border-destructive/40 text-destructive hover:bg-destructive/10"
               >
-                <span>Remove photo</span>
+                <span>{t('photos.removePhoto')}</span>
                 <Trash2 className="h-4 w-4" />
               </Button>
             )}
 
             <Button variant="ghost" onClick={closeSheet} className="h-12 w-full">
-              Cancel
+              {t('common.cancel')}
             </Button>
           </div>
         </SheetContent>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Home,
@@ -23,70 +24,72 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Logo } from "@/components/Logo";
 
-const adminMenuItems = [
-  {
-    title: "Dashboard",
-    url: "/admin",
-    icon: Home,
-  },
-  {
-    title: "Client Management",
-    icon: Users,
-    children: [
-      {
-        title: "All Clients",
-        url: "/admin/clients",
-        icon: Users,
-      },
-    ],
-  },
-  {
-    title: "Matching",
-    icon: Heart,
-    children: [
-      {
-        title: "Suggest Matches",
-        url: "/admin/matches/suggest",
-        icon: Heart,
-      },
-      {
-        title: "Manage Matches",
-        url: "/admin/matches",
-        icon: Heart,
-      },
-    ],
-  },
-  {
-    title: "Access Codes",
-    url: "/admin/access-codes",
-    icon: Code,
-  },
-];
-
-const systemMenuItems = [
-  {
-    title: "Translations",
-    url: "/admin/translations",
-    icon: Settings,
-  },
-  {
-    title: "Settings",
-    url: "/admin/settings",
-    icon: Settings,
-  },
-  {
-    title: "Help & Support",
-    url: "/admin/help",
-    icon: HelpCircle,
-  },
-];
-
 export function AdminSidebar() {
+  const { t } = useTranslation();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
   const currentPath = location.pathname;
-  const [openGroups, setOpenGroups] = useState<string[]>(["Client Management", "Matching"]);
+
+  const adminMenuItems = [
+    {
+      title: t('admin.dashboard'),
+      url: "/admin",
+      icon: Home,
+    },
+    {
+      title: t('admin.clientManagement'),
+      icon: Users,
+      children: [
+        {
+          title: t('admin.allClients'),
+          url: "/admin/clients",
+          icon: Users,
+        },
+      ],
+    },
+    {
+      title: t('admin.matching'),
+      icon: Heart,
+      children: [
+        {
+          title: t('admin.suggestMatches'),
+          url: "/admin/matches/suggest",
+          icon: Heart,
+        },
+        {
+          title: t('admin.manageMatches'),
+          url: "/admin/matches",
+          icon: Heart,
+        },
+      ],
+    },
+    {
+      title: t('admin.accessCodes'),
+      url: "/admin/access-codes",
+      icon: Code,
+    },
+  ];
+
+  const systemMenuItems = [
+    {
+      title: t('admin.translations'),
+      url: "/admin/translations",
+      icon: Settings,
+    },
+    {
+      title: t('admin.settings'),
+      url: "/admin/settings",
+      icon: Settings,
+    },
+    {
+      title: t('admin.helpSupport'),
+      url: "/admin/help",
+      icon: HelpCircle,
+    },
+  ];
+
+  const [openGroups, setOpenGroups] = useState<string[]>([t('admin.clientManagement'), t('admin.matching')]);
 
   const isActive = (path: string) => currentPath === path;
   const isGroupActive = (children: { url: string }[]) => 
@@ -113,7 +116,7 @@ export function AdminSidebar() {
           {!collapsed && (
             <div className="flex flex-col space-y-1">
               <Logo size="sm" />
-              <p className="text-xs text-muted-foreground">Admin Panel</p>
+              <p className="text-xs text-muted-foreground">{t('admin.adminPanel')}</p>
             </div>
           )}
           {collapsed && (
@@ -126,7 +129,7 @@ export function AdminSidebar() {
         {/* Main Navigation */}
         <SidebarGroup>
           <SidebarGroupLabel className={collapsed ? "sr-only" : ""}>
-            Administration
+            {t('admin.administration')}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -194,7 +197,7 @@ export function AdminSidebar() {
         {/* System Navigation */}
         <SidebarGroup className="mt-auto">
           <SidebarGroupLabel className={collapsed ? "sr-only" : ""}>
-            System
+            {t('admin.system')}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>

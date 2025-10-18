@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ const AuthPage = () => {
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
 
   // Check if coming from "I already have an account" link
@@ -221,7 +223,7 @@ const AuthPage = () => {
           to="/client"
           className="hidden rounded-full border border-border bg-transparent px-5 py-2.5 text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground transition hover:border-border-hover hover:text-foreground md:block"
         >
-          Invitation access
+          {t('auth.invitationAccess')}
         </Link>
       </header>
 
@@ -234,10 +236,10 @@ const AuthPage = () => {
         >
           <div className="flex flex-col gap-5">
             <span className="self-center text-[0.65rem] uppercase tracking-[0.35em] text-muted-foreground md:self-start">
-              Private members
+              {t('auth.privateMembers')}
             </span>
             <h1 className="font-display text-4xl font-light leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-6xl">
-              Sign in or finish your invitation.
+              {t('auth.signInOrFinishInvitation')}
             </h1>
             {!isSignInOnly && !hasValidAccessCode && (
               <div className="flex flex-col gap-2 text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
@@ -259,10 +261,10 @@ const AuthPage = () => {
           >
             <div className="rounded-3xl border border-border bg-card p-6 shadow-lg sm:p-8">
               <div className="mb-6 space-y-2 text-center md:text-left">
-                <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">Bloom members</span>
-                <h2 className="font-serif text-2xl font-light text-foreground">{activeTab === "signup" ? "Create your account" : "Sign in"}</h2>
+                <span className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">{t('auth.bloomMembers')}</span>
+                <h2 className="font-serif text-2xl font-light text-foreground">{activeTab === "signup" ? t('auth.createAccount') : t('auth.signIn')}</h2>
                 <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                  {hasValidAccessCode ? "Invitation required" : "Members only"}
+                  {hasValidAccessCode ? t('auth.invitationRequired') : t('auth.membersOnly')}
                 </p>
               </div>
 

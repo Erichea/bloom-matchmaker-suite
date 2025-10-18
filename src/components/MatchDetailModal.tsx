@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,6 +28,7 @@ interface MatchDetailModalProps {
 }
 
 const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchDetailModalProps) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
@@ -158,28 +160,28 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
         if (result.is_mutual_match) {
           // Show celebration modal for mutual match
           toast({
-            title: "🎉 It's a Match!",
-            description: "Both of you are interested! You can now exchange contact information.",
+            title: t('match.itsAMatch'),
+            description: t('match.mutualInterestInfo'),
             duration: 5000,
           });
         } else {
           toast({
-            title: response === 'accepted' ? "Response Sent! ❤️" : "Response Sent",
-            description: response === 'accepted' 
-              ? "We've let them know you're interested. We'll notify you if they feel the same!"
-              : "Thanks for your feedback. We'll use this to improve future matches.",
+            title: response === 'accepted' ? t('match.responseSentAccepted') : t('match.responseSent'),
+            description: response === 'accepted'
+              ? t('match.acceptedInfo')
+              : t('match.rejectedInfo'),
           });
         }
-        
+
         onMatchResponse?.();
         onOpenChange(false);
       } else {
-        throw new Error(result?.message || 'Failed to respond to match');
+        throw new Error(result?.message || t('match.failedResponse'));
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to send response. Please try again.",
+        title: t('common.error'),
+        description: error.message || t('match.failedResponse'),
         variant: "destructive"
       });
     } finally {
@@ -312,15 +314,15 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
               <Card className="bg-primary/5 border-primary/20">
                 <CardContent className="p-6 text-center space-y-3">
                   <div className="text-4xl">🎉</div>
-                  <h3 className="font-semibold text-lg">It's a Match!</h3>
+                  <h3 className="font-semibold text-lg">{t('match.itsAMatch')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    You can now contact each other.
+                    {t('match.contactInfo')}
                   </p>
                   {profileAnswers.instagram_contact && (
                     <div className="pt-3 border-t border-primary/20">
                       <div className="flex items-center justify-center gap-2">
                         <Instagram className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">Instagram:</span>
+                        <span className="text-sm text-muted-foreground">{t('match.instagram')}:</span>
                         <span className="text-base font-medium">{formatAnswer(profileAnswers.instagram_contact)}</span>
                       </div>
                     </div>
@@ -343,9 +345,9 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
                 <Card className="bg-muted/30">
                   <CardContent className="p-6 text-center space-y-3">
                     <div className="text-3xl">💌</div>
-                    <h3 className="font-semibold">Waiting for their response</h3>
+                    <h3 className="font-semibold">{t('match.waitingForResponse')}</h3>
                     <p className="text-sm text-muted-foreground">
-                      You've shown interest. We'll notify you if they feel the same!
+                      {t('match.interestShown')}
                     </p>
                   </CardContent>
                 </Card>
@@ -356,16 +358,16 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
                   disabled={responding}
                 >
                   <X className="w-4 h-4 mr-2" />
-                  Change mind and reject
+                  {t('match.changeReject')}
                 </Button>
               </div>
             ) : userRejected ? (
               <Card className="bg-muted/30">
                 <CardContent className="p-6 text-center space-y-2">
                   <div className="text-3xl">✕</div>
-                  <h3 className="font-semibold">You rejected this match</h3>
+                  <h3 className="font-semibold">{t('match.youRejected')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    This match has been declined. We'll keep finding better connections for you.
+                    {t('match.decliningMessage')}
                   </p>
                 </CardContent>
               </Card>
@@ -380,7 +382,7 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
                     disabled={responding}
                   >
                     <X className="w-5 h-5 mr-2" />
-                    Pass
+                    {t('match.pass')}
                   </Button>
                   <Button
                     size="lg"
@@ -389,18 +391,18 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
                     disabled={responding}
                   >
                     <Heart className="w-5 h-5 mr-2" />
-                    Like
+                    {t('match.like')}
                   </Button>
                 </div>
               </div>
             ) : (
               <div className="space-y-4">
-                <h3 className="font-semibold">Optional: Help us improve</h3>
+                <h3 className="font-semibold">{t('match.helpImprove')}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Any feedback on why this match isn't right for you? (Optional)
+                  {t('match.feedbackPrompt')}
                 </p>
                 <Textarea
-                  placeholder="e.g., Different life goals, not my type, etc."
+                  placeholder={t('match.feedbackExample')}
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
                   rows={3}
@@ -412,7 +414,7 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
                     onClick={() => setShowFeedbackForm(false)}
                     disabled={responding}
                   >
-                    Back
+                    {t('common.back')}
                   </Button>
                   <Button
                     className="flex-1"
@@ -420,7 +422,7 @@ const MatchDetailModal = ({ match, open, onOpenChange, onMatchResponse }: MatchD
                     disabled={responding}
                   >
                     <MessageSquare className="w-4 h-4 mr-2" />
-                    {responding ? "Sending..." : "Submit"}
+                    {responding ? t('common.sending') : t('common.submit')}
                   </Button>
                 </div>
               </div>

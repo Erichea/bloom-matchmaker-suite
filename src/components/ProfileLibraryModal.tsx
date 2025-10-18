@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -38,6 +39,7 @@ const selectPrimaryPhoto = (entries: Array<{ photo_url: string; is_primary: bool
 export const ProfileLibraryModal = ({ open, onOpenChange, sourceProfileId, onSuggestSuccess }: ProfileLibraryModalProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [profiles, setProfiles] = useState<ProfileForSuggestion[]>([]);
   const [selectedProfiles, setSelectedProfiles] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
@@ -79,7 +81,7 @@ export const ProfileLibraryModal = ({ open, onOpenChange, sourceProfileId, onSug
         setProfiles([]);
       }
     } catch (error) {
-      toast({ title: "Error", description: "Could not load profiles for suggestion.", variant: "destructive" });
+      toast({ title: t('common.error'), description: t('profile.loadError'), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -105,11 +107,11 @@ export const ProfileLibraryModal = ({ open, onOpenChange, sourceProfileId, onSug
 
   const handleSubmit = async () => {
     if (selectedProfiles.size === 0) {
-      toast({ title: "No profiles selected", description: "Please select at least one profile to suggest.", variant: "default" });
+      toast({ title: t('profile.noProfileSelected'), description: t('profile.selectAtLeast'), variant: "default" });
       return;
     }
     if (!user) {
-        toast({ title: "Authentication Error", description: "Could not authenticate user.", variant: "destructive" });
+        toast({ title: t('profile.authError'), description: t('profile.authFailed'), variant: "destructive" });
         return;
     }
 
@@ -125,12 +127,12 @@ export const ProfileLibraryModal = ({ open, onOpenChange, sourceProfileId, onSug
         throw error;
       }
 
-      toast({ title: "Success!", description: `Suggested ${selectedProfiles.size} new match(es).` });
+      toast({ title: t('common.success'), description: t('profile.suggestMoreMatches') });
       onSuggestSuccess();
       onOpenChange(false);
     } catch (error) {
       console.error("Failed to create matches:", error);
-      toast({ title: "Error", description: error instanceof Error ? error.message : "Failed to create new matches.", variant: "destructive" });
+      toast({ title: t('common.error'), description: error instanceof Error ? error.message : "Failed to create new matches.", variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -140,8 +142,8 @@ export const ProfileLibraryModal = ({ open, onOpenChange, sourceProfileId, onSug
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Suggest More Matches</DialogTitle>
-          <DialogDescription>Select profiles to suggest as a new match.</DialogDescription>
+          <DialogTitle>{t('profile.suggestMoreMatches')}</DialogTitle>
+          <DialogDescription>{t('profile.selectToSuggest')}</DialogDescription>
         </DialogHeader>
 
         {loading ? (

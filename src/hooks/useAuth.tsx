@@ -1,8 +1,10 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { logoutAwareStorage } from '@/integrations/supabase/storage';
 import { useToast } from '@/hooks/use-toast';
+import { loadUserLanguagePreference } from '@/i18n/config';
 
 interface AuthContextType {
   user: User | null;
@@ -28,6 +30,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     let isMounted = true;
@@ -82,6 +85,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (event === 'SIGNED_IN' && session) {
           logoutAwareStorage.clearLogoutFlag();
           console.log('Cleared logout flag on successful login');
+
+          // Load user's language preference from database
+          if (session.user?.id) {
+            await loadUserLanguagePreference(session.user.id);
+          }
         }
 
         if (isMounted) {
@@ -121,8 +129,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) {
         console.error('Signup error details:', error);
         toast({
-          title: "Sign Up Error",
-          description: error.message || "Failed to create account. Please try again.",
+          title: t('auth.signupError'),
+          description: error.message || t('auth.signupErrorDescription'),
           variant: "destructive",
         });
       } else {
@@ -167,7 +175,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return { error, session: data?.session, user: data?.user };
     } catch (error: any) {
       toast({
-        title: "Sign Up Error",
+        title: t('auth.signupError'),
         description: error.message,
         variant: "destructive",
       });
@@ -188,15 +196,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) {
         console.error("Sign in error:", error);
         toast({
-          title: "Sign In Error",
+          title: t('auth.signInError'),
           description: error.message,
           variant: "destructive",
         });
       } else {
         console.log("Sign in successful:", data);
         toast({
-          title: "Success",
-          description: "Signed in successfully!",
+          title: t('common.success'),
+          description: t('auth.signInSuccess'),
         });
       }
 
@@ -204,7 +212,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error: any) {
       console.error("Sign in exception:", error);
       toast({
-        title: "Sign In Error",
+        title: t('auth.signInError'),
         description: error.message,
         variant: "destructive",
       });
@@ -235,7 +243,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // Don't show toast for "Auth session missing" as it's expected in some cases
         if (!error.message.includes('Auth session missing')) {
           toast({
-            title: "Sign Out Error",
+            title: t('auth.signOutError'),
             description: error.message,
             variant: "destructive",
           });
@@ -261,7 +269,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Don't show toast for session errors as they're expected during logout
       if (!error.message?.includes('Auth session missing')) {
         toast({
-          title: "Sign Out Error",
+          title: t('auth.signOutError'),
           description: error.message,
           variant: "destructive",
         });

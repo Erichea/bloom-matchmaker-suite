@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Heart, Home, Search, ChevronLeft, ChevronRight, Instagram } from "lucide-react";
@@ -61,6 +62,7 @@ const MutualMatches = () => {
   const { user, session, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [profile, setProfile] = useState<any>(null);
   const [matchesWithStatus, setMatchesWithStatus] = useState<MatchWithStatus[]>([]);
@@ -480,7 +482,7 @@ const MutualMatches = () => {
         <header className="sticky top-0 z-40 border-b border-border bg-background-light dark:bg-background-dark">
           <div className="flex h-16 items-center justify-between px-4">
             <div className="w-9"></div>
-            <h1 className="text-lg font-semibold">Mutual Matches</h1>
+            <h1 className="text-lg font-semibold">{t('matches.mutualMatches')}</h1>
             <div className="w-9"></div>
           </div>
         </header>
@@ -492,7 +494,7 @@ const MutualMatches = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Search matches..."
+                placeholder={t('matches.searchMatches')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 pr-10"
@@ -514,8 +516,8 @@ const MutualMatches = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="recent">Most Recent</SelectItem>
-                <SelectItem value="alphabetical">Alphabetical</SelectItem>
+                <SelectItem value="recent">{t('matches.mostRecent')}</SelectItem>
+                <SelectItem value="alphabetical">{t('matches.alphabetical')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -571,7 +573,7 @@ const MutualMatches = () => {
                           </div>
                         ) : (
                           <p className="text-sm text-muted-foreground">
-                            No Instagram
+                            {t('matches.noInstagram')}
                           </p>
                         )}
                       </div>
@@ -682,7 +684,7 @@ const MutualMatches = () => {
                   <Heart className="w-12 h-12 text-muted-foreground" />
                 </div>
                 <h2 className="text-2xl font-bold mb-3">
-                  {searchQuery ? "No matches found" : "No mutual matches yet"}
+                  {searchQuery ? t('matches.noMatchesFound') : t('matches.noMutualMatchesYet')}
                 </h2>
                 <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                   {searchQuery

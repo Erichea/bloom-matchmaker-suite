@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +13,7 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
   const { user, loading, signOut } = useAuth();
+  const { t } = useTranslation();
   const [userRole, setUserRole] = useState<string | undefined>(undefined);
   const [roleLoading, setRoleLoading] = useState(false);
   const [checkedUserId, setCheckedUserId] = useState<string | null>(null);
@@ -109,19 +111,19 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8 text-center">
           <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('protected.accessDenied')}</h1>
           <p className="text-gray-600 mb-6">
-            You do not have permission to access this page. This area is restricted to administrators only.
+            {t('protected.noPermissionMessage')}
           </p>
           <div className="space-y-3">
             <p className="text-sm text-gray-500">
-              Current user role: <span className="font-semibold">{userRole || 'client'}</span>
+              {t('protected.currentUserRole')} <span className="font-semibold">{userRole || 'client'}</span>
             </p>
             <Button onClick={() => window.location.href = '/client'} className="w-full">
-              Go to Client Dashboard
+              {t('protected.goToClientDashboard')}
             </Button>
             <Button onClick={signOut} variant="outline" className="w-full">
-              Sign Out
+              {t('protected.signOut')}
             </Button>
           </div>
         </div>

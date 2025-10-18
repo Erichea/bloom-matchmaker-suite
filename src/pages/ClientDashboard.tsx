@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -37,6 +38,7 @@ const ClientDashboard = () => {
   const { user, session, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [profile, setProfile] = useState<any>(null);
@@ -372,9 +374,9 @@ const ClientDashboard = () => {
           <header className="flex justify-between items-center mb-8">
             <div>
               <p className="text-sm text-subtle-light dark:text-subtle-dark mb-1">
-                Welcome back,
+                {t('dashboard.welcomeBack')}
               </p>
-              <h1 className="text-2xl font-display font-semibold">{profile?.first_name || user?.user_metadata?.first_name || 'there'}</h1>
+              <h1 className="text-2xl font-display font-semibold">{profile?.first_name || user?.user_metadata?.first_name || t('dashboard.there')}</h1>
             </div>
             <button
               onClick={() => navigate('/client/profile')}
@@ -442,7 +444,7 @@ const ClientDashboard = () => {
                   <div className="mt-4 space-y-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs uppercase tracking-[0.2em] text-subtle-light dark:text-subtle-dark">Questionnaire progress</span>
+                        <span className="text-xs uppercase tracking-[0.2em] text-subtle-light dark:text-subtle-dark">{t('dashboard.questionnaireProgress')}</span>
                         <span className="text-lg font-medium text-text-light dark:text-text-dark">{completionPercentage}%</span>
                       </div>
                       <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-600">

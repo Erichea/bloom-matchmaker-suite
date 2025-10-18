@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOnboardingQuestionnaire } from "@/hooks/useOnboardingQuestionnaire";
@@ -21,6 +22,7 @@ export default function ProfileEditPage() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<ProfileTab>("questions");
   const [photos, setPhotos] = useState<any[]>([]);
   const [profileId, setProfileId] = useState<string>("");
@@ -107,16 +109,16 @@ export default function ProfileEditPage() {
     await saveAnswer(questionId, answer);
     setEditingQuestionId(null);
     toast({
-      title: "Answer saved",
-      description: "Your answer has been updated successfully."
+      title: t('profile.answerSaved'),
+      description: t('profile.answerSavedDesc')
     });
   };
 
   const handleLogout = async () => {
     await signOut();
     toast({
-      title: "Logged out",
-      description: "You have been successfully logged out."
+      title: t('profile.loggedOut'),
+      description: t('profile.loggedOutDesc')
     });
     navigate("/auth");
   };
@@ -168,9 +170,9 @@ export default function ProfileEditPage() {
           <div className="flex h-16 items-center justify-between px-4">
             <Button variant="ghost" onClick={() => navigate("/client/dashboard")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              {t('common.back')}
             </Button>
-            <h1 className="text-lg font-semibold">Edit Profile</h1>
+            <h1 className="text-lg font-semibold">{t('profile.editProfile')}</h1>
             <Button
               variant="ghost"
               size="sm"
@@ -178,12 +180,12 @@ export default function ProfileEditPage() {
               disabled={!profileData}
             >
               <Eye className="h-4 w-4 mr-2" />
-              Preview
+              {t('profile.preview')}
             </Button>
           </div>
           <TabsList className="mx-4 mb-2 grid w-auto grid-cols-2">
-            <TabsTrigger value="questions">Questions</TabsTrigger>
-            <TabsTrigger value="photos">Photos ({photos.length})</TabsTrigger>
+            <TabsTrigger value="questions">{t('profile.questions')}</TabsTrigger>
+            <TabsTrigger value="photos">{t('profile.photos')} ({photos.length})</TabsTrigger>
           </TabsList>
         </div>
 
@@ -200,7 +202,7 @@ export default function ProfileEditPage() {
             {/* Account Section */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Account</CardTitle>
+                <CardTitle className="text-base">{t('profile.account')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Button
@@ -209,7 +211,7 @@ export default function ProfileEditPage() {
                   className="w-full justify-start"
                 >
                   <LogOut className="h-4 w-4 mr-2" />
-                  Log out
+                  {t('profile.logOut')}
                 </Button>
               </CardContent>
             </Card>
@@ -220,7 +222,7 @@ export default function ProfileEditPage() {
           <div className="max-w-2xl mx-auto px-4 py-8 space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Your Photos</CardTitle>
+                <CardTitle>{t('profile.yourPhotos')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <PhotoUploadGrid

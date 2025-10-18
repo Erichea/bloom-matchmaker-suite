@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +15,7 @@ interface EmailVerificationProps {
 }
 
 export const EmailVerification = ({ email, onVerificationComplete, onBackToSignIn }: EmailVerificationProps) => {
+  const { t } = useTranslation();
   const [verificationCode, setVerificationCode] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -37,23 +39,23 @@ export const EmailVerification = ({ email, onVerificationComplete, onBackToSignI
       if (error) {
         console.error('Verification error:', error);
         toast({
-          title: "Verification Failed",
-          description: error.message || "Invalid verification code. Please try again.",
+          title: t('verification.verificationFailed'),
+          description: error.message || t('verification.invalidCode'),
           variant: "destructive",
         });
       } else {
         console.log('Verification successful!', data);
         toast({
-          title: "Email Verified! 🎉",
-          description: "Welcome to BLOOM! You can now sign in.",
+          title: t('verification.emailVerified'),
+          description: t('verification.welcomeBloom'),
         });
         onVerificationComplete();
       }
     } catch (error: any) {
       console.error('Verification exception:', error);
       toast({
-        title: "Verification Error",
-        description: "Something went wrong. Please try again.",
+        title: t('verification.verificationError'),
+        description: t('verification.somethingWentWrong'),
         variant: "destructive",
       });
     } finally {
@@ -72,20 +74,20 @@ export const EmailVerification = ({ email, onVerificationComplete, onBackToSignI
 
       if (error) {
         toast({
-          title: "Failed to Resend",
+          title: t('verification.failedResend'),
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Code Sent! ✉️",
-          description: "A new verification code has been sent to your email.",
+          title: t('verification.codeSent'),
+          description: t('verification.newCodeSent'),
         });
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: "Failed to resend code. Please try again.",
+        title: t('common.error'),
+        description: t('verification.failedResendRetry'),
         variant: "destructive",
       });
     } finally {
@@ -99,7 +101,7 @@ export const EmailVerification = ({ email, onVerificationComplete, onBackToSignI
         <div className="space-y-2">
           <div className="flex items-center justify-center space-x-2">
             <Mail className="h-5 w-5 text-accent animate-float" />
-            <CardTitle className="text-2xl font-light">Verify Your Email</CardTitle>
+            <CardTitle className="text-2xl font-light">{t('verification.verifyEmail')}</CardTitle>
             <Sparkles className="h-5 w-5 text-accent animate-pulse-soft" />
           </div>
           <div className="w-12 h-0.5 bg-accent mx-auto"></div>
@@ -112,12 +114,12 @@ export const EmailVerification = ({ email, onVerificationComplete, onBackToSignI
         <form onSubmit={handleVerifyCode} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="verificationCode" className="text-sm font-medium text-muted-foreground">
-              Verification Code
+              {t('verification.verificationCode')}
             </Label>
             <Input
               id="verificationCode"
               type="text"
-              placeholder="Enter 6-digit code"
+              placeholder={t('verification.enter6DigitCode')}
               value={verificationCode}
               onChange={(e) => setVerificationCode(e.target.value)}
               className="input-premium text-center text-lg tracking-wider"
@@ -134,10 +136,10 @@ export const EmailVerification = ({ email, onVerificationComplete, onBackToSignI
             {isVerifying ? (
               <div className="flex items-center">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                Verifying...
+                {t('verification.verifying')}
               </div>
             ) : (
-              "Verify Email"
+              t('verification.verifyEmailButton')
             )}
           </Button>
         </form>
@@ -150,7 +152,7 @@ export const EmailVerification = ({ email, onVerificationComplete, onBackToSignI
               disabled={isResending}
               className="text-sm"
             >
-              {isResending ? "Sending..." : "Resend Code"}
+              {isResending ? t('common.sending') : t('verification.resendCode')}
             </Button>
           </div>
 
@@ -161,14 +163,14 @@ export const EmailVerification = ({ email, onVerificationComplete, onBackToSignI
               className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center mx-auto space-x-1"
             >
               <ArrowLeft className="h-3 w-3" />
-              <span>Back to Sign In</span>
+              <span>{t('verification.backToSignIn')}</span>
             </button>
           </div>
         </div>
 
         <div className="bg-accent/30 border border-accent/20 rounded-lg p-3">
           <p className="text-xs text-center text-muted-foreground">
-            Didn't receive the code? Check your spam folder or click "Resend Code" above.
+            {t('verification.checkSpamFolder')}
           </p>
         </div>
       </CardContent>

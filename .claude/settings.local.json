@@ -28,7 +28,8 @@
       "Bash(claude update)",
       "Bash(git fetch origin)",
       "Bash(git merge-base --is-ancestor HEAD origin/main)",
-      "Bash(git merge --no-commit --no-ff origin/main)"
+      "Bash(git merge --no-commit --no-ff origin/main)",
+      "Bash(node -e \"const en = require(''./public/locales/en.json''); const fr = require(''./public/locales/fr.json''); console.log(''✓ en.json valid:'', Object.keys(en).length, ''sections''); console.log(''✓ fr.json valid:'', Object.keys(fr).length, ''sections'');\")"
     ],
     "deny": [],
     "ask": []
