@@ -104,24 +104,45 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
   return (
     <div className="space-y-4 w-full">
       {/* User's MBTI Indicator */}
-      {userMBTI && (
-        <div className="flex items-center gap-3 p-3 bg-primary/10 rounded-2xl">
-          <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 shadow-sm">
-            {(() => {
-              const userType = mbtiData.find(t => t.type === userMBTI);
-              return userType ? <userType.icon className="w-8 h-8 object-contain" /> : null;
-            })()}
+      {userMBTI && (() => {
+        const userAxes = mbtiToAxes(userMBTI);
+        const userType = mbtiData.find(t => t.type === userMBTI);
+
+        return (
+          <div className="flex items-center gap-3 p-3 bg-primary/10 rounded-2xl">
+            {/* 2x2 Table on the left */}
+            <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+              <div className="flex items-center gap-1">
+                <span className="text-muted-foreground">I↔E:</span>
+                <span className="font-mono font-medium">{userAxes.ei}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-muted-foreground">S↔N:</span>
+                <span className="font-mono font-medium">{userAxes.sn}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-muted-foreground">T↔F:</span>
+                <span className="font-mono font-medium">{userAxes.tf}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-muted-foreground">J↔P:</span>
+                <span className="font-mono font-medium">{userAxes.jp}</span>
+              </div>
+            </div>
+
+            {/* Character and Type */}
+            <div className="flex items-center gap-2 flex-1">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 shadow-sm">
+                {userType && <userType.icon className="w-8 h-8 object-contain" />}
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Your type</p>
+                <p className="text-sm font-semibold">{userMBTI}</p>
+              </div>
+            </div>
           </div>
-          <div className="flex-1">
-            <p className="text-xs text-muted-foreground">Your personality type</p>
-            <p className="text-sm font-semibold">{userMBTI}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-xs text-muted-foreground">Current sliders</p>
-            <p className="text-xs font-mono font-medium">{Math.round(axes.ei)}/{Math.round(axes.sn)}/{Math.round(axes.tf)}/{Math.round(axes.jp)}</p>
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Slider Controls Section - Compact 2x2 Grid */}
       <div className="w-full p-4 bg-muted/30 rounded-2xl">
