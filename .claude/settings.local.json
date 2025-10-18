@@ -32,7 +32,10 @@
       "Bash(node -e \"const en = require(''./public/locales/en.json''); const fr = require(''./public/locales/fr.json''); console.log(''✓ en.json valid:'', Object.keys(en).length, ''sections''); console.log(''✓ fr.json valid:'', Object.keys(fr).length, ''sections'');\")",
       "Bash(grep -r '\"[A-Z][a-zA-Z ]*\"' src/ --include=\"*.tsx\" --include=\"*.ts\" | head -20)",
       "Bash(grep -r \"placeholder=\" src/ --include=\"*.tsx\" --include=\"*.ts\" | head -10)",
-      "Bash(grep -r \"title=\" src/ --include=\"*.tsx\" --include=\"*.ts\" | head -10)"
+      "Bash(grep -r \"title=\" src/ --include=\"*.tsx\" --include=\"*.ts\" | head -10)",
+      "Bash(node:*)",
+      "Bash(timeout:*)",
+      "Bash(python3:*)"
     ],
     "deny": [],
     "ask": []

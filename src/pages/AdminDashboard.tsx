@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useTranslation } from "react-i18next";
 
 interface DashboardStats {
   totalClients: number;
@@ -32,6 +33,7 @@ interface RecentUpdate {
 }
 
 const AdminDashboard = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats>({
     totalClients: 0,
@@ -183,28 +185,28 @@ const AdminDashboard = () => {
 
   const statsConfig = [
     {
-      title: "Total Clients",
+      title: t('admin.totalClients'),
       value: stats.totalClients.toString(),
       icon: Users,
       description: "Active client base",
       color: "text-primary"
     },
     {
-      title: "Pending Approval",
+      title: t('admin.pendingApproval'),
       value: stats.pendingApproval.toString(),
       icon: UserX,
       description: "Profiles awaiting review",
       color: "text-warning"
     },
     {
-      title: "Active Profiles",
+      title: t('admin.activeProfiles'),
       value: stats.activeProfiles.toString(),
       icon: UserCheck,
       description: "Approved and matching",
       color: "text-success"
     },
     {
-      title: "Successful Matches",
+      title: t('admin.successfulMatches'),
       value: stats.successfulMatches.toString(),
       icon: Heart,
       description: "Both accepted",
@@ -219,10 +221,10 @@ const AdminDashboard = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">
-              Welcome back!
+              {t('admin.dashboardTitle')}
             </h1>
             <p className="text-muted-foreground mt-2">
-              Here's what's happening with your matchmaking business today.
+              {t('admin.dashboardSubtitle')}
             </p>
           </div>
         </div>
@@ -259,9 +261,9 @@ const AdminDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <TrendingUp className="mr-2 h-5 w-5 text-primary" />
-                Recent Profile Updates
+                {t('admin.recentProfileUpdates')}
               </CardTitle>
-              <CardDescription>Latest profile changes</CardDescription>
+              <CardDescription>{t('admin.latestProfileChanges')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -314,9 +316,9 @@ const AdminDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Eye className="mr-2 h-5 w-5 text-accent" />
-                Recently Viewed Profiles
+                {t('admin.recentlyViewedProfiles')}
               </CardTitle>
-              <CardDescription>Profiles you've recently opened</CardDescription>
+              <CardDescription>{t('admin.profilesYouRecentlyOpened')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -324,7 +326,7 @@ const AdminDashboard = () => {
                   <p className="text-muted-foreground text-center py-4">Loading...</p>
                 ) : recentProfiles.length === 0 ? (
                   <p className="text-muted-foreground text-center py-4">
-                    No profiles viewed yet. Open a client profile to see it here.
+                    {t('admin.noProfilesViewedYet')}
                   </p>
                 ) : recentProfiles.slice(0, 5).map((profile) => (
                   <div

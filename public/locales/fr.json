@@ -69,12 +69,15 @@
     "pendingMatches": "Compatibilités en attente",
     "completeProfileQuestionnaire": "Complétez votre questionnaire de profil pour le soumettre pour examen par le matchmaker.",
     "lookingForMutualMatches": "Vous cherchez des compatibilités mutuelles?",
-    "viewMutualMatches": "Voir les compatibilités mutuelles"
+    "viewMutualMatches": "Voir les compatibilités mutuelles",
+    "welcome": "Bienvenue",
+    "recentActivity": "Activité récente",
+    "statistics": "Statistiques",
+    "totalMatches": "Total des compatibilités",
+    "activeMatches": "Compatibilités actives",
+    "profileViews": "Vues du profil"
   },
   "profileStatus": {
-    "completeYourProfile": "Complétez votre profil",
-    "letsGetStarted": "Commençons",
-    "completeQuestionnaireIntro": "Complétez votre questionnaire afin que nous puissions commencer à créer des présentations parfaites pour vous.",
     "profileNeedsRevision": "Le profil nécessite une révision",
     "updateRequired": "Mise à jour requise",
     "refineProfile": "affinons votre profil",
@@ -85,8 +88,6 @@
     "reviewInProgress": "Votre profil est en cours d'examen par votre matchmaker. Vous serez notifié une fois approuvé et nous commencerons à créer des présentations.",
     "updateProfileRejected": "Veuillez mettre à jour votre profil et le soumettre à nouveau pour examen.",
     "submitForReview": "Complétez votre questionnaire de profil pour le soumettre pour examen par le matchmaker.",
-    "updateQuestionnaire": "Mettre à jour le questionnaire",
-    "continueQuestionnaire": "Continuer le questionnaire",
     "curatorMessage": "Nous créons des connexions avec intention. Les présentations sont réfléchies, basées sur des valeurs partagées et sur ce qui compte vraiment.",
     "noMatchesYet": "Votre matchmaker prépare la présentation parfaite. Nous vous informerons dès qu'un dossier sera prêt.",
     "lookingForMutual": "Vous cherchez des compatibilités mutuelles ?"
@@ -190,16 +191,8 @@
     "declined": "Refusé",
     "pending": "En attente"
   },
-  "dashboard": {
-    "welcome": "Bienvenue",
-    "recentActivity": "Activité récente",
-    "statistics": "Statistiques",
-    "totalMatches": "Total des compatibilités",
-    "activeMatches": "Compatibilités actives",
-    "profileViews": "Vues du profil"
-  },
-  "admin": {
-    "dashboard": "Tableau de bord administrateur",
+    "admin": {
+    "adminDashboard": "Tableau de bord administrateur",
     "clients": "Clients",
     "matches": "Compatibilités",
     "accessCodes": "Codes d'accès",
