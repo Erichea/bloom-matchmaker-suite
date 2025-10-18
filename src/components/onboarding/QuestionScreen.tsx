@@ -513,9 +513,12 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
           // Get user's own MBTI type from their profile answers
           const userMBTI = allAnswers?.['mbti'] || undefined;
 
+          // Ensure the value is always an array for MBTI preference selector
+          const mbtiPreferenceValue = Array.isArray(localAnswer) ? localAnswer : [];
+
           return (
             <MBTIPreferenceSelector
-              value={localAnswer || []}
+              value={mbtiPreferenceValue}
               onChange={setLocalAnswer}
               userMBTI={userMBTI}
             />
