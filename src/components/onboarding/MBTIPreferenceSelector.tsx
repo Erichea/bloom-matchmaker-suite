@@ -1,9 +1,24 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { mbtiToAxes, calculateMBTIMatch, getRecommendedMBTITypes, axisDescriptions, type MBTIAxes } from "@/lib/mbtiUtils";
+import { mbtiToAxes, calculateMBTIMatch, axisDescriptions, type MBTIAxes } from "@/lib/mbtiUtils";
 import { Slider } from "@/components/ui/slider";
-import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import ENFJ from "@/images/mbti/ENFJ.svg?react";
+import ENFP from "@/images/mbti/ENFP.svg?react";
+import ENTJ from "@/images/mbti/ENTJ.svg?react";
+import ENTP from "@/images/mbti/ENTP.svg?react";
+import ESFJ from "@/images/mbti/ESFJ.svg?react";
+import ESFP from "@/images/mbti/ESFP.svg?react";
+import ESTJ from "@/images/mbti/ESTJ.svg?react";
+import ESTP from "@/images/mbti/ESTP.svg?react";
+import INFJ from "@/images/mbti/INFJ.svg?react";
+import INFP from "@/images/mbti/INFP.svg?react";
+import INTJ from "@/images/mbti/INTJ.svg?react";
+import INTP from "@/images/mbti/INTP.svg?react";
+import ISFJ from "@/images/mbti/ISFJ.svg?react";
+import ISFP from "@/images/mbti/ISFP.svg?react";
+import ISTJ from "@/images/mbti/ISTJ.svg?react";
+import ISTP from "@/images/mbti/ISTP.svg?react";
 
 interface MBTIPreferenceSelectorProps {
   value: string[]; // Array of MBTI types (e.g., ["ENFP", "ENFJ"])
@@ -16,32 +31,36 @@ interface MBTIType {
   label: string;
   color: string;
   description: string;
+  icon: React.ComponentType<any>;
 }
 
 const mbtiData: MBTIType[] = [
-  { type: 'ESFJ', label: 'Ambassador', color: '#10b981', description: 'Warm, conscientious, dedicated' },
-  { type: 'ESFP', label: 'Performer', color: '#10b981', description: 'Spontaneous, energetic, enthusiastic' },
-  { type: 'ESTP', label: 'Rebel', color: '#10b981', description: 'Smart, energetic, perceptive' },
-  { type: 'ENTJ', label: 'Commander', color: '#60a5fa', description: 'Bold, strategic, leader' },
-  { type: 'ENFJ', label: 'Hero', color: '#60a5fa', description: 'Charismatic, inspiring, leader' },
-  { type: 'ENFP', label: 'Crusader', color: '#60a5fa', description: 'Enthusiastic, creative, sociable' },
-  { type: 'ISFP', label: 'Artist', color: '#60a5fa', description: 'Exploratory, artistic, sensitive' },
-  { type: 'ESTJ', label: 'Executive', color: '#60a5fa', description: 'Dedicated, organized, decisive' },
-  { type: 'ISTJ', label: 'Realist', color: '#fb923c', description: 'Practical, fact-minded, reliable' },
-  { type: 'ISTP', label: 'Artisan', color: '#fb923c', description: 'Bold, practical, experimenter' },
-  { type: 'INFJ', label: 'Guardian', color: '#fb923c', description: 'Insightful, principled, passionate' },
-  { type: 'INTJ', label: 'Mastermind', color: '#fb923c', description: 'Imaginative, strategic, planner' },
-  { type: 'ENTP', label: 'Challenger', color: '#fb923c', description: 'Smart, curious, witty' },
-  { type: 'INFP', label: 'Peacemaker', color: '#fb923c', description: 'Poetic, kind, altruistic' },
-  { type: 'INTP', label: 'Genius', color: '#fb923c', description: 'Innovative, logical, abstract' },
-  { type: 'ISFJ', label: 'Protector', color: '#fb923c', description: 'Warm, conscientious, dedicated' }
+  { type: 'ESFJ', label: 'Ambassador', color: '#10b981', description: 'Warm, conscientious, dedicated', icon: ESFJ },
+  { type: 'ESFP', label: 'Performer', color: '#10b981', description: 'Spontaneous, energetic, enthusiastic', icon: ESFP },
+  { type: 'ESTP', label: 'Rebel', color: '#10b981', description: 'Smart, energetic, perceptive', icon: ESTP },
+  { type: 'ENTJ', label: 'Commander', color: '#60a5fa', description: 'Bold, strategic, leader', icon: ENTJ },
+  { type: 'ENFJ', label: 'Hero', color: '#60a5fa', description: 'Charismatic, inspiring, leader', icon: ENFJ },
+  { type: 'ENFP', label: 'Crusader', color: '#60a5fa', description: 'Enthusiastic, creative, sociable', icon: ENFP },
+  { type: 'ISFP', label: 'Artist', color: '#60a5fa', description: 'Exploratory, artistic, sensitive', icon: ISFP },
+  { type: 'ESTJ', label: 'Executive', color: '#60a5fa', description: 'Dedicated, organized, decisive', icon: ESTJ },
+  { type: 'ISTJ', label: 'Realist', color: '#fb923c', description: 'Practical, fact-minded, reliable', icon: ISTJ },
+  { type: 'ISTP', label: 'Artisan', color: '#fb923c', description: 'Bold, practical, experimenter', icon: ISTP },
+  { type: 'INFJ', label: 'Guardian', color: '#fb923c', description: 'Insightful, principled, passionate', icon: INFJ },
+  { type: 'INTJ', label: 'Mastermind', color: '#fb923c', description: 'Imaginative, strategic, planner', icon: INTJ },
+  { type: 'ENTP', label: 'Challenger', color: '#fb923c', description: 'Smart, curious, witty', icon: ENTP },
+  { type: 'INFP', label: 'Peacemaker', color: '#fb923c', description: 'Poetic, kind, altruistic', icon: INFP },
+  { type: 'INTP', label: 'Genius', color: '#fb923c', description: 'Innovative, logical, abstract', icon: INTP },
+  { type: 'ISFJ', label: 'Protector', color: '#fb923c', description: 'Warm, conscientious, dedicated', icon: ISFJ }
 ];
 
 const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, onChange, userMBTI }) => {
   // Initialize axes from user's MBTI type, or default to center
   const initialAxes = userMBTI ? mbtiToAxes(userMBTI) : { ei: 50, sn: 50, tf: 50, jp: 50 };
   const [axes, setAxes] = useState<MBTIAxes>(initialAxes);
-  const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set(value || []));
+  const [hoveredType, setHoveredType] = useState<string | null>(null);
+
+  // Create a Set for faster lookups
+  const selectedTypesSet = useMemo(() => new Set(value || []), [value]);
 
   // Calculate match percentages for all types
   const typesWithMatches = useMemo(() => {
@@ -51,49 +70,18 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
     }));
   }, [axes]);
 
-  // Update selections based on slider changes (auto-recommend high matches)
-  useEffect(() => {
-    const recommended = getRecommendedMBTITypes(axes, 50); // 50% threshold
-    const newSelections = new Set(selectedTypes);
-
-    // Auto-select types with match >= 70%
-    typesWithMatches.forEach(item => {
-      if (item.match >= 70 && !newSelections.has(item.type)) {
-        newSelections.add(item.type);
-      }
-    });
-
-    // Update if selections changed
-    if (newSelections.size !== selectedTypes.size) {
-      setSelectedTypes(newSelections);
-      onChange(Array.from(newSelections));
-    }
-  }, [axes]);
-
-  const handleAxisChange = (axis: keyof MBTIAxes, value: number[]) => {
-    setAxes(prev => ({ ...prev, [axis]: value[0] }));
+  const handleAxisChange = (axis: keyof MBTIAxes, newValue: number[]) => {
+    setAxes(prev => ({ ...prev, [axis]: newValue[0] }));
   };
 
   const toggleType = (type: string) => {
-    const newSelections = new Set(selectedTypes);
+    const newSelections = new Set(selectedTypesSet);
     if (newSelections.has(type)) {
       newSelections.delete(type);
     } else {
       newSelections.add(type);
     }
-    setSelectedTypes(newSelections);
     onChange(Array.from(newSelections));
-  };
-
-  const selectAll = () => {
-    const allTypes = mbtiData.map(t => t.type);
-    setSelectedTypes(new Set(allTypes));
-    onChange(allTypes);
-  };
-
-  const deselectAll = () => {
-    setSelectedTypes(new Set());
-    onChange([]);
   };
 
   return (
@@ -240,71 +228,82 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
         </div>
       </div>
 
-      {/* MBTI Types Grid (4x4 - Always visible) */}
-      <div className="w-full p-6 bg-muted/30 rounded-3xl">
-        <h3 className="text-base font-semibold mb-4 text-foreground">Select Compatible Types</h3>
+      {/* MBTI Types Grid (4x4) - Matching MBTIGrid design */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-semibold text-foreground">Select Compatible Types</h3>
+          <p className="text-xs text-muted-foreground">
+            Match indicators show compatibility based on sliders
+          </p>
+        </div>
 
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-4 gap-4 md:gap-6">
           {typesWithMatches.map((mbtiType) => {
-            const isSelected = selectedTypes.has(mbtiType.type);
+            const isSelected = selectedTypesSet.has(mbtiType.type);
+            const isHovered = hoveredType === mbtiType.type;
             const matchLevel = mbtiType.match >= 70 ? 'high' : mbtiType.match >= 50 ? 'medium' : 'low';
 
             return (
               <div
                 key={mbtiType.type}
                 onClick={() => toggleType(mbtiType.type)}
+                onMouseEnter={() => setHoveredType(mbtiType.type)}
+                onMouseLeave={() => setHoveredType(null)}
                 className={cn(
-                  "flex flex-col items-center cursor-pointer transition-all duration-300 p-3 rounded-2xl relative group",
+                  "flex flex-col items-center cursor-pointer transition-all duration-300 p-4 rounded-2xl relative",
                   "hover:scale-105 active:scale-95",
                   isSelected
-                    ? "bg-primary/10 ring-2 ring-primary"
-                    : matchLevel === 'high'
-                    ? "bg-green-50 dark:bg-green-900/20"
-                    : matchLevel === 'medium'
-                    ? "bg-blue-50 dark:bg-blue-900/20"
-                    : "bg-muted/50"
+                    ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg"
+                    : "bg-gradient-to-br from-muted/30 to-muted/10"
                 )}
               >
-                {/* Match percentage badge */}
+                {/* Match percentage indicator - small badge at top right */}
                 <div className={cn(
-                  "absolute top-1 right-1 text-[10px] font-bold px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity",
+                  "absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full transition-opacity",
                   matchLevel === 'high' ? "bg-green-500 text-white" :
                   matchLevel === 'medium' ? "bg-blue-500 text-white" :
-                  "bg-gray-500 text-white"
+                  "bg-gray-400 text-white",
+                  isHovered ? "opacity-100" : "opacity-60"
                 )}>
                   {mbtiType.match}%
                 </div>
 
-                {/* Label */}
-                <p className="text-xs font-medium mb-2 text-center text-foreground">
+                {/* MBTI Type Label */}
+                <p className="text-sm font-medium mb-3 text-center">
                   {mbtiType.label}
                 </p>
 
-                {/* Character Circle */}
-                <div className="relative mb-2">
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center shadow-sm bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
-                    <div className="text-xl font-bold">{mbtiType.type.charAt(0)}</div>
+                {/* Character Circle with SVG */}
+                <div className="relative mb-3">
+                  <div
+                    className={cn(
+                      "w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center shadow-md transition-all duration-300",
+                      "bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800"
+                    )}
+                  >
+                    {/* SVG Character */}
+                    <mbtiType.icon className="w-12 h-12 md:w-14 md:h-14 object-contain" />
                   </div>
                 </div>
 
                 {/* Type Tag */}
                 <div
                   className={cn(
-                    "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all duration-300 shadow-sm",
+                    "inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300",
                     isSelected
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-background text-foreground"
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "bg-muted text-muted-foreground hover:bg-primary/20"
                   )}
                 >
                   <div
                     className={cn(
                       "w-3 h-3 rounded-full flex items-center justify-center transition-all duration-300",
-                      isSelected ? "bg-primary-foreground" : "bg-muted"
+                      isSelected ? "bg-primary-foreground" : "bg-background"
                     )}
                   >
                     {isSelected && (
                       <svg
-                        className="w-2 h-2 text-primary"
+                        className="w-2.5 h-2.5 text-primary"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                       >
@@ -315,46 +314,24 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
                   <span>{mbtiType.type}</span>
                 </div>
 
-                {/* Tooltip on hover */}
-                <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                  <div className="bg-gray-900 text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap">
+                {/* Description on hover */}
+                {isHovered && (
+                  <div className="text-xs text-center text-muted-foreground mt-2 px-2">
                     {mbtiType.description}
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
                   </div>
-                </div>
+                )}
               </div>
             );
           })}
         </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center justify-center gap-6">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={selectAll}
-            className="text-xs font-medium"
-          >
-            SELECT ALL
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={deselectAll}
-            className="text-xs font-medium"
-          >
-            DESELECT ALL
-          </Button>
-        </div>
       </div>
 
       {/* Selected Types Summary */}
-      {selectedTypes.size > 0 && (
+      {value.length > 0 && (
         <div className="w-full p-6 bg-muted/30 rounded-3xl">
-          <h3 className="text-base font-semibold mb-3 text-foreground">Your Selections ({selectedTypes.size})</h3>
+          <h3 className="text-base font-semibold mb-3 text-foreground">Your Selections ({value.length})</h3>
           <div className="flex flex-wrap gap-2">
-            {Array.from(selectedTypes).map(type => {
-              const mbtiType = mbtiData.find(t => t.type === type);
+            {value.map(type => {
               const match = typesWithMatches.find(t => t.type === type)?.match || 0;
               return (
                 <div
@@ -362,11 +339,9 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
                   className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium bg-primary text-primary-foreground"
                 >
                   <span>{type}</span>
-                  {match >= 50 && (
-                    <span className="text-xs opacity-75">
-                      {match}%
-                    </span>
-                  )}
+                  <span className="text-xs opacity-75">
+                    {match}% match
+                  </span>
                 </div>
               );
             })}
