@@ -1,0 +1,8 @@
+{
+  "generic": "Une erreur s'est produite",
+  "networkError": "Erreur réseau. Veuillez vérifier votre connexion",
+  "unauthorized": "Vous n'êtes pas autorisé à effectuer cette action",
+  "notFound": "Page non trouvée",
+  "validation": "Veuillez vérifier votre saisie",
+  "required": "Ce champ est obligatoire"
+}

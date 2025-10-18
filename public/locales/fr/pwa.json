@@ -1,0 +1,20 @@
+{
+  "installBloomIos": "Installer Bloom sur iOS",
+  "tapShareButton": "Appuyez sur le bouton Partager en bas de Safari",
+  "addToHomeScreen": "Faites défiler vers le bas et appuyez sur «Ajouter à l'écran d'accueil»",
+  "tapAdd": "Appuyez sur «Ajouter» dans le coin supérieur droit",
+  "useSafariIos": "Assurez-vous d'utiliser le navigateur Safari pour l'installation iOS",
+  "installBloomAndroid": "Installer Bloom sur Android",
+  "tapMenu": "Appuyez sur le menu (trois points) en haut à droite de Chrome",
+  "addToHomeScreenAndroid": "Appuyez sur «Ajouter à l'écran d'accueil» ou «Installer l'application»",
+  "confirmInstall": "Appuyez sur «Installer» ou «Ajouter» pour confirmer",
+  "useChromeAndroid": "Assurez-vous d'utiliser le navigateur Chrome pour l'installation Android",
+  "installBloomDesktop": "Installer Bloom sur le bureau",
+  "clickInstallIcon": "Cliquez sur l'icône d'installation dans la barre d'adresse de votre navigateur",
+  "browserMenu": "Ou recherchez «Installer Bloom» dans le menu de votre navigateur",
+  "chromiumBrowsers": "Fonctionne avec Chrome, Edge et d'autres navigateurs basés sur Chromium",
+  "installBloomApp": "Installer l'application Bloom",
+  "bestExperienceDesc": "Obtenez la meilleure expérience avec les notifications push en installant notre application",
+  "showGuide": "Afficher le guide d'installation",
+  "hideInstructions": "Masquer les instructions"
+}

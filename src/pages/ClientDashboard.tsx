@@ -38,7 +38,7 @@ const ClientDashboard = () => {
   const { user, session, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t } = useTranslation(['dashboard', 'profileStatus', 'common']);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [profile, setProfile] = useState<any>(null);

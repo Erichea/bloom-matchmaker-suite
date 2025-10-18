@@ -1,0 +1,9 @@
+{
+  "unableToSave": "Unable to save",
+  "saveRetryMessage": "We couldn't save your notes. We'll retry when new changes are made.",
+  "saving": "Saving...",
+  "saveFailed": "Save failed. Waiting for new changes...",
+  "lastEdited": "Last edited ",
+  "saved": "Saved",
+  "startTakingNotes": "Start taking notes"
+}

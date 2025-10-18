@@ -1,0 +1,7 @@
+{
+  "accessDenied": "Access Denied",
+  "noPermissionMessage": "You do not have permission to access this page. This area is restricted to administrators only.",
+  "currentUserRole": "Current user role:",
+  "goToClientDashboard": "Go to Client Dashboard",
+  "signOut": "Sign Out"
+}

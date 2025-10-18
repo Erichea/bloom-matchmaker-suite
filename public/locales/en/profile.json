@@ -1,0 +1,9 @@
+{
+  "loadError": "Could not load profiles for suggestion.",
+  "authError": "Authentication Error",
+  "authFailed": "Could not authenticate user.",
+  "noProfileSelected": "No profiles selected",
+  "selectAtLeast": "Please select at least one profile to suggest.",
+  "suggestMoreMatches": "Suggest More Matches",
+  "selectToSuggest": "Select profiles to suggest as a new match."
+}

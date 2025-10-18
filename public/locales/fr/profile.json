@@ -1,0 +1,9 @@
+{
+  "loadError": "Impossible de charger les profils pour la suggestion.",
+  "authError": "Erreur d'authentification",
+  "authFailed": "Impossible d'authentifier l'utilisateur.",
+  "noProfileSelected": "Aucun profil sélectionné",
+  "selectAtLeast": "Veuillez sélectionner au moins un profil à suggérer.",
+  "suggestMoreMatches": "Suggérer plus de compatibilités",
+  "selectToSuggest": "Sélectionnez les profils à suggérer comme une nouvelle compatibilité."
+}

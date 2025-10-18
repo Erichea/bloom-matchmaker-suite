@@ -1,0 +1,7 @@
+{
+  "title": "Notifications",
+  "newMatch": "Vous avez une nouvelle compatibilité!",
+  "profileApproved": "Votre profil a été approuvé",
+  "messageReceived": "Nouveau message reçu",
+  "noNotifications": "Aucune nouvelle notification"
+}

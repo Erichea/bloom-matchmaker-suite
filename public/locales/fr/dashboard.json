@@ -1,0 +1,20 @@
+{
+  "welcomeBack": "Bon retour,",
+  "there": "bienvenue",
+  "completeYourProfile": "Complétez votre profil",
+  "welcomeName": "Bienvenue, {name}",
+  "letsGetStarted": "Commencez",
+  "questionnaireProgress": "Progression du questionnaire",
+  "updateQuestionnaire": "Mettre à jour le questionnaire",
+  "continueQuestionnaire": "Continuer le questionnaire",
+  "pendingMatches": "Compatibilités en attente",
+  "completeProfileQuestionnaire": "Complétez votre questionnaire de profil pour le soumettre pour examen par le matchmaker.",
+  "lookingForMutualMatches": "Vous cherchez des compatibilités mutuelles?",
+  "viewMutualMatches": "Voir les compatibilités mutuelles",
+  "welcome": "Bienvenue",
+  "recentActivity": "Activité récente",
+  "statistics": "Statistiques",
+  "totalMatches": "Total des compatibilités",
+  "activeMatches": "Compatibilités actives",
+  "profileViews": "Vues du profil"
+}

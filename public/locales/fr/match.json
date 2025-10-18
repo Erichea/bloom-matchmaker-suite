@@ -1,0 +1,21 @@
+{
+  "itsAMatch": "🎉 C'est une compatibilité!",
+  "mutualInterestInfo": "Vous vous intéressez l'un à l'autre! Vous pouvez maintenant échanger vos coordonnées.",
+  "responseSentAccepted": "Réponse envoyée! ❤️",
+  "responseSent": "Réponse envoyée",
+  "acceptedInfo": "Nous leur avons fait savoir que vous êtes intéressé. Nous vous notifierons s'ils ressentent la même chose!",
+  "rejectedInfo": "Merci pour vos commentaires. Nous utiliserons ceci pour améliorer les futures compatibilités.",
+  "failedResponse": "Échec de l'envoi de la réponse. Veuillez réessayer.",
+  "contactInfo": "Vous pouvez maintenant vous contacter.",
+  "instagram": "Instagram:",
+  "waitingForResponse": "En attente de leur réponse",
+  "interestShown": "Vous avez montré votre intérêt. Nous vous notifierons s'ils ressentent la même chose!",
+  "changeReject": "Changer d'avis et rejeter",
+  "youRejected": "Vous avez rejeté cette compatibilité",
+  "decliningMessage": "Cette compatibilité a été refusée. Nous continuerons à trouver de meilleures connexions pour vous.",
+  "pass": "Passer",
+  "like": "Intéressé",
+  "helpImprove": "Optionnel: Aidez-nous à améliorer",
+  "feedbackPrompt": "Des commentaires sur pourquoi cette compatibilité n'est pas la bonne pour vous? (Optionnel)",
+  "feedbackExample": "par ex., Objectifs de vie différents, pas mon type, etc."
+}

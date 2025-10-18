@@ -1,0 +1,20 @@
+{
+  "loading": "Chargement...",
+  "save": "Enregistrer",
+  "cancel": "Annuler",
+  "edit": "Modifier",
+  "delete": "Supprimer",
+  "close": "Fermer",
+  "confirm": "Confirmer",
+  "back": "Retour",
+  "next": "Suivant",
+  "submit": "Soumettre",
+  "search": "Rechercher",
+  "filter": "Filtrer",
+  "language": "Langue",
+  "logout": "Déconnexion",
+  "settings": "Paramètres",
+  "error": "Erreur",
+  "success": "Succès!",
+  "sending": "Envoi en cours..."
+}

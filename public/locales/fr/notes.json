@@ -1,0 +1,9 @@
+{
+  "unableToSave": "Impossible de sauvegarder",
+  "saveRetryMessage": "Nous n'avons pas pu sauvegarder vos notes. Nous réessaierons lorsque de nouveaux changements seront effectués.",
+  "saving": "Sauvegarde...",
+  "saveFailed": "Échec de la sauvegarde. En attente de nouveaux changements...",
+  "lastEdited": "Dernière modification ",
+  "saved": "Sauvegardé",
+  "startTakingNotes": "Commencer à prendre des notes"
+}

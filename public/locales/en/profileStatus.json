@@ -1,0 +1,15 @@
+{
+  "profileNeedsRevision": "Profile needs revision",
+  "updateRequired": "Update required",
+  "refineProfile": "let's refine your profile",
+  "thankYou": "Thank you, {name}",
+  "revisionRequested": "Your matchmaker has requested some changes to your profile. Please review and resubmit.",
+  "underReview": "Under review",
+  "profileSubmitted": "Profile submitted",
+  "reviewInProgress": "Your profile is being reviewed by your matchmaker. You'll be notified once approved and we start curating introductions.",
+  "updateProfileRejected": "Please update your profile and resubmit for review.",
+  "submitForReview": "Complete your profile questionnaire to submit for matchmaker review.",
+  "curatorMessage": "We curate connections with intention. Introductions are thoughtful, based on shared values and what truly matters.",
+  "noMatchesYet": "Your matchmaker is curating the perfect introduction. We'll let you know the moment a dossier is ready.",
+  "lookingForMutual": "Looking for mutual matches?"
+}

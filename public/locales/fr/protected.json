@@ -1,0 +1,7 @@
+{
+  "accessDenied": "Accès refusé",
+  "noPermissionMessage": "Vous n'avez pas la permission d'accéder à cette page. Cette zone est réservée aux administrateurs uniquement.",
+  "currentUserRole": "Rôle de l'utilisateur actuel :",
+  "goToClientDashboard": "Aller au tableau de bord client",
+  "signOut": "Se déconnecter"
+}

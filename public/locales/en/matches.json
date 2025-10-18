@@ -1,0 +1,12 @@
+{
+  "title": "Your Matches",
+  "newMatch": "New Match!",
+  "mutualMatches": "Mutual Matches",
+  "compatibility": "Compatibility",
+  "viewProfile": "View Profile",
+  "noMatches": "No matches yet",
+  "noMatchesDesc": "Check back soon for new matches!",
+  "accepted": "Accepted",
+  "declined": "Declined",
+  "pending": "Pending"
+}

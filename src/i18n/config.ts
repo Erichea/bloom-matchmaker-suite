@@ -21,14 +21,20 @@ i18n
     },
 
     backend: {
-      // Load translations from /locales folder
-      loadPath: '/locales/{{lng}}.json',
+      // Load translations from /locales folder with namespaces
+      loadPath: '/locales/{{lng}}/{{ns}}.json',
 
       // Cache translations in localStorage for offline support
       requestOptions: {
         cache: 'default',
       },
     },
+
+    // Default namespaces to load
+    defaultNS: ['common', 'nav', 'auth', 'dashboard'],
+
+    // List of all available namespaces
+    ns: ['common', 'nav', 'auth', 'dashboard', 'profileStatus', 'matches', 'protected', 'landing', 'error', 'notes', 'suggest', 'profile', 'notifications', 'errors', 'success', 'languageSwitcher', 'photos', 'crop', 'verification', 'questionnaire', 'match', 'admin', 'pwa'],
 
     // Interpolation settings
     interpolation: {
@@ -42,6 +48,17 @@ i18n
 
     // Enable debug in development
     debug: import.meta.env.DEV,
+
+    // Development-time warnings
+    saveMissing: import.meta.env.DEV,
+    returnNull: false,
+    returnEmptyString: false,
+    returnObjects: false,
+
+    // Missing key handler
+    missingKeyHandler: import.meta.env.DEV ? (lng, ns, key) => {
+      console.warn(`🔑 Missing translation key: ${key} (language: ${lng}, namespace: ${ns})`);
+    } : undefined,
   });
 
 /**

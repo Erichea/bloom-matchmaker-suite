@@ -1,0 +1,21 @@
+{
+  "itsAMatch": "🎉 It's a Match!",
+  "mutualInterestInfo": "Both of you are interested! You can now exchange contact information.",
+  "responseSentAccepted": "Response Sent! ❤️",
+  "responseSent": "Response Sent",
+  "acceptedInfo": "We've let them know you're interested. We'll notify you if they feel the same!",
+  "rejectedInfo": "Thanks for your feedback. We'll use this to improve future matches.",
+  "failedResponse": "Failed to send response. Please try again.",
+  "contactInfo": "You can now contact each other.",
+  "instagram": "Instagram:",
+  "waitingForResponse": "Waiting for their response",
+  "interestShown": "You've shown interest. We'll notify you if they feel the same!",
+  "changeReject": "Change mind and reject",
+  "youRejected": "You rejected this match",
+  "decliningMessage": "This match has been declined. We'll keep finding better connections for you.",
+  "pass": "Pass",
+  "like": "Like",
+  "helpImprove": "Optional: Help us improve",
+  "feedbackPrompt": "Any feedback on why this match isn't right for you? (Optional)",
+  "feedbackExample": "e.g., Different life goals, not my type, etc."
+}

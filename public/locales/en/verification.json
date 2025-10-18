@@ -1,0 +1,20 @@
+{
+  "verificationFailed": "Verification Failed",
+  "invalidCode": "Invalid verification code. Please try again.",
+  "emailVerified": "Email Verified! 🎉",
+  "welcomeBloom": "Welcome to BLOOM! You can now sign in.",
+  "verificationError": "Verification Error",
+  "somethingWentWrong": "Something went wrong. Please try again.",
+  "failedResend": "Failed to Resend",
+  "codeSent": "Code Sent! ✉️",
+  "newCodeSent": "A new verification code has been sent to your email.",
+  "failedResendRetry": "Failed to resend code. Please try again.",
+  "verifyEmail": "Verify Your Email",
+  "verificationCode": "Verification Code",
+  "enter6DigitCode": "Enter 6-digit code",
+  "verifying": "Verifying...",
+  "verifyEmailButton": "Verify Email",
+  "resendCode": "Resend Code",
+  "backToSignIn": "Back to Sign In",
+  "checkSpamFolder": "Didn't receive the code? Check your spam folder or click \"Resend Code\" above."
+}

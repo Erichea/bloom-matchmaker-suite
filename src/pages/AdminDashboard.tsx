@@ -33,7 +33,7 @@ interface RecentUpdate {
 }
 
 const AdminDashboard = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['admin', 'common']);
   const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats>({
     totalClients: 0,
@@ -106,7 +106,7 @@ const AdminDashboard = () => {
 
             return {
               id: profile.id,
-              first_name: profile.first_name || "Unknown",
+              first_name: profile.first_name || t('admin.unknown'),
               last_name: profile.last_name || "",
               status: profile.status,
               updated_at: profile.updated_at,
@@ -152,7 +152,7 @@ const AdminDashboard = () => {
 
                 return {
                   id: profile.id,
-                  first_name: profile.first_name || "Unknown",
+                  first_name: profile.first_name || t('admin.unknown'),
                   last_name: profile.last_name || "",
                   status: profile.status,
                   updated_at: vp.viewed_at, // Use viewed_at instead of updated_at
@@ -177,7 +177,7 @@ const AdminDashboard = () => {
     const now = new Date();
     const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (seconds < 60) return "just now";
+    if (seconds < 60) return t('admin.justNow');
     if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
     if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
     return `${Math.floor(seconds / 86400)} days ago`;
@@ -188,28 +188,28 @@ const AdminDashboard = () => {
       title: t('admin.totalClients'),
       value: stats.totalClients.toString(),
       icon: Users,
-      description: "Active client base",
+      description: t('admin.activeClientBase'),
       color: "text-primary"
     },
     {
       title: t('admin.pendingApproval'),
       value: stats.pendingApproval.toString(),
       icon: UserX,
-      description: "Profiles awaiting review",
+      description: t('admin.profilesAwaitingReview'),
       color: "text-warning"
     },
     {
       title: t('admin.activeProfiles'),
       value: stats.activeProfiles.toString(),
       icon: UserCheck,
-      description: "Approved and matching",
+      description: t('admin.approvedAndMatching'),
       color: "text-success"
     },
     {
       title: t('admin.successfulMatches'),
       value: stats.successfulMatches.toString(),
       icon: Heart,
-      description: "Both accepted",
+      description: t('admin.bothAccepted'),
       color: "text-accent"
     }
   ];
@@ -268,7 +268,7 @@ const AdminDashboard = () => {
             <CardContent>
               <div className="space-y-4">
                 {loading ? (
-                  <p className="text-muted-foreground text-center py-4">Loading...</p>
+                  <p className="text-muted-foreground text-center py-4">{t('admin.loading')}</p>
                 ) : recentUpdates.slice(0, 5).map((profile) => (
                   <div
                     key={profile.id}
@@ -289,7 +289,7 @@ const AdminDashboard = () => {
                         <p className="font-medium text-foreground">
                           {profile.first_name} {profile.last_name}
                         </p>
-                        <p className="text-sm text-muted-foreground">Profile updated</p>
+                        <p className="text-sm text-muted-foreground">{t('admin.profileUpdated')}</p>
                       </div>
                     </div>
                     <div className="text-right">
@@ -323,7 +323,7 @@ const AdminDashboard = () => {
             <CardContent>
               <div className="space-y-4">
                 {loading ? (
-                  <p className="text-muted-foreground text-center py-4">Loading...</p>
+                  <p className="text-muted-foreground text-center py-4">{t('admin.loading')}</p>
                 ) : recentProfiles.length === 0 ? (
                   <p className="text-muted-foreground text-center py-4">
                     {t('admin.noProfilesViewedYet')}
@@ -348,7 +348,7 @@ const AdminDashboard = () => {
                         <p className="font-medium text-foreground">
                           {profile.first_name} {profile.last_name}
                         </p>
-                        <p className="text-sm text-muted-foreground">Viewed {getTimeAgo(profile.updated_at)}</p>
+                        <p className="text-sm text-muted-foreground">{t('admin.viewed')} {getTimeAgo(profile.updated_at)}</p>
                       </div>
                     </div>
                     <div className="text-right">

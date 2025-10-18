@@ -1,0 +1,7 @@
+{
+  "title": "Notifications",
+  "newMatch": "You have a new match!",
+  "profileApproved": "Your profile has been approved",
+  "messageReceived": "New message received",
+  "noNotifications": "No new notifications"
+}

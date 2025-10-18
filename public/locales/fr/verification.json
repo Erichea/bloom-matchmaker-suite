@@ -1,0 +1,20 @@
+{
+  "verificationFailed": "Vérification échouée",
+  "invalidCode": "Code de vérification invalide. Veuillez réessayer.",
+  "emailVerified": "Email vérifié! 🎉",
+  "welcomeBloom": "Bienvenue sur BLOOM! Vous pouvez maintenant vous connecter.",
+  "verificationError": "Erreur de vérification",
+  "somethingWentWrong": "Une erreur s'est produite. Veuillez réessayer.",
+  "failedResend": "Renvoi échoué",
+  "codeSent": "Code envoyé! ✉️",
+  "newCodeSent": "Un nouveau code de vérification a été envoyé à votre email.",
+  "failedResendRetry": "Échec du renvoi du code. Veuillez réessayer.",
+  "verifyEmail": "Vérifier votre email",
+  "verificationCode": "Code de vérification",
+  "enter6DigitCode": "Entrez le code à 6 chiffres",
+  "verifying": "Vérification en cours...",
+  "verifyEmailButton": "Vérifier l'email",
+  "resendCode": "Renvoyer le code",
+  "backToSignIn": "Retour à la connexion",
+  "checkSpamFolder": "Vous n'avez pas reçu le code? Vérifiez votre dossier spam ou cliquez sur \"Renvoyer le code\" ci-dessus."
+}

@@ -1,0 +1,20 @@
+{
+  "loading": "Loading...",
+  "save": "Save",
+  "cancel": "Cancel",
+  "edit": "Edit",
+  "delete": "Delete",
+  "close": "Close",
+  "confirm": "Confirm",
+  "back": "Back",
+  "next": "Next",
+  "submit": "Submit",
+  "search": "Search",
+  "filter": "Filter",
+  "language": "Language",
+  "logout": "Logout",
+  "settings": "Settings",
+  "error": "Error",
+  "success": "Success!",
+  "sending": "Sending..."
+}

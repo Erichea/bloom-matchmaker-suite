@@ -35,7 +35,10 @@
       "Bash(grep -r \"title=\" src/ --include=\"*.tsx\" --include=\"*.ts\" | head -10)",
       "Bash(node:*)",
       "Bash(timeout:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(npm run validate:i18n:*)",
+      "Bash(npx tsx:*)",
+      "Bash(npm run check:hardcoded-strings:*)"
     ],
     "deny": [],
     "ask": []

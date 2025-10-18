@@ -1,0 +1,20 @@
+{
+  "welcomeBack": "Welcome back,",
+  "there": "there",
+  "completeYourProfile": "Complete your profile",
+  "welcomeName": "Welcome, {name}",
+  "letsGetStarted": "Let's get started",
+  "questionnaireProgress": "Questionnaire progress",
+  "updateQuestionnaire": "Update questionnaire",
+  "continueQuestionnaire": "Continue questionnaire",
+  "pendingMatches": "Pending Matches",
+  "completeProfileQuestionnaire": "Complete your profile questionnaire to submit for matchmaker review.",
+  "lookingForMutualMatches": "Looking for mutual matches?",
+  "viewMutualMatches": "View Mutual Matches",
+  "welcome": "Welcome",
+  "recentActivity": "Recent Activity",
+  "statistics": "Statistics",
+  "totalMatches": "Total Matches",
+  "activeMatches": "Active Matches",
+  "profileViews": "Profile Views"
+}
