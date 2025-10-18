@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import MatchDetailModal from "@/components/MatchDetailModal";
-import { QuestionnaireDisplay } from "@/components/questionnaire";
+import { EditableProfileCardGroup } from "@/components/profile";
 import { ArrowLeft, X, LogOut, Eye } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 
@@ -189,15 +189,12 @@ export default function ProfileEditPage() {
 
         <TabsContent value="questions" className="mt-0">
           <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-            {/* Dynamic questionnaire display - automatically respects question order from database */}
-            <QuestionnaireDisplay
-              questions={questions}
-              answers={answers}
-              onEdit={setEditingQuestionId}
+            {/* Profile displayed in same card layout as match detail view */}
+            <EditableProfileCardGroup
+              allQuestions={questions}
+              profileAnswers={answers}
               profile={profileData}
-              editable={true}
-              showProfile={true}
-              showPreferences={false} // Only show profile questions on this page
+              onEdit={setEditingQuestionId}
             />
 
             {/* Account Section */}
