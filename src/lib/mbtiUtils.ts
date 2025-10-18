@@ -27,10 +27,10 @@ export function mbtiToAxes(mbtiType: string): MBTIAxes {
   const type = mbtiType.toUpperCase();
 
   return {
-    ei: type[0] === 'E' ? 75 : 25,   // E = 75%, I = 25%
-    sn: type[1] === 'N' ? 75 : 25,   // N = 75%, S = 25%
-    tf: type[2] === 'F' ? 75 : 25,   // F = 75%, T = 25%
-    jp: type[3] === 'P' ? 75 : 25,   // P = 75%, J = 25%
+    ei: type[0] === 'E' ? 100 : 0,   // E = 100%, I = 0%
+    sn: type[1] === 'N' ? 100 : 0,   // N = 100%, S = 0%
+    tf: type[2] === 'F' ? 100 : 0,   // F = 100%, T = 0%
+    jp: type[3] === 'P' ? 100 : 0,   // P = 100%, J = 0%
   };
 }
 
