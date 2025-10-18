@@ -8,16 +8,35 @@ When working on this codebase, **ALL** user-facing strings must be international
 
 ---
 
-## 🔧 **How to Add Internationalization**
+## 🔧 **NEW: Namespace-Based Internationalization System**
+
+### **🎯 CRITICAL: Always Specify Namespaces**
+
+The translation system now uses domain-scoped namespaces for performance and maintainability.
+
+**❌ NEVER DO THIS (old way):**
+```typescript
+const { t } = useTranslation(); // Loads ALL namespaces - BAD for performance
+```
+
+**✅ ALWAYS DO THIS (new way):**
+```typescript
+const { t } = useTranslation(['common', 'auth']); // Load only what you need
+const { t } = useTranslation('dashboard'); // Single namespace
+```
 
 ### **1. Import useTranslation Hook**
 ```typescript
 import { useTranslation } from "react-i18next";
 ```
 
-### **2. Initialize Hook in Component**
+### **2. Initialize Hook with Namespaces**
 ```typescript
-const { t } = useTranslation();
+// For components needing multiple namespaces
+const { t } = useTranslation(['common', 'auth', 'dashboard']);
+
+// For single namespace components
+const { t } = useTranslation('admin');
 ```
 
 ### **3. Replace ALL Hardcoded Strings**
@@ -50,42 +69,48 @@ title={t('common.loading')}
 
 ---
 
-## 📁 **Where Translation Keys Live**
+## 📁 **NEW: Namespace-Based File Structure**
 
-### **English:** `/public/locales/en.json`
-### **French:** `/public/locales/fr.json`
+### **Translation Files Location:**
+```
+public/locales/
+├── en/
+│   ├── common.json      # Shared UI elements
+│   ├── nav.json         # Navigation items
+│   ├── auth.json        # Authentication
+│   ├── dashboard.json   # Client dashboard
+│   ├── admin.json       # Admin interface
+│   ├── profile.json     # User profiles
+│   └── ... (23 total namespaces)
+└── fr/
+    ├── common.json
+    ├── nav.json
+    ├── auth.json
+    └── ... (same structure as English)
+```
 
-**ALWAYS add keys to BOTH files!**
+**ALWAYS add keys to BOTH en/ AND fr/ directories!**
 
 ---
 
 ## 🏗️ **Translation Key Organization**
 
-### **Follow Existing Patterns:**
-```json
-{
-  "common": {
-    "loading": "Loading...",
-    "save": "Save",
-    "cancel": "Cancel",
-    "error": "Error",
-    "success": "Success"
-  },
-  "auth": {
-    "signIn": "Sign In",
-    "email": "Email",
-    "password": "Password"
-  },
-  "dashboard": {
-    "welcome": "Welcome"
-  }
-}
-```
+### **Available Namespaces:**
+- `common` - Shared UI elements (buttons, loading, etc.)
+- `nav` - Navigation items
+- `auth` - Authentication flows
+- `dashboard` - Client dashboard content
+- `admin` - Admin dashboard and management
+- `profile` - User profile management
+- `match` - Match-related interactions
+- `photos` - Photo upload/management
+- `verification` - Email verification
+- And 14 more domain-specific namespaces
 
 ### **Key Naming Conventions:**
 - **camelCase:** `welcomeMessage` ✅
 - **Descriptive:** `userProfileTitle` ✅
-- **Group by feature:** `auth.signIn`, `dashboard.loading` ✅
+- **Namespace context:** `admin.totalClients`, `dashboard.welcomeBack` ✅
 
 ---
 
@@ -94,7 +119,10 @@ title={t('common.loading')}
 ### **Before Submitting PR:**
 
 1. **[ ] Import `useTranslation` hook**
-2. **[ ] Initialize `{ t } = useTranslation()`**
+2. **[ ] Initialize with SPECIFIC namespaces:**
+   ```typescript
+   const { t } = useTranslation(['common', 'auth']); // Specify needed namespaces
+   ```
 3. **[ ] Search for ANY hardcoded strings:**
    - Button text: `<button>Text</button>`
    - Labels: `<label>Text</label>`
@@ -104,8 +132,10 @@ title={t('common.loading')}
    - Any text users see
 
 4. **[ ] Replace ALL hardcoded strings with `t()` calls**
-5. **[ ] Add new keys to BOTH en.json AND fr.json**
-6. **[ ] Test language switching works**
+5. **[ ] Add new keys to BOTH `public/locales/en/namespace.json` AND `public/locales/fr/namespace.json`**
+6. **[ ] Run validation: `npm run validate:i18n`**
+7. **[ ] Check for hardcoded strings: `npm run check:hardcoded-strings`**
+8. **[ ] Test language switching works**
 
 ---
 
@@ -134,11 +164,19 @@ toast({ title: t('message.title'), description: t('message.description') })
 
 ---
 
-## 📝 **Adding New Translation Keys**
+## 📝 **Adding New Translation Keys (NEW PROCESS)**
 
-### **Step 1: Add to English**
+### **Step 1: Choose the Right Namespace**
+- `common.json` - Shared UI elements (buttons, loading states)
+- `auth.json` - Authentication related text
+- `dashboard.json` - Client dashboard content
+- `admin.json` - Admin interface
+- `profile.json` - User profile management
+- Create new namespace only if truly needed
+
+### **Step 2: Add to English Namespace**
 ```json
-// en.json
+// public/locales/en/common.json (or appropriate namespace)
 {
   "newFeature": {
     "title": "New Feature",
@@ -148,9 +186,9 @@ toast({ title: t('message.title'), description: t('message.description') })
 }
 ```
 
-### **Step 2: Add to French**
+### **Step 3: Add to French Namespace**
 ```json
-// fr.json
+// public/locales/fr/common.json (same namespace as English)
 {
   "newFeature": {
     "title": "Nouvelle fonctionnalité",
@@ -160,18 +198,44 @@ toast({ title: t('message.title'), description: t('message.description') })
 }
 ```
 
-### **Step 3: Use in Component**
+### **Step 4: Update Component with Namespace Loading**
 ```tsx
-<h2>{t('newFeature.title')}</h2>
-<p>{t('newFeature.description')}</p>
-<Button>{t('newFeature.action')}</Button>
+import { useTranslation } from "react-i18next";
+
+const Component = () => {
+  const { t } = useTranslation(['common']); // Load the namespace
+
+  return (
+    <div>
+      <h2>{t('common.newFeature.title')}</h2>
+      <p>{t('common.newFeature.description')}</p>
+      <Button>{t('common.newFeature.action')}</Button>
+    </div>
+  );
+};
+```
+
+### **Step 5: Validate**
+```bash
+npm run validate:i18n
+npm run check:hardcoded-strings
 ```
 
 ---
 
-## 🔍 **How to Find Hardcoded Strings**
+## 🔍 **NEW: Automated Tools for Finding Issues**
 
-### **Search Patterns:**
+### **Use Built-in Validation Scripts:**
+
+```bash
+# Check for hardcoded strings (automated detection)
+npm run check:hardcoded-strings
+
+# Validate translation file integrity
+npm run validate:i18n
+```
+
+### **Manual Search Patterns:**
 ```bash
 # Find all hardcoded strings
 grep -r '".*"' src/ --include="*.tsx" --include="*.ts"
@@ -186,6 +250,12 @@ grep -r "Alert\|Error\|Success" src/
 - Search for: `"[A-Z][a-z].*"` (quoted strings)
 - Search for: `placeholder=`
 - Search for: `title=`
+
+### **Development Warnings:**
+The system automatically shows warnings in console for missing translation keys:
+```
+🔑 Missing translation key: dashboard.welcome (language: en, namespace: dashboard)
+```
 
 ---
 
@@ -208,27 +278,59 @@ grep -r "Alert\|Error\|Success" src/
 
 ---
 
-## 🎯 **Examples of Proper Implementation**
+## 🎯 **Examples of Proper Implementation (NEW)**
 
-### **✅ GOOD:**
+### **✅ GOOD (Namespace-based):**
 ```tsx
 import { useTranslation } from "react-i18next";
 
 const Component = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['dashboard', 'common', 'auth']);
 
   return (
     <div>
       <h1>{t('dashboard.title')}</h1>
       <Button>{t('common.submit')}</Button>
-      <Input placeholder={t('form.emailPlaceholder')} />
-      {error && <p>{t('error.generic')}</p>}
+      <Input placeholder={t('auth.emailPlaceholder')} />
+      {error && <p>{t('common.error')}}</p>}
     </div>
   );
 };
 ```
 
-### **❌ BAD:**
+### **✅ GOOD (Single namespace):**
+```tsx
+import { useTranslation } from "react-i18next";
+
+const AdminComponent = () => {
+  const { t } = useTranslation('admin');
+
+  return (
+    <div>
+      <h1>{t('admin.dashboardTitle')}</h1>
+      <Button>{t('admin.loading')}</Button>
+    </div>
+  );
+};
+```
+
+### **❌ BAD (Old way):**
+```tsx
+const Component = () => {
+  const { t } = useTranslation(); // Loads ALL namespaces - inefficient!
+
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      <Button>Submit</Button>
+      <Input placeholder="Enter email" />
+      {error && <p>Something went wrong</p>}
+    </div>
+  );
+};
+```
+
+### **❌ BAD (Hardcoded):**
 ```tsx
 const Component = () => {
   return (
@@ -244,7 +346,19 @@ const Component = () => {
 
 ---
 
-## 🧪 **Testing Internationalization**
+## 🧪 **Testing Internationalization (NEW TOOLS)**
+
+### **Automated Testing:**
+```bash
+# 1. Validate translation file integrity
+npm run validate:i18n
+
+# 2. Check for hardcoded strings
+npm run check:hardcoded-strings
+
+# 3. Build to ensure type safety
+npm run build
+```
 
 ### **Manual Testing:**
 1. Switch languages in the app
@@ -252,35 +366,55 @@ const Component = () => {
 3. Check for any remaining English text
 4. Test different screens and flows
 
+### **Development Mode Testing:**
+The system automatically shows warnings for:
+- Missing translation keys
+- Empty translations
+- Invalid JSON in translation files
+
 ### **Translation File Validation:**
 ```bash
+# Check namespace structure
 node -e "
-const en = require('./public/locales/en.json');
-const fr = require('./public/locales/fr.json');
-console.log('✓ en.json sections:', Object.keys(en).length);
-console.log('✓ fr.json sections:', Object.keys(fr).length);
+const en = require('./public/locales/en/admin.json');
+const fr = require('./public/locales/fr/admin.json');
+console.log('✓ admin namespace keys (EN):', Object.keys(en).length);
+console.log('✓ admin namespace keys (FR):', Object.keys(fr).length);
 "
 ```
 
 ---
 
-## 🔧 **Development Workflow**
+## 🔧 **NEW: Development Workflow with Automation**
 
 ### **When Adding New Features:**
 1. Plan translation keys upfront
-2. Add keys to BOTH translation files
-3. Implement with t() calls from the start
-4. Test both languages
+2. Choose appropriate namespace(s)
+3. Add keys to BOTH `public/locales/en/namespace.json` AND `public/locales/fr/namespace.json`
+4. Implement with proper namespace loading from the start
+5. Run `npm run validate:i18n` to ensure consistency
+6. Run `npm run check:hardcoded-strings` to catch issues
+7. Test both languages
 
 ### **When Fixing Bugs:**
 1. Check if any hardcoded strings are involved
-2. Internationalize as needed
+2. Internationalize as needed with proper namespaces
 3. Update both language files
+4. Run validation scripts
 
 ### **When Refactoring:**
-1. Preserve existing t() calls
+1. Preserve existing t() calls and namespace loading
 2. Update translation keys if needed
-3. Ensure both files stay in sync
+3. Ensure both namespace files stay in sync
+4. Run validation after changes
+
+### **Pre-commit Quality Check:**
+```bash
+# Run this before every commit
+npm run validate:i18n
+npm run check:hardcoded-strings
+npm run build  # Ensure type safety
+```
 
 ---
 
