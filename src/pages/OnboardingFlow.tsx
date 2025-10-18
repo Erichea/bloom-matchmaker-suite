@@ -17,7 +17,7 @@ type OnboardingStep = "photos" | "questionnaire" | "transition" | "complete";
 
 // Question 17 is 'mbti' - the last profile question
 // Question 18 is 'education_importance' - the first preference question
-const PROFILE_SECTION_END_INDEX = 16; // 0-indexed, so question 17
+const PROFILE_SECTION_END_INDEX = 17; // 0-indexed, so question 18
 
 export default function OnboardingFlow() {
   const navigate = useNavigate();
