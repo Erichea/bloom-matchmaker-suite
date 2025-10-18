@@ -25,7 +25,10 @@
       "WebFetch(domain:boo.world)",
       "Bash(git log:*)",
       "Bash(claude-code --version)",
-      "Bash(claude update)"
+      "Bash(claude update)",
+      "Bash(git fetch origin)",
+      "Bash(git merge-base --is-ancestor HEAD origin/main)",
+      "Bash(git merge --no-commit --no-ff origin/main)"
     ],
     "deny": [],
     "ask": []

@@ -292,8 +292,8 @@ export default function NotificationSettings() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <header className="sticky top-0 z-40 border-b border-border bg-background">
+    <div className="min-h-screen bg-background-light dark:bg-background-dark pb-20">
+      <header className="sticky top-0 z-40 border-b border-border bg-background-light dark:bg-background-dark">
         <div className="flex h-14 items-center justify-between px-4">
           <Button
             variant="ghost"

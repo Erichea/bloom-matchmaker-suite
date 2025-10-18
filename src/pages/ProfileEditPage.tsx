@@ -163,8 +163,8 @@ export default function ProfileEditPage() {
 
   return (
     <>
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ProfileTab)} className="min-h-screen bg-background pb-20">
-        <div className="sticky top-0 z-40 border-b border-border bg-background">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ProfileTab)} className="min-h-screen bg-background-light dark:bg-background-dark pb-20">
+        <div className="sticky top-0 z-40 border-b border-border bg-background-light dark:bg-background-dark">
           <div className="flex h-16 items-center justify-between px-4">
             <Button variant="ghost" onClick={() => navigate("/client/dashboard")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
