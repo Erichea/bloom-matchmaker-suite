@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { mbtiToAxes, calculateMBTIMatch, axisDescriptions, type MBTIAxes } from "@/lib/mbtiUtils";
 import { Slider } from "@/components/ui/slider";
@@ -54,13 +54,10 @@ const mbtiData: MBTIType[] = [
 ];
 
 const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, onChange, userMBTI }) => {
-  // Initialize axes from user's MBTI type, or default to center
+  // Initialize axes from user's MBTI type (not centered at 50%)
   const initialAxes = userMBTI ? mbtiToAxes(userMBTI) : { ei: 50, sn: 50, tf: 50, jp: 50 };
   const [axes, setAxes] = useState<MBTIAxes>(initialAxes);
   const [hoveredType, setHoveredType] = useState<string | null>(null);
-
-  // Create a Set for faster lookups
-  const selectedTypesSet = useMemo(() => new Set(value || []), [value]);
 
   // Calculate match percentages for all types
   const typesWithMatches = useMemo(() => {
@@ -70,11 +67,31 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
     }));
   }, [axes]);
 
+  // Auto-select types with match >= 70% whenever axes change
+  useEffect(() => {
+    const autoSelectedTypes = typesWithMatches
+      .filter(t => t.match >= 70)
+      .map(t => t.type);
+
+    // Only update if the selection actually changed
+    const currentSet = new Set(value);
+    const newSet = new Set(autoSelectedTypes);
+
+    if (currentSet.size !== newSet.size ||
+        !autoSelectedTypes.every(type => currentSet.has(type))) {
+      onChange(autoSelectedTypes);
+    }
+  }, [typesWithMatches, onChange]);
+
+  // Create a Set for faster lookups
+  const selectedTypesSet = useMemo(() => new Set(value || []), [value]);
+
   const handleAxisChange = (axis: keyof MBTIAxes, newValue: number[]) => {
     setAxes(prev => ({ ...prev, [axis]: newValue[0] }));
   };
 
   const toggleType = (type: string) => {
+    // Allow manual toggle
     const newSelections = new Set(selectedTypesSet);
     if (newSelections.has(type)) {
       newSelections.delete(type);
@@ -254,27 +271,19 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
                   "hover:scale-105 active:scale-95",
                   isSelected
                     ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg"
-                    : "bg-gradient-to-br from-muted/30 to-muted/10"
+                    : "bg-gradient-to-br from-muted/30 to-muted/10 opacity-40 grayscale"
                 )}
               >
-                {/* Match percentage indicator - small badge at top right */}
-                <div className={cn(
-                  "absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full transition-opacity",
-                  matchLevel === 'high' ? "bg-green-500 text-white" :
-                  matchLevel === 'medium' ? "bg-blue-500 text-white" :
-                  "bg-gray-400 text-white",
-                  isHovered ? "opacity-100" : "opacity-60"
-                )}>
-                  {mbtiType.match}%
-                </div>
-
                 {/* MBTI Type Label */}
-                <p className="text-sm font-medium mb-3 text-center">
+                <p className={cn(
+                  "text-sm font-medium mb-3 text-center",
+                  !isSelected && "text-muted-foreground"
+                )}>
                   {mbtiType.label}
                 </p>
 
                 {/* Character Circle with SVG */}
-                <div className="relative mb-3">
+                <div className="relative mb-2">
                   <div
                     className={cn(
                       "w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center shadow-md transition-all duration-300",
@@ -284,6 +293,16 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
                     {/* SVG Character */}
                     <mbtiType.icon className="w-12 h-12 md:w-14 md:h-14 object-contain" />
                   </div>
+                </div>
+
+                {/* Match percentage - between character and tag */}
+                <div className={cn(
+                  "text-sm font-bold mb-2 transition-colors",
+                  matchLevel === 'high' ? "text-green-600 dark:text-green-500" :
+                  matchLevel === 'medium' ? "text-blue-600 dark:text-blue-500" :
+                  "text-gray-500 dark:text-gray-400"
+                )}>
+                  {mbtiType.match}%
                 </div>
 
                 {/* Type Tag */}
