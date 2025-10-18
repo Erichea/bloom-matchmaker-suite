@@ -102,33 +102,37 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
   };
 
   return (
-    <div className="space-y-6 w-full">
-      {/* Slider Controls Section */}
-      <div className="w-full p-6 bg-muted/30 rounded-3xl">
-        <h3 className="text-base font-semibold mb-4 text-foreground">Personality Preferences</h3>
-        <p className="text-sm text-muted-foreground mb-6">
-          Adjust the sliders to discover MBTI types that match your preferences
-        </p>
+    <div className="space-y-4 w-full">
+      {/* User's MBTI Indicator */}
+      {userMBTI && (
+        <div className="flex items-center gap-3 p-3 bg-primary/10 rounded-2xl">
+          <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 shadow-sm">
+            {(() => {
+              const userType = mbtiData.find(t => t.type === userMBTI);
+              return userType ? <userType.icon className="w-8 h-8 object-contain" /> : null;
+            })()}
+          </div>
+          <div className="flex-1">
+            <p className="text-xs text-muted-foreground">Your personality type</p>
+            <p className="text-sm font-semibold">{userMBTI}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-muted-foreground">Current sliders</p>
+            <p className="text-xs font-mono font-medium">{Math.round(axes.ei)}/{Math.round(axes.sn)}/{Math.round(axes.tf)}/{Math.round(axes.jp)}</p>
+          </div>
+        </div>
+      )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Slider Controls Section - Compact 2x2 Grid */}
+      <div className="w-full p-4 bg-muted/30 rounded-2xl">
+        <h3 className="text-sm font-semibold mb-3 text-foreground">Adjust Personality Preferences</h3>
+
+        <div className="grid grid-cols-2 gap-4">
           {/* E/I Axis */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="text-sm font-medium cursor-help text-foreground">
-                      {axisDescriptions.ei.left.label} ↔ {axisDescriptions.ei.right.label}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="max-w-xs">
-                    <p className="font-semibold mb-1">{axisDescriptions.ei.title}</p>
-                    <p className="text-xs mb-2 italic">{axisDescriptions.ei.question}</p>
-                    <p className="text-xs">{axes.ei < 50 ? axisDescriptions.ei.left.description : axisDescriptions.ei.right.description}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <span className="text-xs text-muted-foreground">{Math.round(axes.ei)}%</span>
+              <span className="text-xs font-medium text-foreground">I ↔ E</span>
+              <span className="text-xs text-muted-foreground font-mono">{Math.round(axes.ei)}%</span>
             </div>
             <Slider
               value={[axes.ei]}
@@ -138,30 +142,13 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
               step={1}
               className="w-full"
             />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>I</span>
-              <span>E</span>
-            </div>
           </div>
 
           {/* S/N Axis */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="text-sm font-medium cursor-help text-foreground">
-                      {axisDescriptions.sn.left.label} ↔ {axisDescriptions.sn.right.label}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="max-w-xs">
-                    <p className="font-semibold mb-1">{axisDescriptions.sn.title}</p>
-                    <p className="text-xs mb-2 italic">{axisDescriptions.sn.question}</p>
-                    <p className="text-xs">{axes.sn < 50 ? axisDescriptions.sn.left.description : axisDescriptions.sn.right.description}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <span className="text-xs text-muted-foreground">{Math.round(axes.sn)}%</span>
+              <span className="text-xs font-medium text-foreground">S ↔ N</span>
+              <span className="text-xs text-muted-foreground font-mono">{Math.round(axes.sn)}%</span>
             </div>
             <Slider
               value={[axes.sn]}
@@ -171,30 +158,13 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
               step={1}
               className="w-full"
             />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>S</span>
-              <span>N</span>
-            </div>
           </div>
 
           {/* T/F Axis */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="text-sm font-medium cursor-help text-foreground">
-                      {axisDescriptions.tf.left.label} ↔ {axisDescriptions.tf.right.label}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="max-w-xs">
-                    <p className="font-semibold mb-1">{axisDescriptions.tf.title}</p>
-                    <p className="text-xs mb-2 italic">{axisDescriptions.tf.question}</p>
-                    <p className="text-xs">{axes.tf < 50 ? axisDescriptions.tf.left.description : axisDescriptions.tf.right.description}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <span className="text-xs text-muted-foreground">{Math.round(axes.tf)}%</span>
+              <span className="text-xs font-medium text-foreground">T ↔ F</span>
+              <span className="text-xs text-muted-foreground font-mono">{Math.round(axes.tf)}%</span>
             </div>
             <Slider
               value={[axes.tf]}
@@ -204,30 +174,13 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
               step={1}
               className="w-full"
             />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>T</span>
-              <span>F</span>
-            </div>
           </div>
 
           {/* J/P Axis */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="text-sm font-medium cursor-help text-foreground">
-                      {axisDescriptions.jp.left.label} ↔ {axisDescriptions.jp.right.label}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="max-w-xs">
-                    <p className="font-semibold mb-1">{axisDescriptions.jp.title}</p>
-                    <p className="text-xs mb-2 italic">{axisDescriptions.jp.question}</p>
-                    <p className="text-xs">{axes.jp < 50 ? axisDescriptions.jp.left.description : axisDescriptions.jp.right.description}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <span className="text-xs text-muted-foreground">{Math.round(axes.jp)}%</span>
+              <span className="text-xs font-medium text-foreground">J ↔ P</span>
+              <span className="text-xs text-muted-foreground font-mono">{Math.round(axes.jp)}%</span>
             </div>
             <Slider
               value={[axes.jp]}
@@ -237,24 +190,20 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
               step={1}
               className="w-full"
             />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>J</span>
-              <span>P</span>
-            </div>
           </div>
         </div>
       </div>
 
-      {/* MBTI Types Grid (4x4) - Matching MBTIGrid design */}
-      <div className="space-y-6">
+      {/* MBTI Types Grid (4x4) - Compact */}
+      <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-foreground">Select Compatible Types</h3>
+          <h3 className="text-sm font-semibold text-foreground">Select Compatible Types</h3>
           <p className="text-xs text-muted-foreground">
-            Match indicators show compatibility based on sliders
+            ≥70% auto-selected
           </p>
         </div>
 
-        <div className="grid grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-4 gap-3">
           {typesWithMatches.map((mbtiType) => {
             const isSelected = selectedTypesSet.has(mbtiType.type);
             const isHovered = hoveredType === mbtiType.type;
@@ -267,7 +216,7 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
                 onMouseEnter={() => setHoveredType(mbtiType.type)}
                 onMouseLeave={() => setHoveredType(null)}
                 className={cn(
-                  "flex flex-col items-center cursor-pointer transition-all duration-300 p-4 rounded-2xl relative",
+                  "flex flex-col items-center cursor-pointer transition-all duration-300 p-2 rounded-xl relative",
                   "hover:scale-105 active:scale-95",
                   isSelected
                     ? "bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg"
@@ -276,28 +225,28 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
               >
                 {/* MBTI Type Label */}
                 <p className={cn(
-                  "text-sm font-medium mb-3 text-center",
+                  "text-xs font-medium mb-1.5 text-center",
                   !isSelected && "text-muted-foreground"
                 )}>
                   {mbtiType.label}
                 </p>
 
                 {/* Character Circle with SVG */}
-                <div className="relative mb-2">
+                <div className="relative mb-1">
                   <div
                     className={cn(
-                      "w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center shadow-md transition-all duration-300",
+                      "w-14 h-14 rounded-full flex items-center justify-center shadow-sm transition-all duration-300",
                       "bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800"
                     )}
                   >
                     {/* SVG Character */}
-                    <mbtiType.icon className="w-12 h-12 md:w-14 md:h-14 object-contain" />
+                    <mbtiType.icon className="w-10 h-10 object-contain" />
                   </div>
                 </div>
 
                 {/* Match percentage - between character and tag */}
                 <div className={cn(
-                  "text-sm font-bold mb-2 transition-colors",
+                  "text-xs font-bold mb-1 transition-colors",
                   matchLevel === 'high' ? "text-green-600 dark:text-green-500" :
                   matchLevel === 'medium' ? "text-blue-600 dark:text-blue-500" :
                   "text-gray-500 dark:text-gray-400"
@@ -308,21 +257,21 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
                 {/* Type Tag */}
                 <div
                   className={cn(
-                    "inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300",
+                    "inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium transition-all duration-300",
                     isSelected
-                      ? "bg-primary text-primary-foreground shadow-md"
+                      ? "bg-primary text-primary-foreground shadow-sm"
                       : "bg-muted text-muted-foreground hover:bg-primary/20"
                   )}
                 >
                   <div
                     className={cn(
-                      "w-3 h-3 rounded-full flex items-center justify-center transition-all duration-300",
+                      "w-2.5 h-2.5 rounded-full flex items-center justify-center transition-all duration-300",
                       isSelected ? "bg-primary-foreground" : "bg-background"
                     )}
                   >
                     {isSelected && (
                       <svg
-                        className="w-2.5 h-2.5 text-primary"
+                        className="w-2 h-2 text-primary"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                       >
@@ -330,12 +279,12 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
                       </svg>
                     )}
                   </div>
-                  <span>{mbtiType.type}</span>
+                  <span className="text-[10px]">{mbtiType.type}</span>
                 </div>
 
                 {/* Description on hover */}
                 {isHovered && (
-                  <div className="text-xs text-center text-muted-foreground mt-2 px-2">
+                  <div className="text-[10px] text-center text-muted-foreground mt-1 px-1">
                     {mbtiType.description}
                   </div>
                 )}
@@ -345,21 +294,21 @@ const MBTIPreferenceSelector: React.FC<MBTIPreferenceSelectorProps> = ({ value, 
         </div>
       </div>
 
-      {/* Selected Types Summary */}
+      {/* Selected Types Summary - Compact */}
       {value.length > 0 && (
-        <div className="w-full p-6 bg-muted/30 rounded-3xl">
-          <h3 className="text-base font-semibold mb-3 text-foreground">Your Selections ({value.length})</h3>
-          <div className="flex flex-wrap gap-2">
+        <div className="w-full p-3 bg-muted/30 rounded-xl">
+          <h3 className="text-xs font-semibold mb-2 text-foreground">Selected ({value.length})</h3>
+          <div className="flex flex-wrap gap-1.5">
             {value.map(type => {
               const match = typesWithMatches.find(t => t.type === type)?.match || 0;
               return (
                 <div
                   key={type}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium bg-primary text-primary-foreground"
+                  className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-primary text-primary-foreground"
                 >
                   <span>{type}</span>
-                  <span className="text-xs opacity-75">
-                    {match}% match
+                  <span className="text-[10px] opacity-75">
+                    {match}%
                   </span>
                 </div>
               );
