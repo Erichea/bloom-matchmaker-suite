@@ -403,39 +403,39 @@ const ClientDashboard = () => {
                 {profileStatus === "incomplete" && (
                   <div className="flex flex-col gap-3">
                     <span className="text-xs uppercase tracking-[0.2em] text-subtle-light dark:text-subtle-dark">
-                      Complete your profile
+                      {t('profileStatus.completeYourProfile')}
                     </span>
                     <h2 className="text-lg font-display font-medium text-text-light dark:text-text-dark">
-                      {profile?.first_name ? `Welcome, ${profile.first_name}` : "Let's get started"}
+                      {profile?.first_name ? t('dashboard.welcomeName', { name: profile.first_name }) : t('profileStatus.letsGetStarted')}
                     </h2>
                     <p className="text-sm text-subtle-light dark:text-subtle-dark">
-                      Complete your questionnaire so we can start curating perfect introductions for you.
+                      {t('profileStatus.completeQuestionnaireIntro')}
                     </p>
                   </div>
                 )}
                 {profileStatus === "rejected" && (
                   <div className="flex flex-col gap-3">
                     <span className="text-xs uppercase tracking-[0.2em] text-subtle-light dark:text-subtle-dark">
-                      Profile needs revision
+                      {t('profileStatus.profileNeedsRevision')}
                     </span>
                     <h2 className="text-lg font-display font-medium text-text-light dark:text-text-dark">
-                      {profile?.first_name ? `${profile.first_name}, let's refine your profile` : "Update required"}
+                      {profile?.first_name ? `${profile.first_name}, ${t('profileStatus.refineProfile')}` : t('profileStatus.updateRequired')}
                     </h2>
                     <p className="text-sm text-subtle-light dark:text-subtle-dark">
-                      Your matchmaker has requested some changes to your profile. Please review and resubmit.
+                      {t('profileStatus.revisionRequested')}
                     </p>
                   </div>
                 )}
                 {profileStatus === "pending_approval" && (
                   <div className="flex flex-col gap-3">
                     <span className="text-xs uppercase tracking-[0.2em] text-subtle-light dark:text-subtle-dark">
-                      Under review
+                      {t('profileStatus.underReview')}
                     </span>
                     <h2 className="text-lg font-display font-medium text-text-light dark:text-text-dark">
-                      {profile?.first_name ? `Thank you, ${profile.first_name}` : "Profile submitted"}
+                      {profile?.first_name ? t('profileStatus.thankYou', { name: profile.first_name }) : t('profileStatus.profileSubmitted')}
                     </h2>
                     <p className="text-sm text-subtle-light dark:text-subtle-dark">
-                      Your profile is being reviewed by your matchmaker. You'll be notified once approved and we start curating introductions.
+                      {t('profileStatus.reviewInProgress')}
                     </p>
                   </div>
                 )}
@@ -456,8 +456,8 @@ const ClientDashboard = () => {
                     </div>
                     <p className="text-xs text-subtle-light dark:text-subtle-dark">
                       {profileStatus === "rejected"
-                        ? "Please update your profile and resubmit for review."
-                        : "Complete your profile questionnaire to submit for matchmaker review."}
+                        ? t('profileStatus.updateProfileRejected')
+                        : t('profileStatus.submitForReview')}
                     </p>
                     <Button
                       onClick={() =>
@@ -467,7 +467,7 @@ const ClientDashboard = () => {
                       }
                       className="w-full rounded-lg bg-accent dark:bg-accent-dark px-4 py-2 text-xs font-medium uppercase tracking-[0.2em] text-white dark:text-black transition-all duration-300 hover:opacity-90"
                     >
-                      {profileStatus === "rejected" ? "Update questionnaire" : "Continue questionnaire"}
+                      {profileStatus === "rejected" ? t('profileStatus.updateQuestionnaire') : t('profileStatus.continueQuestionnaire')}
                     </Button>
                   </div>
                 )}
@@ -479,34 +479,34 @@ const ClientDashboard = () => {
             <>
               <section className="mb-8">
                 <p className="text-sm text-subtle-light dark:text-subtle-dark leading-relaxed">
-                  We curate connections with intention. Introductions are thoughtful, based on shared values and what truly matters.
+                  {t('profileStatus.curatorMessage')}
                 </p>
               </section>
 
               <section>
                 {formattedMatches.length > 0 ? (
                   <MatchList
-                    title="Pending Matches"
+                    title={t('dashboard.pendingMatches')}
                     matches={formattedMatches}
                     onSelect={handleOpenMatch}
                   />
                 ) : (
                   <div className="bg-card-light dark:bg-card-dark p-6 rounded-xl text-left shadow-sm border border-gray-100 dark:border-gray-800">
                     <div className="rounded-lg border border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-8 text-center text-sm text-subtle-light dark:text-subtle-dark">
-                      Your matchmaker is curating the perfect introduction. We'll let you know the moment a dossier is ready.
+                      {t('profileStatus.noMatchesYet')}
                     </div>
                   </div>
                 )}
 
                 <div className="mt-6 text-center">
                   <p className="text-xs text-subtle-light dark:text-subtle-dark">
-                    Looking for mutual matches?
+                    {t('profileStatus.lookingForMutual')}
                     <Button
                       variant="link"
                       onClick={() => navigate('/client/mutual-matches')}
                       className="p-0 ml-1 h-auto font-normal text-xs"
                     >
-                      View Mutual Matches
+                      {t('dashboard.viewMutualMatches')}
                     </Button>
                   </p>
                 </div>
